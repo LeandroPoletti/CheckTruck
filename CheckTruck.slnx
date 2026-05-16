@@ -5,4 +5,5 @@
     <File Path="compose.yaml" />
   </Folder>
   <Project Path="CheckTruck.Api/CheckTruck.Api.csproj" />
+  <Project Path="CheckTruck.Dominio/CheckTruck.Dominio.csproj" />
 </Solution>
