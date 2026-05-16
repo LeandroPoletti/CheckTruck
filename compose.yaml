@@ -1,0 +1,7 @@
+﻿services:
+  checktruck.api:
+    image: checktruck.api
+    build:
+      context: .
+      dockerfile: CheckTruck.Api/Dockerfile
+
