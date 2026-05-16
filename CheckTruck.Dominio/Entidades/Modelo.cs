@@ -1,9 +1,13 @@
-﻿namespace CheckTruck.Dominio.Entidades;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace CheckTruck.Dominio.Entidades;
 
 public class Modelo
 {
     public long Id { get; set; }
+    [Required]
     public string Nome { get; set; }
+    [Required]
     public GeracaoModelo Geracao { get; set; }
     public int PotenciaCavalo { get; set; }
     public int EixoDianteiroPneus { get; set; }
