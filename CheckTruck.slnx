@@ -6,4 +6,5 @@
   </Folder>
   <Project Path="CheckTruck.Api/CheckTruck.Api.csproj" />
   <Project Path="CheckTruck.Dominio/CheckTruck.Dominio.csproj" />
+  <Project Path="CheckTruck.Repositorio/CheckTruck.Repositorio.csproj" />
 </Solution>
