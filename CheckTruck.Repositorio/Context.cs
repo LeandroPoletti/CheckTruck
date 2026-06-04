@@ -10,7 +10,6 @@ public class Context : DbContext
     public DbSet<Modelo> Modelos { get; set; }
     public DbSet<Pais> Paises { get; set; }
     public DbSet<TipoManutencao> TiposManutencao { get; set; }
-    public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<Veiculo> Veiculos { get; set; }
     public DbSet<Manutencao> Manutencoes { get; set; }
     public DbSet<IntervaloRecomendado> IntervalosRecomendados { get; set; }

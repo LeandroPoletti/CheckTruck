@@ -7,7 +7,7 @@ public class Manutencao
     public long Id { get; set; }
     public Veiculo Veiculo { get; set; }
     public TipoManutencao TipoManutencao { get; set; }
-    public Usuario Usuario { get; set; }
+    // public Usuario Usuario { get; set; }
     public DateTime RealizadoEm { get; set; } = DateTime.Now;
     public DateTime? DataProximaTroca { get; set; }
     public int KmAtual { get; set; }
