@@ -14,8 +14,4 @@
       <ProjectReference Include="..\CheckTruck.Dominio\CheckTruck.Dominio.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Configurations\" />
-    </ItemGroup>
-
 </Project>

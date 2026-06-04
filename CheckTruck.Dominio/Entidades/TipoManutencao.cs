@@ -9,4 +9,5 @@ public class TipoManutencao
     public string Nome { get; set; }
     public string Descricao { get; set; }
     public Componente Componente { get; set; }
+    public IList<IntervaloRecomendado> IntervaloRecomendados { get; set; } = new List<IntervaloRecomendado>();
 }

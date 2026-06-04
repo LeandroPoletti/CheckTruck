@@ -14,4 +14,5 @@ public class Modelo
     public int EixoTraseiroTandem { get; set; }
     public int PneusPorEixoTraseiro { get; set; }
     public IList<IntervaloRecomendado> IntervaloRecomendados { get; set; } = new List<IntervaloRecomendado>();
+    public IList<Veiculo> Veiculos { get; set; } = new List<Veiculo>();
 }
