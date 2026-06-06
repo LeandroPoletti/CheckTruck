@@ -10,6 +10,5 @@ public class FabricanteConfiguration : IEntityTypeConfiguration<Fabricante>
     {
         builder.HasKey(f => f.Id);
         builder.Property(f => f.Nome).IsRequired().HasMaxLength(100);
-        builder.HasMany(e => e.Geracoes).WithOne(g => g.Fabricante).IsRequired();
     }
 }

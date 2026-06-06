@@ -10,6 +10,5 @@ public class TipoManutencaoConfiguration: IEntityTypeConfiguration<TipoManutenca
     {
         builder.HasKey(t => t.Id);
         builder.Property(t => t.Nome).IsRequired().HasMaxLength(100);
-        builder.HasMany(t => t.IntervaloRecomendados).WithOne(i => i.TipoManutencao).IsRequired();
     }
 }

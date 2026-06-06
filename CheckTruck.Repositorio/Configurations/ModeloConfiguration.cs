@@ -11,7 +11,5 @@ public class ModeloConfiguration : IEntityTypeConfiguration<Modelo>
         builder.HasKey(m => m.Id);
         builder.Property(m => m.Nome).IsRequired();
         builder.HasOne(m => m.Geracao).WithMany(g => g.Modelos).IsRequired();
-        builder.HasMany(m => m.IntervaloRecomendados).WithOne(i => i.Modelo).IsRequired();
-        builder.HasMany(m => m.Veiculos).WithOne(v => v.Modelo).IsRequired();
     }
 }

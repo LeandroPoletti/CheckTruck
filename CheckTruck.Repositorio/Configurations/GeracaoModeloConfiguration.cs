@@ -11,6 +11,5 @@ public class GeracaoModeloConfiguration : IEntityTypeConfiguration<GeracaoModelo
         builder.HasKey(e => e.Id);
         builder.Property(e => e.Nome).IsRequired().HasMaxLength(100);
         builder.HasOne(e => e.Fabricante).WithMany(f => f.Geracoes).IsRequired();
-        builder.HasMany(e => e.Modelos).WithOne(m => m.Geracao).IsRequired();
     }
 }
