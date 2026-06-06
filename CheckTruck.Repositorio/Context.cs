@@ -16,6 +16,10 @@ public class Context : IdentityDbContext<Usuario>
     public DbSet<Manutencao> Manutencoes { get; set; }
     public DbSet<IntervaloRecomendado> IntervalosRecomendados { get; set; }
 
+    public Context(DbContextOptions options) : base(options)
+    {
+        
+    }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(typeof(Context).Assembly);

@@ -1,15 +1,17 @@
 ﻿services:
-  checktruck.api:
-    image: checktruck.api
-    build:
-      context: .
-      dockerfile: CheckTruck.Api/Dockerfile
+#  checktruck.api:
+#    image: checktruck.api
+#    build:
+#      context: .
+#      dockerfile: CheckTruck.Api/Dockerfile
 
   db:
     image: postgres:14.23-trixie
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
   
   adminer:
     image: adminer:standalone
