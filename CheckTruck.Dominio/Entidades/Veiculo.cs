@@ -14,6 +14,6 @@ public class Veiculo
     public DateTime AnoFabricacao { get; set; }
     public int KmAtual { get; set; }
     public bool Ativo { get; set; }
-    // public Usuario Motorista { get; set; }
+    public string MotoristaGuid { get; set; }
     public IList<Manutencao> Manutencoes { get; set; } = new List<Manutencao>();
 }
