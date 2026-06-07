@@ -3,6 +3,8 @@ using CheckTruck.Repositorio;
 using CheckTruck.Repositorio.Entidades;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,10 +17,9 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
-    
-builder.Services.AddAuthentication().AddJwtBearer();
+
+builder.Services.AddAuthentication().AddBearerToken(IdentityConstants.BearerScheme);
 builder.Services.AddAuthorization();
 
 builder.Services.AddIdentityCore<Usuario>()
@@ -37,8 +38,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapScalarApiReference("/docs");
 }
 
 app.UseHttpsRedirection();
