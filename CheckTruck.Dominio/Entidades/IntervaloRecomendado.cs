@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using CheckTruck.Dominio.Interfaces;
 
 namespace CheckTruck.Dominio.Entidades;
 
-public class IntervaloRecomendado
+public class IntervaloRecomendado : EntidadeBanco
 {
     public long Id { get; set; }
     [Required]

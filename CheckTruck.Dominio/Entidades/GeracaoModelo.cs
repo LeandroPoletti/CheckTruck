@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using CheckTruck.Dominio.Interfaces;
 
 namespace CheckTruck.Dominio.Entidades;
 
-public class GeracaoModelo
+public class GeracaoModelo : EntidadeBanco
 {
     public long Id { get; set; }
     [Required]

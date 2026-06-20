@@ -1,8 +1,9 @@
 ﻿using CheckTruck.Dominio.Enums;
+using CheckTruck.Dominio.Interfaces;
 
 namespace CheckTruck.Dominio.Entidades;
 
-public class TipoManutencao
+public class TipoManutencao : EntidadeBanco
 {
     public long Id { get; set; }
     
