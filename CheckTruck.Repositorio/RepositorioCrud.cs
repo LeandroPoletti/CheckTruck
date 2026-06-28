@@ -56,4 +56,19 @@ public class RepositorioCrud : IRepositorioCrud
     {
         _context.SaveChanges();
     }
+    
+    public void MakeTransaction(Action<IRepositorioCrud> action)
+    {
+        using var transaction = _context.Database.BeginTransaction();
+        try
+        {
+            action(this);
+            transaction.Commit();
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
+    }
 }

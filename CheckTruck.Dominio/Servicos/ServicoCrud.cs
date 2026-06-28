@@ -109,6 +109,20 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud) where T : class, E
                 return null;
             }
         }
+
+        public virtual bool MakeTransaction(Action<IRepositorioCrud> action)
+        {
+            try
+            {
+                _repositorioCrud.MakeTransaction(action);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Mensagens.Add(e.Message);
+                return false;
+            }
+        }
     
     #endregion
 }
