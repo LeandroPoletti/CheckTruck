@@ -1,5 +1,4 @@
 ﻿using CheckTruck.Dominio.Entidades;
-using CheckTruck.Repositorio.Entidades;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -14,7 +13,7 @@ public class ManutencaoConfiguration : IEntityTypeConfiguration<Manutencao>
         builder.HasOne(m => m.TipoManutencao).WithMany().IsRequired();
         builder.Property(m => m.NumNotaFiscal).IsRequired();
         builder.Property(m => m.Concessionaria).IsRequired();
-        builder.HasOne<Usuario>().WithMany(u => u.Manutencoes).HasForeignKey(m => m.UsuarioGuid)
+        builder.HasOne(m => m.Tecnico).WithMany(t => t.Manutencoes)
             .IsRequired().OnDelete(DeleteBehavior.Restrict);
     }
 }

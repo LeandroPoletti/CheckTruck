@@ -15,6 +15,8 @@ public class Context : IdentityDbContext<Usuario>
     public DbSet<Veiculo> Veiculos { get; set; }
     public DbSet<Manutencao> Manutencoes { get; set; }
     public DbSet<IntervaloRecomendado> IntervalosRecomendados { get; set; }
+    public DbSet<Motorista> Motoristas { get; set; }
+    public DbSet<Tecnico> Tecnicos { get; set; }
 
     public Context(DbContextOptions options) : base(options)
     {

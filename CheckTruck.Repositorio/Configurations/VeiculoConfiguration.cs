@@ -1,5 +1,4 @@
 ﻿using CheckTruck.Dominio.Entidades;
-using CheckTruck.Repositorio.Entidades;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -19,7 +18,8 @@ public class VeiculoConfiguration : IEntityTypeConfiguration<Veiculo>
         builder.Property(v => v.KmAtual).IsRequired();
         
         builder.HasOne(v => v.Modelo).WithMany(m => m.Veiculos).IsRequired();
-        builder.HasOne<Usuario>().WithOne(u => u.Veiculo).HasForeignKey<Veiculo>(v => v.MotoristaGuid)
-            .IsRequired().OnDelete(DeleteBehavior.SetNull);
+        builder.HasOne(v => v.Motorista).WithOne(m => m.Veiculo)
+            .HasForeignKey<Veiculo>("MotoristaId")
+            .IsRequired().OnDelete(DeleteBehavior.Restrict);
     }   
 }

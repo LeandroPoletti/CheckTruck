@@ -8,7 +8,7 @@ public class Manutencao : EntidadeBanco
     public long Id { get; set; }
     public Veiculo Veiculo { get; set; }
     public TipoManutencao TipoManutencao { get; set; }
-    public string UsuarioGuid { get; set; }
+    public Tecnico Tecnico { get; set; } = null!;
     public DateTime RealizadoEm { get; set; } = DateTime.Now;
     public DateTime? DataProximaTroca { get; set; }
     public int KmAtual { get; set; }

@@ -15,6 +15,6 @@ public class Veiculo : EntidadeBanco
     public DateTime AnoFabricacao { get; set; }
     public int KmAtual { get; set; }
     public bool Ativo { get; set; }
-    public string MotoristaGuid { get; set; }
+    public Motorista Motorista { get; set; } = null!;
     public IList<Manutencao> Manutencoes { get; set; } = new List<Manutencao>();
 }

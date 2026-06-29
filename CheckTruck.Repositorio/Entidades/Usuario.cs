@@ -6,6 +6,6 @@ namespace CheckTruck.Repositorio.Entidades;
 public class Usuario : IdentityUser
 {
     public bool Ativo { get; set; }
-    public Veiculo Veiculo { get; set; } 
-    public IList<Manutencao> Manutencoes { get; set; } = new List<Manutencao>();
+    public Motorista? Motorista { get; set; }
+    public Tecnico? Tecnico { get; set; }
 }
