@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using CheckTruck.Dominio.Entidades;
 using CheckTruck.Repositorio;
 using CheckTruck.Repositorio.Entidades;
 using CheckTruck.Dominio.Interfaces;
@@ -25,6 +26,7 @@ builder.Services.AddAuthentication().AddBearerToken(IdentityConstants.BearerSche
 builder.Services.AddAuthorization();
 
 builder.Services.AddIdentityCore<Usuario>()
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<Context>()
     .AddApiEndpoints();
 
@@ -54,6 +56,40 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapIdentityApi<Usuario>();
+
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    
+    var rolesStrings = new string[] { "Administrador", "Motorista" };
+    
+    foreach (var role in rolesStrings)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+    
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
+
+    const string usuarioName = "Admin";
+    const string usuarioEmail = "admin@admin.com";
+    const string usuarioSenha = "Admin@123";
+
+    if (await userManager.FindByEmailAsync(usuarioEmail) is null)
+    {
+        var usuario = new Usuario()
+        {
+            Ativo = true,
+            Email = usuarioEmail,
+            UserName = usuarioName,
+
+        };
+        await userManager.CreateAsync(usuario, usuarioSenha);
+        await userManager.AddToRoleAsync(usuario, "Administrador");
+    }
+}
 
 
 app.Run();
