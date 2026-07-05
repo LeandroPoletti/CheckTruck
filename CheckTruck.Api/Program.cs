@@ -1,6 +1,8 @@
 using System.Text.Json.Serialization;
 using CheckTruck.Repositorio;
 using CheckTruck.Repositorio.Entidades;
+using CheckTruck.Dominio.Interfaces;
+using CheckTruck.Dominio.Servicos;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
@@ -30,6 +32,10 @@ builder.Services.AddDbContext<Context>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+builder.Services.AddScoped<IRepositorioCrud, RepositorioCrud>();
+builder.Services.AddScoped(typeof(ServicoCrud<>));
+builder.Services.AddScoped<ServicoVeiculo>();
 
 
 var app = builder.Build();
