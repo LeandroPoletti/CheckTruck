@@ -13,8 +13,10 @@ public class TecnicoConfiguration : IEntityTypeConfiguration<Tecnico>
         builder.Property(t => t.UsuarioGuid).IsRequired();
         builder.HasIndex(t => t.UsuarioGuid).IsUnique();
 
+        builder.Property(t => t.Cpf).IsRequired().HasMaxLength(14);
+        
         builder.HasOne<Usuario>().WithOne(u => u.Tecnico)
             .HasForeignKey<Tecnico>(t => t.UsuarioGuid)
-            .IsRequired().OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -13,8 +13,10 @@ public class MotoristaConfiguration : IEntityTypeConfiguration<Motorista>
         builder.Property(m => m.UsuarioGuid).IsRequired();
         builder.HasIndex(m => m.UsuarioGuid).IsUnique();
 
+        builder.Property(m => m.Cpf).IsRequired().HasMaxLength(14);
+        
         builder.HasOne<Usuario>().WithOne(u => u.Motorista)
             .HasForeignKey<Motorista>(m => m.UsuarioGuid)
-            .IsRequired().OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
