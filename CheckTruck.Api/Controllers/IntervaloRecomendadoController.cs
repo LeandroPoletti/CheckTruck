@@ -6,8 +6,8 @@ namespace CheckTruck.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class IntervaloRecomendadoController(ServicoCrud<IntervaloRecomendado> servicoCrud)
-    : CrudController<IntervaloRecomendado>(servicoCrud, "intervalo recomendado")
+public class IntervaloRecomendadoController(ServicoCrud<IntervaloRecomendado> servicoCrud, ILogger<IntervaloRecomendado> logger)
+    : CrudController<IntervaloRecomendado>(servicoCrud, "intervalo recomendado", logger)
 {
     [HttpGet("{id:long}")]
     public IActionResult GetById(long id) => GetByIdCore(id);

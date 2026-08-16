@@ -1,9 +1,10 @@
 ﻿using CheckTruck.Dominio.Entidades;
 using CheckTruck.Dominio.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace CheckTruck.Dominio.Servicos;
 
-public class ServicoVeiculo(IRepositorioCrud repositorioCrud) : ServicoCrud<Veiculo>(repositorioCrud)
+public class ServicoVeiculo(IRepositorioCrud repositorioCrud, ILogger<ServicoVeiculo> logger) : ServicoCrud<Veiculo>(repositorioCrud, logger)
 {
     public override bool Valida(Veiculo entidade)
     {

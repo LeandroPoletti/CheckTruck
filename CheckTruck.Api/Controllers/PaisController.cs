@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace CheckTruck.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
-public class PaisController(ServicoCrud<Pais> servicoCrud)
-    : CrudController<Pais>(servicoCrud, "país")
+public class PaisController(ServicoCrud<Pais> servicoCrud, ILogger<Pais> logger)
+    : CrudController<Pais>(servicoCrud, "país", logger)
 {
     [HttpGet("{id:long}")]
     public IActionResult GetById(long id) => GetByIdCore(id);

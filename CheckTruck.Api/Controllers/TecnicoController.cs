@@ -6,8 +6,8 @@ namespace CheckTruck.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class TecnicoController(ServicoCrud<Tecnico> servicoCrud)
-    : CrudController<Tecnico>(servicoCrud, "técnico")
+public class TecnicoController(ServicoCrud<Tecnico> servicoCrud, ILogger<Tecnico> logger)
+    : CrudController<Tecnico>(servicoCrud, "técnico", logger)
 {
     [HttpGet("{id:long}")]
     public IActionResult GetById(long id) => GetByIdCore(id);

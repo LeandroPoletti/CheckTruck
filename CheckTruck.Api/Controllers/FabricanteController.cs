@@ -6,8 +6,8 @@ namespace CheckTruck.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class FabricanteController(ServicoCrud<Fabricante> servicoCrud)
-    : CrudController<Fabricante>(servicoCrud, "fabricante")
+public class FabricanteController(ServicoCrud<Fabricante> servicoCrud, ILogger<Fabricante> logger)
+    : CrudController<Fabricante>(servicoCrud, "fabricante", logger)
 {
     [HttpGet("{id:long}")]
     public IActionResult GetById(long id) => GetByIdCore(id);

@@ -6,8 +6,8 @@ namespace CheckTruck.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class GeracaoModeloController(ServicoCrud<GeracaoModelo> servicoCrud)
-    : CrudController<GeracaoModelo>(servicoCrud, "geração de modelo")
+public class GeracaoModeloController(ServicoCrud<GeracaoModelo> servicoCrud, ILogger<GeracaoModelo> logger)
+    : CrudController<GeracaoModelo>(servicoCrud, "geração de modelo", logger)
 {
     [HttpGet("{id:long}")]
     public IActionResult GetById(long id) => GetByIdCore(id);

@@ -6,8 +6,8 @@ namespace CheckTruck.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ModeloController(ServicoCrud<Modelo> servicoCrud)
-    : CrudController<Modelo>(servicoCrud, "modelo")
+public class ModeloController(ServicoCrud<Modelo> servicoCrud, ILogger<Modelo> logger)
+    : CrudController<Modelo>(servicoCrud, "modelo", logger)
 {
     [HttpGet("{id:long}")]
     public IActionResult GetById(long id) => GetByIdCore(id);
