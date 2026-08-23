@@ -20,4 +20,11 @@ public class VeiculoController(ServicoVeiculo servicoVeiculo, ILogger<Veiculo> l
 
     [HttpDelete("{id:long}")]
     public IActionResult Delete(long id) => DeleteCore(id);
+
+    [HttpPut("{id:long}/kilometragem")]
+    public IActionResult AtualizarKilometragem(long id, [FromBody] int distancia)
+    {
+        var res = servicoVeiculo.AtualizarKmVeiculo(id, distancia);
+        return res ? Ok() : BadRequest(servicoVeiculo.Mensagens);
+    }
 }

@@ -54,4 +54,20 @@ public class ServicoVeiculo(IRepositorioCrud repositorioCrud, ILogger<ServicoVei
 
         return distanciaParaProximaManutencao;
     }
+
+    public bool AtualizarKmVeiculo(long veiculoId, int distancia)
+    {
+        var veiculo = GetById(veiculoId);
+        if (veiculo is null)
+        {
+            Mensagens.Add("Veículo não encontrado.");
+            return false;
+        }
+        
+        veiculo.KmAtual += distancia;
+        Atualizar(veiculo);
+        if (Mensagens.Count <= 0) return true;
+        Mensagens.Add("Erro ao atualizar");
+        return false;
+    }
 }
