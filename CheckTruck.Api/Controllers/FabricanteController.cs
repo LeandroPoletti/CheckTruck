@@ -9,6 +9,8 @@ namespace CheckTruck.Api.Controllers;
 public class FabricanteController(ServicoCrud<Fabricante> servicoCrud, ILogger<Fabricante> logger)
     : CrudController<Fabricante>(servicoCrud, "fabricante", logger)
 {
+    [HttpGet]
+    public IActionResult Get() => GetODataCore();
     [HttpGet("{id:long}")]
     public IActionResult GetById(long id) => GetByIdCore(id);
 

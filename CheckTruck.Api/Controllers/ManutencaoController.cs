@@ -9,6 +9,8 @@ namespace CheckTruck.Api.Controllers;
 public class ManutencaoController(ServicoCrud<Manutencao> servicoCrud, ILogger<Manutencao> logger)
     : CrudController<Manutencao>(servicoCrud, "manutenção", logger)
 {
+    [HttpGet]
+    public IActionResult Get() => GetODataCore();
     [HttpGet("{id:long}")]
     public IActionResult GetById(long id) => GetByIdCore(id);
 

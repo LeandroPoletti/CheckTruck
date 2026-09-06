@@ -1,6 +1,10 @@
 using CheckTruck.Dominio.Interfaces;
 using CheckTruck.Dominio.Servicos;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Query.Validator;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
 
 namespace CheckTruck.Api.Controllers;
 
@@ -9,6 +13,29 @@ public abstract class CrudController<T>(ServicoCrud<T> servicoCrud, string nomeE
 {
     private readonly ServicoCrud<T> _servicoCrud = servicoCrud;
     private readonly ILogger<T> _logger = logger;
+
+    protected virtual IActionResult GetODataCore()
+    {
+        _logger.LogDebug($"Consultando lista de {nomeEntidade} com opções OData");
+    
+        var edmModel = HttpContext.RequestServices.GetRequiredService<IEdmModel>();
+        var contexto = new ODataQueryContext(edmModel, typeof(T), path: null);
+        var opcoesQuery = new ODataQueryOptions<T>(contexto, Request);
+    
+        try
+        {
+            opcoesQuery.Validate(new ODataValidationSettings { MaxTop = 100 });
+        }
+        catch (ODataException e)
+        {
+            return BadRequest(e.Message);
+        }
+    
+        var query = _servicoCrud.Query(_ => true);
+        var resultado = opcoesQuery.ApplyTo(query, new ODataQuerySettings { EnsureStableOrdering = true });
+    
+        return Ok(resultado);
+    }
 
     protected virtual IActionResult GetByIdCore(long id)
     {

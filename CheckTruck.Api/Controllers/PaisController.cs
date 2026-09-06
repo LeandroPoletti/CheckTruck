@@ -8,6 +8,9 @@ namespace CheckTruck.Api.Controllers;
 public class PaisController(ServicoCrud<Pais> servicoCrud, ILogger<Pais> logger)
     : CrudController<Pais>(servicoCrud, "país", logger)
 {
+    [HttpGet]
+    public IActionResult Get() => GetODataCore();
+
     [HttpGet("{id:long}")]
     public IActionResult GetById(long id) => GetByIdCore(id);
 

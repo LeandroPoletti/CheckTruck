@@ -5,7 +5,9 @@ using CheckTruck.Repositorio.Entidades;
 using CheckTruck.Dominio.Interfaces;
 using CheckTruck.Dominio.Servicos;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OData.ModelBuilder;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 
@@ -14,7 +16,27 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddControllers().AddJsonOptions(options =>
+
+var modelBuilder = new ODataConventionModelBuilder();
+modelBuilder.EntitySet<Veiculo>("Veiculo");
+modelBuilder.EntitySet<Modelo>("Modelo");
+modelBuilder.EntitySet<Fabricante>("Fabricante");
+modelBuilder.EntitySet<GeracaoModelo>("GeracaoModelo");
+modelBuilder.EntitySet<Pais>("Pais");
+modelBuilder.EntitySet<TipoManutencao>("TiposManutencao");
+modelBuilder.EntitySet<Manutencao>("Manutencao");
+modelBuilder.EntitySet<IntervaloRecomendado>("IntervaloRecomendado");
+modelBuilder.EntitySet<Motorista>("Motorista");
+modelBuilder.EntitySet<Tecnico>("Tecnico");
+
+builder.Services.AddSingleton(modelBuilder.GetEdmModel());
+
+builder.Services.AddControllers()
+    .AddOData(options =>
+    {
+        options.Select().OrderBy().Count().Filter().Expand().SetMaxTop(100);
+    })
+    .AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
@@ -90,6 +112,16 @@ using (var scope = app.Services.CreateScope())
         await userManager.CreateAsync(usuario, usuarioSenha);
         await userManager.AddToRoleAsync(usuario, "Administrador");
     }
+    
+    var context = scope.ServiceProvider.GetRequiredService<Context>();
+
+    if (!context.Paises.Any(p => p.Nome == "Brasil"))
+    {
+        context.Paises.Add(new Pais() { Nome = "Brasil" });
+        context.SaveChanges();
+    }
+
+    
 }
 
 

@@ -9,6 +9,8 @@ namespace CheckTruck.Api.Controllers;
 public class MotoristaController(ServicoCrud<Motorista> servicoCrud, ILogger<Motorista> logger)
     : CrudController<Motorista>(servicoCrud, "motorista", logger)
 {
+    [HttpGet]
+    public IActionResult Get() => GetODataCore();
     [HttpGet("{id:long}")]
     public IActionResult GetById(long id) => GetByIdCore(id);
 

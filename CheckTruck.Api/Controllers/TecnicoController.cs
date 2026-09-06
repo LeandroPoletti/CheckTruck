@@ -9,6 +9,8 @@ namespace CheckTruck.Api.Controllers;
 public class TecnicoController(ServicoCrud<Tecnico> servicoCrud, ILogger<Tecnico> logger)
     : CrudController<Tecnico>(servicoCrud, "técnico", logger)
 {
+    [HttpGet]
+    public IActionResult Get() => GetODataCore();
     [HttpGet("{id:long}")]
     public IActionResult GetById(long id) => GetByIdCore(id);
 
