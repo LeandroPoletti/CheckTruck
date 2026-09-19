@@ -1,24 +1,64 @@
+using CheckTruck.Api.Dtos.IntervalosRecomendados;
 using CheckTruck.Dominio.Entidades;
 using CheckTruck.Dominio.Servicos;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CheckTruck.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class IntervaloRecomendadoController(ServicoCrud<IntervaloRecomendado> servicoCrud, ILogger<IntervaloRecomendado> logger)
-    : CrudController<IntervaloRecomendado>(servicoCrud, "intervalo recomendado", logger)
+public class IntervaloRecomendadoController(
+    ServicoCrud<IntervaloRecomendado> servicoCrud,
+    ServicoCrud<Modelo> servicoModelo,
+    ServicoCrud<TipoManutencao> servicoTipoManutencao,
+    ILogger<IntervaloRecomendado> logger)
+    : CrudController<IntervaloRecomendado, IntervaloRecomendadoResponseDto>(
+        servicoCrud, "intervalo recomendado", logger,
+        i => i.ToResponseDto(),
+        q => q.Include(i => i.Modelo).Include(i => i.TipoManutencao))
 {
     [HttpGet]
-    public IActionResult Get() => GetODataCore();
+    public ActionResult<IEnumerable<IntervaloRecomendadoResponseDto>> Get() => GetODataCore();
+
     [HttpGet("{id:long}")]
-    public IActionResult GetById(long id) => GetByIdCore(id);
+    public ActionResult<IntervaloRecomendadoResponseDto> GetById(long id) => GetByIdCore(id);
 
     [HttpPost]
-    public IActionResult Post([FromBody] IntervaloRecomendado entidade) => PostCore(entidade);
+    public ActionResult<IntervaloRecomendadoResponseDto> Post([FromBody] IntervaloRecomendadoRequestDto dto)
+    {
+        var modelo = servicoModelo.GetById(dto.ModeloId);
+        if (modelo is null)
+        {
+            return BadRequest("Modelo não encontrado.");
+        }
+
+        var tipoManutencao = servicoTipoManutencao.GetById(dto.TipoManutencaoId);
+        if (tipoManutencao is null)
+        {
+            return BadRequest("Tipo de manutenção não encontrado.");
+        }
+
+        return PostCore(dto.ToEntity(modelo, tipoManutencao));
+    }
 
     [HttpPut("{id:long}")]
-    public IActionResult Put(long id, [FromBody] IntervaloRecomendado entidade) => PutCore(id, entidade);
+    public ActionResult<IntervaloRecomendadoResponseDto> Put(long id, [FromBody] IntervaloRecomendadoRequestDto dto)
+    {
+        var modelo = servicoModelo.GetById(dto.ModeloId);
+        if (modelo is null)
+        {
+            return BadRequest("Modelo não encontrado.");
+        }
+
+        var tipoManutencao = servicoTipoManutencao.GetById(dto.TipoManutencaoId);
+        if (tipoManutencao is null)
+        {
+            return BadRequest("Tipo de manutenção não encontrado.");
+        }
+
+        return PutCore(id, dto.ToEntity(modelo, tipoManutencao));
+    }
 
     [HttpDelete("{id:long}")]
     public IActionResult Delete(long id) => DeleteCore(id);

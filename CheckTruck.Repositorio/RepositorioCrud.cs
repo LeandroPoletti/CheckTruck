@@ -12,9 +12,15 @@ public class RepositorioCrud : IRepositorioCrud
     {
         _context = context;
     }
-    public T? GetById<T>(long id) where T : class, EntidadeBanco
+    public T? GetById<T>(long id, Func<IQueryable<T>, IQueryable<T>>? include = null) where T : class, EntidadeBanco
     {
-        var res = _context.Set<T>().FirstOrDefault(x => x.Id == id);
+        IQueryable<T> query = _context.Set<T>();
+        if (include is not null)
+        {
+            query = include(query);
+        }
+
+        var res = query.FirstOrDefault(x => x.Id == id);
         return res;
     }
 
@@ -46,9 +52,15 @@ public class RepositorioCrud : IRepositorioCrud
         
     }
 
-    public IQueryable<T> Query<T>(Expression<Func<T, bool>> where) where T : class
+    public IQueryable<T> Query<T>(Expression<Func<T, bool>> where, Func<IQueryable<T>, IQueryable<T>>? include = null) where T : class
     {
-        var res = _context.Set<T>().Where(where);
+        IQueryable<T> query = _context.Set<T>();
+        if (include is not null)
+        {
+            query = include(query);
+        }
+
+        var res = query.Where(where);
         return res;
     }
 

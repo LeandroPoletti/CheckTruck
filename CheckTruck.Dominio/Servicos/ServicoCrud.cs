@@ -24,11 +24,11 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
 
     #region Operacoes de leitura
 
-        public IQueryable<T> Query(Expression<Func<T, bool>> where)
+        public IQueryable<T> Query(Expression<Func<T, bool>> where, Func<IQueryable<T>, IQueryable<T>>? include = null)
         {
             try
             {
-                var retorno = _repositorioCrud.Query(where);
+                var retorno = _repositorioCrud.Query(where, include);
 
                 return retorno;
             }
@@ -40,12 +40,12 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
             }
         }
 
-        public T? GetById(long id)
+        public T? GetById(long id, Func<IQueryable<T>, IQueryable<T>>? include = null)
         {
             _logger.LogDebug($"Consultando entidade do tipo {typeof(T).Name} com ID: {id}");
             try
             {
-                var retorno = _repositorioCrud.GetById<T>(id);
+                var retorno = _repositorioCrud.GetById(id, include);
 
                 return retorno;
             }

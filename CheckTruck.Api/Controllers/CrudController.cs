@@ -8,43 +8,63 @@ using Microsoft.OData.Edm;
 
 namespace CheckTruck.Api.Controllers;
 
-public abstract class CrudController<T>(ServicoCrud<T> servicoCrud, string nomeEntidade, ILogger<T> logger) : ControllerBase
-    where T : class, EntidadeBanco
+public abstract class CrudController<TEntity, TResponseDto>(
+    ServicoCrud<TEntity> servicoCrud,
+    string nomeEntidade,
+    ILogger<TEntity> logger,
+    Func<TEntity, TResponseDto> toResponseDto,
+    Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null) : ControllerBase
+    where TEntity : class, EntidadeBanco
 {
-    private readonly ServicoCrud<T> _servicoCrud = servicoCrud;
-    private readonly ILogger<T> _logger = logger;
+    private readonly ServicoCrud<TEntity> _servicoCrud = servicoCrud;
+    private readonly ILogger<TEntity> _logger = logger;
+    private readonly Func<TEntity, TResponseDto> _toResponseDto = toResponseDto;
+    private readonly Func<IQueryable<TEntity>, IQueryable<TEntity>>? _include = include;
 
-    protected virtual IActionResult GetODataCore()
+    protected virtual ActionResult<IEnumerable<TResponseDto>> GetODataCore()
     {
         _logger.LogDebug($"Consultando lista de {nomeEntidade} com opções OData");
-    
+
         var edmModel = HttpContext.RequestServices.GetRequiredService<IEdmModel>();
-        var contexto = new ODataQueryContext(edmModel, typeof(T), path: null);
-        var opcoesQuery = new ODataQueryOptions<T>(contexto, Request);
-    
+        var contexto = new ODataQueryContext(edmModel, typeof(TEntity), path: null);
+        var opcoesQuery = new ODataQueryOptions<TEntity>(contexto, Request);
+
         try
         {
-            opcoesQuery.Validate(new ODataValidationSettings { MaxTop = 100 });
+            opcoesQuery.Validate(new ODataValidationSettings
+            {
+                MaxTop = 100,
+                AllowedQueryOptions = AllowedQueryOptions.Filter
+                    | AllowedQueryOptions.OrderBy
+                    | AllowedQueryOptions.Top
+                    | AllowedQueryOptions.Skip
+                    | AllowedQueryOptions.Count
+            });
         }
         catch (ODataException e)
         {
             return BadRequest(e.Message);
         }
-    
-        var query = _servicoCrud.Query(_ => true);
-        var resultado = opcoesQuery.ApplyTo(query, new ODataQuerySettings { EnsureStableOrdering = true });
-    
-        return Ok(resultado);
+
+        var query = _servicoCrud.Query(_ => true, _include);
+        var resultado = (IQueryable<TEntity>)opcoesQuery.ApplyTo(query, new ODataQuerySettings { EnsureStableOrdering = true });
+
+        return Ok(resultado.ToList().Select(_toResponseDto).ToList());
     }
 
-    protected virtual IActionResult GetByIdCore(long id)
+    protected virtual ActionResult<TResponseDto> GetByIdCore(long id)
     {
         _logger.LogDebug($"Buscando {nomeEntidade} com ID: {id}");
-        var entidade = _servicoCrud.GetById(id);
-        return entidade is null ? NotFound() : Ok(entidade);
+        var entidade = _servicoCrud.GetById(id, _include);
+        if (entidade is null)
+        {
+            return NotFound();
+        }
+
+        return _toResponseDto(entidade);
     }
 
-    protected virtual IActionResult PostCore(T entidade)
+    protected virtual ActionResult<TResponseDto> PostCore(TEntity entidade)
     {
         _logger.LogDebug($"Inserindo {nomeEntidade}");
         var entidadeInserida = _servicoCrud.Inserir(entidade);
@@ -53,21 +73,23 @@ public abstract class CrudController<T>(ServicoCrud<T> servicoCrud, string nomeE
             return Erro($"Erro ao inserir {nomeEntidade}");
         }
 
-        return CreatedAtAction("GetById", new { id = entidadeInserida.Id }, entidadeInserida);
+        var entidadeCompleta = _servicoCrud.GetById(entidadeInserida.Id, _include) ?? entidadeInserida;
+        return CreatedAtAction("GetById", new { id = entidadeInserida.Id }, _toResponseDto(entidadeCompleta));
     }
 
-    protected virtual IActionResult PutCore(long id, T entidade)
+    protected virtual ActionResult<TResponseDto> PutCore(long id, TEntity entidade)
     {
-        if (id != entidade.Id)
-        {
-            return BadRequest($"O ID de {nomeEntidade} não corresponde ao ID do corpo da requisição.");
-        }
+        entidade.Id = id;
 
         _logger.LogDebug($"Atualizando {nomeEntidade} com ID: {id}");
         var entidadeAtualizada = _servicoCrud.Atualizar(entidade);
-        return entidadeAtualizada is null
-            ? Erro($"Erro ao atualizar {nomeEntidade}")
-            : Ok(entidadeAtualizada);
+        if (entidadeAtualizada is null)
+        {
+            return Erro($"Erro ao atualizar {nomeEntidade}");
+        }
+
+        var entidadeCompleta = _servicoCrud.GetById(id, _include) ?? entidadeAtualizada;
+        return _toResponseDto(entidadeCompleta);
     }
 
     protected virtual IActionResult DeleteCore(long id)

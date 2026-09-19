@@ -34,7 +34,7 @@ builder.Services.AddSingleton(modelBuilder.GetEdmModel());
 builder.Services.AddControllers()
     .AddOData(options =>
     {
-        options.Select().OrderBy().Count().Filter().Expand().SetMaxTop(100);
+        options.OrderBy().Count().Filter().SetMaxTop(100);
     })
     .AddJsonOptions(options =>
 {

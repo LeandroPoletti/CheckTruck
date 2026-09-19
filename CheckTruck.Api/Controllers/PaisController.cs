@@ -1,24 +1,26 @@
-﻿using CheckTruck.Dominio.Entidades;
+using CheckTruck.Api.Dtos.Paises;
+using CheckTruck.Dominio.Entidades;
 using CheckTruck.Dominio.Servicos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CheckTruck.Api.Controllers;
+
 [ApiController]
 [Route("api/[controller]")]
 public class PaisController(ServicoCrud<Pais> servicoCrud, ILogger<Pais> logger)
-    : CrudController<Pais>(servicoCrud, "país", logger)
+    : CrudController<Pais, PaisResponseDto>(servicoCrud, "país", logger, p => p.ToResponseDto())
 {
     [HttpGet]
-    public IActionResult Get() => GetODataCore();
+    public ActionResult<IEnumerable<PaisResponseDto>> Get() => GetODataCore();
 
     [HttpGet("{id:long}")]
-    public IActionResult GetById(long id) => GetByIdCore(id);
+    public ActionResult<PaisResponseDto> GetById(long id) => GetByIdCore(id);
 
     [HttpPost]
-    public IActionResult Post([FromBody] Pais pais) => PostCore(pais);
+    public ActionResult<PaisResponseDto> Post([FromBody] PaisRequestDto dto) => PostCore(dto.ToEntity());
 
     [HttpPut("{id:long}")]
-    public IActionResult Put(long id, [FromBody] Pais pais) => PutCore(id, pais);
+    public ActionResult<PaisResponseDto> Put(long id, [FromBody] PaisRequestDto dto) => PutCore(id, dto.ToEntity());
 
     [HttpDelete("{id:long}")]
     public IActionResult Delete(long id) => DeleteCore(id);
