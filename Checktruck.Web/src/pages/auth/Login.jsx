@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
 import { Field, Input, Button } from '../../components/ui/Form'
 
-// Usuário criado pelo seed do CheckTruck.Api (Program.cs). O POST /login do Identity
-// autentica pelo UserName, por isso o admin entra com "Admin" e não com o e-mail.
 const DEMO = [
-  { perfil: 'Gerente', email: 'Admin', senha: 'Admin@123' },
+  { perfil: 'Gerente', email: 'admin@admin.com', senha: 'admin123' },
+  { perfil: 'Mecânico', email: 'wesley.martins@checktruck.com.br', senha: '123456' },
+  { perfil: 'Motorista', email: 'joao.pereira@transp.com.br', senha: '123456' },
 ]
 
 const HOME_BY_ROLE = {
@@ -18,16 +18,13 @@ const HOME_BY_ROLE = {
 export default function Login() {
   const { login } = useApp()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [senha, setSenha] = useState('')
+  const [email, setEmail] = useState('admin@admin.com')
+  const [senha, setSenha] = useState('admin123')
   const [error, setError] = useState('')
-  const [enviando, setEnviando] = useState(false)
 
-  async function handleSubmit(e) {
+  function handleSubmit(e) {
     e.preventDefault()
-    setEnviando(true)
-    const result = await login(email, senha)
-    setEnviando(false)
+    const result = login(email, senha)
     if (!result.ok) {
       setError(result.error)
       return
@@ -55,10 +52,9 @@ export default function Login() {
           </p>
 
           <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-            <Field label="Usuário ou e-mail" required>
+            <Field label="E-mail" required>
               <Input
-                type="text"
-                autoComplete="username"
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="voce@empresa.com"
@@ -79,8 +75,8 @@ export default function Login() {
               <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
             )}
 
-            <Button type="submit" className="w-full justify-center" size="lg" disabled={enviando}>
-              {enviando ? 'Entrando…' : 'Entrar'}
+            <Button type="submit" className="w-full justify-center" size="lg">
+              Entrar
             </Button>
           </form>
 

@@ -6,9 +6,8 @@ import { Button } from '../../components/ui/Form'
 
 export default function Catalogo() {
   const { fabricantes, geracoes, modelos, veiculos, intervalos } = useApp()
-  const [fabricanteSelecionado, setFabricanteId] = useState(null)
+  const [fabricanteId, setFabricanteId] = useState(fabricantes[0]?.id)
   const [geracaoId, setGeracaoId] = useState(null)
-  const fabricanteId = fabricanteSelecionado ?? fabricantes[0]?.id
 
   const geracoesDoFabricante = useMemo(
     () => geracoes.filter((g) => g.fabricanteId === fabricanteId),
@@ -52,7 +51,7 @@ export default function Catalogo() {
                 >
                   <span>
                     <span className="block text-sm font-semibold">{f.nome}</span>
-                    <span className="block text-xs text-stone-400">{f.pais || '—'} · {qtdGeracoes} gerações</span>
+                    <span className="block text-xs text-stone-400">{f.pais} · {qtdGeracoes} gerações</span>
                   </span>
                   <span className="text-stone-300">›</span>
                 </button>
@@ -83,7 +82,7 @@ export default function Catalogo() {
                   }`}
                 >
                   <span className="block text-sm font-semibold text-stone-900">{g.nome}</span>
-                  <span className="block text-xs text-stone-400">{g.periodo} · {g.motor.split(' ')[0] || '—'} · {g.norma}</span>
+                  <span className="block text-xs text-stone-400">{g.periodo} · {g.motor.split(' ')[0]} · {g.norma}</span>
                 </button>
               )
             })}
@@ -119,7 +118,7 @@ export default function Catalogo() {
                     <p>Eixo diant.</p>
                   </div>
                   <div>
-                    <p className="font-semibold text-stone-800">{m.eixoTraseiroTandem} {m.eixoTraseiroTandem === 1 ? 'eixo' : 'eixos'}</p>
+                    <p className="font-semibold text-stone-800">{m.tandem ? '2 eixos' : '1 eixo'}</p>
                     <p>Tandem tras.</p>
                   </div>
                   <div>

@@ -1,16 +1,15 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useApp, useDominio } from '../../context/AppContext'
+import { useApp } from '../../context/AppContext'
 import { PageHeader, Card } from '../../components/Layout'
 import { StatusBadge, PlacaBadge } from '../../components/ui/Badges'
 import { Button, Select, Input } from '../../components/ui/Form'
 import { Search, Plus } from 'lucide-react'
-import { formatKm, nomePessoa } from '../../data/domain'
+import { getModeloCompleto, getStatusGeralVeiculo, getItemMaisUrgente, formatKm } from '../../data/domain'
 import NovoVeiculoModal from '../../components/modals/NovoVeiculoModal'
 
 export default function Veiculos() {
-  const { veiculos, motoristas, registros, geracoes } = useApp()
-  const { getModeloCompleto, getStatusGeralVeiculo, getItemMaisUrgente } = useDominio()
+  const { veiculos, usuarios, registros, geracoes } = useApp()
   const navigate = useNavigate()
   const [busca, setBusca] = useState('')
   const [geracaoFiltro, setGeracaoFiltro] = useState('todas')
@@ -27,13 +26,13 @@ export default function Veiculos() {
       const mc = getModeloCompleto(v.modeloId)
       if (geracaoFiltro !== 'todas' && mc?.geracao?.id !== geracaoFiltro) return false
       if (busca.trim()) {
-        const motorista = motoristas.find((m) => m.id === v.motoristaId)
-        const alvo = `${v.placa} ${v.chassi || ''} ${nomePessoa(motorista) || ''}`.toLowerCase()
+        const motorista = usuarios.find((u) => u.id === v.motoristaId)
+        const alvo = `${v.placa} ${v.chassi || ''} ${motorista?.nome || ''}`.toLowerCase()
         if (!alvo.includes(busca.trim().toLowerCase())) return false
       }
       return true
     })
-  }, [veiculos, motoristas, busca, getModeloCompleto, geracaoFiltro, statusFiltro])
+  }, [veiculos, usuarios, busca, geracaoFiltro, statusFiltro])
 
   return (
     <>
@@ -75,7 +74,7 @@ export default function Veiculos() {
           const mc = getModeloCompleto(v.modeloId)
           const status = getStatusGeralVeiculo(v, registros)
           const item = getItemMaisUrgente(v, registros)
-          const motorista = motoristas.find((m) => m.id === v.motoristaId)
+          const motorista = usuarios.find((u) => u.id === v.motoristaId)
           const pct = item ? Math.max(2, Math.min(100, (v.kmAtual / item.kmProximaTroca) * 100)) : 0
           const barColor = status === 'critico' ? 'bg-red-500' : status === 'atencao' ? 'bg-amber-500' : 'bg-brand-600'
 
@@ -104,7 +103,7 @@ export default function Veiculos() {
               </div>
 
               <div className="mt-4 flex items-center justify-between border-t border-stone-100 pt-3 text-sm">
-                <span className="text-stone-600">{motorista ? nomePessoa(motorista) : 'Sem motorista'}</span>
+                <span className="text-stone-600">{motorista ? motorista.nome : 'Sem motorista'}</span>
                 <button
                   onClick={() => navigate(`/gerente/veiculos/${v.id}`)}
                   className="font-semibold text-brand-700 hover:text-brand-900"

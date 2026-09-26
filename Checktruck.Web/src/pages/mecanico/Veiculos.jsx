@@ -1,15 +1,14 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
-import { useApp, useDominio } from '../../context/AppContext'
+import { useApp } from '../../context/AppContext'
 import { PageHeader, Card } from '../../components/Layout'
 import { StatusBadge, PlacaBadge } from '../../components/ui/Badges'
 import { Input, Select } from '../../components/ui/Form'
-import { formatKm, nomePessoa } from '../../data/domain'
+import { getModeloCompleto, getStatusGeralVeiculo, getItemMaisUrgente, formatKm } from '../../data/domain'
 
 export default function MecanicoVeiculos() {
-  const { veiculos, motoristas, registros, geracoes } = useApp()
-  const { getModeloCompleto, getStatusGeralVeiculo, getItemMaisUrgente } = useDominio()
+  const { veiculos, usuarios, registros, geracoes } = useApp()
   const navigate = useNavigate()
   const [busca, setBusca] = useState('')
   const [statusFiltro, setStatusFiltro] = useState('todos')
@@ -20,13 +19,13 @@ export default function MecanicoVeiculos() {
     return ativos.filter((v) => {
       if (statusFiltro !== 'todos' && getStatusGeralVeiculo(v, registros) !== statusFiltro) return false
       if (busca.trim()) {
-        const motorista = motoristas.find((m) => m.id === v.motoristaId)
-        const alvo = `${v.placa} ${v.chassi || ''} ${nomePessoa(motorista) || ''}`.toLowerCase()
+        const motorista = usuarios.find((u) => u.id === v.motoristaId)
+        const alvo = `${v.placa} ${v.chassi || ''} ${motorista?.nome || ''}`.toLowerCase()
         if (!alvo.includes(busca.trim().toLowerCase())) return false
       }
       return true
     })
-  }, [ativos, motoristas, registros, busca, statusFiltro, getStatusGeralVeiculo])
+  }, [ativos, usuarios, registros, busca, statusFiltro])
 
   return (
     <>
@@ -55,7 +54,7 @@ export default function MecanicoVeiculos() {
           const mc = getModeloCompleto(v.modeloId)
           const status = getStatusGeralVeiculo(v, registros)
           const item = getItemMaisUrgente(v, registros)
-          const motorista = motoristas.find((m) => m.id === v.motoristaId)
+          const motorista = usuarios.find((u) => u.id === v.motoristaId)
           const pct = item ? Math.max(2, Math.min(100, (v.kmAtual / item.kmProximaTroca) * 100)) : 0
           const barColor = status === 'critico' ? 'bg-red-500' : status === 'atencao' ? 'bg-amber-500' : 'bg-brand-600'
 
@@ -82,7 +81,7 @@ export default function MecanicoVeiculos() {
                 </div>
 
                 <div className="mt-4 border-t border-stone-100 pt-3 text-sm text-stone-600">
-                  {motorista ? nomePessoa(motorista) : 'Sem motorista'}
+                  {motorista ? motorista.nome : 'Sem motorista'}
                 </div>
               </Card>
             </button>

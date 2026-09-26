@@ -4,8 +4,7 @@ import { Modal } from '../ui/Overlay'
 import { Field, Input, Select, Button } from '../ui/Form'
 
 export default function NovaPessoaModal({ open, onClose, perfilInicial = 'motorista' }) {
-  const { addPessoa, veiculos } = useApp()
-  const [salvando, setSalvando] = useState(false)
+  const { addPessoa, updateVeiculo, veiculos } = useApp()
   const [passo, setPasso] = useState(1)
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
@@ -46,38 +45,30 @@ export default function NovaPessoaModal({ open, onClose, perfilInicial = 'motori
     setPasso(2)
   }
 
-  async function handleFinalizar() {
+  function handleFinalizar() {
     if (!cpf.trim()) {
       setError('Informe o CPF.')
       return
     }
-    setSalvando(true)
-    setError('')
-    try {
-      // TODO: API — POST /api/Usuario (conta + papel + Motorista/Tecnico + vínculo com veículo).
-      // O POST /register atual não devolve o GUID do usuário, então não dá para encadear
-      // com POST /api/Motorista ou /api/Tecnico.
-      await addPessoa({
-        nome: nome.trim(),
-        email: email.trim(),
-        senha,
-        perfil,
-        cpf: cpf.trim(),
-        veiculoId: perfil === 'motorista' ? (veiculoId || null) : undefined,
-      })
-      onClose()
-    } catch (e) {
-      setError(e.message)
-    } finally {
-      setSalvando(false)
+    const pessoa = addPessoa({
+      nome: nome.trim(),
+      email: email.trim(),
+      senha,
+      perfil,
+      cpf: cpf.trim(),
+      veiculoId: perfil === 'motorista' ? (veiculoId || null) : undefined,
+    })
+    if (perfil === 'motorista' && veiculoId) {
+      updateVeiculo(veiculoId, { motoristaId: pessoa.id })
     }
+    onClose()
   }
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      eyebrow="POST /api/Usuario (TODO na API)"
+      eyebrow="POST /register → POST /api/pessoas"
       title="Nova pessoa"
       subtitle="Conta de acesso e depois perfil + CPF"
       width="max-w-lg"
@@ -90,7 +81,7 @@ export default function NovaPessoaModal({ open, onClose, perfilInicial = 'motori
         ) : (
           <>
             <Button variant="secondary" onClick={() => setPasso(1)}>Voltar</Button>
-            <Button onClick={handleFinalizar} disabled={salvando}>{salvando ? 'Cadastrando…' : 'Cadastrar pessoa'}</Button>
+            <Button onClick={handleFinalizar}>Cadastrar pessoa</Button>
           </>
         )
       }

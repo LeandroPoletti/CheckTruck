@@ -28,27 +28,9 @@ const HOME_BY_ROLE = {
 }
 
 function ProtectedArea({ perfil, children }) {
-  const { user, carregando, erroCarga, carregarTudo } = useApp()
+  const { user } = useApp()
   if (!user) return <Navigate to="/login" replace />
   if (perfil && user.perfil !== perfil) return <Navigate to={HOME_BY_ROLE[user.perfil]} replace />
-  if (carregando) {
-    return (
-      <Layout>
-        <p className="py-20 text-center text-sm text-stone-400">Carregando dados da API…</p>
-      </Layout>
-    )
-  }
-  if (erroCarga) {
-    return (
-      <Layout>
-        <div className="mx-auto max-w-md rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
-          <p className="font-semibold">Não foi possível carregar os dados.</p>
-          <p className="mt-1">{erroCarga}</p>
-          <button onClick={carregarTudo} className="mt-3 font-semibold underline">Tentar novamente</button>
-        </div>
-      </Layout>
-    )
-  }
   return <Layout>{children}</Layout>
 }
 

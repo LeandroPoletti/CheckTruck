@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react'
-import { useApp, useDominio } from '../../context/AppContext'
+import { useApp } from '../../context/AppContext'
 import { Modal } from '../ui/Overlay'
 import { Field, Input, Select, Toggle, Button } from '../ui/Form'
-import { getUltimoRegistro, formatKm, nomePessoa } from '../../data/domain'
+import { getIntervalosDoModelo, getUltimoRegistro, getTipoManutencao, formatKm } from '../../data/domain'
 
 export default function RegistrarManutencaoModal({ open, onClose, veiculo }) {
-  const { user, registros, tecnicos, addRegistroManutencao } = useApp()
-  const { getIntervalosDoModelo, getTipoManutencao } = useDominio()
+  const { registros, addRegistroManutencao } = useApp()
   const [tipoId, setTipoId] = useState('')
-  const [tecnicoId, setTecnicoId] = useState('')
   const [kmNaTroca, setKmNaTroca] = useState('')
   const [dataRealizacao, setDataRealizacao] = useState(() => new Date().toISOString().slice(0, 10))
   const [isPrimeiraTroca, setIsPrimeiraTroca] = useState(false)
@@ -16,13 +14,10 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo }) {
   const [concessionaria, setConcessionaria] = useState('')
   const [observacoes, setObservacoes] = useState('')
   const [error, setError] = useState('')
-  const [salvando, setSalvando] = useState(false)
 
   useEffect(() => {
     if (open && veiculo) {
       setTipoId('')
-      // TODO: API — user.tecnicoId depende de GET /api/Usuario/me; até lá o técnico é escolhido no select
-      setTecnicoId(user?.tecnicoId || '')
       setKmNaTroca(String(veiculo.kmAtual))
       setDataRealizacao(new Date().toISOString().slice(0, 10))
       setIsPrimeiraTroca(false)
@@ -31,7 +26,7 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo }) {
       setObservacoes('')
       setError('')
     }
-  }, [open, veiculo, user])
+  }, [open, veiculo])
 
   if (!veiculo) return null
 
@@ -40,16 +35,11 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo }) {
   const ultimo = tipoId ? getUltimoRegistro(veiculo.id, tipoId, registros) : null
   const sugerePrimeira = tipoId && !ultimo
 
-  async function handleSubmit() {
+  function handleSubmit() {
     const km = Number(kmNaTroca)
     if (!tipoId) { setError('Selecione o tipo de manutenção.'); return }
-    if (!tecnicoId) { setError('Selecione o técnico responsável.'); return }
     if (!Number.isFinite(km) || km < veiculo.kmAtual) {
       setError(`Km na troca deve ser maior ou igual ao km atual do veículo (${formatKm(veiculo.kmAtual)}).`)
-      return
-    }
-    if (!concessionaria.trim() || !nrNotaFiscal.trim()) {
-      setError('Informe a concessionária/oficina e o número da nota fiscal.')
       return
     }
     const usaPrimeira = isPrimeiraTroca || sugerePrimeira
@@ -57,40 +47,32 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo }) {
       ? (intervaloSelecionado?.intervaloKmPrimeira ?? intervaloSelecionado?.intervaloKm ?? 0)
       : (intervaloSelecionado?.intervaloKm ?? 0)
 
-    setSalvando(true)
-    try {
-      await addRegistroManutencao({
-        veiculoId: veiculo.id,
-        tipoId,
-        tecnicoId,
-        kmNaTroca: km,
-        kmProximaTroca: km + intervaloAplicado,
-        dataRealizacao,
-        isPrimeiraTroca: !!usaPrimeira,
-        nrNotaFiscal: nrNotaFiscal.trim(),
-        concessionaria: concessionaria.trim(),
-        observacoes: observacoes.trim(),
-      })
-      onClose()
-    } catch (e) {
-      setError(e.message)
-    } finally {
-      setSalvando(false)
-    }
+    addRegistroManutencao({
+      veiculoId: veiculo.id,
+      tipoId,
+      kmNaTroca: km,
+      kmProximaTroca: km + intervaloAplicado,
+      dataRealizacao,
+      isPrimeiraTroca: usaPrimeira,
+      nrNotaFiscal: nrNotaFiscal.trim() || null,
+      concessionaria: concessionaria.trim() || null,
+      observacoes: observacoes.trim() || null,
+    })
+    onClose()
   }
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      eyebrow="POST /api/Manutencao"
+      eyebrow="POST /api/vehicles/:id/maintenance"
       title="Registrar manutenção"
       subtitle={veiculo.placa}
       width="max-w-lg"
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>Cancelar</Button>
-          <Button onClick={handleSubmit} disabled={salvando}>{salvando ? 'Registrando…' : 'Registrar manutenção'}</Button>
+          <Button onClick={handleSubmit}>Registrar manutenção</Button>
         </>
       }
     >
@@ -108,18 +90,6 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo }) {
               {intervaloSelecionado.intervaloKmPrimeira && <> · 1ª troca {formatKm(intervaloSelecionado.intervaloKmPrimeira)}</>}
             </p>
           )}
-          {intervalosDoModelo.length === 0 && (
-            <p className="mt-1.5 text-xs text-amber-600">Nenhum intervalo recomendado cadastrado para este modelo.</p>
-          )}
-        </Field>
-
-        <Field label="Técnico responsável" required>
-          <Select value={tecnicoId} onChange={(e) => setTecnicoId(e.target.value)}>
-            <option value="">Selecione</option>
-            {tecnicos.map((t) => (
-              <option key={t.id} value={t.id}>{nomePessoa(t)}</option>
-            ))}
-          </Select>
         </Field>
 
         <div className="grid grid-cols-2 gap-3">
@@ -138,10 +108,10 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo }) {
         />
 
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Concessionária / oficina" required>
+          <Field label="Concessionária / oficina">
             <Input value={concessionaria} onChange={(e) => setConcessionaria(e.target.value)} placeholder="Volvo Bauru" />
           </Field>
-          <Field label="Nº nota fiscal" required>
+          <Field label="Nº nota fiscal">
             <Input value={nrNotaFiscal} onChange={(e) => setNrNotaFiscal(e.target.value)} placeholder="118.442" />
           </Field>
         </div>

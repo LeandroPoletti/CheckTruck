@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
-import { PageHeader, Card, AvisoApi } from '../../components/Layout'
-import { nomePessoa } from '../../data/domain'
+import { PageHeader, Card } from '../../components/Layout'
 import { Button, Select } from '../../components/ui/Form'
 import { PlacaBadge } from '../../components/ui/Badges'
 import NovaPessoaModal from '../../components/modals/NovaPessoaModal'
@@ -14,21 +13,20 @@ const TABS = [
 ]
 
 export default function Pessoas() {
-  const { pessoas, veiculos, updateVeiculo } = useApp()
-  const [erroVinculo, setErroVinculo] = useState('')
+  const { usuarios, veiculos, updateVeiculo } = useApp()
   const [tab, setTab] = useState('motorista')
   const [novoOpen, setNovoOpen] = useState(false)
 
   const contagens = {
-    motorista: pessoas.filter((u) => u.perfil === 'motorista' && u.ativo).length,
-    mecanico: pessoas.filter((u) => u.perfil === 'mecanico' && u.ativo).length,
-    inativos: pessoas.filter((u) => !u.ativo && u.perfil !== 'gerente').length,
+    motorista: usuarios.filter((u) => u.perfil === 'motorista' && u.ativo).length,
+    mecanico: usuarios.filter((u) => u.perfil === 'mecanico' && u.ativo).length,
+    inativos: usuarios.filter((u) => !u.ativo && u.perfil !== 'gerente').length,
   }
 
   const listaFiltrada = useMemo(() => {
-    if (tab === 'inativos') return pessoas.filter((u) => !u.ativo && u.perfil !== 'gerente')
-    return pessoas.filter((u) => u.perfil === tab && u.ativo)
-  }, [pessoas, tab])
+    if (tab === 'inativos') return usuarios.filter((u) => !u.ativo && u.perfil !== 'gerente')
+    return usuarios.filter((u) => u.perfil === tab && u.ativo)
+  }, [usuarios, tab])
 
   const veiculosLivres = veiculos.filter((v) => v.ativo && !v.motoristaId)
 
@@ -43,12 +41,6 @@ export default function Pessoas() {
           </Button>
         }
       />
-
-      {/* TODO: API — GET /api/Usuario para nome, e-mail e status (ativo/inativo) das pessoas */}
-      <AvisoApi>
-        Nome, e-mail e status das pessoas ainda não são expostos pela API — exibindo o CPF como identificação.
-      </AvisoApi>
-      {erroVinculo && <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erroVinculo}</p>}
 
       <div className="mb-5 flex gap-6 border-b border-stone-200">
         {TABS.map((t) => (
@@ -66,13 +58,13 @@ export default function Pessoas() {
 
       <div className="grid grid-cols-3 gap-4">
         {listaFiltrada.map((p) => {
-          const veiculo = p.perfil === 'motorista' ? veiculos.find((v) => v.motoristaId === p.id) : null
+          const veiculo = veiculos.find((v) => v.motoristaId === p.id)
           return (
-            <Card key={p.key} className="p-4">
+            <Card key={p.id} className="p-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="font-semibold text-stone-900">{nomePessoa(p)}</p>
-                  <p className="text-xs text-stone-500">{p.email || '—'}</p>
+                  <p className="font-semibold text-stone-900">{p.nome}</p>
+                  <p className="text-xs text-stone-500">{p.email}</p>
                 </div>
                 <span
                   className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
@@ -100,14 +92,7 @@ export default function Pessoas() {
                   ) : (
                     <VincularSelect
                       veiculosLivres={veiculosLivres}
-                      onVincular={async (veiculoId) => {
-                        setErroVinculo('')
-                        try {
-                          await updateVeiculo(veiculoId, { motoristaId: p.id })
-                        } catch (e) {
-                          setErroVinculo(e.message)
-                        }
-                      }}
+                      onVincular={(veiculoId) => updateVeiculo(veiculoId, { motoristaId: p.id })}
                     />
                   )}
                 </div>

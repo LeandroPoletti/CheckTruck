@@ -21,7 +21,6 @@ export default function NovoChamadoModal({ open, onClose, veiculo }) {
   const [descricao, setDescricao] = useState('')
   const [veiculoId, setVeiculoId] = useState('')
   const [error, setError] = useState('')
-  const [salvando, setSalvando] = useState(false)
 
   useEffect(() => {
     if (open) {
@@ -33,41 +32,33 @@ export default function NovoChamadoModal({ open, onClose, veiculo }) {
     }
   }, [open, veiculo])
 
-  async function handleSubmit() {
+  function handleSubmit() {
     if (!descricao.trim()) {
       setError('Descreva o que está acontecendo.')
       return
     }
-    setSalvando(true)
-    try {
-      // TODO: API — POST /api/Chamado (entidade Chamado ainda não existe)
-      await abrirChamado({
-        veiculoId: veiculo?.id || veiculoId || null,
-        abertoPorId: user.id,
-        tipo,
-        urgencia,
-        descricao: descricao.trim(),
-      })
-      onClose()
-    } catch (e) {
-      setError(e.message)
-    } finally {
-      setSalvando(false)
-    }
+    abrirChamado({
+      veiculoId: veiculo?.id || veiculoId || null,
+      abertoPorId: user.id,
+      tipo,
+      urgencia,
+      descricao: descricao.trim(),
+    })
+    onClose()
   }
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      eyebrow="POST /api/Chamado (TODO na API)"
+      eyebrow="POST /api/chamados"
       title="Abrir chamado"
       subtitle={veiculo ? `Veículo ${veiculo.placa}` : 'Selecione o motivo do chamado'}
       width="max-w-lg"
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>Cancelar</Button>
-          <Button onClick={handleSubmit} disabled={salvando}>{salvando ? 'Enviando…' : 'Enviar chamado'}</Button>
+          <Button onClick={handleSubmit}>Enviar chamado</Button>
         </>
       }
     >
