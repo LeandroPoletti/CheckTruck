@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
-import { PageHeader, Card, EmptyState } from '../../components/Layout'
+import { PageHeader, Card, EmptyState, AvisoApi } from '../../components/Layout'
+import { CHAMADOS_DISPONIVEIS } from '../../services'
 import { ChamadoStatusBadge, UrgenciaBadge, PlacaBadge } from '../../components/ui/Badges'
 import { Button } from '../../components/ui/Form'
 import { formatDataHora } from '../../data/domain'
@@ -11,7 +12,7 @@ export default function MotoristaChamados() {
   const { user, chamados, veiculos } = useApp()
   const [novoOpen, setNovoOpen] = useState(false)
 
-  const veiculo = veiculos.find((v) => v.motoristaId === user.id && v.ativo)
+  const veiculo = veiculos.find((v) => user.motoristaId && v.motoristaId === user.motoristaId && v.ativo)
   const meus = chamados
     .filter((c) => c.abertoPorId === user.id)
     .sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm))
@@ -27,6 +28,11 @@ export default function MotoristaChamados() {
           </Button>
         }
       />
+
+      {/* TODO: API — GET/POST/PUT /api/Chamado (entidade Chamado ainda não existe) */}
+      {!CHAMADOS_DISPONIVEIS && (
+        <AvisoApi>Chamados ainda não estão disponíveis na API — a lista fica vazia e novas aberturas retornam erro.</AvisoApi>
+      )}
 
       {!veiculo && (
         <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">

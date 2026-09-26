@@ -1,18 +1,19 @@
 import { useState } from 'react'
-import { useApp } from '../../context/AppContext'
+import { useApp, useDominio } from '../../context/AppContext'
 import { PageHeader, Card, EmptyState } from '../../components/Layout'
 import { StatusBadge, PlacaBadge } from '../../components/ui/Badges'
 import { Button } from '../../components/ui/Form'
-import { getModeloCompleto, getSituacaoVeiculo, getStatusGeralVeiculo, formatKm } from '../../data/domain'
+import { formatKm } from '../../data/domain'
 import AtualizarKmModal from '../../components/modals/AtualizarKmModal'
 import NovoChamadoModal from '../../components/modals/NovoChamadoModal'
 
 export default function MotoristaInicio() {
   const { user, veiculos, registros } = useApp()
+  const { getModeloCompleto, getSituacaoVeiculo, getStatusGeralVeiculo } = useDominio()
   const [kmOpen, setKmOpen] = useState(false)
   const [chamadoOpen, setChamadoOpen] = useState(false)
 
-  const veiculo = veiculos.find((v) => v.motoristaId === user.id && v.ativo)
+  const veiculo = veiculos.find((v) => user.motoristaId && v.motoristaId === user.motoristaId && v.ativo)
 
   return (
     <>

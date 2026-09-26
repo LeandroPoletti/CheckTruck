@@ -5,9 +5,10 @@ import { Field, Input, Button } from '../ui/Form'
 import { formatKm } from '../../data/domain'
 
 export default function AtualizarKmModal({ open, onClose, veiculo }) {
-  const { updateVeiculo } = useApp()
+  const { atualizarKm } = useApp()
   const [km, setKm] = useState('')
   const [error, setError] = useState('')
+  const [salvando, setSalvando] = useState(false)
 
   useEffect(() => {
     if (open && veiculo) {
@@ -18,28 +19,35 @@ export default function AtualizarKmModal({ open, onClose, veiculo }) {
 
   if (!veiculo) return null
 
-  function handleSubmit() {
+  async function handleSubmit() {
     const valor = Number(km)
     if (!Number.isFinite(valor) || valor < veiculo.kmAtual) {
       setError(`Km atual nunca pode diminuir (RN-02). Valor mínimo: ${formatKm(veiculo.kmAtual)}.`)
       return
     }
-    updateVeiculo(veiculo.id, { kmAtual: valor })
-    onClose()
+    setSalvando(true)
+    try {
+      await atualizarKm(veiculo, valor)
+      onClose()
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setSalvando(false)
+    }
   }
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      eyebrow={`PATCH /api/vehicles/${veiculo.id}/km`}
+      eyebrow={`PUT /api/Veiculo/${veiculo.id}/kilometragem`}
       title="Atualizar quilometragem"
       subtitle={veiculo.placa}
       width="max-w-sm"
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>Cancelar</Button>
-          <Button onClick={handleSubmit}>Salvar</Button>
+          <Button onClick={handleSubmit} disabled={salvando}>{salvando ? 'Salvando…' : 'Salvar'}</Button>
         </>
       }
     >

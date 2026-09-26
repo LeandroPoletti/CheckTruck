@@ -5,21 +5,39 @@ import { Field, Input, Button } from '../../components/ui/Form'
 import { PlacaBadge } from '../../components/ui/Badges'
 
 export default function MotoristaPerfil() {
-  const { user, veiculos, updatePessoa } = useApp()
-  const veiculo = veiculos.find((v) => v.motoristaId === user.id && v.ativo)
+  const { user, veiculos, motoristas, updatePessoa, alterarSenha } = useApp()
+  const veiculo = veiculos.find((v) => user.motoristaId && v.motoristaId === user.motoristaId && v.ativo)
+  const motorista = motoristas.find((m) => m.id === user.motoristaId)
 
   const [nome, setNome] = useState(user.nome)
+  const [senhaAtual, setSenhaAtual] = useState('')
   const [novaSenha, setNovaSenha] = useState('')
   const [salvo, setSalvo] = useState(false)
+  const [error, setError] = useState('')
+  const [salvando, setSalvando] = useState(false)
 
-  function handleSalvar(e) {
+  async function handleSalvar(e) {
     e.preventDefault()
-    const patch = { nome: nome.trim() }
-    if (novaSenha) patch.senha = novaSenha
-    updatePessoa(user.id, patch)
-    setNovaSenha('')
-    setSalvo(true)
-    setTimeout(() => setSalvo(false), 2500)
+    setError('')
+    if (novaSenha && !senhaAtual) {
+      setError('Informe a senha atual para definir uma nova senha.')
+      return
+    }
+    setSalvando(true)
+    try {
+      // POST /manage/info do Identity exige a senha atual para trocar a senha
+      if (novaSenha) await alterarSenha(senhaAtual, novaSenha)
+      // TODO: API — PUT /api/Usuario/{id} para alterar o nome (ainda não existe)
+      if (nome.trim() !== user.nome) await updatePessoa(user.id, { nome: nome.trim() })
+      setSenhaAtual('')
+      setNovaSenha('')
+      setSalvo(true)
+      setTimeout(() => setSalvo(false), 2500)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSalvando(false)
+    }
   }
 
   return (
@@ -37,13 +55,19 @@ export default function MotoristaPerfil() {
               <Input value={user.email} disabled className="bg-stone-50 text-stone-400" />
             </Field>
             <Field label="CPF">
-              <Input value={user.cpf || '—'} disabled className="bg-stone-50 text-stone-400" />
+              <Input value={motorista?.cpf || '—'} disabled className="bg-stone-50 text-stone-400" />
             </Field>
-            <Field label="Nova senha" hint="Deixe em branco para manter a senha atual.">
-              <Input type="password" value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} placeholder="••••••••" />
-            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Senha atual">
+                <Input type="password" value={senhaAtual} onChange={(e) => setSenhaAtual(e.target.value)} placeholder="••••••••" />
+              </Field>
+              <Field label="Nova senha" hint="Deixe em branco para manter.">
+                <Input type="password" value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} placeholder="••••••••" />
+              </Field>
+            </div>
+            {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
             {salvo && <p className="text-sm font-medium text-brand-700">Perfil atualizado.</p>}
-            <Button type="submit">Salvar alterações</Button>
+            <Button type="submit" disabled={salvando}>{salvando ? 'Salvando…' : 'Salvar alterações'}</Button>
           </form>
         </Card>
 

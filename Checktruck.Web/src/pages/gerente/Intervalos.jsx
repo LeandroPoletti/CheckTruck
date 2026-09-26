@@ -7,8 +7,9 @@ import { formatKm } from '../../data/domain'
 
 export default function Intervalos() {
   const { modelos, geracoes, tiposManutencao, intervalos } = useApp()
-  const [modeloId, setModeloId] = useState(modelos[2]?.id || modelos[0]?.id)
+  const [modeloSelecionado, setModeloId] = useState(null)
   const [componente, setComponente] = useState('todos')
+  const modeloId = modeloSelecionado ?? modelos[0]?.id
 
   const modeloAtivo = modelos.find((m) => m.id === modeloId)
   const geracaoAtiva = geracoes.find((g) => g.id === modeloAtivo?.geracaoId)
@@ -36,7 +37,7 @@ export default function Intervalos() {
       />
 
       <div className="mb-5 flex gap-3">
-        <Select value={modeloId} onChange={(e) => setModeloId(e.target.value)} className="w-64">
+        <Select value={modeloId ?? ''} onChange={(e) => setModeloId(e.target.value)} className="w-64">
           {modelos.map((m) => {
             const g = geracoes.find((gg) => gg.id === m.geracaoId)
             return <option key={m.id} value={m.id}>{m.nome} · {g?.nome}</option>
@@ -62,7 +63,7 @@ export default function Intervalos() {
           </thead>
           <tbody>
             {linhas.map((it) => (
-              <tr key={it.tipoId} className="border-b border-stone-100 last:border-0">
+              <tr key={it.id} className="border-b border-stone-100 last:border-0">
                 <td className="px-5 py-3.5 font-semibold text-stone-800">{it.tipo?.nome}</td>
                 <td className="px-5 py-3.5 text-stone-500">{it.tipo?.componente}</td>
                 <td className="px-5 py-3.5 text-stone-700">{formatKm(it.intervaloKm)}</td>

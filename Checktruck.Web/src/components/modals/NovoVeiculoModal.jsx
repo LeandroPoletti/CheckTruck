@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useApp } from '../../context/AppContext'
+import { useApp, useDominio } from '../../context/AppContext'
 import { Drawer } from '../ui/Overlay'
 import { Field, Input, Select, Toggle, Button } from '../ui/Form'
-import { getModeloCompleto } from '../../data/domain'
+import { nomePessoa } from '../../data/domain'
 
 const empty = {
   fabricanteId: '',
@@ -19,9 +19,12 @@ const empty = {
 }
 
 export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar }) {
-  const { fabricantes, geracoes, modelos, usuarios, addVeiculo, updateVeiculo } = useApp()
+  const { fabricantes, geracoes, modelos, motoristas, addVeiculo, updateVeiculo } = useApp()
+  const { getModeloCompleto } = useDominio()
   const [form, setForm] = useState(empty)
   const [errors, setErrors] = useState({})
+  const [erroApi, setErroApi] = useState('')
+  const [salvando, setSalvando] = useState(false)
 
   useEffect(() => {
     if (!open) return
@@ -34,8 +37,8 @@ export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar }) {
         placa: veiculoParaEditar.placa,
         chassi: veiculoParaEditar.chassi || '',
         renavam: veiculoParaEditar.renavam || '',
-        anoFabricacao: veiculoParaEditar.anoFabricacao,
-        anoModelo: veiculoParaEditar.anoModelo,
+        anoFabricacao: veiculoParaEditar.anoFabricacao ?? '',
+        anoModelo: veiculoParaEditar.anoModelo ?? '',
         kmAtual: veiculoParaEditar.kmAtual,
         motoristaId: veiculoParaEditar.motoristaId || '',
         ativo: veiculoParaEditar.ativo,
@@ -44,7 +47,8 @@ export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar }) {
       setForm(empty)
     }
     setErrors({})
-  }, [open, veiculoParaEditar])
+    setErroApi('')
+  }, [open, veiculoParaEditar, getModeloCompleto])
 
   const geracoesDoFabricante = useMemo(
     () => geracoes.filter((g) => g.fabricanteId === form.fabricanteId),
@@ -57,7 +61,10 @@ export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar }) {
   const modeloSelecionado = modelos.find((m) => m.id === form.modeloId)
   const geracaoSelecionada = geracoes.find((g) => g.id === form.geracaoId)
 
-  const motoristas = usuarios.filter((u) => u.perfil === 'motorista' && u.ativo)
+  // Motorista ↔ veículo é 1:1 na API: só lista quem está livre (ou o motorista atual do veículo)
+  const motoristasDisponiveis = motoristas.filter(
+    (m) => m.ativo && (!m.veiculoId || m.veiculoId === veiculoParaEditar?.id)
+  )
 
   function set(field, value) {
     setForm((f) => {
@@ -72,7 +79,10 @@ export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar }) {
     const e = {}
     if (!form.modeloId) e.modeloId = 'Selecione o modelo.'
     if (!form.placa.trim()) e.placa = 'Placa é obrigatória.'
-    if (form.chassi && form.chassi.length !== 17) e.chassi = `${form.chassi.length} de 17 caracteres`
+    if (form.chassi.length !== 17) e.chassi = `${form.chassi.length} de 17 caracteres`
+    if (!form.renavam.trim()) e.renavam = 'Renavam é obrigatório.'
+    // A API exige motorista em todo veículo (VeiculoRequestDto.MotoristaId é [Required])
+    if (!form.motoristaId) e.motoristaId = 'Selecione o motorista (obrigatório na API).'
     if (veiculoParaEditar && Number(form.kmAtual) < veiculoParaEditar.kmAtual) {
       e.kmAtual = 'Km atual nunca pode diminuir (RN-02).'
     }
@@ -80,29 +90,37 @@ export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar }) {
     return Object.keys(e).length === 0
   }
 
-  function handleSubmit(fecharDepois) {
+  async function handleSubmit(fecharDepois) {
     if (!validate()) return
     const payload = {
       modeloId: form.modeloId,
       placa: form.placa.trim().toUpperCase(),
-      chassi: form.chassi.trim() || null,
-      renavam: form.renavam.trim() || null,
+      chassi: form.chassi.trim(),
+      renavam: form.renavam.trim(),
       anoFabricacao: Number(form.anoFabricacao) || null,
       anoModelo: Number(form.anoModelo) || null,
       kmAtual: Number(form.kmAtual) || 0,
-      motoristaId: form.motoristaId || null,
+      motoristaId: form.motoristaId,
       ativo: form.ativo,
     }
-    if (veiculoParaEditar) {
-      updateVeiculo(veiculoParaEditar.id, payload)
-    } else {
-      addVeiculo(payload)
-    }
-    if (fecharDepois) {
-      onClose()
-    } else {
-      setForm(empty)
-      setErrors({})
+    setSalvando(true)
+    setErroApi('')
+    try {
+      if (veiculoParaEditar) {
+        await updateVeiculo(veiculoParaEditar.id, payload)
+      } else {
+        await addVeiculo(payload)
+      }
+      if (fecharDepois) {
+        onClose()
+      } else {
+        setForm(empty)
+        setErrors({})
+      }
+    } catch (e) {
+      setErroApi(e.message)
+    } finally {
+      setSalvando(false)
     }
   }
 
@@ -110,15 +128,17 @@ export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar }) {
     <Drawer
       open={open}
       onClose={onClose}
-      eyebrow={veiculoParaEditar ? 'PUT /api/vehicles/:id' : 'POST /api/vehicles'}
+      eyebrow={veiculoParaEditar ? `PUT /api/Veiculo/${veiculoParaEditar.id}` : 'POST /api/Veiculo'}
       title={veiculoParaEditar ? 'Editar veículo' : 'Novo veículo'}
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>Cancelar</Button>
           {!veiculoParaEditar && (
-            <Button variant="secondary" onClick={() => handleSubmit(false)}>Salvar e cadastrar outro</Button>
+            <Button variant="secondary" onClick={() => handleSubmit(false)} disabled={salvando}>Salvar e cadastrar outro</Button>
           )}
-          <Button onClick={() => handleSubmit(true)}>{veiculoParaEditar ? 'Salvar alterações' : 'Cadastrar veículo'}</Button>
+          <Button onClick={() => handleSubmit(true)} disabled={salvando}>
+            {salvando ? 'Salvando…' : veiculoParaEditar ? 'Salvar alterações' : 'Cadastrar veículo'}
+          </Button>
         </>
       }
     >
@@ -160,7 +180,7 @@ export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar }) {
               >
                 <option value="">Selecione o modelo</option>
                 {modelosDaGeracao.map((m) => (
-                  <option key={m.id} value={m.id}>{m.nome} · {m.potenciaCv} cv · 6×4</option>
+                  <option key={m.id} value={m.id}>{m.nome} · {m.potenciaCv} cv</option>
                 ))}
               </Select>
               {modeloSelecionado && (
@@ -178,10 +198,10 @@ export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar }) {
             <Field label="Placa" required error={errors.placa}>
               <Input value={form.placa} onChange={(e) => set('placa', e.target.value)} placeholder="ABC1D23" error={errors.placa} />
             </Field>
-            <Field label="Renavam">
-              <Input value={form.renavam} onChange={(e) => set('renavam', e.target.value)} placeholder="00912345678" />
+            <Field label="Renavam" required error={errors.renavam}>
+              <Input value={form.renavam} onChange={(e) => set('renavam', e.target.value)} placeholder="00912345678" error={errors.renavam} />
             </Field>
-            <Field label="Chassi (17 caracteres)" className="col-span-2" error={errors.chassi}>
+            <Field label="Chassi (17 caracteres)" required className="col-span-2" error={errors.chassi}>
               <Input value={form.chassi} onChange={(e) => set('chassi', e.target.value.toUpperCase())} placeholder="9BVR4X20DJE882301" error={errors.chassi} maxLength={17} />
             </Field>
             <Field label="Ano fabr.">
@@ -198,18 +218,20 @@ export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar }) {
 
         <div>
           <p className="mb-3 text-xs font-bold tracking-wide text-brand-700">3 · VÍNCULOS</p>
-          <Field label="Motorista (opcional)">
+          <Field label="Motorista" required error={errors.motoristaId}>
             <div className="flex items-center gap-3">
-              <Select className="flex-1" value={form.motoristaId} onChange={(e) => set('motoristaId', e.target.value)}>
-                <option value="">Sem motorista</option>
-                {motoristas.map((m) => (
-                  <option key={m.id} value={m.id}>{m.nome}</option>
+              <Select className="flex-1" value={form.motoristaId} onChange={(e) => set('motoristaId', e.target.value)} error={errors.motoristaId}>
+                <option value="">Selecione o motorista</option>
+                {motoristasDisponiveis.map((m) => (
+                  <option key={m.id} value={m.id}>{nomePessoa(m)}</option>
                 ))}
               </Select>
               <Toggle checked={form.ativo} onChange={(v) => set('ativo', v)} label="Ativo" />
             </div>
           </Field>
         </div>
+
+        {erroApi && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erroApi}</p>}
       </div>
     </Drawer>
   )

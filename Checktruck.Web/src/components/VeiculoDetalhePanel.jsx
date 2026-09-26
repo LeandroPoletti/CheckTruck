@@ -1,14 +1,15 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
-import { useApp } from '../context/AppContext'
+import { useApp, useDominio } from '../context/AppContext'
 import { Card } from './Layout'
 import { StatusBadge, PlacaBadge } from './ui/Badges'
-import { getModeloCompleto, getSituacaoVeiculo, getHistoricoVeiculo, getStatusGeralVeiculo, formatKm, formatData } from '../data/domain'
+import { getHistoricoVeiculo, formatKm, formatData, nomePessoa } from '../data/domain'
 
 export default function VeiculoDetalhePanel({ backTo, actions }) {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { veiculos, usuarios, registros } = useApp()
+  const { veiculos, motoristas, registros } = useApp()
+  const { getModeloCompleto, getSituacaoVeiculo, getStatusGeralVeiculo, getTipoManutencao } = useDominio()
 
   const veiculo = veiculos.find((v) => v.id === id)
   if (!veiculo) {
@@ -25,7 +26,7 @@ export default function VeiculoDetalhePanel({ backTo, actions }) {
   const mc = getModeloCompleto(veiculo.modeloId)
   const situacao = getSituacaoVeiculo(veiculo, registros)
   const historico = getHistoricoVeiculo(veiculo.id, registros)
-  const motorista = usuarios.find((u) => u.id === veiculo.motoristaId)
+  const motorista = motoristas.find((m) => m.id === veiculo.motoristaId)
   const status = getStatusGeralVeiculo(veiculo, registros)
 
   return (
@@ -58,7 +59,7 @@ export default function VeiculoDetalhePanel({ backTo, actions }) {
 
         <div className="mt-5 grid grid-cols-4 gap-4 border-t border-stone-100 pt-4">
           <Info label="Km atual" value={formatKm(veiculo.kmAtual)} />
-          <Info label="Motorista" value={motorista ? motorista.nome : 'Sem motorista'} />
+          <Info label="Motorista" value={motorista ? nomePessoa(motorista) : 'Sem motorista'} />
           <Info label="Ano fabr./modelo" value={`${veiculo.anoFabricacao} / ${veiculo.anoModelo}`} />
           <Info label="Manutenções" value={`${historico.length} registro${historico.length === 1 ? '' : 's'}`} />
         </div>
@@ -104,7 +105,7 @@ export default function VeiculoDetalhePanel({ backTo, actions }) {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-stone-800">
-                      {situacao.find((s) => s.tipoId === r.tipoId)?.tipo?.nome || r.tipoId}
+                      {getTipoManutencao(r.tipoId)?.nome || r.tipoId}
                       {r.isPrimeiraTroca && <span className="ml-2 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">1ª TROCA</span>}
                     </p>
                     <p className="text-xs text-stone-500">

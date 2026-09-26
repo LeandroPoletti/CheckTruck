@@ -1,168 +1,235 @@
-import { createContext, useContext, useMemo, useState, useCallback } from 'react'
+import { createContext, useContext, useMemo, useState, useCallback, useEffect, useRef } from 'react'
+import { lerSessao, salvarSessao, setOnNaoAutorizado } from '../services/api'
 import {
-  usuarios as usuariosSeed,
-  veiculosSeed,
-  registrosManutencaoSeed,
-  chamadosSeed,
-  fabricantes as fabricantesSeed,
-  geracoes as geracoesSeed,
-  modelos as modelosSeed,
-  tiposManutencao as tiposManutencaoSeed,
-  intervalos as intervalosSeed,
-} from '../data/mockData'
+  authService,
+  paisService,
+  fabricanteService,
+  geracaoModeloService,
+  modeloService,
+  tipoManutencaoService,
+  intervaloRecomendadoService,
+  veiculoService,
+  manutencaoService,
+  motoristaService,
+  tecnicoService,
+  usuarioService,
+  chamadoService,
+} from '../services'
+import { criarDominio } from '../data/domain'
 
 const AppContext = createContext(null)
 
-let nextId = 1000
-function uid(prefix) {
-  nextId += 1
-  return `${prefix}-${nextId}`
+// Coleções carregadas da API após o login
+const COLECOES = {
+  veiculos: () => veiculoService.listar(),
+  registros: () => manutencaoService.listar(),
+  fabricantes: () => fabricanteService.listar(),
+  geracoes: () => geracaoModeloService.listar(),
+  modelos: () => modeloService.listar(),
+  tiposManutencao: () => tipoManutencaoService.listar(),
+  intervalos: () => intervaloRecomendadoService.listar(),
+  paises: () => paisService.listar(),
+  motoristas: () => motoristaService.listar(),
+  tecnicos: () => tecnicoService.listar(),
+  chamados: () => chamadoService.listar(),
 }
 
-const SESSION_KEY = 'checktruck.session'
+const DADOS_VAZIOS = Object.fromEntries(Object.keys(COLECOES).map((k) => [k, []]))
 
 export function AppProvider({ children }) {
-  const [userId, setUserId] = useState(() => {
+  const [sessao, setSessao] = useState(lerSessao)
+  const user = sessao?.user || null
+
+  const [dados, setDados] = useState(DADOS_VAZIOS)
+  const [carregando, setCarregando] = useState(!!user)
+  const [erroCarga, setErroCarga] = useState(null)
+
+  const dadosRef = useRef(dados)
+  useEffect(() => { dadosRef.current = dados }, [dados])
+
+  const recarregar = useCallback(async (chaves = Object.keys(COLECOES)) => {
+    const resultados = await Promise.all(chaves.map((k) => COLECOES[k]()))
+    setDados((prev) => {
+      const next = { ...prev }
+      chaves.forEach((k, i) => { next[k] = resultados[i] })
+      return next
+    })
+  }, [])
+
+  const carregarTudo = useCallback(async () => {
+    setCarregando(true)
+    setErroCarga(null)
     try {
-      return localStorage.getItem(SESSION_KEY) || null
-    } catch {
-      return null
+      await recarregar()
+    } catch (e) {
+      setErroCarga(e.message)
+    } finally {
+      setCarregando(false)
     }
-  })
-
-  const [usuarios, setUsuarios] = useState(usuariosSeed)
-  const user = usuarios.find((u) => u.id === userId) || null
-  const [veiculos, setVeiculos] = useState(veiculosSeed)
-  const [registros, setRegistros] = useState(registrosManutencaoSeed)
-  const [chamados, setChamados] = useState(chamadosSeed)
-  const [fabricantes, setFabricantes] = useState(fabricantesSeed)
-  const [geracoes, setGeracoes] = useState(geracoesSeed)
-  const [modelos, setModelos] = useState(modelosSeed)
-  const [tiposManutencao, setTiposManutencao] = useState(tiposManutencaoSeed)
-  const [intervalos, setIntervalos] = useState(intervalosSeed)
-
-  const login = useCallback((email, senha) => {
-    const found = usuarios.find(
-      (u) => u.email.toLowerCase() === email.trim().toLowerCase() && u.senha === senha
-    )
-    if (!found) return { ok: false, error: 'E-mail ou senha inválidos.' }
-    if (!found.ativo) return { ok: false, error: 'Esta conta está inativa. Fale com o gerente.' }
-    setUserId(found.id)
-    try { localStorage.setItem(SESSION_KEY, found.id) } catch { /* noop */ }
-    return { ok: true, user: found }
-  }, [usuarios])
+  }, [recarregar])
 
   const logout = useCallback(() => {
-    setUserId(null)
-    try { localStorage.removeItem(SESSION_KEY) } catch { /* noop */ }
+    salvarSessao(null)
+    setSessao(null)
+    setDados(DADOS_VAZIOS)
   }, [])
 
-  const addVeiculo = useCallback((veiculo) => {
-    const novo = { id: uid('v'), ativo: true, ...veiculo }
-    setVeiculos((prev) => [novo, ...prev])
+  useEffect(() => {
+    setOnNaoAutorizado(logout)
+    return () => setOnNaoAutorizado(null)
+  }, [logout])
+
+  const userKey = user?.email
+  useEffect(() => {
+    if (userKey) carregarTudo()
+  }, [userKey, carregarTudo])
+
+  const login = useCallback(async (usuario, senha) => {
+    try {
+      const tokens = await authService.login(usuario, senha)
+      salvarSessao({ token: tokens.accessToken, refreshToken: tokens.refreshToken })
+
+      const info = await authService.obterInfo().catch(() => null)
+      const me = await usuarioService.obterMe()
+      if (me && me.ativo === false) {
+        salvarSessao(null)
+        return { ok: false, error: 'Esta conta está inativa. Fale com o gerente.' }
+      }
+
+      const novoUser = {
+        id: me?.id ?? null,
+        email: me?.email ?? info?.email ?? usuario.trim(),
+        nome: me?.nome ?? info?.email ?? usuario.trim(),
+        // TODO: API — sem GET /api/Usuario/me não há como saber o perfil do usuário;
+        // até lá todo login entra como gerente.
+        perfil: me?.perfil ?? 'gerente',
+        motoristaId: me?.motoristaId != null ? String(me.motoristaId) : null,
+        tecnicoId: me?.tecnicoId != null ? String(me.tecnicoId) : null,
+      }
+      const novaSessao = { token: tokens.accessToken, refreshToken: tokens.refreshToken, user: novoUser }
+      salvarSessao(novaSessao)
+      setCarregando(true)
+      setSessao(novaSessao)
+      return { ok: true, user: novoUser }
+    } catch (e) {
+      salvarSessao(null)
+      const error = e.status === 401 ? 'Usuário ou senha inválidos.' : e.message
+      return { ok: false, error }
+    }
+  }, [])
+
+  // -------------------------------------------------------------------------
+  // Veículos e manutenções
+  // -------------------------------------------------------------------------
+  const addVeiculo = useCallback(async (veiculo) => {
+    const novo = await veiculoService.criar({ ativo: true, ...veiculo })
+    await recarregar(['veiculos', 'motoristas'])
     return novo
-  }, [])
+  }, [recarregar])
 
-  const updateVeiculo = useCallback((id, patch) => {
-    setVeiculos((prev) => prev.map((v) => (v.id === id ? { ...v, ...patch } : v)))
-  }, [])
+  // PUT exige o DTO completo: mescla o patch com o veículo atual
+  const updateVeiculo = useCallback(async (id, patch) => {
+    const atual = dadosRef.current.veiculos.find((v) => v.id === id)
+    const atualizado = await veiculoService.atualizar(id, { ...atual, ...patch })
+    await recarregar(['veiculos', 'motoristas'])
+    return atualizado
+  }, [recarregar])
 
-  const addPessoa = useCallback((pessoa) => {
-    const novo = { id: uid('u'), ativo: true, ...pessoa }
-    setUsuarios((prev) => [novo, ...prev])
+  // A API recebe a distância percorrida (delta), não o km absoluto
+  const atualizarKm = useCallback(async (veiculo, novoKm) => {
+    const distancia = Number(novoKm) - veiculo.kmAtual
+    if (distancia > 0) await veiculoService.atualizarKm(veiculo.id, distancia)
+    await recarregar(['veiculos'])
+  }, [recarregar])
+
+  const addRegistroManutencao = useCallback(async (registro) => {
+    const novo = await manutencaoService.criar(registro)
+    // RN-05: km_na_troca maior que o km do veículo atualiza o km atual.
+    // O POST /api/Manutencao não faz isso, então chamamos /kilometragem em seguida.
+    const veiculo = dadosRef.current.veiculos.find((v) => v.id === registro.veiculoId)
+    if (veiculo && registro.kmNaTroca > veiculo.kmAtual) {
+      await veiculoService.atualizarKm(veiculo.id, registro.kmNaTroca - veiculo.kmAtual)
+    }
+    await recarregar(['registros', 'veiculos'])
     return novo
-  }, [])
+  }, [recarregar])
+
+  // -------------------------------------------------------------------------
+  // Catálogo e intervalos
+  // -------------------------------------------------------------------------
+  const criarEmColecao = useCallback((service, chave) => async (dados) => {
+    const novo = await service.criar(dados)
+    await recarregar([chave])
+    return novo
+  }, [recarregar])
+
+  const addFabricante = useMemo(() => criarEmColecao(fabricanteService, 'fabricantes'), [criarEmColecao])
+  const addGeracao = useMemo(() => criarEmColecao(geracaoModeloService, 'geracoes'), [criarEmColecao])
+  const addModelo = useMemo(() => criarEmColecao(modeloService, 'modelos'), [criarEmColecao])
+  const addTipoManutencao = useMemo(() => criarEmColecao(tipoManutencaoService, 'tiposManutencao'), [criarEmColecao])
+  const addIntervalo = useMemo(() => criarEmColecao(intervaloRecomendadoService, 'intervalos'), [criarEmColecao])
+
+  const updateIntervalo = useCallback(async (id, patch) => {
+    const atual = dadosRef.current.intervalos.find((i) => i.id === id)
+    const atualizado = await intervaloRecomendadoService.atualizar(id, { ...atual, ...patch })
+    await recarregar(['intervalos'])
+    return atualizado
+  }, [recarregar])
+
+  // -------------------------------------------------------------------------
+  // Pessoas e conta
+  // -------------------------------------------------------------------------
+  const addPessoa = useCallback(async (pessoa) => {
+    const nova = await usuarioService.criarPessoa(pessoa) // TODO: API — POST /api/Usuario
+    await recarregar(['motoristas', 'tecnicos', 'veiculos'])
+    return nova
+  }, [recarregar])
 
   const updatePessoa = useCallback((id, patch) => {
-    setUsuarios((prev) => prev.map((u) => (u.id === id ? { ...u, ...patch } : u)))
+    return usuarioService.atualizar(id, patch) // TODO: API — PUT /api/Usuario/{id}
   }, [])
 
-  const addRegistroManutencao = useCallback((registro) => {
-    const novo = { id: uid('m'), ...registro }
-    setRegistros((prev) => [novo, ...prev])
-    // km_na_troca consistente com veículo (RN-05): se maior, atualiza km_atual
-    setVeiculos((prev) =>
-      prev.map((v) =>
-        v.id === registro.veiculoId && registro.kmNaTroca > v.kmAtual
-          ? { ...v, kmAtual: registro.kmNaTroca }
-          : v
-      )
-    )
+  const alterarSenha = useCallback((senhaAtual, novaSenha) => {
+    return authService.alterarSenha(senhaAtual, novaSenha)
+  }, [])
+
+  // -------------------------------------------------------------------------
+  // Chamados (TODO: API — entidade Chamado ainda não existe)
+  // -------------------------------------------------------------------------
+  const abrirChamado = useCallback(async (chamado) => {
+    const novo = await chamadoService.criar(chamado)
+    await recarregar(['chamados'])
     return novo
-  }, [])
+  }, [recarregar])
 
-  const addIntervalo = useCallback((intervalo) => {
-    const novo = { ...intervalo }
-    setIntervalos((prev) => [novo, ...prev])
-    return novo
-  }, [])
+  const updateChamado = useCallback(async (id, patch) => {
+    const atualizado = await chamadoService.atualizar(id, patch)
+    await recarregar(['chamados'])
+    return atualizado
+  }, [recarregar])
 
-  const updateIntervalo = useCallback((modeloId, tipoId, patch) => {
-    setIntervalos((prev) =>
-      prev.map((it) => (it.modeloId === modeloId && it.tipoId === tipoId ? { ...it, ...patch } : it))
-    )
-  }, [])
-
-  const addTipoManutencao = useCallback((tipo) => {
-    const novo = { id: uid('tipo'), ...tipo }
-    setTiposManutencao((prev) => [...prev, novo])
-    return novo
-  }, [])
-
-  const addModelo = useCallback((modelo) => {
-    const novo = { id: uid('modelo'), ...modelo }
-    setModelos((prev) => [...prev, novo])
-    return novo
-  }, [])
-
-  const addGeracao = useCallback((geracao) => {
-    const novo = { id: uid('geracao'), ...geracao }
-    setGeracoes((prev) => [...prev, novo])
-    return novo
-  }, [])
-
-  const addFabricante = useCallback((fabricante) => {
-    const novo = { id: uid('fab'), ...fabricante }
-    setFabricantes((prev) => [...prev, novo])
-    return novo
-  }, [])
-
-  const abrirChamado = useCallback((chamado) => {
-    const novo = {
-      id: uid('c'),
-      status: 'aberto',
-      criadoEm: new Date().toISOString(),
-      ...chamado,
-    }
-    setChamados((prev) => [novo, ...prev])
-    return novo
-  }, [])
-
-  const updateChamado = useCallback((id, patch) => {
-    setChamados((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)))
-  }, [])
+  const pessoas = useMemo(() => [...dados.motoristas, ...dados.tecnicos], [dados.motoristas, dados.tecnicos])
 
   const value = useMemo(
     () => ({
       user,
       login,
       logout,
-      usuarios,
+      carregando,
+      erroCarga,
+      carregarTudo,
+      recarregar,
+      ...dados,
+      pessoas,
       addPessoa,
       updatePessoa,
-      veiculos,
+      alterarSenha,
       addVeiculo,
       updateVeiculo,
-      registros,
+      atualizarKm,
       addRegistroManutencao,
-      chamados,
       abrirChamado,
       updateChamado,
-      fabricantes,
-      geracoes,
-      modelos,
-      tiposManutencao,
-      intervalos,
       addIntervalo,
       updateIntervalo,
       addTipoManutencao,
@@ -171,12 +238,10 @@ export function AppProvider({ children }) {
       addFabricante,
     }),
     [
-      user, login, logout,
-      usuarios, addPessoa, updatePessoa,
-      veiculos, addVeiculo, updateVeiculo,
-      registros, addRegistroManutencao,
-      chamados, abrirChamado, updateChamado,
-      fabricantes, geracoes, modelos, tiposManutencao, intervalos,
+      user, login, logout, carregando, erroCarga, carregarTudo, recarregar,
+      dados, pessoas, addPessoa, updatePessoa, alterarSenha,
+      addVeiculo, updateVeiculo, atualizarKm, addRegistroManutencao,
+      abrirChamado, updateChamado,
       addIntervalo, updateIntervalo, addTipoManutencao, addModelo, addGeracao, addFabricante,
     ]
   )
@@ -188,4 +253,13 @@ export function useApp() {
   const ctx = useContext(AppContext)
   if (!ctx) throw new Error('useApp must be used within AppProvider')
   return ctx
+}
+
+// Regras de negócio ligadas ao catálogo carregado da API
+export function useDominio() {
+  const { fabricantes, geracoes, modelos, tiposManutencao, intervalos } = useApp()
+  return useMemo(
+    () => criarDominio({ fabricantes, geracoes, modelos, tiposManutencao, intervalos }),
+    [fabricantes, geracoes, modelos, tiposManutencao, intervalos]
+  )
 }
