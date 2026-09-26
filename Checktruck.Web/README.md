@@ -14,7 +14,7 @@ Os dados vêm da API `CheckTruck.Api` (.NET + OData + ASP.NET Identity).
    ```bash
    docker compose up -d db
    dotnet ef database update --project CheckTruck.Repositorio --startup-project CheckTruck.Api
-   dotnet run --project CheckTruck.Api --launch-profile http   # http://localhost:5202
+   dotnet run --project CheckTruck.Api --launch-profile https  # https://localhost:7013
    ```
 
 2. Rode o front:
@@ -26,17 +26,17 @@ Os dados vêm da API `CheckTruck.Api` (.NET + OData + ASP.NET Identity).
    npm run preview   # serve o build de produção
    ```
 
-A API não tem CORS configurado, então em desenvolvimento as chamadas passam pelo
-proxy do Vite: `/backend/*` → `http://localhost:5202/*` (ver `vite.config.js`).
+O front chama a API diretamente (sem proxy; a API libera a origem via CORS):
+os controllers em `/api/<Controller>` e o Identity em `/identity/*`. O certificado
+de desenvolvimento do ASP.NET precisa ser confiável no navegador (`dotnet dev-certs https --trust`).
 
-| Variável               | Uso                                                    | Padrão                  |
-|------------------------|--------------------------------------------------------|-------------------------|
-| `VITE_API_PROXY`       | Destino do proxy do Vite em dev                        | `http://localhost:5202` |
-| `VITE_API_BASE_URL`    | Base das requisições (ex.: URL da API em produção)     | `/backend`              |
+| Variável               | Uso                                                     | Padrão                   |
+|------------------------|---------------------------------------------------------|--------------------------|
+| `VITE_API_BASE_URL`    | URL base da API                                         | `https://localhost:7013` |
 
 ## Acesso
 
-O seed da API cria o usuário **`Admin` / `Admin@123`**. O `POST /login` do Identity
+O seed da API cria o usuário **`Admin` / `Admin@123`**. O `POST /identity/login` do Identity
 autentica pelo *UserName*, por isso o admin entra com `Admin` e não com o e-mail.
 O token Bearer fica salvo no `localStorage`.
 

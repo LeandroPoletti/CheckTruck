@@ -82,7 +82,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapIdentityApi<Usuario>();
+app.MapGroup("/identity").MapIdentityApi<Usuario>();
 
 using (var scope = app.Services.CreateScope())
 {
