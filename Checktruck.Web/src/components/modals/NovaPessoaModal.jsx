@@ -45,30 +45,34 @@ export default function NovaPessoaModal({ open, onClose, perfilInicial = 'motori
     setPasso(2)
   }
 
-  function handleFinalizar() {
+  async function handleFinalizar() {
     if (!cpf.trim()) {
       setError('Informe o CPF.')
       return
     }
-    const pessoa = addPessoa({
-      nome: nome.trim(),
-      email: email.trim(),
-      senha,
-      perfil,
-      cpf: cpf.trim(),
-      veiculoId: perfil === 'motorista' ? (veiculoId || null) : undefined,
-    })
-    if (perfil === 'motorista' && veiculoId) {
-      updateVeiculo(veiculoId, { motoristaId: pessoa.id })
+    try {
+      const pessoa = await addPessoa({
+        nome: nome.trim(),
+        email: email.trim(),
+        senha,
+        perfil,
+        cpf: cpf.trim(),
+        veiculoId: perfil === 'motorista' ? (veiculoId || null) : undefined,
+      })
+      if (perfil === 'motorista' && veiculoId) {
+        await updateVeiculo(veiculoId, { motoristaId: pessoa.id })
+      }
+      onClose()
+    } catch (e) {
+      setError(e.message)
     }
-    onClose()
   }
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      eyebrow="POST /register → POST /api/pessoas"
+      eyebrow="POST /api/Usuario (pendente na API)"
       title="Nova pessoa"
       subtitle="Conta de acesso e depois perfil + CPF"
       width="max-w-lg"

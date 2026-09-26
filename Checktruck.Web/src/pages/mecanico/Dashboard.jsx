@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
 import { Card, PageHeader } from '../../components/Layout'
 import { StatusBadge, PlacaBadge } from '../../components/ui/Badges'
-import { getStatusGeralVeiculo, getItemMaisUrgente, getModeloCompleto, formatKm } from '../../data/domain'
+import { formatKm } from '../../data/domain'
 
 export default function MecanicoDashboard() {
-  const { veiculos, registros, chamados, user } = useApp()
+  const { veiculos, registros, chamados, user, getStatusGeralVeiculo, getItemMaisUrgente, getModeloCompleto } = useApp()
   const navigate = useNavigate()
 
   const ativos = useMemo(() => veiculos.filter((v) => v.ativo), [veiculos])
@@ -15,14 +15,14 @@ export default function MecanicoDashboard() {
     const c = { ok: 0, atencao: 0, critico: 0 }
     ativos.forEach((v) => { c[getStatusGeralVeiculo(v, registros)] += 1 })
     return c
-  }, [ativos, registros])
+  }, [ativos, registros, getStatusGeralVeiculo])
 
   const prioridades = useMemo(() => {
     return ativos
       .map((v) => ({ veiculo: v, item: getItemMaisUrgente(v, registros) }))
       .filter((a) => a.item && a.item.status !== 'ok')
       .sort((a, b) => a.item.kmRestante - b.item.kmRestante)
-  }, [ativos, registros])
+  }, [ativos, registros, getItemMaisUrgente])
 
   const meusChamados = chamados.filter((c) => c.status !== 'resolvido')
 

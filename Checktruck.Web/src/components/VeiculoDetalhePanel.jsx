@@ -3,12 +3,12 @@ import { ChevronLeft } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { Card } from './Layout'
 import { StatusBadge, PlacaBadge } from './ui/Badges'
-import { getModeloCompleto, getSituacaoVeiculo, getHistoricoVeiculo, getStatusGeralVeiculo, formatKm, formatData } from '../data/domain'
+import { formatKm, formatData } from '../data/domain'
 
 export default function VeiculoDetalhePanel({ backTo, actions }) {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { veiculos, usuarios, registros } = useApp()
+  const { veiculos, motoristas, registros, getModeloCompleto, getSituacaoVeiculo, getHistoricoVeiculo, getStatusGeralVeiculo, getTipoManutencao } = useApp()
 
   const veiculo = veiculos.find((v) => v.id === id)
   if (!veiculo) {
@@ -25,7 +25,7 @@ export default function VeiculoDetalhePanel({ backTo, actions }) {
   const mc = getModeloCompleto(veiculo.modeloId)
   const situacao = getSituacaoVeiculo(veiculo, registros)
   const historico = getHistoricoVeiculo(veiculo.id, registros)
-  const motorista = usuarios.find((u) => u.id === veiculo.motoristaId)
+  const motorista = motoristas.find((u) => u.id === veiculo.motoristaId)
   const status = getStatusGeralVeiculo(veiculo, registros)
 
   return (
@@ -104,7 +104,7 @@ export default function VeiculoDetalhePanel({ backTo, actions }) {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-stone-800">
-                      {situacao.find((s) => s.tipoId === r.tipoId)?.tipo?.nome || r.tipoId}
+                      {getTipoManutencao(r.tipoId)?.nome || r.tipoId}
                       {r.isPrimeiraTroca && <span className="ml-2 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">1ª TROCA</span>}
                     </p>
                     <p className="text-xs text-stone-500">

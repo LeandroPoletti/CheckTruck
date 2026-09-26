@@ -1,11 +1,26 @@
 import Sidebar from './Sidebar'
+import { useApp } from '../context/AppContext'
+import { Button } from './ui/Form'
 
 export default function Layout({ children }) {
+  const { carregando, erro, recarregar } = useApp()
   return (
     <div className="flex h-screen bg-mist-50">
       <Sidebar />
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-6xl px-8 py-8">{children}</div>
+        <div className="mx-auto max-w-6xl px-8 py-8">
+          {erro && (
+            <div className="mb-6 flex items-center justify-between gap-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+              <span>{erro}</span>
+              <Button variant="secondary" size="sm" onClick={recarregar}>Tentar novamente</Button>
+            </div>
+          )}
+          {carregando ? (
+            <p className="py-20 text-center text-sm text-stone-400">Carregando dados da API…</p>
+          ) : (
+            children
+          )}
+        </div>
       </main>
     </div>
   )

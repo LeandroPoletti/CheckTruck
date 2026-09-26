@@ -1,28 +1,43 @@
-import { fabricantes, geracoes, modelos, tiposManutencao, intervalos, alertaMargemKm } from './mockData'
+// Regras de domínio do CheckTruck. As funções recebem o catálogo carregado da API
+// ({ fabricantes, geracoes, modelos, tiposManutencao, intervalos }); o AppContext
+// expõe versões já ligadas ao catálogo atual.
 
-export function getModelo(modeloId) {
-  return modelos.find((m) => m.id === modeloId)
-}
-export function getGeracao(geracaoId) {
-  return geracoes.find((g) => g.id === geracaoId)
-}
-export function getFabricante(fabricanteId) {
-  return fabricantes.find((f) => f.id === fabricanteId)
-}
-export function getTipoManutencao(tipoId) {
-  return tiposManutencao.find((t) => t.id === tipoId)
+export const alertaMargemKm = 5000
+export const alertaMargemDias = 30
+
+// enum CheckTruck.Dominio.Enums.Componente
+export const COMPONENTES = {
+  1: 'Motor',
+  2: 'Câmbio',
+  3: 'Diferencial 1',
+  4: 'Diferencial 2',
+  5: 'Filtro',
+  6: 'Embreagem',
 }
 
-export function getModeloCompleto(modeloId) {
-  const modelo = getModelo(modeloId)
+export function getModelo(catalogo, modeloId) {
+  return catalogo.modelos.find((m) => m.id === modeloId)
+}
+export function getGeracao(catalogo, geracaoId) {
+  return catalogo.geracoes.find((g) => g.id === geracaoId)
+}
+export function getFabricante(catalogo, fabricanteId) {
+  return catalogo.fabricantes.find((f) => f.id === fabricanteId)
+}
+export function getTipoManutencao(catalogo, tipoId) {
+  return catalogo.tiposManutencao.find((t) => t.id === tipoId)
+}
+
+export function getModeloCompleto(catalogo, modeloId) {
+  const modelo = getModelo(catalogo, modeloId)
   if (!modelo) return null
-  const geracao = getGeracao(modelo.geracaoId)
-  const fabricante = geracao ? getFabricante(geracao.fabricanteId) : null
+  const geracao = getGeracao(catalogo, modelo.geracaoId)
+  const fabricante = geracao ? getFabricante(catalogo, geracao.fabricanteId) : null
   return { modelo, geracao, fabricante }
 }
 
-export function getIntervalosDoModelo(modeloId) {
-  return intervalos.filter((i) => i.modeloId === modeloId)
+export function getIntervalosDoModelo(catalogo, modeloId) {
+  return catalogo.intervalos.filter((i) => i.modeloId === modeloId)
 }
 
 export function getUltimoRegistro(veiculoId, tipoId, registros) {
@@ -45,8 +60,8 @@ export function statusPorKmRestante(kmRestante) {
   return 'ok'
 }
 
-export function getSituacaoVeiculo(veiculo, registros) {
-  const intervalosDoModelo = getIntervalosDoModelo(veiculo.modeloId)
+export function getSituacaoVeiculo(catalogo, veiculo, registros) {
+  const intervalosDoModelo = getIntervalosDoModelo(catalogo, veiculo.modeloId)
   return intervalosDoModelo.map((intervalo) => {
     const ultimo = getUltimoRegistro(veiculo.id, intervalo.tipoId, registros)
     let kmProximaTroca
@@ -74,7 +89,7 @@ export function getSituacaoVeiculo(veiculo, registros) {
     const kmRestante = kmProximaTroca - veiculo.kmAtual
     return {
       tipoId: intervalo.tipoId,
-      tipo: getTipoManutencao(intervalo.tipoId),
+      tipo: getTipoManutencao(catalogo, intervalo.tipoId),
       kmProximaTroca,
       kmRestante,
       isPrimeira,
@@ -85,16 +100,16 @@ export function getSituacaoVeiculo(veiculo, registros) {
   }).sort((a, b) => a.kmRestante - b.kmRestante)
 }
 
-export function getStatusGeralVeiculo(veiculo, registros) {
-  const situacao = getSituacaoVeiculo(veiculo, registros)
+export function getStatusGeralVeiculo(catalogo, veiculo, registros) {
+  const situacao = getSituacaoVeiculo(catalogo, veiculo, registros)
   if (situacao.some((s) => s.status === 'critico')) return 'critico'
   if (situacao.some((s) => s.status === 'atencao')) return 'atencao'
   return 'ok'
 }
 
 // item mais urgente do veículo — usado nos cards e nos alertas do dashboard
-export function getItemMaisUrgente(veiculo, registros) {
-  const situacao = getSituacaoVeiculo(veiculo, registros)
+export function getItemMaisUrgente(catalogo, veiculo, registros) {
+  const situacao = getSituacaoVeiculo(catalogo, veiculo, registros)
   return situacao[0] || null
 }
 

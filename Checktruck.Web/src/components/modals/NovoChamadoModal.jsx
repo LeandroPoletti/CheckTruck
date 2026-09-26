@@ -32,26 +32,30 @@ export default function NovoChamadoModal({ open, onClose, veiculo }) {
     }
   }, [open, veiculo])
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!descricao.trim()) {
       setError('Descreva o que está acontecendo.')
       return
     }
-    abrirChamado({
-      veiculoId: veiculo?.id || veiculoId || null,
-      abertoPorId: user.id,
-      tipo,
-      urgencia,
-      descricao: descricao.trim(),
-    })
-    onClose()
+    try {
+      await abrirChamado({
+        veiculoId: veiculo?.id || veiculoId || null,
+        abertoPorId: user.id,
+        tipo,
+        urgencia,
+        descricao: descricao.trim(),
+      })
+      onClose()
+    } catch (e) {
+      setError(e.message)
+    }
   }
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      eyebrow="POST /api/chamados"
+      eyebrow="POST /api/Chamado (pendente na API)"
       title="Abrir chamado"
       subtitle={veiculo ? `Veículo ${veiculo.placa}` : 'Selecione o motivo do chamado'}
       width="max-w-lg"

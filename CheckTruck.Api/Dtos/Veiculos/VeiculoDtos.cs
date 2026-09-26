@@ -21,8 +21,7 @@ public class VeiculoRequestDto
     public int KmAtual { get; set; }
     public bool Ativo { get; set; }
 
-    [Required]
-    public long MotoristaId { get; set; }
+    public long? MotoristaId { get; set; }
 }
 
 public class VeiculoResponseDto
@@ -55,7 +54,7 @@ public static class VeiculoDtoExtensions
         Motorista = entidade.Motorista?.ToResumoDto()
     };
 
-    public static Veiculo ToEntity(this VeiculoRequestDto dto, Modelo modelo, Motorista motorista) => new()
+    public static Veiculo ToEntity(this VeiculoRequestDto dto, Modelo modelo, Motorista? motorista) => new()
     {
         Placa = dto.Placa,
         Modelo = modelo,

@@ -4,14 +4,12 @@ import { useApp } from '../../context/AppContext'
 import { Card, PageHeader } from '../../components/Layout'
 import { StatusBadge, PlacaBadge } from '../../components/ui/Badges'
 import { Button } from '../../components/ui/Form'
-import {
-  getStatusGeralVeiculo, getItemMaisUrgente, getModeloCompleto, formatKm,
-} from '../../data/domain'
+import { formatKm } from '../../data/domain'
 import NovoVeiculoModal from '../../components/modals/NovoVeiculoModal'
 import NovaPessoaModal from '../../components/modals/NovaPessoaModal'
 
 export default function GerenteDashboard() {
-  const { veiculos, registros, geracoes } = useApp()
+  const { veiculos, registros, geracoes, getStatusGeralVeiculo, getItemMaisUrgente, getModeloCompleto } = useApp()
   const navigate = useNavigate()
   const [novoVeiculoOpen, setNovoVeiculoOpen] = useState(false)
   const [novaPessoaOpen, setNovaPessoaOpen] = useState(null) // 'motorista' | 'tecnico' | null
@@ -22,7 +20,7 @@ export default function GerenteDashboard() {
     const c = { ok: 0, atencao: 0, critico: 0 }
     ativos.forEach((v) => { c[getStatusGeralVeiculo(v, registros)] += 1 })
     return c
-  }, [ativos, registros])
+  }, [ativos, registros, getStatusGeralVeiculo])
 
   const alertas = useMemo(() => {
     return ativos
@@ -30,7 +28,7 @@ export default function GerenteDashboard() {
       .filter((a) => a.item && a.item.status !== 'ok')
       .sort((a, b) => a.item.kmRestante - b.item.kmRestante)
       .slice(0, 5)
-  }, [ativos, registros])
+  }, [ativos, registros, getItemMaisUrgente])
 
   const frotaPorGeracao = useMemo(() => {
     const total = ativos.length || 1
@@ -43,7 +41,7 @@ export default function GerenteDashboard() {
         return { geracao: g, qtd, pct: (qtd / total) * 100 }
       })
       .filter((g) => g.qtd > 0)
-  }, [ativos, geracoes])
+  }, [ativos, geracoes, getModeloCompleto])
 
   return (
     <>

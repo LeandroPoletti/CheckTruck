@@ -3,10 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
 import { Field, Input, Button } from '../../components/ui/Form'
 
+// Conta criada pelo seed da API (Program.cs).
 const DEMO = [
-  { perfil: 'Gerente', email: 'admin@admin.com', senha: 'admin123' },
-  { perfil: 'Mecânico', email: 'wesley.martins@checktruck.com.br', senha: '123456' },
-  { perfil: 'Motorista', email: 'joao.pereira@transp.com.br', senha: '123456' },
+  { perfil: 'Administrador', email: 'admin@admin.com', senha: 'Admin@123' },
 ]
 
 const HOME_BY_ROLE = {
@@ -19,12 +18,15 @@ export default function Login() {
   const { login } = useApp()
   const navigate = useNavigate()
   const [email, setEmail] = useState('admin@admin.com')
-  const [senha, setSenha] = useState('admin123')
+  const [senha, setSenha] = useState('Admin@123')
   const [error, setError] = useState('')
+  const [entrando, setEntrando] = useState(false)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    const result = login(email, senha)
+    setEntrando(true)
+    const result = await login(email, senha)
+    setEntrando(false)
     if (!result.ok) {
       setError(result.error)
       return
@@ -75,13 +77,13 @@ export default function Login() {
               <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
             )}
 
-            <Button type="submit" className="w-full justify-center" size="lg">
-              Entrar
+            <Button type="submit" className="w-full justify-center" size="lg" disabled={entrando}>
+              {entrando ? 'Entrando…' : 'Entrar'}
             </Button>
           </form>
 
           <p className="mt-5 text-center text-xs text-stone-400">
-            Bearer Token · <span className="font-mono-label">POST /login</span>
+            Bearer Token · <span className="font-mono-label">POST /identity/login</span>
           </p>
         </div>
 

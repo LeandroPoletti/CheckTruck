@@ -3,12 +3,12 @@ import { useApp } from '../../context/AppContext'
 import { PageHeader, Card, EmptyState } from '../../components/Layout'
 import { StatusBadge, PlacaBadge } from '../../components/ui/Badges'
 import { Button } from '../../components/ui/Form'
-import { getModeloCompleto, getSituacaoVeiculo, getStatusGeralVeiculo, formatKm } from '../../data/domain'
+import { formatKm } from '../../data/domain'
 import AtualizarKmModal from '../../components/modals/AtualizarKmModal'
 import NovoChamadoModal from '../../components/modals/NovoChamadoModal'
 
 export default function MotoristaInicio() {
-  const { user, veiculos, registros } = useApp()
+  const { user, veiculos, registros, getModeloCompleto, getSituacaoVeiculo, getStatusGeralVeiculo } = useApp()
   const [kmOpen, setKmOpen] = useState(false)
   const [chamadoOpen, setChamadoOpen] = useState(false)
 

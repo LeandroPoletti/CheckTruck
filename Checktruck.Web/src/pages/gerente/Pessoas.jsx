@@ -16,6 +16,7 @@ export default function Pessoas() {
   const { usuarios, veiculos, updateVeiculo } = useApp()
   const [tab, setTab] = useState('motorista')
   const [novoOpen, setNovoOpen] = useState(false)
+  const [erroVinculo, setErroVinculo] = useState('')
 
   const contagens = {
     motorista: usuarios.filter((u) => u.perfil === 'motorista' && u.ativo).length,
@@ -29,6 +30,15 @@ export default function Pessoas() {
   }, [usuarios, tab])
 
   const veiculosLivres = veiculos.filter((v) => v.ativo && !v.motoristaId)
+
+  async function vincular(veiculoId, motoristaId) {
+    setErroVinculo('')
+    try {
+      await updateVeiculo(veiculoId, { motoristaId })
+    } catch (e) {
+      setErroVinculo(e.message)
+    }
+  }
 
   return (
     <>
@@ -56,11 +66,13 @@ export default function Pessoas() {
         ))}
       </div>
 
+      {erroVinculo && <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erroVinculo}</p>}
+
       <div className="grid grid-cols-3 gap-4">
         {listaFiltrada.map((p) => {
-          const veiculo = veiculos.find((v) => v.motoristaId === p.id)
+          const veiculo = p.perfil === 'motorista' ? veiculos.find((v) => v.motoristaId === p.id) : null
           return (
-            <Card key={p.id} className="p-4">
+            <Card key={p.key} className="p-4">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="font-semibold text-stone-900">{p.nome}</p>
@@ -92,7 +104,7 @@ export default function Pessoas() {
                   ) : (
                     <VincularSelect
                       veiculosLivres={veiculosLivres}
-                      onVincular={(veiculoId) => updateVeiculo(veiculoId, { motoristaId: p.id })}
+                      onVincular={(veiculoId) => vincular(veiculoId, p.id)}
                     />
                   )}
                 </div>

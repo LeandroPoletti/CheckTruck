@@ -33,10 +33,14 @@ public class VeiculoController(
             return BadRequest("Modelo não encontrado.");
         }
 
-        var motorista = servicoMotorista.GetById(dto.MotoristaId);
-        if (motorista is null)
+        Motorista? motorista = null;
+        if (dto.MotoristaId.HasValue)
         {
-            return BadRequest("Motorista não encontrado.");
+            motorista = servicoMotorista.GetById(dto.MotoristaId.Value);
+            if (motorista is null)
+            {
+                return BadRequest("Motorista não encontrado.");
+            }
         }
 
         return PostCore(dto.ToEntity(modelo, motorista));
@@ -51,10 +55,14 @@ public class VeiculoController(
             return BadRequest("Modelo não encontrado.");
         }
 
-        var motorista = servicoMotorista.GetById(dto.MotoristaId);
-        if (motorista is null)
+        Motorista? motorista = null;
+        if (dto.MotoristaId.HasValue)
         {
-            return BadRequest("Motorista não encontrado.");
+            motorista = servicoMotorista.GetById(dto.MotoristaId.Value);
+            if (motorista is null)
+            {
+                return BadRequest("Motorista não encontrado.");
+            }
         }
 
         return PutCore(id, dto.ToEntity(modelo, motorista));

@@ -9,7 +9,7 @@ public class Manutencao : EntidadeBanco
     public Veiculo Veiculo { get; set; }
     public TipoManutencao TipoManutencao { get; set; }
     public Tecnico Tecnico { get; set; } = null!;
-    public DateTime RealizadoEm { get; set; } = DateTime.Now;
+    public DateTime RealizadoEm { get; set; } = DateTime.UtcNow;
     public DateTime? DataProximaTroca { get; set; }
     public int KmAtual { get; set; }
     public int KmProximaTroca { get; set; }
@@ -19,6 +19,6 @@ public class Manutencao : EntidadeBanco
     public string Observacao { get; set; }
     [Required]
     public string Concessionaria { get; set; }
-    public DateTime CriadoEm { get; set; } = DateTime.Now;
+    public DateTime CriadoEm { get; set; } = DateTime.UtcNow;
     public DateTime? AtualizadoEm { get; set; }
 }

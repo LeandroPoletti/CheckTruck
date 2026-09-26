@@ -11,12 +11,19 @@ export default function MotoristaPerfil() {
   const [nome, setNome] = useState(user.nome)
   const [novaSenha, setNovaSenha] = useState('')
   const [salvo, setSalvo] = useState(false)
+  const [erro, setErro] = useState('')
 
-  function handleSalvar(e) {
+  async function handleSalvar(e) {
     e.preventDefault()
     const patch = { nome: nome.trim() }
     if (novaSenha) patch.senha = novaSenha
-    updatePessoa(user.id, patch)
+    setErro('')
+    try {
+      await updatePessoa(user.id, patch)
+    } catch (err) {
+      setErro(err.message)
+      return
+    }
     setNovaSenha('')
     setSalvo(true)
     setTimeout(() => setSalvo(false), 2500)
@@ -43,6 +50,7 @@ export default function MotoristaPerfil() {
               <Input type="password" value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} placeholder="••••••••" />
             </Field>
             {salvo && <p className="text-sm font-medium text-brand-700">Perfil atualizado.</p>}
+            {erro && <p className="text-sm text-red-600">{erro}</p>}
             <Button type="submit">Salvar alterações</Button>
           </form>
         </Card>

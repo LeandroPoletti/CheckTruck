@@ -10,14 +10,14 @@ public class ServicoVeiculo(IRepositorioCrud repositorioCrud, ILogger<ServicoVei
     {
         if (entidade.Id != 0)
         {
-            var oldValue = GetById(entidade.Id);
+            // Projeção evita rastrear a entidade antiga (conflito de tracking no Update)
+            var kmAnterior = Query(v => v.Id == entidade.Id).Select(v => (int?)v.KmAtual).FirstOrDefault();
 
-            if (oldValue is null)
+            if (kmAnterior is null)
             {
                 Mensagens.Add("Veículo não encontrado para atualização.");
             }
-
-            if (oldValue.KmAtual > entidade.KmAtual)
+            else if (kmAnterior > entidade.KmAtual)
             {
                 Mensagens.Add("A quilometragem atual não pode ser menor que a quilometragem anterior.");
             }
