@@ -61,6 +61,8 @@ builder.Services.AddDbContext<Context>(options =>
 builder.Services.AddScoped<IRepositorioCrud, RepositorioCrud>();
 builder.Services.AddScoped(typeof(ServicoCrud<>));
 builder.Services.AddScoped<ServicoVeiculo>();
+builder.Services.AddScoped<ServicoSituacaoVeiculo>();
+builder.Services.AddScoped<ServicoDashboard>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy => policy.AllowAnyMethod().AllowAnyOrigin().AllowAnyHeader());

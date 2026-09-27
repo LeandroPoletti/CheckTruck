@@ -1,38 +1,67 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useApp } from '../../context/AppContext'
-import { PageHeader, Card } from '../../components/Layout'
+import { PageHeader, Card, Carregando, ErroCarregamento } from '../../components/Layout'
 import { StatusBadge, PlacaBadge } from '../../components/ui/Badges'
 import { Button, Select, Input } from '../../components/ui/Form'
 import { Search, Plus } from 'lucide-react'
 import { formatKm } from '../../data/domain'
 import NovoVeiculoModal from '../../components/modals/NovoVeiculoModal'
+import { veiculoService } from '../../services'
 
 export default function Veiculos() {
-  const { veiculos, motoristas, registros, geracoes, getModeloCompleto, getStatusGeralVeiculo, getItemMaisUrgente } = useApp()
   const navigate = useNavigate()
+  const [veiculos, setVeiculos] = useState([])
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState(null)
+  const [versao, setVersao] = useState(0)
   const [busca, setBusca] = useState('')
   const [geracaoFiltro, setGeracaoFiltro] = useState('todas')
   const [statusFiltro, setStatusFiltro] = useState('ativos')
   const [novoOpen, setNovoOpen] = useState(false)
 
+  // Uma request: a API devolve cada veículo com modelo, geração, motorista e situação já calculada
+  useEffect(() => {
+    let cancelado = false
+    veiculoService.listarSituacao()
+      .then((lista) => { if (!cancelado) setVeiculos(lista) })
+      .catch((e) => { if (!cancelado) setErro(e.message) })
+      .finally(() => { if (!cancelado) setCarregando(false) })
+    return () => { cancelado = true }
+  }, [versao])
+
+  // Após salvar: atualiza em segundo plano, sem desmontar a tela (e os modais abertos)
+  function recarregar() {
+    setErro(null)
+    setVersao((v) => v + 1)
+  }
+
+  function tentarNovamente() {
+    setCarregando(true)
+    recarregar()
+  }
+
   const ativos = veiculos.filter((v) => v.ativo).length
-  const inativos = veiculos.filter((v) => !v.ativo).length
+  const inativos = veiculos.length - ativos
+
+  // Opções do filtro: só as gerações que têm veículos
+  const geracoes = useMemo(() => {
+    const porId = new Map(veiculos.map((v) => [v.geracaoId, v.geracaoNome]))
+    return [...porId].map(([id, nome]) => ({ id, nome })).sort((a, b) => a.nome.localeCompare(b.nome))
+  }, [veiculos])
 
   const filtrados = useMemo(() => {
+    const termo = busca.trim().toLowerCase()
     return veiculos.filter((v) => {
       if (statusFiltro === 'ativos' && !v.ativo) return false
       if (statusFiltro === 'inativos' && v.ativo) return false
-      const mc = getModeloCompleto(v.modeloId)
-      if (geracaoFiltro !== 'todas' && mc?.geracao?.id !== geracaoFiltro) return false
-      if (busca.trim()) {
-        const motorista = motoristas.find((u) => u.id === v.motoristaId)
-        const alvo = `${v.placa} ${v.chassi || ''} ${motorista?.nome || ''}`.toLowerCase()
-        if (!alvo.includes(busca.trim().toLowerCase())) return false
-      }
+      if (geracaoFiltro !== 'todas' && v.geracaoId !== geracaoFiltro) return false
+      if (termo && !`${v.placa} ${v.chassi || ''} ${v.motoristaCpf || ''}`.toLowerCase().includes(termo)) return false
       return true
     })
-  }, [veiculos, motoristas, busca, geracaoFiltro, statusFiltro, getModeloCompleto])
+  }, [veiculos, busca, geracaoFiltro, statusFiltro])
+
+  if (carregando) return <Carregando />
+  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
 
   return (
     <>
@@ -52,7 +81,7 @@ export default function Veiculos() {
           <Input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar por placa, chassi ou motorista"
+            placeholder="Buscar por placa, chassi ou CPF do motorista"
             className="pl-9"
           />
         </div>
@@ -71,10 +100,7 @@ export default function Veiculos() {
 
       <div className="grid grid-cols-3 gap-4">
         {filtrados.map((v) => {
-          const mc = getModeloCompleto(v.modeloId)
-          const status = getStatusGeralVeiculo(v, registros)
-          const item = getItemMaisUrgente(v, registros)
-          const motorista = motoristas.find((u) => u.id === v.motoristaId)
+          const { status, itemMaisUrgente: item } = v
           const pct = item ? Math.max(2, Math.min(100, (v.kmAtual / item.kmProximaTroca) * 100)) : 0
           const barColor = status === 'critico' ? 'bg-red-500' : status === 'atencao' ? 'bg-amber-500' : 'bg-brand-600'
 
@@ -89,9 +115,9 @@ export default function Veiculos() {
                 <PlacaBadge placa={v.placa} />
                 <StatusBadge status={v.ativo ? status : 'ok'} />
               </div>
-              <p className="mt-2.5 font-semibold text-stone-900">{mc?.modelo?.nome} · {mc?.modelo?.potenciaCv} cv</p>
+              <p className="mt-2.5 font-semibold text-stone-900">{v.modeloNome} · {v.potenciaCv} cv</p>
               <p className="text-xs text-stone-500">
-                {mc?.geracao?.nome} · {v.anoFabricacao}/{v.anoModelo} · 6×4
+                {v.geracaoNome} · {v.anoFabricacao}/{v.anoModelo} · 6×4
               </p>
 
               <div className="mt-3 flex items-center justify-between text-sm">
@@ -103,7 +129,7 @@ export default function Veiculos() {
               </div>
 
               <div className="mt-4 flex items-center justify-between border-t border-stone-100 pt-3 text-sm">
-                <span className="text-stone-600">{motorista ? motorista.nome : 'Sem motorista'}</span>
+                <span className="text-stone-600">{v.motoristaCpf ?? 'Sem motorista'}</span>
                 <button
                   onClick={() => navigate(`/gerente/veiculos/${v.id}`)}
                   className="font-semibold text-brand-700 hover:text-brand-900"
@@ -125,7 +151,7 @@ export default function Veiculos() {
         </button>
       </div>
 
-      <NovoVeiculoModal open={novoOpen} onClose={() => setNovoOpen(false)} />
+      <NovoVeiculoModal open={novoOpen} onClose={() => setNovoOpen(false)} onSalvo={recarregar} />
     </>
   )
 }

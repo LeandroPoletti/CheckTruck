@@ -11,6 +11,7 @@ namespace CheckTruck.Api.Controllers;
 public class FabricanteController(
     ServicoCrud<Fabricante> servicoCrud,
     ServicoCrud<Pais> servicoPais,
+    ServicoCrud<GeracaoModelo> servicoGeracao,
     ILogger<Fabricante> logger)
     : CrudController<Fabricante, FabricanteResponseDto>(
         servicoCrud, "fabricante", logger,
@@ -48,5 +49,14 @@ public class FabricanteController(
     }
 
     [HttpDelete("{id:long}")]
-    public IActionResult Delete(long id) => DeleteCore(id);
+    public IActionResult Delete(long id)
+    {
+        var geracoes = servicoGeracao.Query(g => g.Fabricante.Id == id).Count();
+        if (geracoes > 0)
+        {
+            return BadRequest($"Não é possível excluir: o fabricante possui {geracoes} geração(ões) cadastrada(s).");
+        }
+
+        return DeleteCore(id);
+    }
 }

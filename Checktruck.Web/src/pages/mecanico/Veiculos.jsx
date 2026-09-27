@@ -1,35 +1,52 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
-import { useApp } from '../../context/AppContext'
-import { PageHeader, Card } from '../../components/Layout'
+import { PageHeader, Card, Carregando, ErroCarregamento } from '../../components/Layout'
 import { StatusBadge, PlacaBadge } from '../../components/ui/Badges'
 import { Input, Select } from '../../components/ui/Form'
 import { formatKm } from '../../data/domain'
+import { veiculoService } from '../../services'
 
 export default function MecanicoVeiculos() {
-  const { veiculos, motoristas, registros, geracoes, getModeloCompleto, getStatusGeralVeiculo, getItemMaisUrgente } = useApp()
   const navigate = useNavigate()
+  const [veiculos, setVeiculos] = useState([])
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState(null)
+  const [versao, setVersao] = useState(0)
   const [busca, setBusca] = useState('')
   const [statusFiltro, setStatusFiltro] = useState('todos')
 
-  const ativos = veiculos.filter((v) => v.ativo)
+  // Uma request: só veículos ativos, com modelo, geração, motorista e situação já calculada pela API
+  useEffect(() => {
+    let cancelado = false
+    veiculoService.listarSituacao({ apenasAtivos: true })
+      .then((lista) => { if (!cancelado) setVeiculos(lista) })
+      .catch((e) => { if (!cancelado) setErro(e.message) })
+      .finally(() => { if (!cancelado) setCarregando(false) })
+    return () => { cancelado = true }
+  }, [versao])
+
+  function tentarNovamente() {
+    setCarregando(true)
+    setErro(null)
+    setVersao((v) => v + 1)
+  }
 
   const filtrados = useMemo(() => {
-    return ativos.filter((v) => {
-      if (statusFiltro !== 'todos' && getStatusGeralVeiculo(v, registros) !== statusFiltro) return false
-      if (busca.trim()) {
-        const motorista = motoristas.find((u) => u.id === v.motoristaId)
-        const alvo = `${v.placa} ${v.chassi || ''} ${motorista?.nome || ''}`.toLowerCase()
-        if (!alvo.includes(busca.trim().toLowerCase())) return false
-      }
+    const termo = busca.trim().toLowerCase()
+    return veiculos.filter((v) => {
+      if (statusFiltro !== 'todos' && v.status !== statusFiltro) return false
+      if (termo && !`${v.placa} ${v.chassi || ''} ${v.motoristaCpf || ''}`.toLowerCase().includes(termo)) return false
       return true
     })
-  }, [ativos, motoristas, registros, busca, statusFiltro, getStatusGeralVeiculo])
+  }, [veiculos, busca, statusFiltro])
+
+  if (carregando) return <Carregando />
+  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
 
   return (
     <>
-      <PageHeader title="Veículos" subtitle={`${ativos.length} veículos na frota`} />
+      <PageHeader title="Veículos" subtitle={`${veiculos.length} veículos na frota`} />
 
       <div className="mb-5 flex gap-3">
         <div className="relative flex-1">
@@ -37,7 +54,7 @@ export default function MecanicoVeiculos() {
           <Input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar por placa, chassi ou motorista"
+            placeholder="Buscar por placa, chassi ou CPF do motorista"
             className="pl-9"
           />
         </div>
@@ -51,10 +68,7 @@ export default function MecanicoVeiculos() {
 
       <div className="grid grid-cols-3 gap-4">
         {filtrados.map((v) => {
-          const mc = getModeloCompleto(v.modeloId)
-          const status = getStatusGeralVeiculo(v, registros)
-          const item = getItemMaisUrgente(v, registros)
-          const motorista = motoristas.find((u) => u.id === v.motoristaId)
+          const { status, itemMaisUrgente: item } = v
           const pct = item ? Math.max(2, Math.min(100, (v.kmAtual / item.kmProximaTroca) * 100)) : 0
           const barColor = status === 'critico' ? 'bg-red-500' : status === 'atencao' ? 'bg-amber-500' : 'bg-brand-600'
 
@@ -69,8 +83,8 @@ export default function MecanicoVeiculos() {
                   <PlacaBadge placa={v.placa} />
                   <StatusBadge status={status} />
                 </div>
-                <p className="mt-2.5 font-semibold text-stone-900">{mc?.modelo?.nome} · {mc?.modelo?.potenciaCv} cv</p>
-                <p className="text-xs text-stone-500">{mc?.geracao?.nome} · {v.anoFabricacao}/{v.anoModelo}</p>
+                <p className="mt-2.5 font-semibold text-stone-900">{v.modeloNome} · {v.potenciaCv} cv</p>
+                <p className="text-xs text-stone-500">{v.geracaoNome} · {v.anoFabricacao}/{v.anoModelo}</p>
 
                 <div className="mt-3 flex items-center justify-between text-sm">
                   <span className="font-semibold text-stone-800">{formatKm(v.kmAtual)}</span>
@@ -81,7 +95,7 @@ export default function MecanicoVeiculos() {
                 </div>
 
                 <div className="mt-4 border-t border-stone-100 pt-3 text-sm text-stone-600">
-                  {motorista ? motorista.nome : 'Sem motorista'}
+                  {v.motoristaCpf ?? 'Sem motorista'}
                 </div>
               </Card>
             </button>

@@ -28,11 +28,6 @@ export function salvarSessao(sessao) {
   } catch { /* noop */ }
 }
 
-let onNaoAutorizado = null
-export function setOnNaoAutorizado(fn) {
-  onNaoAutorizado = fn
-}
-
 // ---------------------------------------------------------------------------
 // Interceptors
 // ---------------------------------------------------------------------------
@@ -62,7 +57,12 @@ api.interceptors.response.use(
       return Promise.reject(new Error('Não foi possível conectar à API. Verifique se a CheckTruck.Api está rodando.'))
     }
     const { status, data } = error.response
-    if (status === 401 && onNaoAutorizado) onNaoAutorizado()
+    // Token expirado/inválido: encerra a sessão e volta para o login
+    // (sem sessão, o 401 é do próprio login e a tela trata a mensagem).
+    if (status === 401 && lerSessao()) {
+      salvarSessao(null)
+      window.location.assign('/login')
+    }
     const err = new Error(extrairMensagem(data, status))
     err.status = status
     return Promise.reject(err)

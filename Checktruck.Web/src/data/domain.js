@@ -1,6 +1,5 @@
-// Regras de domínio do CheckTruck. As funções recebem o catálogo carregado da API
-// ({ fabricantes, geracoes, modelos, tiposManutencao, intervalos }); o AppContext
-// expõe versões já ligadas ao catálogo atual.
+// Regras de domínio do CheckTruck. As funções recebem o catálogo que cada página
+// carregou da API ({ fabricantes, geracoes, modelos, tiposManutencao, intervalos }).
 
 export const alertaMargemKm = 5000
 export const alertaMargemDias = 30

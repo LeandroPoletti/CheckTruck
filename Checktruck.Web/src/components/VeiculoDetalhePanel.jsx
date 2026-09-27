@@ -1,32 +1,33 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
-import { useApp } from '../context/AppContext'
 import { Card } from './Layout'
 import { StatusBadge, PlacaBadge } from './ui/Badges'
-import { formatKm, formatData } from '../data/domain'
+import {
+  formatKm, formatData, getModeloCompleto, getSituacaoVeiculo, getHistoricoVeiculo,
+  getStatusGeralVeiculo, getTipoManutencao,
+} from '../data/domain'
 
-export default function VeiculoDetalhePanel({ backTo, actions }) {
-  const { id } = useParams()
+export function VeiculoNaoEncontrado({ backTo }) {
   const navigate = useNavigate()
-  const { veiculos, motoristas, registros, getModeloCompleto, getSituacaoVeiculo, getHistoricoVeiculo, getStatusGeralVeiculo, getTipoManutencao } = useApp()
+  return (
+    <div>
+      <button onClick={() => navigate(backTo)} className="mb-4 flex items-center gap-1 text-sm text-brand-700">
+        <ChevronLeft size={16} /> Voltar
+      </button>
+      <p className="text-stone-500">Veículo não encontrado.</p>
+    </div>
+  )
+}
 
-  const veiculo = veiculos.find((v) => v.id === id)
-  if (!veiculo) {
-    return (
-      <div>
-        <button onClick={() => navigate(backTo)} className="mb-4 flex items-center gap-1 text-sm text-brand-700">
-          <ChevronLeft size={16} /> Voltar
-        </button>
-        <p className="text-stone-500">Veículo não encontrado.</p>
-      </div>
-    )
-  }
+// Apresentacional: a página de detalhe carrega os dados e passa por props.
+// catalogo = { fabricantes, geracoes, modelos, tiposManutencao, intervalos } do veículo.
+export default function VeiculoDetalhePanel({ veiculo, catalogo, registros, motorista, backTo, actions }) {
+  const navigate = useNavigate()
 
-  const mc = getModeloCompleto(veiculo.modeloId)
-  const situacao = getSituacaoVeiculo(veiculo, registros)
+  const mc = getModeloCompleto(catalogo, veiculo.modeloId)
+  const situacao = getSituacaoVeiculo(catalogo, veiculo, registros)
   const historico = getHistoricoVeiculo(veiculo.id, registros)
-  const motorista = motoristas.find((u) => u.id === veiculo.motoristaId)
-  const status = getStatusGeralVeiculo(veiculo, registros)
+  const status = getStatusGeralVeiculo(catalogo, veiculo, registros)
 
   return (
     <>
@@ -104,7 +105,7 @@ export default function VeiculoDetalhePanel({ backTo, actions }) {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-stone-800">
-                      {getTipoManutencao(r.tipoId)?.nome || r.tipoId}
+                      {getTipoManutencao(catalogo, r.tipoId)?.nome || r.tipoId}
                       {r.isPrimeiraTroca && <span className="ml-2 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">1ª TROCA</span>}
                     </p>
                     <p className="text-xs text-stone-500">

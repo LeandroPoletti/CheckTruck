@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useApp } from '../../context/AppContext'
+import { veiculoService } from '../../services'
 import { Modal } from '../ui/Overlay'
 import { Field, Input, Button } from '../ui/Form'
 import { formatKm } from '../../data/domain'
 
-export default function AtualizarKmModal({ open, onClose, veiculo }) {
-  const { atualizarKm } = useApp()
+export default function AtualizarKmModal({ open, onClose, veiculo, onSalvo }) {
   const [km, setKm] = useState('')
   const [error, setError] = useState('')
   const [salvando, setSalvando] = useState(false)
@@ -27,7 +26,9 @@ export default function AtualizarKmModal({ open, onClose, veiculo }) {
     }
     setSalvando(true)
     try {
-      await atualizarKm(veiculo.id, valor)
+      // A API recebe a distância percorrida, não o km absoluto
+      await veiculoService.somarKm(veiculo.id, valor - veiculo.kmAtual)
+      onSalvo?.(valor)
       onClose()
     } catch (e) {
       setError(e.message)

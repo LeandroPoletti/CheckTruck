@@ -11,6 +11,7 @@ namespace CheckTruck.Api.Controllers;
 public class GeracaoModeloController(
     ServicoCrud<GeracaoModelo> servicoCrud,
     ServicoCrud<Fabricante> servicoFabricante,
+    ServicoCrud<Modelo> servicoModelo,
     ILogger<GeracaoModelo> logger)
     : CrudController<GeracaoModelo, GeracaoModeloResponseDto>(
         servicoCrud, "geração de modelo", logger,
@@ -48,5 +49,14 @@ public class GeracaoModeloController(
     }
 
     [HttpDelete("{id:long}")]
-    public IActionResult Delete(long id) => DeleteCore(id);
+    public IActionResult Delete(long id)
+    {
+        var modelos = servicoModelo.Query(m => m.Geracao.Id == id).Count();
+        if (modelos > 0)
+        {
+            return BadRequest($"Não é possível excluir: a geração possui {modelos} modelo(s) cadastrado(s).");
+        }
+
+        return DeleteCore(id);
+    }
 }

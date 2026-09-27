@@ -1,59 +1,61 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useApp } from '../../context/AppContext'
-import { Card, PageHeader } from '../../components/Layout'
+import { Card, PageHeader, Carregando, ErroCarregamento } from '../../components/Layout'
 import { StatusBadge, PlacaBadge } from '../../components/ui/Badges'
 import { Button } from '../../components/ui/Form'
 import { formatKm } from '../../data/domain'
+import { dashboardService } from '../../services'
 import NovoVeiculoModal from '../../components/modals/NovoVeiculoModal'
 import NovaPessoaModal from '../../components/modals/NovaPessoaModal'
 
+const LIMITE_ALERTAS = 5
+
 export default function GerenteDashboard() {
-  const { veiculos, registros, geracoes, getStatusGeralVeiculo, getItemMaisUrgente, getModeloCompleto } = useApp()
   const navigate = useNavigate()
+  const [dados, setDados] = useState(null)
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState(null)
+  const [versao, setVersao] = useState(0)
   const [novoVeiculoOpen, setNovoVeiculoOpen] = useState(false)
   const [novaPessoaOpen, setNovaPessoaOpen] = useState(null) // 'motorista' | 'tecnico' | null
 
-  const ativos = useMemo(() => veiculos.filter((v) => v.ativo), [veiculos])
+  // A API já devolve a situação da frota calculada: contagens, alertas e frota por geração
+  useEffect(() => {
+    let cancelado = false
+    dashboardService.obter(LIMITE_ALERTAS)
+      .then((d) => { if (!cancelado) setDados(d) })
+      .catch((e) => { if (!cancelado) setErro(e.message) })
+      .finally(() => { if (!cancelado) setCarregando(false) })
+    return () => { cancelado = true }
+  }, [versao])
 
-  const contagem = useMemo(() => {
-    const c = { ok: 0, atencao: 0, critico: 0 }
-    ativos.forEach((v) => { c[getStatusGeralVeiculo(v, registros)] += 1 })
-    return c
-  }, [ativos, registros, getStatusGeralVeiculo])
+  // Após salvar: atualiza em segundo plano, sem desmontar a tela (e os modais abertos)
+  function recarregar() {
+    setErro(null)
+    setVersao((v) => v + 1)
+  }
 
-  const alertas = useMemo(() => {
-    return ativos
-      .map((v) => ({ veiculo: v, item: getItemMaisUrgente(v, registros) }))
-      .filter((a) => a.item && a.item.status !== 'ok')
-      .sort((a, b) => a.item.kmRestante - b.item.kmRestante)
-      .slice(0, 5)
-  }, [ativos, registros, getItemMaisUrgente])
+  function tentarNovamente() {
+    setCarregando(true)
+    recarregar()
+  }
 
-  const frotaPorGeracao = useMemo(() => {
-    const total = ativos.length || 1
-    return geracoes
-      .map((g) => {
-        const qtd = ativos.filter((v) => {
-          const mc = getModeloCompleto(v.modeloId)
-          return mc?.geracao?.id === g.id
-        }).length
-        return { geracao: g, qtd, pct: (qtd / total) * 100 }
-      })
-      .filter((g) => g.qtd > 0)
-  }, [ativos, geracoes, getModeloCompleto])
+  if (carregando) return <Carregando />
+  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
+
+  const { frotaAtiva, contagem, alertas, frotaPorGeracao, margemAlertaKm } = dados
 
   return (
     <>
       <PageHeader
         title="Dashboard"
-        subtitle={`${ativos.length} veículos ativos · atualizado agora`}
+        subtitle={`${frotaAtiva} veículos ativos · atualizado agora`}
       />
 
       <div className="grid grid-cols-4 gap-4">
         <Card className="px-5 py-4">
           <p className="text-xs font-semibold tracking-wide text-stone-400">FROTA ATIVA</p>
-          <p className="mt-1 text-3xl font-bold text-stone-900">{ativos.length}</p>
+          <p className="mt-1 text-3xl font-bold text-stone-900">{frotaAtiva}</p>
         </Card>
         <Card className="px-5 py-4">
           <p className="text-xs font-semibold tracking-wide text-stone-400">OK</p>
@@ -76,40 +78,39 @@ export default function GerenteDashboard() {
             <p className="py-8 text-center text-sm text-stone-400">Nenhum alerta ativo. Frota em dia.</p>
           ) : (
             <div className="space-y-4">
-              {alertas.map(({ veiculo, item }) => {
-                const mc = getModeloCompleto(veiculo.modeloId)
-                const pct = Math.max(0, Math.min(100, (veiculo.kmAtual / item.kmProximaTroca) * 100))
+              {alertas.map((alerta) => {
+                const pct = Math.max(0, Math.min(100, (alerta.kmAtual / alerta.kmProximaTroca) * 100))
                 return (
                   <button
-                    key={veiculo.id + item.tipoId}
-                    onClick={() => navigate(`/gerente/veiculos/${veiculo.id}`)}
+                    key={alerta.veiculoId + alerta.tipoId}
+                    onClick={() => navigate(`/gerente/veiculos/${alerta.veiculoId}`)}
                     className="block w-full text-left"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <PlacaBadge placa={veiculo.placa} size="sm" />
+                        <PlacaBadge placa={alerta.placa} size="sm" />
                         <span className="text-sm text-stone-500">
-                          {mc?.modelo?.nome} · {mc?.geracao?.nome}
+                          {alerta.modeloNome} · {alerta.geracaoNome}
                         </span>
                       </div>
-                      <StatusBadge status={item.status} />
+                      <StatusBadge status={alerta.status} />
                     </div>
                     <div className="mt-2 flex items-center justify-between text-sm">
-                      <span className="font-medium text-stone-800">{item.tipo?.nome}</span>
+                      <span className="font-medium text-stone-800">{alerta.tipoNome}</span>
                       <span className="text-stone-500">
-                        {formatKm(veiculo.kmAtual)} / {formatKm(item.kmProximaTroca)}
+                        {formatKm(alerta.kmAtual)} / {formatKm(alerta.kmProximaTroca)}
                       </span>
                     </div>
                     <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-stone-100">
                       <div
-                        className={`h-full rounded-full ${item.status === 'critico' ? 'bg-red-500' : 'bg-amber-500'}`}
+                        className={`h-full rounded-full ${alerta.status === 'critico' ? 'bg-red-500' : 'bg-amber-500'}`}
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <p className={`mt-1 text-xs ${item.status === 'critico' ? 'text-red-600' : 'text-amber-600'}`}>
-                      {item.kmRestante <= 0
-                        ? `Vencido há ${formatKm(Math.abs(item.kmRestante))}`
-                        : `Faltam ${formatKm(item.kmRestante)} · dentro da margem de 5.000 km`}
+                    <p className={`mt-1 text-xs ${alerta.status === 'critico' ? 'text-red-600' : 'text-amber-600'}`}>
+                      {alerta.kmRestante <= 0
+                        ? `Vencido há ${formatKm(Math.abs(alerta.kmRestante))}`
+                        : `Faltam ${formatKm(alerta.kmRestante)} · dentro da margem de ${formatKm(margemAlertaKm)}`}
                     </p>
                   </button>
                 )
@@ -137,14 +138,14 @@ export default function GerenteDashboard() {
           <Card className="p-5">
             <h3 className="mb-4 font-semibold text-stone-900">Frota por geração</h3>
             <div className="space-y-3">
-              {frotaPorGeracao.map(({ geracao, qtd, pct }) => (
-                <div key={geracao.id}>
+              {frotaPorGeracao.map((g) => (
+                <div key={g.geracaoId}>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-stone-700">{geracao.nome}</span>
-                    <span className="font-semibold text-stone-900">{qtd}</span>
+                    <span className="text-stone-700">{g.geracaoNome}</span>
+                    <span className="font-semibold text-stone-900">{g.quantidade}</span>
                   </div>
                   <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-stone-100">
-                    <div className="h-full rounded-full bg-brand-600" style={{ width: `${pct}%` }} />
+                    <div className="h-full rounded-full bg-brand-600" style={{ width: `${(g.quantidade / (frotaAtiva || 1)) * 100}%` }} />
                   </div>
                 </div>
               ))}
@@ -153,11 +154,12 @@ export default function GerenteDashboard() {
         </div>
       </div>
 
-      <NovoVeiculoModal open={novoVeiculoOpen} onClose={() => setNovoVeiculoOpen(false)} />
+      <NovoVeiculoModal open={novoVeiculoOpen} onClose={() => setNovoVeiculoOpen(false)} onSalvo={recarregar} />
       <NovaPessoaModal
         open={!!novaPessoaOpen}
         perfilInicial={novaPessoaOpen === 'tecnico' ? 'mecanico' : 'motorista'}
         onClose={() => setNovaPessoaOpen(null)}
+        onSalvo={recarregar}
       />
     </>
   )

@@ -570,7 +570,7 @@ namespace CheckTruck.Repositorio.Migrations
                     b.HasOne("CheckTruck.Dominio.Entidades.Pais", "PaisOrigem")
                         .WithMany("Fabricantes")
                         .HasForeignKey("PaisOrigemId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("PaisOrigem");
@@ -581,7 +581,7 @@ namespace CheckTruck.Repositorio.Migrations
                     b.HasOne("CheckTruck.Dominio.Entidades.Fabricante", "Fabricante")
                         .WithMany("Geracoes")
                         .HasForeignKey("FabricanteId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Fabricante");
@@ -592,7 +592,7 @@ namespace CheckTruck.Repositorio.Migrations
                     b.HasOne("CheckTruck.Dominio.Entidades.Modelo", "Modelo")
                         .WithMany("IntervaloRecomendados")
                         .HasForeignKey("ModeloId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("CheckTruck.Dominio.Entidades.TipoManutencao", "TipoManutencao")
@@ -638,7 +638,7 @@ namespace CheckTruck.Repositorio.Migrations
                     b.HasOne("CheckTruck.Dominio.Entidades.GeracaoModelo", "Geracao")
                         .WithMany("Modelos")
                         .HasForeignKey("GeracaoId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Geracao");
@@ -667,7 +667,7 @@ namespace CheckTruck.Repositorio.Migrations
                     b.HasOne("CheckTruck.Dominio.Entidades.Modelo", "Modelo")
                         .WithMany("Veiculos")
                         .HasForeignKey("ModeloId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("CheckTruck.Dominio.Entidades.Motorista", "Motorista")

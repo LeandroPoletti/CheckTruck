@@ -1,20 +1,57 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
-import { useApp } from '../../context/AppContext'
-import { PageHeader, Card, EmptyState } from '../../components/Layout'
+import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../../components/Layout'
 import { ChamadoStatusBadge, UrgenciaBadge, PlacaBadge } from '../../components/ui/Badges'
 import { Button } from '../../components/ui/Form'
 import { formatDataHora } from '../../data/domain'
 import NovoChamadoModal from '../../components/modals/NovoChamadoModal'
+import { chamadoService, veiculoService, filtro } from '../../services'
+import { obterUsuario } from '../../services/sessao'
 
 export default function MotoristaChamados() {
-  const { user, chamados, veiculos } = useApp()
+  const user = obterUsuario()
   const [novoOpen, setNovoOpen] = useState(false)
+  const [chamados, setChamados] = useState([])
+  const [veiculo, setVeiculo] = useState(null)
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState(null)
+  const [versao, setVersao] = useState(0)
 
-  const veiculo = veiculos.find((v) => v.motoristaId === user.id && v.ativo)
+  // Chamados + o veículo ativo do motorista logado ($filter=Motorista/Id eq X)
+  useEffect(() => {
+    let cancelado = false
+    // sem GET /api/Usuario/me o front não conhece o motoristaId do usuário logado
+    const buscaVeiculo = user?.motoristaId
+      ? veiculoService.listar(filtro.porId('Motorista', user.motoristaId))
+      : Promise.resolve([])
+    Promise.all([chamadoService.listar(), buscaVeiculo])
+      .then(([lista, [v]]) => {
+        if (cancelado) return
+        setChamados(lista)
+        setVeiculo(v?.ativo ? v : null)
+      })
+      .catch((e) => { if (!cancelado) setErro(e.message) })
+      .finally(() => { if (!cancelado) setCarregando(false) })
+    return () => { cancelado = true }
+  }, [user?.motoristaId, versao])
+
+  // Após salvar: atualiza em segundo plano, sem desmontar a tela (e os modais abertos)
+  function recarregar() {
+    setErro(null)
+    setVersao((v) => v + 1)
+  }
+
+  function tentarNovamente() {
+    setCarregando(true)
+    recarregar()
+  }
+
   const meus = chamados
     .filter((c) => c.abertoPorId === user.id)
     .sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm))
+
+  if (carregando) return <Carregando />
+  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
 
   return (
     <>
@@ -58,7 +95,7 @@ export default function MotoristaChamados() {
         </div>
       )}
 
-      <NovoChamadoModal open={novoOpen} onClose={() => setNovoOpen(false)} veiculo={veiculo} />
+      <NovoChamadoModal open={novoOpen} onClose={() => setNovoOpen(false)} veiculo={veiculo} onSalvo={recarregar} />
     </>
   )
 }

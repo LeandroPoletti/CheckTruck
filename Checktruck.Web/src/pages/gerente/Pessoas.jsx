@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
-import { useApp } from '../../context/AppContext'
-import { PageHeader, Card } from '../../components/Layout'
+import { PageHeader, Card, Carregando, ErroCarregamento } from '../../components/Layout'
 import { Button, Select } from '../../components/ui/Form'
 import { PlacaBadge } from '../../components/ui/Badges'
 import NovaPessoaModal from '../../components/modals/NovaPessoaModal'
+import { motoristaService, tecnicoService, veiculoService, filtro } from '../../services'
 
 const TABS = [
   { id: 'motorista', label: 'Motoristas' },
@@ -12,11 +12,45 @@ const TABS = [
   { id: 'inativos', label: 'Inativos' },
 ]
 
+const VAZIO = { motoristas: [], tecnicos: [], veiculosLivres: [] }
+
 export default function Pessoas() {
-  const { usuarios, veiculos, updateVeiculo } = useApp()
   const [tab, setTab] = useState('motorista')
   const [novoOpen, setNovoOpen] = useState(false)
   const [erroVinculo, setErroVinculo] = useState('')
+  const [dados, setDados] = useState(VAZIO)
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState(null)
+  const [versao, setVersao] = useState(0)
+
+  useEffect(() => {
+    let cancelado = false
+    Promise.all([
+      motoristaService.listar(),
+      tecnicoService.listar(),
+      veiculoService.listar(filtro.semVinculo('Motorista')),
+    ])
+      .then(([motoristas, tecnicos, semMotorista]) => {
+        if (!cancelado) setDados({ motoristas, tecnicos, veiculosLivres: semMotorista.filter((v) => v.ativo) })
+      })
+      .catch((e) => { if (!cancelado) setErro(e.message) })
+      .finally(() => { if (!cancelado) setCarregando(false) })
+    return () => { cancelado = true }
+  }, [versao])
+
+  // Após salvar: atualiza em segundo plano, sem desmontar a tela (e os modais abertos)
+  function recarregar() {
+    setErro(null)
+    setVersao((v) => v + 1)
+  }
+
+  function tentarNovamente() {
+    setCarregando(true)
+    recarregar()
+  }
+
+  const { veiculosLivres } = dados
+  const usuarios = useMemo(() => [...dados.motoristas, ...dados.tecnicos], [dados])
 
   const contagens = {
     motorista: usuarios.filter((u) => u.perfil === 'motorista' && u.ativo).length,
@@ -29,16 +63,20 @@ export default function Pessoas() {
     return usuarios.filter((u) => u.perfil === tab && u.ativo)
   }, [usuarios, tab])
 
-  const veiculosLivres = veiculos.filter((v) => v.ativo && !v.motoristaId)
-
   async function vincular(veiculoId, motoristaId) {
     setErroVinculo('')
     try {
-      await updateVeiculo(veiculoId, { motoristaId })
+      // a API exige o veículo completo no PUT
+      const veiculo = veiculosLivres.find((v) => v.id === veiculoId)
+      await veiculoService.atualizar(veiculoId, { ...veiculo, motoristaId })
+      recarregar()
     } catch (e) {
       setErroVinculo(e.message)
     }
   }
+
+  if (carregando) return <Carregando />
+  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
 
   return (
     <>
@@ -70,7 +108,7 @@ export default function Pessoas() {
 
       <div className="grid grid-cols-3 gap-4">
         {listaFiltrada.map((p) => {
-          const veiculo = p.perfil === 'motorista' ? veiculos.find((v) => v.motoristaId === p.id) : null
+          const veiculo = p.veiculoId ? { id: p.veiculoId, placa: p.veiculoPlaca } : null
           return (
             <Card key={p.key} className="p-4">
               <div className="flex items-start justify-between">
@@ -127,6 +165,7 @@ export default function Pessoas() {
         open={novoOpen}
         perfilInicial={tab === 'mecanico' ? 'mecanico' : 'motorista'}
         onClose={() => setNovoOpen(false)}
+        onSalvo={recarregar}
       />
     </>
   )

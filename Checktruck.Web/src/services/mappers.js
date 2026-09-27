@@ -25,6 +25,7 @@ export const geracaoFromApi = (dto) => {
     id: toId(dto.id),
     nome: dto.nome,
     fabricanteId: toId(dto.fabricante?.id),
+    fabricanteNome: dto.fabricante?.nome ?? null,
     motor: dto.motor,
     cambio: dto.caixa,
     norma: dto.normaEmissao,
@@ -47,6 +48,7 @@ export const modeloFromApi = (dto) => ({
   id: toId(dto.id),
   nome: dto.nome,
   geracaoId: toId(dto.geracao?.id),
+  geracaoNome: dto.geracao?.nome ?? null,
   potenciaCv: dto.potenciaCavalo,
   eixoDianteiroPneus: dto.eixoDianteiroPneus,
   eixoTraseiroTandem: dto.eixoTraseiroTandem,
@@ -109,6 +111,33 @@ export const veiculoFromApi = (dto) => ({
   ativo: dto.ativo,
   motoristaId: toId(dto.motorista?.id),
 })
+// Veículo com modelo/geração/motorista e situação de manutenção (GET /api/Veiculo/situacao)
+export const veiculoSituacaoFromApi = (dto) => ({
+  id: toId(dto.id),
+  placa: dto.placa,
+  chassi: dto.chassi,
+  kmAtual: dto.kmAtual,
+  ativo: dto.ativo,
+  anoFabricacao: anoDaApi(dto.anoFabricacao),
+  anoModelo: anoDaApi(dto.anoModelo),
+  modeloId: toId(dto.modelo.id),
+  modeloNome: dto.modelo.nome,
+  potenciaCv: dto.modelo.potenciaCavalo,
+  geracaoId: toId(dto.geracao.id),
+  geracaoNome: dto.geracao.nome,
+  motoristaId: toId(dto.motorista?.id),
+  motoristaCpf: dto.motorista?.cpf ?? null,
+  status: dto.status, // 'ok' | 'atencao' | 'critico'
+  itemMaisUrgente: dto.itemMaisUrgente && {
+    tipoId: toId(dto.itemMaisUrgente.tipoManutencaoId),
+    tipoNome: dto.itemMaisUrgente.tipoManutencaoNome,
+    kmProximaTroca: dto.itemMaisUrgente.kmProximaTroca,
+    kmRestante: dto.itemMaisUrgente.kmRestante,
+    isPrimeiraTroca: dto.itemMaisUrgente.isPrimeiraTroca,
+    status: dto.itemMaisUrgente.status,
+  },
+})
+
 export const veiculoToApi = (v) => ({
   placa: v.placa,
   modeloId: toApiId(v.modeloId),
@@ -150,6 +179,33 @@ export const registroToApi = (r) => ({
 })
 
 // ---------------------------------------------------------------------------
+// Dashboard — situação da frota já calculada pela API (GET /api/Dashboard)
+// ---------------------------------------------------------------------------
+export const dashboardFromApi = (dto) => ({
+  frotaAtiva: dto.frotaAtiva,
+  margemAlertaKm: dto.margemAlertaKm,
+  contagem: dto.contagem, // { ok, atencao, critico }
+  alertas: dto.alertas.map((a) => ({
+    veiculoId: toId(a.veiculoId),
+    placa: a.placa,
+    kmAtual: a.kmAtual,
+    modeloNome: a.modeloNome,
+    geracaoNome: a.geracaoNome,
+    tipoId: toId(a.tipoManutencaoId),
+    tipoNome: a.tipoManutencaoNome,
+    kmProximaTroca: a.kmProximaTroca,
+    kmRestante: a.kmRestante,
+    isPrimeiraTroca: a.isPrimeiraTroca,
+    status: a.status, // 'ok' | 'atencao' | 'critico'
+  })),
+  frotaPorGeracao: dto.frotaPorGeracao.map((g) => ({
+    geracaoId: toId(g.geracaoId),
+    geracaoNome: g.geracaoNome,
+    quantidade: g.quantidade,
+  })),
+})
+
+// ---------------------------------------------------------------------------
 // Pessoas — Motorista e Tecnico só têm usuarioGuid + cpf na API.
 // Nome, e-mail e status virão de GET /api/Usuario (pendente); até lá o CPF identifica a pessoa.
 // ---------------------------------------------------------------------------
@@ -161,6 +217,8 @@ function pessoaFromApi(perfil, dto) {
     perfil,
     usuarioGuid: dto.usuarioGuid,
     cpf: dto.cpf,
+    veiculoId: toId(dto.veiculo?.id),
+    veiculoPlaca: dto.veiculo?.placa ?? null,
     nome: dto.cpf,
     email: null,
     ativo: true,

@@ -10,5 +10,7 @@ public class FabricanteConfiguration : IEntityTypeConfiguration<Fabricante>
     {
         builder.HasKey(f => f.Id);
         builder.Property(f => f.Nome).IsRequired().HasMaxLength(100);
+        builder.HasOne(f => f.PaisOrigem).WithMany(p => p.Fabricantes)
+            .IsRequired().OnDelete(DeleteBehavior.Restrict);
     }
 }

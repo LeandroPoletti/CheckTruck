@@ -1,34 +1,46 @@
-import { useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useApp } from '../../context/AppContext'
-import { Card, PageHeader } from '../../components/Layout'
+import { Card, PageHeader, Carregando, ErroCarregamento } from '../../components/Layout'
 import { StatusBadge, PlacaBadge } from '../../components/ui/Badges'
 import { formatKm } from '../../data/domain'
+import { dashboardService, chamadoService } from '../../services'
+import { obterUsuario } from '../../services/sessao'
 
 export default function MecanicoDashboard() {
-  const { veiculos, registros, chamados, user, getStatusGeralVeiculo, getItemMaisUrgente, getModeloCompleto } = useApp()
+  const user = obterUsuario()
   const navigate = useNavigate()
+  const [dados, setDados] = useState(null)
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState(null)
+  const [versao, setVersao] = useState(0)
 
-  const ativos = useMemo(() => veiculos.filter((v) => v.ativo), [veiculos])
+  // Situação da frota calculada pela API (todas as prioridades, sem limite) + chamados
+  useEffect(() => {
+    let cancelado = false
+    Promise.all([dashboardService.obter(), chamadoService.listar()])
+      .then(([situacao, chamados]) => {
+        if (!cancelado) setDados({ ...situacao, chamados })
+      })
+      .catch((e) => { if (!cancelado) setErro(e.message) })
+      .finally(() => { if (!cancelado) setCarregando(false) })
+    return () => { cancelado = true }
+  }, [versao])
 
-  const contagem = useMemo(() => {
-    const c = { ok: 0, atencao: 0, critico: 0 }
-    ativos.forEach((v) => { c[getStatusGeralVeiculo(v, registros)] += 1 })
-    return c
-  }, [ativos, registros, getStatusGeralVeiculo])
+  function tentarNovamente() {
+    setCarregando(true)
+    setErro(null)
+    setVersao((v) => v + 1)
+  }
 
-  const prioridades = useMemo(() => {
-    return ativos
-      .map((v) => ({ veiculo: v, item: getItemMaisUrgente(v, registros) }))
-      .filter((a) => a.item && a.item.status !== 'ok')
-      .sort((a, b) => a.item.kmRestante - b.item.kmRestante)
-  }, [ativos, registros, getItemMaisUrgente])
+  if (carregando) return <Carregando />
+  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
 
+  const { frotaAtiva, contagem, alertas: prioridades, chamados } = dados
   const meusChamados = chamados.filter((c) => c.status !== 'resolvido')
 
   return (
     <>
-      <PageHeader title="Dashboard" subtitle={`Olá, ${user.nome.split(' ')[0]} · ${ativos.length} veículos na frota`} />
+      <PageHeader title="Dashboard" subtitle={`Olá, ${user.nome.split(' ')[0]} · ${frotaAtiva} veículos na frota`} />
 
       <div className="grid grid-cols-3 gap-4">
         <Card className="px-5 py-4">
@@ -52,19 +64,18 @@ export default function MecanicoDashboard() {
             <p className="py-8 text-center text-sm text-stone-400">Nenhum veículo com manutenção pendente.</p>
           ) : (
             <div className="space-y-4">
-              {prioridades.map(({ veiculo, item }) => {
-                const mc = getModeloCompleto(veiculo.modeloId)
+              {prioridades.map((item) => {
                 return (
                   <button
-                    key={veiculo.id}
-                    onClick={() => navigate(`/mecanico/veiculos/${veiculo.id}`)}
+                    key={item.veiculoId}
+                    onClick={() => navigate(`/mecanico/veiculos/${item.veiculoId}`)}
                     className="flex w-full items-center justify-between rounded-lg border border-stone-100 px-3 py-3 text-left hover:border-brand-200 hover:bg-brand-50/40"
                   >
                     <div className="flex items-center gap-3">
-                      <PlacaBadge placa={veiculo.placa} size="sm" />
+                      <PlacaBadge placa={item.placa} size="sm" />
                       <div>
-                        <p className="text-sm font-semibold text-stone-800">{item.tipo?.nome}</p>
-                        <p className="text-xs text-stone-500">{mc?.modelo?.nome} · {mc?.geracao?.nome}</p>
+                        <p className="text-sm font-semibold text-stone-800">{item.tipoNome}</p>
+                        <p className="text-xs text-stone-500">{item.modeloNome} · {item.geracaoNome}</p>
                       </div>
                     </div>
                     <div className="text-right">

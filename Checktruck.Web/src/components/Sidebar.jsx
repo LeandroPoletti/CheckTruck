@@ -1,9 +1,10 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Truck, Users, LibraryBig, Clock, LogOut,
   Wrench, ClipboardList, UserCircle, MessageSquareWarning,
+  Globe, Factory, Layers, Boxes,
 } from 'lucide-react'
-import { useApp } from '../context/AppContext'
+import { obterUsuario, sair } from '../services/sessao'
 
 const NAV = {
   gerente: [
@@ -13,6 +14,11 @@ const NAV = {
     { to: '/gerente/catalogo', label: 'Catálogo', icon: LibraryBig },
     { to: '/gerente/intervalos', label: 'Intervalos', icon: Clock },
     { to: '/gerente/chamados', label: 'Chamados', icon: MessageSquareWarning },
+    { grupo: 'CADASTROS' },
+    { to: '/gerente/paises', label: 'Países', icon: Globe },
+    { to: '/gerente/fabricantes', label: 'Fabricantes', icon: Factory },
+    { to: '/gerente/geracoes', label: 'Gerações', icon: Layers },
+    { to: '/gerente/modelos', label: 'Modelos', icon: Boxes },
   ],
   mecanico: [
     { to: '/mecanico/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -29,7 +35,13 @@ const NAV = {
 const ROLE_LABEL = { gerente: 'GERENTE', mecanico: 'MECÂNICO', motorista: 'MOTORISTA' }
 
 export default function Sidebar() {
-  const { user, logout } = useApp()
+  const user = obterUsuario()
+  const navigate = useNavigate()
+
+  function logout() {
+    sair()
+    navigate('/login', { replace: true })
+  }
   const items = NAV[user.perfil] || []
 
   return (
@@ -45,7 +57,11 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 space-y-0.5 px-3">
-        {items.map(({ to, label, icon: Icon }) => (
+        {items.map(({ to, label, icon: Icon, grupo }) => grupo ? (
+          <p key={grupo} className="px-3 pt-4 pb-1 text-[10px] font-semibold tracking-widest text-brand-300">
+            {grupo}
+          </p>
+        ) : (
           <NavLink
             key={to}
             to={to}

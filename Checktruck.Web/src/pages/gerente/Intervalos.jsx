@@ -1,26 +1,69 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
-import { useApp } from '../../context/AppContext'
-import { PageHeader, Card } from '../../components/Layout'
+import { PageHeader, Card, Carregando, ErroCarregamento } from '../../components/Layout'
 import { Button, Select } from '../../components/ui/Form'
 import { formatKm } from '../../data/domain'
+import { modeloService, geracaoService, tipoManutencaoService, intervaloService, filtro } from '../../services'
+
+const VAZIO = { modelos: [], geracoes: [], tiposManutencao: [] }
 
 export default function Intervalos() {
-  const { modelos, geracoes, tiposManutencao, intervalos } = useApp()
-  const [modeloId, setModeloId] = useState(modelos[2]?.id || modelos[0]?.id)
+  const [selecionadoId, setModeloId] = useState(null)
   const [componente, setComponente] = useState('todos')
 
-  const modeloAtivo = modelos.find((m) => m.id === modeloId)
-  const geracaoAtiva = geracoes.find((g) => g.id === modeloAtivo?.geracaoId)
+  // Listas fixas da página: modelos (seletor), gerações (rótulos) e tipos (colunas/filtro)
+  const [dados, setDados] = useState(VAZIO)
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState(null)
+  const [versao, setVersao] = useState(0)
+
+  useEffect(() => {
+    let cancelado = false
+    Promise.all([modeloService.listar(), geracaoService.listar(), tipoManutencaoService.listar()])
+      .then(([modelos, geracoes, tiposManutencao]) => {
+        if (!cancelado) setDados({ modelos, geracoes, tiposManutencao })
+      })
+      .catch((e) => { if (!cancelado) setErro(e.message) })
+      .finally(() => { if (!cancelado) setCarregando(false) })
+    return () => { cancelado = true }
+  }, [versao])
+
+  function tentarNovamente() {
+    setCarregando(true)
+    setErro(null)
+    setVersao((v) => v + 1)
+  }
+
+  const { modelos, geracoes, tiposManutencao } = dados
+  const modeloId = selecionadoId ?? modelos[0]?.id
+
+  // Intervalos só do modelo selecionado ($filter=Modelo/Id eq X), recarregados ao trocar o modelo
+  const [intervalos, setIntervalos] = useState([])
+  const [carregandoIntervalos, setCarregandoIntervalos] = useState(false)
+  const [erroIntervalos, setErroIntervalos] = useState(null)
+
+  useEffect(() => {
+    if (!modeloId) return
+    let cancelado = false
+    setCarregandoIntervalos(true)
+    setErroIntervalos(null)
+    intervaloService.listar(filtro.porId('Modelo', modeloId))
+      .then((lista) => { if (!cancelado) setIntervalos(lista) })
+      .catch((e) => { if (!cancelado) setErroIntervalos(e.message) })
+      .finally(() => { if (!cancelado) setCarregandoIntervalos(false) })
+    return () => { cancelado = true }
+  }, [modeloId])
 
   const linhas = useMemo(() => {
     return intervalos
-      .filter((it) => it.modeloId === modeloId)
       .filter((it) => componente === 'todos' || tiposManutencao.find((t) => t.id === it.tipoId)?.componente === componente)
       .map((it) => ({ ...it, tipo: tiposManutencao.find((t) => t.id === it.tipoId) }))
-  }, [intervalos, modeloId, componente, tiposManutencao])
+  }, [intervalos, componente, tiposManutencao])
 
   const componentes = [...new Set(tiposManutencao.map((t) => t.componente))]
+
+  if (carregando) return <Carregando />
+  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
 
   return (
     <>
@@ -36,7 +79,7 @@ export default function Intervalos() {
       />
 
       <div className="mb-5 flex gap-3">
-        <Select value={modeloId} onChange={(e) => setModeloId(e.target.value)} className="w-64">
+        <Select value={modeloId ?? ''} onChange={(e) => setModeloId(e.target.value)} className="w-64">
           {modelos.map((m) => {
             const g = geracoes.find((gg) => gg.id === m.geracaoId)
             return <option key={m.id} value={m.id}>{m.nome} · {g?.nome}</option>
@@ -47,6 +90,9 @@ export default function Intervalos() {
           {componentes.map((c) => <option key={c} value={c}>{c}</option>)}
         </Select>
       </div>
+
+      {erroIntervalos && <ErroCarregamento mensagem={erroIntervalos} />}
+      {carregandoIntervalos && <p className="mb-3 text-sm text-stone-400">Carregando intervalos do modelo…</p>}
 
       <Card className="overflow-hidden">
         <table className="w-full text-sm">

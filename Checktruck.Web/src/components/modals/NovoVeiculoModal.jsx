@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useApp } from '../../context/AppContext'
 import { Drawer } from '../ui/Overlay'
 import { Field, Input, Select, Toggle, Button } from '../ui/Form'
+import { getModeloCompleto } from '../../data/domain'
+import { veiculoService, fabricanteService, geracaoService, modeloService, motoristaService } from '../../services'
+
+const LISTAS_VAZIAS = { fabricantes: [], geracoes: [], modelos: [], motoristas: [] }
 
 const empty = {
   fabricanteId: '',
@@ -17,34 +20,48 @@ const empty = {
   ativo: true,
 }
 
-export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar }) {
-  const { fabricantes, geracoes, modelos, motoristas, veiculos, addVeiculo, updateVeiculo, getModeloCompleto } = useApp()
+export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar, onSalvo }) {
   const [form, setForm] = useState(empty)
   const [errors, setErrors] = useState({})
   const [salvando, setSalvando] = useState(false)
+  const [listas, setListas] = useState(LISTAS_VAZIAS)
+  const [carregando, setCarregando] = useState(false)
+  const [erroCarga, setErroCarga] = useState(null)
+  const { fabricantes, geracoes, modelos, motoristas } = listas
 
+  // Ao abrir: carrega as listas do formulário e, na edição, preenche fabricante/geração a partir do modelo
   useEffect(() => {
     if (!open) return
-    if (veiculoParaEditar) {
-      const mc = getModeloCompleto(veiculoParaEditar.modeloId)
-      setForm({
-        fabricanteId: mc?.fabricante?.id || '',
-        geracaoId: mc?.geracao?.id || '',
-        modeloId: veiculoParaEditar.modeloId,
-        placa: veiculoParaEditar.placa,
-        chassi: veiculoParaEditar.chassi || '',
-        renavam: veiculoParaEditar.renavam || '',
-        anoFabricacao: veiculoParaEditar.anoFabricacao,
-        anoModelo: veiculoParaEditar.anoModelo,
-        kmAtual: veiculoParaEditar.kmAtual,
-        motoristaId: veiculoParaEditar.motoristaId || '',
-        ativo: veiculoParaEditar.ativo,
-      })
-    } else {
-      setForm(empty)
-    }
+    let cancelado = false
+    setForm(empty)
     setErrors({})
-  }, [open, veiculoParaEditar, getModeloCompleto])
+    setErroCarga(null)
+    setCarregando(true)
+    Promise.all([fabricanteService.listar(), geracaoService.listar(), modeloService.listar(), motoristaService.listar()])
+      .then(([fabricantes, geracoes, modelos, motoristas]) => {
+        if (cancelado) return
+        setListas({ fabricantes, geracoes, modelos, motoristas })
+        if (veiculoParaEditar) {
+          const mc = getModeloCompleto({ fabricantes, geracoes, modelos }, veiculoParaEditar.modeloId)
+          setForm({
+            fabricanteId: mc?.fabricante?.id || '',
+            geracaoId: mc?.geracao?.id || '',
+            modeloId: veiculoParaEditar.modeloId,
+            placa: veiculoParaEditar.placa,
+            chassi: veiculoParaEditar.chassi || '',
+            renavam: veiculoParaEditar.renavam || '',
+            anoFabricacao: veiculoParaEditar.anoFabricacao,
+            anoModelo: veiculoParaEditar.anoModelo,
+            kmAtual: veiculoParaEditar.kmAtual,
+            motoristaId: veiculoParaEditar.motoristaId || '',
+            ativo: veiculoParaEditar.ativo,
+          })
+        }
+      })
+      .catch((e) => { if (!cancelado) setErroCarga(e.message) })
+      .finally(() => { if (!cancelado) setCarregando(false) })
+    return () => { cancelado = true }
+  }, [open, veiculoParaEditar])
 
   const geracoesDoFabricante = useMemo(
     () => geracoes.filter((g) => g.fabricanteId === form.fabricanteId),
@@ -59,7 +76,7 @@ export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar }) {
 
   // motoristas ainda sem veículo (o vínculo é 1:1), mais o atual do veículo em edição
   const motoristasDisponiveis = motoristas.filter(
-    (m) => m.ativo && (m.id === veiculoParaEditar?.motoristaId || !veiculos.some((v) => v.motoristaId === m.id))
+    (m) => m.ativo && (m.id === veiculoParaEditar?.motoristaId || !m.veiculoId)
   )
 
   function set(field, value) {
@@ -98,10 +115,16 @@ export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar }) {
     }
     setSalvando(true)
     try {
-      if (veiculoParaEditar) {
-        await updateVeiculo(veiculoParaEditar.id, payload)
-      } else {
-        await addVeiculo(payload)
+      const salvo = veiculoParaEditar
+        ? await veiculoService.atualizar(veiculoParaEditar.id, payload)
+        : await veiculoService.criar(payload)
+      onSalvo?.(salvo)
+      // o motorista escolhido deixa de estar livre para o próximo cadastro
+      if (salvo.motoristaId) {
+        setListas((l) => ({
+          ...l,
+          motoristas: l.motoristas.map((m) => (m.id === salvo.motoristaId ? { ...m, veiculoId: salvo.id } : m)),
+        }))
       }
     } catch (err) {
       setErrors({ api: err.message })
@@ -127,13 +150,15 @@ export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar }) {
         <>
           <Button variant="secondary" onClick={onClose}>Cancelar</Button>
           {!veiculoParaEditar && (
-            <Button variant="secondary" onClick={() => handleSubmit(false)} disabled={salvando}>Salvar e cadastrar outro</Button>
+            <Button variant="secondary" onClick={() => handleSubmit(false)} disabled={salvando || carregando || !!erroCarga}>Salvar e cadastrar outro</Button>
           )}
-          <Button onClick={() => handleSubmit(true)} disabled={salvando}>{veiculoParaEditar ? 'Salvar alterações' : 'Cadastrar veículo'}</Button>
+          <Button onClick={() => handleSubmit(true)} disabled={salvando || carregando || !!erroCarga}>{veiculoParaEditar ? 'Salvar alterações' : 'Cadastrar veículo'}</Button>
         </>
       }
     >
       <div className="space-y-6">
+        {carregando && <p className="text-sm text-stone-400">Carregando fabricantes, modelos e motoristas…</p>}
+        {erroCarga && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erroCarga}</p>}
         <div>
           <p className="mb-3 text-xs font-bold tracking-wide text-brand-700">1 · MODELO</p>
           <div className="space-y-3">

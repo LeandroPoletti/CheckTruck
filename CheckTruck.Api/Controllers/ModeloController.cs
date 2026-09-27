@@ -11,6 +11,8 @@ namespace CheckTruck.Api.Controllers;
 public class ModeloController(
     ServicoCrud<Modelo> servicoCrud,
     ServicoCrud<GeracaoModelo> servicoGeracaoModelo,
+    ServicoCrud<Veiculo> servicoVeiculo,
+    ServicoCrud<IntervaloRecomendado> servicoIntervalo,
     ILogger<Modelo> logger)
     : CrudController<Modelo, ModeloResponseDto>(
         servicoCrud, "modelo", logger,
@@ -48,5 +50,15 @@ public class ModeloController(
     }
 
     [HttpDelete("{id:long}")]
-    public IActionResult Delete(long id) => DeleteCore(id);
+    public IActionResult Delete(long id)
+    {
+        var veiculos = servicoVeiculo.Query(v => v.Modelo.Id == id).Count();
+        var intervalos = servicoIntervalo.Query(i => i.Modelo.Id == id).Count();
+        if (veiculos > 0 || intervalos > 0)
+        {
+            return BadRequest($"Não é possível excluir: o modelo possui {veiculos} veículo(s) e {intervalos} intervalo(s) recomendado(s) cadastrado(s).");
+        }
+
+        return DeleteCore(id);
+    }
 }

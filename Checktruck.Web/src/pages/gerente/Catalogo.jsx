@@ -1,13 +1,54 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
-import { useApp } from '../../context/AppContext'
-import { PageHeader, Card } from '../../components/Layout'
+import { PageHeader, Card, Carregando, ErroCarregamento } from '../../components/Layout'
 import { Button } from '../../components/ui/Form'
+import { fabricanteService, geracaoService, modeloService, veiculoService, intervaloService } from '../../services'
+import FabricanteModal from '../../components/modals/FabricanteModal'
+import GeracaoModal from '../../components/modals/GeracaoModal'
+import ModeloModal from '../../components/modals/ModeloModal'
+
+const VAZIO = { fabricantes: [], geracoes: [], modelos: [], veiculos: [], intervalos: [] }
 
 export default function Catalogo() {
-  const { fabricantes, geracoes, modelos, veiculos, intervalos } = useApp()
-  const [fabricanteId, setFabricanteId] = useState(fabricantes[0]?.id)
+  const [selecionadoId, setFabricanteId] = useState(null)
   const [geracaoId, setGeracaoId] = useState(null)
+  const [dados, setDados] = useState(VAZIO)
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState(null)
+  const [versao, setVersao] = useState(0)
+  const [modalAberto, setModalAberto] = useState(null) // 'fabricante' | 'geracao' | 'modelo'
+
+  useEffect(() => {
+    let cancelado = false
+    Promise.all([
+      fabricanteService.listar(),
+      geracaoService.listar(),
+      modeloService.listar(),
+      veiculoService.listar(),
+      intervaloService.listar(),
+    ])
+      .then(([fabricantes, geracoes, modelos, veiculos, intervalos]) => {
+        if (!cancelado) setDados({ fabricantes, geracoes, modelos, veiculos, intervalos })
+      })
+      .catch((e) => { if (!cancelado) setErro(e.message) })
+      .finally(() => { if (!cancelado) setCarregando(false) })
+    return () => { cancelado = true }
+  }, [versao])
+
+  // Após salvar: atualiza em segundo plano, sem desmontar a tela
+  function recarregar() {
+    setErro(null)
+    setVersao((v) => v + 1)
+  }
+
+  function tentarNovamente() {
+    setCarregando(true)
+    recarregar()
+  }
+
+  const { fabricantes, geracoes, modelos, veiculos, intervalos } = dados
+  // sem seleção explícita, o primeiro fabricante carregado fica ativo
+  const fabricanteId = selecionadoId ?? fabricantes[0]?.id
 
   const geracoesDoFabricante = useMemo(
     () => geracoes.filter((g) => g.fabricanteId === fabricanteId),
@@ -26,12 +67,19 @@ export default function Catalogo() {
     return intervalos.filter((i) => i.modeloId === modeloId).length
   }
 
+  // Pré-seleção dos modais a partir da coluna ativa (memo para não resetar o formulário a cada render)
+  const iniciaisGeracao = useMemo(() => ({ fabricanteId: fabricanteId ?? '' }), [fabricanteId])
+  const iniciaisModelo = useMemo(() => ({ geracaoId: geracaoAtiva?.id ?? '' }), [geracaoAtiva?.id])
+
+  if (carregando) return <Carregando />
+  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
+
   return (
     <>
       <PageHeader
         title="Catálogo"
         subtitle="Fabricantes, gerações e modelos usados no cadastro de veículos"
-        action={<Button><Plus size={16} /> Novo modelo</Button>}
+        action={<Button onClick={() => setModalAberto('modelo')}><Plus size={16} /> Novo modelo</Button>}
       />
 
       <div className="grid grid-cols-3 gap-5">
@@ -57,7 +105,10 @@ export default function Catalogo() {
                 </button>
               )
             })}
-            <button className="mt-1 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-600 hover:bg-brand-50">
+            <button
+              onClick={() => setModalAberto('fabricante')}
+              className="mt-1 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-600 hover:bg-brand-50"
+            >
               + Fabricante
             </button>
           </div>
@@ -86,7 +137,10 @@ export default function Catalogo() {
                 </button>
               )
             })}
-            <button className="mt-1 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-600 hover:bg-brand-50">
+            <button
+              onClick={() => setModalAberto('geracao')}
+              className="mt-1 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-600 hover:bg-brand-50"
+            >
               + Geração
             </button>
           </div>
@@ -97,7 +151,12 @@ export default function Catalogo() {
             <p className="text-xs font-bold tracking-wide text-stone-400">
               MODELOS · {geracaoAtiva?.nome?.toUpperCase() || '—'}
             </p>
-            <button className="text-xs font-semibold text-brand-600 hover:text-brand-800">+ Modelo</button>
+            <button
+              onClick={() => setModalAberto('modelo')}
+              className="text-xs font-semibold text-brand-600 hover:text-brand-800"
+            >
+              + Modelo
+            </button>
           </div>
           <div className="space-y-3">
             {modelosDaGeracao.map((m) => (
@@ -134,6 +193,24 @@ export default function Catalogo() {
           </p>
         </Card>
       </div>
+
+      <FabricanteModal
+        open={modalAberto === 'fabricante'}
+        onClose={() => setModalAberto(null)}
+        onSalvo={(f) => { setFabricanteId(f.id); setGeracaoId(null); recarregar() }}
+      />
+      <GeracaoModal
+        open={modalAberto === 'geracao'}
+        valoresIniciais={iniciaisGeracao}
+        onClose={() => setModalAberto(null)}
+        onSalvo={(g) => { setFabricanteId(g.fabricanteId); setGeracaoId(g.id); recarregar() }}
+      />
+      <ModeloModal
+        open={modalAberto === 'modelo'}
+        valoresIniciais={iniciaisModelo}
+        onClose={() => setModalAberto(null)}
+        onSalvo={recarregar}
+      />
     </>
   )
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useApp } from '../../context/AppContext'
+import { entrar } from '../../services/sessao'
 import { Field, Input, Button } from '../../components/ui/Form'
 
 // Conta criada pelo seed da API (Program.cs).
@@ -15,7 +15,6 @@ const HOME_BY_ROLE = {
 }
 
 export default function Login() {
-  const { login } = useApp()
   const navigate = useNavigate()
   const [email, setEmail] = useState('admin@admin.com')
   const [senha, setSenha] = useState('Admin@123')
@@ -25,13 +24,14 @@ export default function Login() {
   async function handleSubmit(e) {
     e.preventDefault()
     setEntrando(true)
-    const result = await login(email, senha)
-    setEntrando(false)
-    if (!result.ok) {
-      setError(result.error)
-      return
+    setError('')
+    try {
+      const user = await entrar(email, senha)
+      navigate(HOME_BY_ROLE[user.perfil])
+    } catch (err) {
+      setError(err.status === 401 ? 'E-mail ou senha inválidos.' : err.message)
+      setEntrando(false)
     }
-    navigate(HOME_BY_ROLE[result.user.perfil])
   }
 
   return (

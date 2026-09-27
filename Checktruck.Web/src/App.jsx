@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useApp } from './context/AppContext'
+import { obterUsuario } from './services/sessao'
 import Layout from './components/Layout'
 
 import Login from './pages/auth/Login'
@@ -10,6 +10,10 @@ import GerenteVeiculoDetalhe from './pages/gerente/VeiculoDetalhe'
 import GerentePessoas from './pages/gerente/Pessoas'
 import GerenteCatalogo from './pages/gerente/Catalogo'
 import GerenteIntervalos from './pages/gerente/Intervalos'
+import GerentePaises from './pages/gerente/Paises'
+import GerenteFabricantes from './pages/gerente/Fabricantes'
+import GerenteGeracoes from './pages/gerente/Geracoes'
+import GerenteModelos from './pages/gerente/Modelos'
 import GerenteChamados from './pages/gerente/Chamados'
 
 import MecanicoDashboard from './pages/mecanico/Dashboard'
@@ -27,22 +31,28 @@ const HOME_BY_ROLE = {
   motorista: '/motorista/inicio',
 }
 
+// Componentes (e não expressões em App) para lerem a sessão a cada navegação.
 function ProtectedArea({ perfil, children }) {
-  const { user } = useApp()
+  const user = obterUsuario()
   if (!user) return <Navigate to="/login" replace />
   if (perfil && user.perfil !== perfil) return <Navigate to={HOME_BY_ROLE[user.perfil]} replace />
   return <Layout>{children}</Layout>
 }
 
-export default function App() {
-  const { user } = useApp()
+function RotaLogin() {
+  const user = obterUsuario()
+  return user ? <Navigate to={HOME_BY_ROLE[user.perfil]} replace /> : <Login />
+}
 
+function RotaPadrao() {
+  const user = obterUsuario()
+  return <Navigate to={user ? HOME_BY_ROLE[user.perfil] : '/login'} replace />
+}
+
+export default function App() {
   return (
     <Routes>
-      <Route
-        path="/login"
-        element={user ? <Navigate to={HOME_BY_ROLE[user.perfil]} replace /> : <Login />}
-      />
+      <Route path="/login" element={<RotaLogin />} />
 
       {/* Gerente */}
       <Route path="/gerente/dashboard" element={<ProtectedArea perfil="gerente"><GerenteDashboard /></ProtectedArea>} />
@@ -52,6 +62,10 @@ export default function App() {
       <Route path="/gerente/catalogo" element={<ProtectedArea perfil="gerente"><GerenteCatalogo /></ProtectedArea>} />
       <Route path="/gerente/intervalos" element={<ProtectedArea perfil="gerente"><GerenteIntervalos /></ProtectedArea>} />
       <Route path="/gerente/chamados" element={<ProtectedArea perfil="gerente"><GerenteChamados /></ProtectedArea>} />
+      <Route path="/gerente/paises" element={<ProtectedArea perfil="gerente"><GerentePaises /></ProtectedArea>} />
+      <Route path="/gerente/fabricantes" element={<ProtectedArea perfil="gerente"><GerenteFabricantes /></ProtectedArea>} />
+      <Route path="/gerente/geracoes" element={<ProtectedArea perfil="gerente"><GerenteGeracoes /></ProtectedArea>} />
+      <Route path="/gerente/modelos" element={<ProtectedArea perfil="gerente"><GerenteModelos /></ProtectedArea>} />
 
       {/* Mecânico */}
       <Route path="/mecanico/dashboard" element={<ProtectedArea perfil="mecanico"><MecanicoDashboard /></ProtectedArea>} />
@@ -64,10 +78,7 @@ export default function App() {
       <Route path="/motorista/chamados" element={<ProtectedArea perfil="motorista"><MotoristaChamados /></ProtectedArea>} />
       <Route path="/motorista/perfil" element={<ProtectedArea perfil="motorista"><MotoristaPerfil /></ProtectedArea>} />
 
-      <Route
-        path="*"
-        element={<Navigate to={user ? HOME_BY_ROLE[user.perfil] : '/login'} replace />}
-      />
+      <Route path="*" element={<RotaPadrao />} />
     </Routes>
   )
 }

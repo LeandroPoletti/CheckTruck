@@ -1,12 +1,36 @@
-import { useState } from 'react'
-import { useApp } from '../../context/AppContext'
-import { PageHeader, Card } from '../../components/Layout'
+import { useEffect, useState } from 'react'
+import { PageHeader, Card, Carregando, ErroCarregamento } from '../../components/Layout'
 import { Field, Input, Button } from '../../components/ui/Form'
 import { PlacaBadge } from '../../components/ui/Badges'
+import { usuarioService, veiculoService, filtro } from '../../services'
+import { obterUsuario } from '../../services/sessao'
 
 export default function MotoristaPerfil() {
-  const { user, veiculos, updatePessoa } = useApp()
-  const veiculo = veiculos.find((v) => v.motoristaId === user.id && v.ativo)
+  const user = obterUsuario()
+  const [veiculo, setVeiculo] = useState(null)
+  const [carregando, setCarregando] = useState(true)
+  const [erroCarga, setErroCarga] = useState(null)
+  const [versao, setVersao] = useState(0)
+
+  // Só o veículo ativo do motorista logado ($filter=Motorista/Id eq X)
+  useEffect(() => {
+    let cancelado = false
+    // sem GET /api/Usuario/me o front não conhece o motoristaId do usuário logado
+    const busca = user?.motoristaId
+      ? veiculoService.listar(filtro.porId('Motorista', user.motoristaId))
+      : Promise.resolve([])
+    busca
+      .then(([v]) => { if (!cancelado) setVeiculo(v?.ativo ? v : null) })
+      .catch((e) => { if (!cancelado) setErroCarga(e.message) })
+      .finally(() => { if (!cancelado) setCarregando(false) })
+    return () => { cancelado = true }
+  }, [user?.motoristaId, versao])
+
+  function tentarNovamente() {
+    setCarregando(true)
+    setErroCarga(null)
+    setVersao((v) => v + 1)
+  }
 
   const [nome, setNome] = useState(user.nome)
   const [novaSenha, setNovaSenha] = useState('')
@@ -19,7 +43,7 @@ export default function MotoristaPerfil() {
     if (novaSenha) patch.senha = novaSenha
     setErro('')
     try {
-      await updatePessoa(user.id, patch)
+      await usuarioService.atualizar(user.id, patch)
     } catch (err) {
       setErro(err.message)
       return
@@ -28,6 +52,9 @@ export default function MotoristaPerfil() {
     setSalvo(true)
     setTimeout(() => setSalvo(false), 2500)
   }
+
+  if (carregando) return <Carregando />
+  if (erroCarga) return <ErroCarregamento mensagem={erroCarga} onTentarNovamente={tentarNovamente} />
 
   return (
     <>

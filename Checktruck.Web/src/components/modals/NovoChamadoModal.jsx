@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useApp } from '../../context/AppContext'
+import { chamadoService, veiculoService, filtro } from '../../services'
+import { obterUsuario } from '../../services/sessao'
 import { Modal } from '../ui/Overlay'
 import { Field, Select, Textarea, Button } from '../ui/Form'
 
@@ -14,8 +15,9 @@ const TIPOS = [
   'Outro',
 ]
 
-export default function NovoChamadoModal({ open, onClose, veiculo }) {
-  const { user, veiculos, abrirChamado } = useApp()
+export default function NovoChamadoModal({ open, onClose, veiculo, onSalvo }) {
+  const user = obterUsuario()
+  const [veiculos, setVeiculos] = useState([])
   const [tipo, setTipo] = useState(TIPOS[0])
   const [urgencia, setUrgencia] = useState('media')
   const [descricao, setDescricao] = useState('')
@@ -32,19 +34,30 @@ export default function NovoChamadoModal({ open, onClose, veiculo }) {
     }
   }, [open, veiculo])
 
+  // Sem veículo definido pela página: carrega os ativos para o usuário escolher
+  useEffect(() => {
+    if (!open || veiculo) return
+    let cancelado = false
+    veiculoService.listar(filtro.ativos())
+      .then((lista) => { if (!cancelado) setVeiculos(lista) })
+      .catch((e) => { if (!cancelado) setError(`Não foi possível carregar os veículos: ${e.message}`) })
+    return () => { cancelado = true }
+  }, [open, veiculo])
+
   async function handleSubmit() {
     if (!descricao.trim()) {
       setError('Descreva o que está acontecendo.')
       return
     }
     try {
-      await abrirChamado({
+      const chamado = await chamadoService.criar({
         veiculoId: veiculo?.id || veiculoId || null,
         abertoPorId: user.id,
         tipo,
         urgencia,
         descricao: descricao.trim(),
       })
+      onSalvo?.(chamado)
       onClose()
     } catch (e) {
       setError(e.message)
@@ -71,7 +84,7 @@ export default function NovoChamadoModal({ open, onClose, veiculo }) {
           <Field label="Veículo" required>
             <Select value={veiculoId} onChange={(e) => setVeiculoId(e.target.value)}>
               <option value="">Selecione o veículo</option>
-              {veiculos.filter((v) => v.ativo).map((v) => (
+              {veiculos.map((v) => (
                 <option key={v.id} value={v.id}>{v.placa}</option>
               ))}
             </Select>

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useApp } from '../../context/AppContext'
+import { usuarioService, veiculoService, filtro } from '../../services'
 import { Modal } from '../ui/Overlay'
 import { Field, Input, Select, Button } from '../ui/Form'
 
-export default function NovaPessoaModal({ open, onClose, perfilInicial = 'motorista' }) {
-  const { addPessoa, updateVeiculo, veiculos } = useApp()
+export default function NovaPessoaModal({ open, onClose, perfilInicial = 'motorista', onSalvo }) {
+  const [veiculosSemMotorista, setVeiculosSemMotorista] = useState([])
   const [passo, setPasso] = useState(1)
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
@@ -29,7 +29,15 @@ export default function NovaPessoaModal({ open, onClose, perfilInicial = 'motori
     }
   }, [open, perfilInicial])
 
-  const veiculosSemMotorista = veiculos.filter((v) => v.ativo && !v.motoristaId)
+  // Ao abrir: só os veículos ativos sem motorista (opções de vínculo)
+  useEffect(() => {
+    if (!open) return
+    let cancelado = false
+    veiculoService.listar(filtro.semVinculo('Motorista'))
+      .then((lista) => { if (!cancelado) setVeiculosSemMotorista(lista.filter((v) => v.ativo)) })
+      .catch((e) => { if (!cancelado) setError(`Não foi possível carregar os veículos: ${e.message}`) })
+    return () => { cancelado = true }
+  }, [open])
 
   function handleContinuar(e) {
     e.preventDefault()
@@ -51,7 +59,7 @@ export default function NovaPessoaModal({ open, onClose, perfilInicial = 'motori
       return
     }
     try {
-      const pessoa = await addPessoa({
+      const pessoa = await usuarioService.criar({
         nome: nome.trim(),
         email: email.trim(),
         senha,
@@ -60,8 +68,10 @@ export default function NovaPessoaModal({ open, onClose, perfilInicial = 'motori
         veiculoId: perfil === 'motorista' ? (veiculoId || null) : undefined,
       })
       if (perfil === 'motorista' && veiculoId) {
-        await updateVeiculo(veiculoId, { motoristaId: pessoa.id })
+        const veiculo = veiculosSemMotorista.find((v) => v.id === veiculoId)
+        await veiculoService.atualizar(veiculoId, { ...veiculo, motoristaId: pessoa.id })
       }
+      onSalvo?.(pessoa)
       onClose()
     } catch (e) {
       setError(e.message)
