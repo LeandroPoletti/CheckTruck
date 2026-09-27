@@ -15,7 +15,7 @@ public class ManutencaoRequestDto
     [Required]
     public long TecnicoId { get; set; }
 
-    public DateTime RealizadoEm { get; set; } = DateTime.Now;
+    public DateTime RealizadoEm { get; set; } = DateTime.UtcNow;
     public DateTime? DataProximaTroca { get; set; }
     public int KmAtual { get; set; }
     public int KmProximaTroca { get; set; }

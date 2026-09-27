@@ -226,6 +226,11 @@ namespace CheckTruck.Repositorio.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<string>("Cpf")
+                        .IsRequired()
+                        .HasMaxLength(14)
+                        .HasColumnType("character varying(14)");
+
                     b.Property<string>("UsuarioGuid")
                         .IsRequired()
                         .HasColumnType("text");
@@ -263,6 +268,11 @@ namespace CheckTruck.Repositorio.Migrations
                         .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Cpf")
+                        .IsRequired()
+                        .HasMaxLength(14)
+                        .HasColumnType("character varying(14)");
 
                     b.Property<string>("UsuarioGuid")
                         .IsRequired()
@@ -329,7 +339,7 @@ namespace CheckTruck.Repositorio.Migrations
                     b.Property<long>("ModeloId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("MotoristaId")
+                    b.Property<long?>("MotoristaId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Placa")
@@ -560,7 +570,7 @@ namespace CheckTruck.Repositorio.Migrations
                     b.HasOne("CheckTruck.Dominio.Entidades.Pais", "PaisOrigem")
                         .WithMany("Fabricantes")
                         .HasForeignKey("PaisOrigemId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("PaisOrigem");
@@ -571,7 +581,7 @@ namespace CheckTruck.Repositorio.Migrations
                     b.HasOne("CheckTruck.Dominio.Entidades.Fabricante", "Fabricante")
                         .WithMany("Geracoes")
                         .HasForeignKey("FabricanteId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Fabricante");
@@ -582,7 +592,7 @@ namespace CheckTruck.Repositorio.Migrations
                     b.HasOne("CheckTruck.Dominio.Entidades.Modelo", "Modelo")
                         .WithMany("IntervaloRecomendados")
                         .HasForeignKey("ModeloId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("CheckTruck.Dominio.Entidades.TipoManutencao", "TipoManutencao")
@@ -628,7 +638,7 @@ namespace CheckTruck.Repositorio.Migrations
                     b.HasOne("CheckTruck.Dominio.Entidades.GeracaoModelo", "Geracao")
                         .WithMany("Modelos")
                         .HasForeignKey("GeracaoId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Geracao");
@@ -657,14 +667,13 @@ namespace CheckTruck.Repositorio.Migrations
                     b.HasOne("CheckTruck.Dominio.Entidades.Modelo", "Modelo")
                         .WithMany("Veiculos")
                         .HasForeignKey("ModeloId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("CheckTruck.Dominio.Entidades.Motorista", "Motorista")
                         .WithOne("Veiculo")
                         .HasForeignKey("CheckTruck.Dominio.Entidades.Veiculo", "MotoristaId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Modelo");
 

@@ -10,6 +10,7 @@ namespace CheckTruck.Api.Controllers;
 [Route("api/[controller]")]
 public class VeiculoController(
     ServicoVeiculo servicoVeiculo,
+    ServicoSituacaoVeiculo servicoSituacao,
     ServicoCrud<Modelo> servicoModelo,
     ServicoCrud<Motorista> servicoMotorista,
     ILogger<Veiculo> logger)
@@ -20,6 +21,17 @@ public class VeiculoController(
 {
     [HttpGet]
     public ActionResult<IEnumerable<VeiculoResponseDto>> Get() => GetODataCore();
+
+    /// <summary>
+    /// Veículos com modelo, geração, motorista e situação de manutenção já calculada
+    /// (status e item mais urgente), para as listas de veículos.
+    /// </summary>
+    /// <param name="apenasAtivos">true para ignorar veículos desativados.</param>
+    [HttpGet("situacao")]
+    public ActionResult<IEnumerable<VeiculoSituacaoResponseDto>> GetSituacao([FromQuery] bool apenasAtivos = false)
+    {
+        return servicoSituacao.ObterSituacaoVeiculos(apenasAtivos).Select(s => s.ToResponseDto()).ToList();
+    }
 
     [HttpGet("{id:long}")]
     public ActionResult<VeiculoResponseDto> GetById(long id) => GetByIdCore(id);
@@ -33,10 +45,14 @@ public class VeiculoController(
             return BadRequest("Modelo não encontrado.");
         }
 
-        var motorista = servicoMotorista.GetById(dto.MotoristaId);
-        if (motorista is null)
+        Motorista? motorista = null;
+        if (dto.MotoristaId.HasValue)
         {
-            return BadRequest("Motorista não encontrado.");
+            motorista = servicoMotorista.GetById(dto.MotoristaId.Value);
+            if (motorista is null)
+            {
+                return BadRequest("Motorista não encontrado.");
+            }
         }
 
         return PostCore(dto.ToEntity(modelo, motorista));
@@ -51,10 +67,14 @@ public class VeiculoController(
             return BadRequest("Modelo não encontrado.");
         }
 
-        var motorista = servicoMotorista.GetById(dto.MotoristaId);
-        if (motorista is null)
+        Motorista? motorista = null;
+        if (dto.MotoristaId.HasValue)
         {
-            return BadRequest("Motorista não encontrado.");
+            motorista = servicoMotorista.GetById(dto.MotoristaId.Value);
+            if (motorista is null)
+            {
+                return BadRequest("Motorista não encontrado.");
+            }
         }
 
         return PutCore(id, dto.ToEntity(modelo, motorista));
