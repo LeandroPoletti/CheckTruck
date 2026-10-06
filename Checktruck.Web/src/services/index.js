@@ -13,18 +13,7 @@ export const tipoManutencaoService = criarCrud('TipoManutencao', { fromApi: m.ti
 export const intervaloService = criarCrud('IntervaloRecomendado', { fromApi: m.intervaloFromApi, toApi: m.intervaloToApi })
 export const manutencaoService = criarCrud('Manutencao', { fromApi: m.registroFromApi, toApi: m.registroToApi })
 export const motoristaService = criarCrud('Motorista', { fromApi: m.motoristaFromApi, toApi: m.pessoaToApi })
-export const mecanicoService = {
-  ...criarCrud('Mecanico', { fromApi: m.mecanicoFromApi, toApi: m.mecanicoToApi }),
-  // Cria o login do mecânico (e-mail vira o usuário) para ele consultar pelo celular
-  async darAcesso(id, { email, senha }) {
-    const { data } = await api.post(`/api/Mecanico/${id}/acesso`, { email: email.trim(), senha })
-    return m.mecanicoFromApi(data)
-  },
-  async removerAcesso(id) {
-    const { data } = await api.delete(`/api/Mecanico/${id}/acesso`)
-    return m.mecanicoFromApi(data)
-  },
-}
+export const mecanicoService = criarCrud('Mecanico', { fromApi: m.mecanicoFromApi, toApi: m.mecanicoToApi })
 
 export const veiculoService = {
   ...criarCrud('Veiculo', { fromApi: m.veiculoFromApi, toApi: m.veiculoToApi }),
@@ -61,7 +50,7 @@ export const chamadoService = {
 
 // Contas de usuário. Criar/atualizar conta de motorista ainda não existe na API.
 export const usuarioService = {
-  // → { id, email, nome, perfil: 'gerente'|'mecanico'|'motorista', mecanicoId, motoristaId }
+  // → { id, email, nome, perfil: 'gerente'|'mecanico'|'motorista', motoristaId }
   async obterMe() {
     const { data } = await api.get('/api/Usuario/me')
     return data

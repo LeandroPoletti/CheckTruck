@@ -12,7 +12,6 @@ namespace CheckTruck.Api.Controllers;
 [Route("api/[controller]")]
 public class UsuarioController(
     UserManager<Usuario> userManager,
-    ServicoCrud<Mecanico> servicoMecanico,
     ServicoCrud<Motorista> servicoMotorista) : ControllerBase
 {
     /// <summary>
@@ -30,25 +29,21 @@ public class UsuarioController(
         }
 
         var papeis = await userManager.GetRolesAsync(usuario);
-        var mecanico = servicoMecanico.Query(m => m.UsuarioGuid == usuario.Id)
-            .Select(m => new { m.Id, m.Nome })
-            .FirstOrDefault();
         var motoristaId = servicoMotorista.Query(m => m.UsuarioGuid == usuario.Id)
             .Select(m => (long?)m.Id)
             .FirstOrDefault();
 
         // Sem papel conhecido, cai no perfil mais restrito
         var perfil = papeis.Contains("Administrador") ? "gerente"
-            : papeis.Contains(MecanicoController.PapelMecanico) ? "mecanico"
+            : papeis.Contains("Mecanico") ? "mecanico"
             : "motorista";
 
         return new UsuarioLogadoDto
         {
             Id = usuario.Id,
             Email = usuario.Email ?? usuario.UserName ?? "",
-            Nome = mecanico?.Nome ?? usuario.UserName ?? "",
+            Nome = usuario.UserName ?? "",
             Perfil = perfil,
-            MecanicoId = mecanico?.Id,
             MotoristaId = motoristaId,
         };
     }
@@ -63,6 +58,5 @@ public class UsuarioLogadoDto
     /// <summary>"gerente", "mecanico" ou "motorista"</summary>
     public string Perfil { get; set; } = "";
 
-    public long? MecanicoId { get; set; }
     public long? MotoristaId { get; set; }
 }

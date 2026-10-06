@@ -238,6 +238,5 @@ export const mecanicoFromApi = (dto) => ({
   nome: dto.nome,
   funcao: dto.funcao,
   ativo: dto.ativo,
-  temAcesso: !!dto.temAcesso, // tem login para consultar pelo celular
 })
 export const mecanicoToApi = (m) => ({ nome: m.nome, funcao: m.funcao, ativo: m.ativo ?? true })

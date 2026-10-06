@@ -12,7 +12,6 @@ export function obterUsuario() {
     nome: sessao.nome || sessao.usuario,
     email: sessao.usuario,
     perfil: sessao.perfil,
-    mecanicoId: sessao.mecanicoId ?? null,
     motoristaId: sessao.motoristaId ?? null,
     ativo: true,
   }
@@ -29,7 +28,6 @@ export async function entrar(email, senha) {
       usuarioId: me.id,
       nome: me.nome,
       perfil: me.perfil,
-      mecanicoId: toId(me.mecanicoId),
       motoristaId: toId(me.motoristaId),
     })
   } catch (e) {

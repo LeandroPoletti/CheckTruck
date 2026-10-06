@@ -23,21 +23,6 @@ public class MecanicoResponseDto
     public string Nome { get; set; }
     public string Funcao { get; set; }
     public bool Ativo { get; set; }
-
-    /// <summary>true quando o mecânico tem login para consultar pelo celular.</summary>
-    public bool TemAcesso { get; set; }
-}
-
-/// <summary>Login do mecânico: e-mail (vira o usuário) e senha.</summary>
-public class AcessoMecanicoRequestDto
-{
-    [Required(ErrorMessage = "Informe o e-mail.")]
-    [EmailAddress(ErrorMessage = "E-mail inválido.")]
-    public string Email { get; set; }
-
-    [Required(ErrorMessage = "Informe a senha.")]
-    [MinLength(6, ErrorMessage = "A senha precisa ter pelo menos 6 caracteres.")]
-    public string Senha { get; set; }
 }
 
 public static class MecanicoDtoExtensions
@@ -47,8 +32,7 @@ public static class MecanicoDtoExtensions
         Id = entidade.Id,
         Nome = entidade.Nome,
         Funcao = entidade.Funcao,
-        Ativo = entidade.Ativo,
-        TemAcesso = entidade.UsuarioGuid != null
+        Ativo = entidade.Ativo
     };
 
     public static Mecanico ToEntity(this MecanicoRequestDto dto) => new()

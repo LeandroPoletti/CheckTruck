@@ -4,8 +4,8 @@ using CheckTruck.Dominio.Interfaces;
 namespace CheckTruck.Dominio.Entidades;
 
 /// <summary>
-/// Mecânico que faz as trocas (ex.: "Marco Rueda" / "Borracheiro"). Cadastro simples, sem login.
-/// Na OS, o mecânico é escolhido desta lista.
+/// Mecânico que faz as trocas (ex.: "Marco Rueda" / "Borracheiro"). Cadastro simples, sem login:
+/// não tem ligação com os usuários que entram no sistema. Na OS, o mecânico é escolhido desta lista.
 /// </summary>
 public class Mecanico : EntidadeBanco
 {
@@ -17,6 +17,4 @@ public class Mecanico : EntidadeBanco
     public string Funcao { get; set; } = "";
     /// <summary>Inativo some da lista da OS, mas continua no histórico.</summary>
     public bool Ativo { get; set; } = true;
-    /// <summary>Login no sistema, se um dia ele for consultar pelo celular. Opcional.</summary>
-    public string? UsuarioGuid { get; set; }
 }

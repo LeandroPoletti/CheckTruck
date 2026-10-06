@@ -7,5 +7,4 @@ public class Usuario : IdentityUser
 {
     public bool Ativo { get; set; }
     public Motorista? Motorista { get; set; }
-    public Mecanico? Mecanico { get; set; }
 }
