@@ -102,7 +102,8 @@ using (var scope = app.Services.CreateScope())
     
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
 
-    const string usuarioName = "Admin";
+    // O login do Identity procura pelo UserName, e a tela de login só aceita e-mail.
+    const string usuarioName = "admin@admin.com";
     const string usuarioEmail = "admin@admin.com";
     const string usuarioSenha = "Admin@123";
 
@@ -117,6 +118,13 @@ using (var scope = app.Services.CreateScope())
         };
         await userManager.CreateAsync(usuario, usuarioSenha);
         await userManager.AddToRoleAsync(usuario, "Administrador");
+    }
+    else
+    {
+        // Bancos criados antes da troca ficaram com UserName "Admin": corrige para o e-mail.
+        var admin = await userManager.FindByEmailAsync(usuarioEmail);
+        if (admin is not null && admin.UserName != usuarioName)
+            await userManager.SetUserNameAsync(admin, usuarioName);
     }
     
     var context = scope.ServiceProvider.GetRequiredService<Context>();
