@@ -14,6 +14,10 @@ public class IntervaloRecomendadoRequestDto
 
     public int IntervaloKm { get; set; }
     public int IntervaloKmPrimeira { get; set; }
+
+    /// <summary>Prazo máximo entre trocas, em meses. 0 = vence só por km.</summary>
+    public int IntervaloMeses { get; set; }
+
     public string Fonte { get; set; }
     public string Observacao { get; set; }
 }
@@ -25,6 +29,7 @@ public class IntervaloRecomendadoResponseDto
     public TipoManutencaoResumoDto TipoManutencao { get; set; }
     public int IntervaloKm { get; set; }
     public int IntervaloKmPrimeira { get; set; }
+    public int IntervaloMeses { get; set; }
     public string Fonte { get; set; }
     public string Observacao { get; set; }
 }
@@ -38,6 +43,7 @@ public static class IntervaloRecomendadoDtoExtensions
         TipoManutencao = entidade.TipoManutencao?.ToResumoDto(),
         IntervaloKm = entidade.IntervaloKm,
         IntervaloKmPrimeira = entidade.IntervaloKmPrimeira,
+        IntervaloMeses = entidade.IntervaloMeses,
         Fonte = entidade.Fonte,
         Observacao = entidade.Observacao
     };
@@ -48,6 +54,7 @@ public static class IntervaloRecomendadoDtoExtensions
         TipoManutencao = tipoManutencao,
         IntervaloKm = dto.IntervaloKm,
         IntervaloKmPrimeira = dto.IntervaloKmPrimeira,
+        IntervaloMeses = dto.IntervaloMeses,
         Fonte = dto.Fonte,
         Observacao = dto.Observacao
     };

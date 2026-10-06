@@ -11,4 +11,12 @@ public static class StatusManutencaoExtensions
         StatusManutencao.Atencao => "atencao",
         _ => "ok"
     };
+
+    /// <summary>De onde veio o intervalo: "veiculo", "modelo" ou "padrao".</summary>
+    public static string ToApiString(this OrigemIntervalo origem) => origem switch
+    {
+        OrigemIntervalo.Veiculo => "veiculo",
+        OrigemIntervalo.Modelo => "modelo",
+        _ => "padrao"
+    };
 }

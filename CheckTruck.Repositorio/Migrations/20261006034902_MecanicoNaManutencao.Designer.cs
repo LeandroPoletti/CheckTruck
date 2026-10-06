@@ -3,6 +3,7 @@ using System;
 using CheckTruck.Repositorio;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CheckTruck.Repositorio.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20261006034902_MecanicoNaManutencao")]
+    partial class MecanicoNaManutencao
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -193,8 +196,10 @@ namespace CheckTruck.Repositorio.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
-                    b.Property<long>("MecanicoId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("Mecanico")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.Property<string>("NumNotaFiscal")
                         .IsRequired()
@@ -214,8 +219,6 @@ namespace CheckTruck.Repositorio.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MecanicoId");
-
                     b.HasIndex("TipoManutencaoId");
 
                     b.HasIndex("VeiculoId");
@@ -231,20 +234,13 @@ namespace CheckTruck.Repositorio.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Funcao")
+                    b.Property<string>("Cpf")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
+                        .HasMaxLength(14)
+                        .HasColumnType("character varying(14)");
 
                     b.Property<string>("UsuarioGuid")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -673,12 +669,6 @@ namespace CheckTruck.Repositorio.Migrations
 
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.Manutencao", b =>
                 {
-                    b.HasOne("CheckTruck.Dominio.Entidades.Mecanico", "Mecanico")
-                        .WithMany()
-                        .HasForeignKey("MecanicoId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("CheckTruck.Dominio.Entidades.TipoManutencao", "TipoManutencao")
                         .WithMany()
                         .HasForeignKey("TipoManutencaoId")
@@ -691,8 +681,6 @@ namespace CheckTruck.Repositorio.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Mecanico");
-
                     b.Navigation("TipoManutencao");
 
                     b.Navigation("Veiculo");
@@ -703,7 +691,8 @@ namespace CheckTruck.Repositorio.Migrations
                     b.HasOne("CheckTruck.Repositorio.Entidades.Usuario", null)
                         .WithOne("Mecanico")
                         .HasForeignKey("CheckTruck.Dominio.Entidades.Mecanico", "UsuarioGuid")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.Modelo", b =>

@@ -8,7 +8,6 @@ import {
 } from '../../services'
 import { Button } from '../../components/ui/Form'
 import AtualizarKmModal from '../../components/modals/AtualizarKmModal'
-import RegistrarManutencaoModal from '../../components/modals/RegistrarManutencaoModal'
 import NovoChamadoModal from '../../components/modals/NovoChamadoModal'
 
 const BACK_TO = '/mecanico/veiculos'
@@ -16,7 +15,6 @@ const BACK_TO = '/mecanico/veiculos'
 export default function MecanicoVeiculoDetalhe() {
   const { id } = useParams()
   const [kmOpen, setKmOpen] = useState(false)
-  const [manutencaoOpen, setManutencaoOpen] = useState(false)
   const [chamadoOpen, setChamadoOpen] = useState(false)
   const [dados, setDados] = useState(null)
   const [carregando, setCarregando] = useState(true)
@@ -79,12 +77,10 @@ export default function MecanicoVeiculoDetalhe() {
           <div className="flex gap-2">
             <Button variant="secondary" onClick={() => setKmOpen(true)}>Atualizar km</Button>
             <Button variant="secondary" onClick={() => setChamadoOpen(true)}>Abrir chamado</Button>
-            <Button onClick={() => setManutencaoOpen(true)}>Registrar manutenção</Button>
           </div>
         }
       />
       <AtualizarKmModal open={kmOpen} onClose={() => setKmOpen(false)} veiculo={veiculo} onSalvo={recarregar} />
-      <RegistrarManutencaoModal open={manutencaoOpen} onClose={() => setManutencaoOpen(false)} veiculo={veiculo} onSalvo={recarregar} />
       <NovoChamadoModal open={chamadoOpen} onClose={() => setChamadoOpen(false)} veiculo={veiculo} />
     </>
   )

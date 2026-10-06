@@ -6,6 +6,7 @@ public class SituacaoFrota
 {
     public int FrotaAtiva { get; set; }
     public int MargemAlertaKm { get; set; }
+    public int MargemAlertaDias { get; set; }
     public int QuantidadeOk { get; set; }
     public int QuantidadeAtencao { get; set; }
     public int QuantidadeCritico { get; set; }
@@ -13,7 +14,7 @@ public class SituacaoFrota
     public IList<QuantidadePorGeracao> FrotaPorGeracao { get; set; } = new List<QuantidadePorGeracao>();
 }
 
-// Item mais urgente de um veículo que está em atenção ou crítico.
+// Item mais urgente de um veículo que está em atenção ou crítico (por km ou por data).
 public class AlertaManutencao
 {
     public long VeiculoId { get; set; }
@@ -25,6 +26,8 @@ public class AlertaManutencao
     public string TipoManutencaoNome { get; set; } = "";
     public int KmProximaTroca { get; set; }
     public int KmRestante { get; set; }
+    public DateTime? DataProximaTroca { get; set; }
+    public int? DiasRestantes { get; set; }
     public bool IsPrimeiraTroca { get; set; }
     public StatusManutencao Status { get; set; }
 }

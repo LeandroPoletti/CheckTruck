@@ -33,6 +33,22 @@ public class VeiculoController(
         return servicoSituacao.ObterSituacaoVeiculos(apenasAtivos).Select(s => s.ToResponseDto()).ToList();
     }
 
+    /// <summary>
+    /// Situação completa de um caminhão pela placa: todos os itens, com o que já venceu e o que vai
+    /// vencer (km e dias restantes). É a consulta do mecânico no pátio. Aceita placa com ou sem hífen.
+    /// </summary>
+    [HttpGet("placa/{placa}/situacao")]
+    public ActionResult<VeiculoSituacaoResponseDto> GetSituacaoPorPlaca(string placa)
+    {
+        var situacao = servicoSituacao.ObterSituacaoPorPlaca(placa);
+        if (situacao is null)
+        {
+            return NotFound("Nenhum caminhão encontrado com essa placa.");
+        }
+
+        return situacao.ToResponseDto(incluirItens: true);
+    }
+
     [HttpGet("{id:long}")]
     public ActionResult<VeiculoResponseDto> GetById(long id) => GetByIdCore(id);
 

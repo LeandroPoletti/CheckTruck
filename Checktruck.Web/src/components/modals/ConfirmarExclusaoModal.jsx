@@ -4,7 +4,7 @@ import { Button } from '../ui/Form'
 
 // Confirmação genérica de exclusão. onConfirmar faz o DELETE; se a API recusar
 // (ex.: registro em uso), a mensagem aparece aqui e o modal continua aberto.
-export default function ConfirmarExclusaoModal({ open, onClose, titulo, descricao, onConfirmar }) {
+export default function ConfirmarExclusaoModal({ open, onClose, titulo, descricao, onConfirmar, rotulo = 'Excluir' }) {
   const [excluindo, setExcluindo] = useState(false)
   const [erro, setErro] = useState('')
 
@@ -35,7 +35,7 @@ export default function ConfirmarExclusaoModal({ open, onClose, titulo, descrica
         <>
           <Button variant="secondary" onClick={onClose}>Cancelar</Button>
           <Button variant="danger" onClick={handleConfirmar} disabled={excluindo}>
-            {excluindo ? 'Excluindo…' : 'Excluir'}
+            {excluindo ? 'Aguarde…' : rotulo}
           </Button>
         </>
       }

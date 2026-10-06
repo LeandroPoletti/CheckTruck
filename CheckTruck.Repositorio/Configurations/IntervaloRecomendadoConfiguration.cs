@@ -14,5 +14,6 @@ public class IntervaloRecomendadoConfiguration : IEntityTypeConfiguration<Interv
         builder.HasOne(i => i.TipoManutencao).WithMany(t => t.IntervaloRecomendados).IsRequired();
         builder.Property(i => i.IntervaloKm).IsRequired();
         builder.Property(i => i.IntervaloKmPrimeira).IsRequired();
+        builder.Property(i => i.IntervaloMeses).IsRequired();
     }
 }

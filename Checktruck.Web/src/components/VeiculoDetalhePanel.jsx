@@ -109,8 +109,10 @@ export default function VeiculoDetalhePanel({ veiculo, catalogo, registros, moto
                       {r.isPrimeiraTroca && <span className="ml-2 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">1ª TROCA</span>}
                     </p>
                     <p className="text-xs text-stone-500">
-                      {formatKm(r.kmNaTroca)} → próx. {formatKm(r.kmProximaTroca)} · {r.concessionaria}
-                      {r.nrNotaFiscal && <> · NF {r.nrNotaFiscal}</>}
+                      {formatKm(r.kmNaTroca)} → próx. {formatKm(r.kmProximaTroca)}
+                      {r.mecanicoNome && <> · {r.mecanicoNome}{r.mecanicoFuncao && ` (${r.mecanicoFuncao})`}</>}
+                      {r.concessionaria && <> · {r.concessionaria}</>}
+                      {r.nrNotaFiscal && <> · OS {r.nrNotaFiscal}</>}
                     </p>
                   </div>
                 </div>

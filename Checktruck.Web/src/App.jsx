@@ -14,6 +14,7 @@ import GerentePaises from './pages/gerente/Paises'
 import GerenteFabricantes from './pages/gerente/Fabricantes'
 import GerenteGeracoes from './pages/gerente/Geracoes'
 import GerenteModelos from './pages/gerente/Modelos'
+import GerenteMecanicos from './pages/gerente/Mecanicos'
 import GerenteChamados from './pages/gerente/Chamados'
 
 import MecanicoDashboard from './pages/mecanico/Dashboard'
@@ -66,6 +67,7 @@ export default function App() {
       <Route path="/gerente/fabricantes" element={<ProtectedArea perfil="gerente"><GerenteFabricantes /></ProtectedArea>} />
       <Route path="/gerente/geracoes" element={<ProtectedArea perfil="gerente"><GerenteGeracoes /></ProtectedArea>} />
       <Route path="/gerente/modelos" element={<ProtectedArea perfil="gerente"><GerenteModelos /></ProtectedArea>} />
+      <Route path="/gerente/mecanicos" element={<ProtectedArea perfil="gerente"><GerenteMecanicos /></ProtectedArea>} />
 
       {/* Mecânico */}
       <Route path="/mecanico/dashboard" element={<ProtectedArea perfil="mecanico"><MecanicoDashboard /></ProtectedArea>} />

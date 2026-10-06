@@ -7,6 +7,7 @@ import { formatKm } from '../../data/domain'
 import { dashboardService } from '../../services'
 import NovoVeiculoModal from '../../components/modals/NovoVeiculoModal'
 import NovaPessoaModal from '../../components/modals/NovaPessoaModal'
+import MecanicoModal from '../../components/modals/MecanicoModal'
 
 const LIMITE_ALERTAS = 5
 
@@ -17,7 +18,8 @@ export default function GerenteDashboard() {
   const [erro, setErro] = useState(null)
   const [versao, setVersao] = useState(0)
   const [novoVeiculoOpen, setNovoVeiculoOpen] = useState(false)
-  const [novaPessoaOpen, setNovaPessoaOpen] = useState(null) // 'motorista' | 'tecnico' | null
+  const [novaPessoaOpen, setNovaPessoaOpen] = useState(false)
+  const [novoMecanicoOpen, setNovoMecanicoOpen] = useState(false)
 
   // A API já devolve a situação da frota calculada: contagens, alertas e frota por geração
   useEffect(() => {
@@ -126,11 +128,11 @@ export default function GerenteDashboard() {
               <Button className="w-full justify-center" onClick={() => setNovoVeiculoOpen(true)}>
                 Novo veículo
               </Button>
-              <Button variant="secondary" className="w-full justify-center" onClick={() => setNovaPessoaOpen('motorista')}>
+              <Button variant="secondary" className="w-full justify-center" onClick={() => setNovaPessoaOpen(true)}>
                 Novo motorista
               </Button>
-              <Button variant="secondary" className="w-full justify-center" onClick={() => setNovaPessoaOpen('tecnico')}>
-                Novo técnico
+              <Button variant="secondary" className="w-full justify-center" onClick={() => setNovoMecanicoOpen(true)}>
+                Novo mecânico
               </Button>
             </div>
           </Card>
@@ -156,11 +158,12 @@ export default function GerenteDashboard() {
 
       <NovoVeiculoModal open={novoVeiculoOpen} onClose={() => setNovoVeiculoOpen(false)} onSalvo={recarregar} />
       <NovaPessoaModal
-        open={!!novaPessoaOpen}
-        perfilInicial={novaPessoaOpen === 'tecnico' ? 'mecanico' : 'motorista'}
-        onClose={() => setNovaPessoaOpen(null)}
+        open={novaPessoaOpen}
+        perfilInicial="motorista"
+        onClose={() => setNovaPessoaOpen(false)}
         onSalvo={recarregar}
       />
+      <MecanicoModal open={novoMecanicoOpen} onClose={() => setNovoMecanicoOpen(false)} />
     </>
   )
 }

@@ -64,13 +64,13 @@ retornam vazio e escritas retornam o erro "Endpoint não implementado".
 |-----------------------------------|-----------------------------------|----------------------------------------------------------------|
 | `usuarioService.obterMe`          | `GET /api/Usuario/me`             | Perfil do usuário logado — hoje todo login entra como gerente   |
 | `usuarioService.listar`           | `GET /api/Usuario`                | Nome, e-mail e status das pessoas (a tela mostra o CPF)        |
-| `usuarioService.criarPessoa`      | `POST /api/Usuario`               | Cadastro de motorista/técnico com conta de acesso              |
+| `usuarioService.criarPessoa`      | `POST /api/Usuario`               | Cadastro de motorista/mecânico com conta de acesso              |
 | `usuarioService.atualizar`        | `PUT /api/Usuario/{id}`           | Alterar nome / inativar pessoa                                 |
 | `chamadoService.*`                | `GET/POST/PUT /api/Chamado`       | Tela de chamados (entidade não existe na API)                  |
 
 ## Perfis e permissões
 
-- **Gerente**: acesso total — cadastra veículos, motoristas e técnicos,
+- **Gerente**: acesso total — cadastra veículos, motoristas e mecânicos,
   configura catálogo/intervalos e acompanha todos os chamados.
 - **Mecânico**: vê a frota, registra manutenções, atualiza km e abre/atende chamados.
 - **Motorista**: vê apenas o veículo atribuído a ele, atualiza a quilometragem

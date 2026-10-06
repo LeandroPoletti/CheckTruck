@@ -4,19 +4,25 @@ import { PageHeader, Card, Carregando, ErroCarregamento } from '../../components
 import { Button, Select } from '../../components/ui/Form'
 import { PlacaBadge } from '../../components/ui/Badges'
 import NovaPessoaModal from '../../components/modals/NovaPessoaModal'
-import { motoristaService, tecnicoService, veiculoService, filtro } from '../../services'
+import MecanicoModal from '../../components/modals/MecanicoModal'
+import AcessoMecanicoModal from '../../components/modals/AcessoMecanicoModal'
+import ConfirmarExclusaoModal from '../../components/modals/ConfirmarExclusaoModal'
+import { motoristaService, mecanicoService, veiculoService, filtro } from '../../services'
 
 const TABS = [
   { id: 'motorista', label: 'Motoristas' },
-  { id: 'mecanico', label: 'Técnicos' },
+  { id: 'mecanico', label: 'Mecânicos' },
   { id: 'inativos', label: 'Inativos' },
 ]
 
-const VAZIO = { motoristas: [], tecnicos: [], veiculosLivres: [] }
+const VAZIO = { motoristas: [], mecanicos: [], veiculosLivres: [] }
 
 export default function Pessoas() {
   const [tab, setTab] = useState('motorista')
   const [novoOpen, setNovoOpen] = useState(false)
+  const [mecanicoModal, setMecanicoModal] = useState(null) // { registro } ao cadastrar/editar
+  const [acessoPara, setAcessoPara] = useState(null) // mecânico que vai ganhar login
+  const [removerAcessoDe, setRemoverAcessoDe] = useState(null)
   const [erroVinculo, setErroVinculo] = useState('')
   const [dados, setDados] = useState(VAZIO)
   const [carregando, setCarregando] = useState(true)
@@ -27,11 +33,11 @@ export default function Pessoas() {
     let cancelado = false
     Promise.all([
       motoristaService.listar(),
-      tecnicoService.listar(),
+      mecanicoService.listar(),
       veiculoService.listar(filtro.semVinculo('Motorista')),
     ])
-      .then(([motoristas, tecnicos, semMotorista]) => {
-        if (!cancelado) setDados({ motoristas, tecnicos, veiculosLivres: semMotorista.filter((v) => v.ativo) })
+      .then(([motoristas, mecanicos, semMotorista]) => {
+        if (!cancelado) setDados({ motoristas, mecanicos, veiculosLivres: semMotorista.filter((v) => v.ativo) })
       })
       .catch((e) => { if (!cancelado) setErro(e.message) })
       .finally(() => { if (!cancelado) setCarregando(false) })
@@ -50,11 +56,11 @@ export default function Pessoas() {
   }
 
   const { veiculosLivres } = dados
-  const usuarios = useMemo(() => [...dados.motoristas, ...dados.tecnicos], [dados])
+  const usuarios = useMemo(() => [...dados.motoristas], [dados])
 
   const contagens = {
     motorista: usuarios.filter((u) => u.perfil === 'motorista' && u.ativo).length,
-    mecanico: usuarios.filter((u) => u.perfil === 'mecanico' && u.ativo).length,
+    mecanico: dados.mecanicos.filter((m) => m.ativo).length,
     inativos: usuarios.filter((u) => !u.ativo && u.perfil !== 'gerente').length,
   }
 
@@ -84,8 +90,8 @@ export default function Pessoas() {
         title="Pessoas"
         subtitle="Contas de acesso, CPF e vínculo com veículos"
         action={
-          <Button onClick={() => setNovoOpen(true)}>
-            <Plus size={16} /> Nova pessoa
+          <Button onClick={() => (tab === 'mecanico' ? setMecanicoModal({ registro: null }) : setNovoOpen(true))}>
+            <Plus size={16} /> {tab === 'mecanico' ? 'Novo mecânico' : 'Nova pessoa'}
           </Button>
         }
       />
@@ -106,6 +112,15 @@ export default function Pessoas() {
 
       {erroVinculo && <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erroVinculo}</p>}
 
+      {tab === 'mecanico' ? (
+        <MecanicosGrid
+          mecanicos={dados.mecanicos}
+          onNovo={() => setMecanicoModal({ registro: null })}
+          onEditar={(m) => setMecanicoModal({ registro: m })}
+          onDarAcesso={setAcessoPara}
+          onRemoverAcesso={setRemoverAcessoDe}
+        />
+      ) : (
       <div className="grid grid-cols-3 gap-4">
         {listaFiltrada.map((p) => {
           const veiculo = p.veiculoId ? { id: p.veiculoId, placa: p.veiculoPlaca } : null
@@ -156,18 +171,87 @@ export default function Pessoas() {
           className="flex min-h-[140px] flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-stone-300 text-stone-400 transition hover:border-brand-400 hover:text-brand-600"
         >
           <Plus size={20} />
-          <span className="text-sm font-semibold">Cadastrar {tab === 'mecanico' ? 'técnico' : 'motorista'}</span>
+          <span className="text-sm font-semibold">Cadastrar motorista</span>
           <span className="text-xs">conta de acesso · CPF · veículo</span>
         </button>
       </div>
+      )}
 
       <NovaPessoaModal
         open={novoOpen}
-        perfilInicial={tab === 'mecanico' ? 'mecanico' : 'motorista'}
+        perfilInicial="motorista"
         onClose={() => setNovoOpen(false)}
         onSalvo={recarregar}
       />
+      <MecanicoModal open={!!mecanicoModal} registro={mecanicoModal?.registro} onClose={() => setMecanicoModal(null)} onSalvo={recarregar} />
+      <AcessoMecanicoModal open={!!acessoPara} mecanico={acessoPara} onClose={() => setAcessoPara(null)} onSalvo={recarregar} />
+      <ConfirmarExclusaoModal
+        open={!!removerAcessoDe}
+        onClose={() => setRemoverAcessoDe(null)}
+        titulo="Remover acesso"
+        rotulo="Remover acesso"
+        descricao={`Tirar o login de "${removerAcessoDe?.nome}"? Ele continua no cadastro e no histórico das OS, só não entra mais no sistema.`}
+        onConfirmar={async () => {
+          await mecanicoService.removerAcesso(removerAcessoDe.id)
+          recarregar()
+        }}
+      />
     </>
+  )
+}
+
+// Mecânicos: cadastro (nome e função) e, se precisar, login para consultar pelo celular
+function MecanicosGrid({ mecanicos, onNovo, onEditar, onDarAcesso, onRemoverAcesso }) {
+  const ordenados = [...mecanicos].sort((a, b) => (a.ativo === b.ativo ? a.nome.localeCompare(b.nome) : a.ativo ? -1 : 1))
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      {ordenados.map((m) => (
+        <Card key={m.id} className="p-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className={`font-semibold ${m.ativo ? 'text-stone-900' : 'text-stone-400'}`}>{m.nome}</p>
+              <p className="text-xs text-stone-500">{m.funcao}</p>
+            </div>
+            <span
+              className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
+                !m.ativo
+                  ? 'border-stone-300 bg-stone-50 text-stone-500'
+                  : m.temAcesso
+                  ? 'border-brand-300 bg-brand-50 text-brand-700'
+                  : 'border-amber-300 bg-amber-50 text-amber-700'
+              }`}
+            >
+              {!m.ativo ? 'INATIVO' : m.temAcesso ? 'COM ACESSO' : 'SEM ACESSO'}
+            </span>
+          </div>
+
+          <div className="mt-3 flex items-center justify-between text-sm">
+            <span className="text-stone-400">Login no sistema</span>
+            {m.temAcesso ? (
+              <button type="button" onClick={() => onRemoverAcesso(m)} className="text-xs font-semibold text-red-600 hover:underline">
+                Remover acesso
+              </button>
+            ) : (
+              <button type="button" onClick={() => onDarAcesso(m)} className="text-xs font-semibold text-brand-700 hover:underline">
+                Dar acesso
+              </button>
+            )}
+          </div>
+          <div className="mt-1.5 flex justify-end">
+            <button type="button" onClick={() => onEditar(m)} className="text-xs text-stone-500 hover:underline">Editar</button>
+          </div>
+        </Card>
+      ))}
+
+      <button
+        onClick={onNovo}
+        className="flex min-h-[140px] flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-stone-300 text-stone-400 transition hover:border-brand-400 hover:text-brand-600"
+      >
+        <Plus size={20} />
+        <span className="text-sm font-semibold">Cadastrar mecânico</span>
+        <span className="text-xs">nome · função · acesso opcional</span>
+      </button>
+    </div>
   )
 }
 

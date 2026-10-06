@@ -125,7 +125,7 @@ export default function NovaPessoaModal({ open, onClose, perfilInicial = 'motori
           {error && <p className="text-sm text-red-600">{error}</p>}
           <p className="rounded-lg bg-brand-50 px-3 py-2.5 text-xs text-brand-800">
             A conta é criada com o papel escolhido no passo 2. O CPF e o vínculo com veículo
-            pertencem ao registro de motorista ou técnico.
+            pertencem ao registro de motorista ou mecânico.
           </p>
         </form>
       ) : (
@@ -149,7 +149,7 @@ export default function NovaPessoaModal({ open, onClose, perfilInicial = 'motori
                   perfil === 'mecanico' ? 'border-brand-600 bg-brand-50 text-brand-800' : 'border-stone-300 text-stone-500'
                 }`}
               >
-                Técnico
+                Mecânico
               </button>
             </div>
           </div>

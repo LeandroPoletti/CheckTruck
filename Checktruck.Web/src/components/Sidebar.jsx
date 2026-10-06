@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Truck, Users, LibraryBig, Clock, LogOut,
   Wrench, ClipboardList, UserCircle, MessageSquareWarning,
-  Globe, Factory, Layers, Boxes,
+  Globe, Factory, Layers, Boxes, HardHat,
 } from 'lucide-react'
 import { obterUsuario, sair } from '../services/sessao'
 
@@ -19,6 +19,7 @@ const NAV = {
     { to: '/gerente/fabricantes', label: 'Fabricantes', icon: Factory },
     { to: '/gerente/geracoes', label: 'Gerações', icon: Layers },
     { to: '/gerente/modelos', label: 'Modelos', icon: Boxes },
+    { to: '/gerente/mecanicos', label: 'Mecânicos', icon: HardHat },
   ],
   mecanico: [
     { to: '/mecanico/dashboard', label: 'Dashboard', icon: LayoutDashboard },

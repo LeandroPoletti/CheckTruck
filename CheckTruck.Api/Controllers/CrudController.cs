@@ -21,6 +21,9 @@ public abstract class CrudController<TEntity, TResponseDto>(
     private readonly Func<TEntity, TResponseDto> _toResponseDto = toResponseDto;
     private readonly Func<IQueryable<TEntity>, IQueryable<TEntity>>? _include = include;
 
+    /// <summary>Serviço da entidade, para validações extras nos controllers filhos.</summary>
+    protected ServicoCrud<TEntity> Servico => _servicoCrud;
+
     protected virtual ActionResult<IEnumerable<TResponseDto>> GetODataCore()
     {
         _logger.LogDebug($"Consultando lista de {nomeEntidade} com opções OData");

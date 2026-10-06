@@ -38,10 +38,11 @@ public class MotoristaResumoDto
     public string Cpf { get; set; }
 }
 
-public class TecnicoResumoDto
+public class MecanicoResumoDto
 {
     public long Id { get; set; }
-    public string Cpf { get; set; }
+    public string Nome { get; set; }
+    public string Funcao { get; set; }
 }
 
 public class TipoManutencaoResumoDto
@@ -58,6 +59,6 @@ public static class ResumoDtoExtensions
     public static ModeloResumoDto ToResumoDto(this Modelo entidade) => new() { Id = entidade.Id, Nome = entidade.Nome };
     public static VeiculoResumoDto ToResumoDto(this Veiculo entidade) => new() { Id = entidade.Id, Placa = entidade.Placa };
     public static MotoristaResumoDto ToResumoDto(this Motorista entidade) => new() { Id = entidade.Id, Cpf = entidade.Cpf };
-    public static TecnicoResumoDto ToResumoDto(this Tecnico entidade) => new() { Id = entidade.Id, Cpf = entidade.Cpf };
+    public static MecanicoResumoDto ToResumoDto(this Mecanico entidade) => new() { Id = entidade.Id, Nome = entidade.Nome, Funcao = entidade.Funcao };
     public static TipoManutencaoResumoDto ToResumoDto(this TipoManutencao entidade) => new() { Id = entidade.Id, Nome = entidade.Nome };
 }

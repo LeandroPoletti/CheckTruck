@@ -12,8 +12,10 @@ public class ManutencaoConfiguration : IEntityTypeConfiguration<Manutencao>
         builder.HasOne(m => m.Veiculo).WithMany(v => v.Manutencoes).IsRequired();
         builder.HasOne(m => m.TipoManutencao).WithMany().IsRequired();
         builder.Property(m => m.NumNotaFiscal).IsRequired();
-        builder.Property(m => m.Concessionaria).IsRequired();
-        builder.HasOne(m => m.Tecnico).WithMany(t => t.Manutencoes)
+        builder.HasOne(m => m.Mecanico).WithMany()
             .IsRequired().OnDelete(DeleteBehavior.Restrict);
+        builder.Property(m => m.LancadoPor).IsRequired().HasMaxLength(256);
+        builder.Property(m => m.Concessionaria).IsRequired(false);
+        builder.Property(m => m.Observacao).IsRequired(false);
     }
 }

@@ -9,6 +9,7 @@ import {
 import { Button } from '../../components/ui/Form'
 import AtualizarKmModal from '../../components/modals/AtualizarKmModal'
 import NovoVeiculoModal from '../../components/modals/NovoVeiculoModal'
+import RegistrarManutencaoModal from '../../components/modals/RegistrarManutencaoModal'
 
 const BACK_TO = '/gerente/veiculos'
 
@@ -16,6 +17,7 @@ export default function VeiculoDetalheGerente() {
   const { id } = useParams()
   const [kmOpen, setKmOpen] = useState(false)
   const [editarOpen, setEditarOpen] = useState(false)
+  const [manutencaoOpen, setManutencaoOpen] = useState(false)
   const [dados, setDados] = useState(null)
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState(null)
@@ -76,12 +78,14 @@ export default function VeiculoDetalheGerente() {
         actions={
           <div className="flex gap-2">
             <Button variant="secondary" onClick={() => setKmOpen(true)}>Atualizar km</Button>
-            <Button onClick={() => setEditarOpen(true)}>Editar</Button>
+            <Button variant="secondary" onClick={() => setEditarOpen(true)}>Editar</Button>
+            <Button onClick={() => setManutencaoOpen(true)}>Registrar manutenção</Button>
           </div>
         }
       />
       <AtualizarKmModal open={kmOpen} onClose={() => setKmOpen(false)} veiculo={veiculo} onSalvo={recarregar} />
       <NovoVeiculoModal open={editarOpen} onClose={() => setEditarOpen(false)} veiculoParaEditar={veiculo} onSalvo={recarregar} />
+      <RegistrarManutencaoModal open={manutencaoOpen} onClose={() => setManutencaoOpen(false)} veiculo={veiculo} onSalvo={recarregar} />
     </>
   )
 }

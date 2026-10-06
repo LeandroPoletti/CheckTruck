@@ -3,6 +3,7 @@ using System;
 using CheckTruck.Repositorio;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CheckTruck.Repositorio.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20261006031532_IntervaloPorDataEPorVeiculo")]
+    partial class IntervaloPorDataEPorVeiculo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -171,6 +174,7 @@ namespace CheckTruck.Repositorio.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Concessionaria")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CriadoEm")
@@ -188,23 +192,19 @@ namespace CheckTruck.Repositorio.Migrations
                     b.Property<int>("KmProximaTroca")
                         .HasColumnType("integer");
 
-                    b.Property<string>("LancadoPor")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<long>("MecanicoId")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("NumNotaFiscal")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Observacao")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("RealizadoEm")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("TecnicoId")
+                        .HasColumnType("bigint");
 
                     b.Property<long>("TipoManutencaoId")
                         .HasColumnType("bigint");
@@ -214,45 +214,13 @@ namespace CheckTruck.Repositorio.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MecanicoId");
+                    b.HasIndex("TecnicoId");
 
                     b.HasIndex("TipoManutencaoId");
 
                     b.HasIndex("VeiculoId");
 
                     b.ToTable("Manutencoes");
-                });
-
-            modelBuilder.Entity("CheckTruck.Dominio.Entidades.Mecanico", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Funcao")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
-
-                    b.Property<string>("UsuarioGuid")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UsuarioGuid")
-                        .IsUnique();
-
-                    b.ToTable("Mecanicos");
                 });
 
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.Modelo", b =>
@@ -330,6 +298,31 @@ namespace CheckTruck.Repositorio.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Paises");
+                });
+
+            modelBuilder.Entity("CheckTruck.Dominio.Entidades.Tecnico", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Cpf")
+                        .IsRequired()
+                        .HasMaxLength(14)
+                        .HasColumnType("character varying(14)");
+
+                    b.Property<string>("UsuarioGuid")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioGuid")
+                        .IsUnique();
+
+                    b.ToTable("Tecnicos");
                 });
 
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.TipoManutencao", b =>
@@ -673,9 +666,9 @@ namespace CheckTruck.Repositorio.Migrations
 
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.Manutencao", b =>
                 {
-                    b.HasOne("CheckTruck.Dominio.Entidades.Mecanico", "Mecanico")
-                        .WithMany()
-                        .HasForeignKey("MecanicoId")
+                    b.HasOne("CheckTruck.Dominio.Entidades.Tecnico", "Tecnico")
+                        .WithMany("Manutencoes")
+                        .HasForeignKey("TecnicoId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -691,19 +684,11 @@ namespace CheckTruck.Repositorio.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Mecanico");
+                    b.Navigation("Tecnico");
 
                     b.Navigation("TipoManutencao");
 
                     b.Navigation("Veiculo");
-                });
-
-            modelBuilder.Entity("CheckTruck.Dominio.Entidades.Mecanico", b =>
-                {
-                    b.HasOne("CheckTruck.Repositorio.Entidades.Usuario", null)
-                        .WithOne("Mecanico")
-                        .HasForeignKey("CheckTruck.Dominio.Entidades.Mecanico", "UsuarioGuid")
-                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.Modelo", b =>
@@ -722,6 +707,15 @@ namespace CheckTruck.Repositorio.Migrations
                     b.HasOne("CheckTruck.Repositorio.Entidades.Usuario", null)
                         .WithOne("Motorista")
                         .HasForeignKey("CheckTruck.Dominio.Entidades.Motorista", "UsuarioGuid")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CheckTruck.Dominio.Entidades.Tecnico", b =>
+                {
+                    b.HasOne("CheckTruck.Repositorio.Entidades.Usuario", null)
+                        .WithOne("Tecnico")
+                        .HasForeignKey("CheckTruck.Dominio.Entidades.Tecnico", "UsuarioGuid")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -822,6 +816,11 @@ namespace CheckTruck.Repositorio.Migrations
                     b.Navigation("Fabricantes");
                 });
 
+            modelBuilder.Entity("CheckTruck.Dominio.Entidades.Tecnico", b =>
+                {
+                    b.Navigation("Manutencoes");
+                });
+
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.TipoManutencao", b =>
                 {
                     b.Navigation("IntervaloRecomendados");
@@ -834,9 +833,9 @@ namespace CheckTruck.Repositorio.Migrations
 
             modelBuilder.Entity("CheckTruck.Repositorio.Entidades.Usuario", b =>
                 {
-                    b.Navigation("Mecanico");
-
                     b.Navigation("Motorista");
+
+                    b.Navigation("Tecnico");
                 });
 #pragma warning restore 612, 618
         }

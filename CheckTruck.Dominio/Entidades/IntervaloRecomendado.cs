@@ -12,6 +12,8 @@ public class IntervaloRecomendado : EntidadeBanco
     public TipoManutencao TipoManutencao { get; set; }
     public int IntervaloKm { get; set; }
     public int IntervaloKmPrimeira { get; set; }
+    /// <summary>Prazo máximo entre trocas, em meses. 0 = vence só por km.</summary>
+    public int IntervaloMeses { get; set; }
     public string Fonte { get; set; }
     public string Observacao { get; set; }
 }

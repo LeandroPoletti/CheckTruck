@@ -154,7 +154,9 @@ export const registroFromApi = (dto) => ({
   id: toId(dto.id),
   veiculoId: toId(dto.veiculo?.id),
   tipoId: toId(dto.tipoManutencao?.id),
-  tecnicoId: toId(dto.tecnico?.id),
+  mecanicoId: toId(dto.mecanico?.id),
+  mecanicoNome: dto.mecanico?.nome ?? null,
+  mecanicoFuncao: dto.mecanico?.funcao ?? null,
   kmNaTroca: dto.kmAtual,
   kmProximaTroca: dto.kmProximaTroca,
   dataRealizacao: dataDaApi(dto.realizadoEm),
@@ -163,19 +165,21 @@ export const registroFromApi = (dto) => ({
   nrNotaFiscal: dto.numNotaFiscal,
   concessionaria: dto.concessionaria,
   observacoes: dto.observacao,
+  lancadoPor: dto.lancadoPor, // login de quem lançou a OS
+  lancadoEm: dto.lancadoEm, // data e hora do lançamento
 })
 export const registroToApi = (r) => ({
   veiculoId: toApiId(r.veiculoId),
   tipoManutencaoId: toApiId(r.tipoId),
-  tecnicoId: toApiId(r.tecnicoId),
+  mecanicoId: toApiId(r.mecanicoId),
   realizadoEm: dataParaApi(r.dataRealizacao),
   dataProximaTroca: dataParaApi(r.dataProximaTroca),
   kmAtual: Number(r.kmNaTroca) || 0,
   kmProximaTroca: Number(r.kmProximaTroca) || 0,
   isPrimeiraTroca: !!r.isPrimeiraTroca,
   numNotaFiscal: r.nrNotaFiscal,
-  concessionaria: r.concessionaria,
-  observacao: r.observacoes ?? '',
+  concessionaria: r.concessionaria ?? null,
+  observacao: r.observacoes ?? null,
 })
 
 // ---------------------------------------------------------------------------
@@ -206,7 +210,7 @@ export const dashboardFromApi = (dto) => ({
 })
 
 // ---------------------------------------------------------------------------
-// Pessoas — Motorista e Tecnico só têm usuarioGuid + cpf na API.
+// Pessoas — Motorista só tem usuarioGuid + cpf na API.
 // Nome, e-mail e status virão de GET /api/Usuario (pendente); até lá o CPF identifica a pessoa.
 // ---------------------------------------------------------------------------
 function pessoaFromApi(perfil, dto) {
@@ -226,5 +230,14 @@ function pessoaFromApi(perfil, dto) {
 }
 
 export const motoristaFromApi = (dto) => pessoaFromApi('motorista', dto)
-export const tecnicoFromApi = (dto) => pessoaFromApi('mecanico', dto)
 export const pessoaToApi = (p) => ({ usuarioGuid: p.usuarioGuid, cpf: p.cpf })
+
+// Mecânicos — cadastro simples (nome e função), sem login. Usado na OS.
+export const mecanicoFromApi = (dto) => ({
+  id: toId(dto.id),
+  nome: dto.nome,
+  funcao: dto.funcao,
+  ativo: dto.ativo,
+  temAcesso: !!dto.temAcesso, // tem login para consultar pelo celular
+})
+export const mecanicoToApi = (m) => ({ nome: m.nome, funcao: m.funcao, ativo: m.ativo ?? true })

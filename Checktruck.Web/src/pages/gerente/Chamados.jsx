@@ -4,7 +4,7 @@ import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../.
 import { ChamadoStatusBadge, UrgenciaBadge, PlacaBadge } from '../../components/ui/Badges'
 import { Select } from '../../components/ui/Form'
 import { formatDataHora } from '../../data/domain'
-import { chamadoService, veiculoService, motoristaService, tecnicoService } from '../../services'
+import { chamadoService, veiculoService, motoristaService } from '../../services'
 
 const VAZIO = { chamados: [], veiculos: [], usuarios: [] }
 
@@ -22,10 +22,9 @@ export default function GerenteChamados() {
       chamadoService.listar(),
       veiculoService.listar(),
       motoristaService.listar(),
-      tecnicoService.listar(),
     ])
-      .then(([chamados, veiculos, motoristas, tecnicos]) => {
-        if (!cancelado) setDados({ chamados, veiculos, usuarios: [...motoristas, ...tecnicos] })
+      .then(([chamados, veiculos, motoristas]) => {
+        if (!cancelado) setDados({ chamados, veiculos, usuarios: [...motoristas] })
       })
       .catch((e) => { if (!cancelado) setErro(e.message) })
       .finally(() => { if (!cancelado) setCarregando(false) })
@@ -87,7 +86,7 @@ export default function GerenteChamados() {
                     </div>
                     <p className="mt-1 text-sm text-stone-600">{c.descricao}</p>
                     <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-400">
-                      <span>{autor?.nome} · {autor?.perfil === 'mecanico' ? 'Técnico' : 'Motorista'}</span>
+                      <span>{autor?.nome} · {autor?.perfil === 'mecanico' ? 'Mecânico' : 'Motorista'}</span>
                       <span>{formatDataHora(c.criadoEm)}</span>
                       {veiculo && (
                         <button onClick={() => navigate(`/gerente/veiculos/${veiculo.id}`)}>

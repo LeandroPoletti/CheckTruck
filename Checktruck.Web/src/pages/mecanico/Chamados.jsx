@@ -7,7 +7,7 @@ import { Button, Select } from '../../components/ui/Form'
 import { formatDataHora } from '../../data/domain'
 import NovoChamadoModal from '../../components/modals/NovoChamadoModal'
 import { obterUsuario } from '../../services/sessao'
-import { chamadoService, veiculoService, motoristaService, tecnicoService } from '../../services'
+import { chamadoService, veiculoService, motoristaService } from '../../services'
 
 const VAZIO = { chamados: [], veiculos: [], usuarios: [] }
 
@@ -27,10 +27,9 @@ export default function MecanicoChamados() {
       chamadoService.listar(),
       veiculoService.listar(),
       motoristaService.listar(),
-      tecnicoService.listar(),
     ])
-      .then(([chamados, veiculos, motoristas, tecnicos]) => {
-        if (!cancelado) setDados({ chamados, veiculos, usuarios: [...motoristas, ...tecnicos] })
+      .then(([chamados, veiculos, motoristas]) => {
+        if (!cancelado) setDados({ chamados, veiculos, usuarios: [...motoristas] })
       })
       .catch((e) => { if (!cancelado) setErro(e.message) })
       .finally(() => { if (!cancelado) setCarregando(false) })

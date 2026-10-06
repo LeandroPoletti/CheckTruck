@@ -18,7 +18,8 @@ public class ServicoDashboard(ServicoSituacaoVeiculo servicoSituacao, ILogger<Se
 
         var alertas = veiculos
             .Where(v => v.ItemMaisUrgente is { Status: not StatusManutencao.Ok })
-            .OrderBy(v => v.ItemMaisUrgente!.KmRestante)
+            .OrderByDescending(v => v.ItemMaisUrgente!.Status)
+            .ThenBy(v => v.ItemMaisUrgente!.KmRestante)
             .Select(v => new AlertaManutencao
             {
                 VeiculoId = v.VeiculoId,
@@ -30,6 +31,8 @@ public class ServicoDashboard(ServicoSituacaoVeiculo servicoSituacao, ILogger<Se
                 TipoManutencaoNome = v.ItemMaisUrgente.TipoManutencaoNome,
                 KmProximaTroca = v.ItemMaisUrgente.KmProximaTroca,
                 KmRestante = v.ItemMaisUrgente.KmRestante,
+                DataProximaTroca = v.ItemMaisUrgente.DataProximaTroca,
+                DiasRestantes = v.ItemMaisUrgente.DiasRestantes,
                 IsPrimeiraTroca = v.ItemMaisUrgente.IsPrimeiraTroca,
                 Status = v.ItemMaisUrgente.Status,
             });
@@ -38,6 +41,7 @@ public class ServicoDashboard(ServicoSituacaoVeiculo servicoSituacao, ILogger<Se
         {
             FrotaAtiva = veiculos.Count,
             MargemAlertaKm = ServicoSituacaoVeiculo.MargemAlertaKm,
+            MargemAlertaDias = ServicoSituacaoVeiculo.MargemAlertaDias,
             QuantidadeOk = veiculos.Count(v => v.Status == StatusManutencao.Ok),
             QuantidadeAtencao = veiculos.Count(v => v.Status == StatusManutencao.Atencao),
             QuantidadeCritico = veiculos.Count(v => v.Status == StatusManutencao.Critico),
