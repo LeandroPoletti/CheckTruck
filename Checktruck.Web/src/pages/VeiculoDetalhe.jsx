@@ -10,11 +10,14 @@ import { Button } from '../components/ui/Form'
 import AtualizarKmModal from '../components/modals/AtualizarKmModal'
 import NovoVeiculoModal from '../components/modals/NovoVeiculoModal'
 import RegistrarManutencaoModal from '../components/modals/RegistrarManutencaoModal'
+import { obterUsuario } from '../services/sessao'
+import { pode } from '../data/acesso'
 
 const BACK_TO = '/veiculos'
 
 export default function VeiculoDetalhe() {
   const { id } = useParams()
+  const usuario = obterUsuario()
   const [kmOpen, setKmOpen] = useState(false)
   const [editarOpen, setEditarOpen] = useState(false)
   const [manutencaoOpen, setManutencaoOpen] = useState(false)
@@ -75,9 +78,15 @@ export default function VeiculoDetalhe() {
         backTo={BACK_TO}
         actions={
           <div className="flex gap-2">
-            <Button variant="secondary" onClick={() => setKmOpen(true)}>Atualizar km</Button>
-            <Button variant="secondary" onClick={() => setEditarOpen(true)}>Editar</Button>
-            <Button onClick={() => setManutencaoOpen(true)}>Registrar manutenção</Button>
+            {pode(usuario, 'AtualizarKm') && (
+              <Button variant="secondary" onClick={() => setKmOpen(true)}>Atualizar km</Button>
+            )}
+            {pode(usuario, 'Veiculos') && (
+              <Button variant="secondary" onClick={() => setEditarOpen(true)}>Editar</Button>
+            )}
+            {pode(usuario, 'OrdemServico') && (
+              <Button onClick={() => setManutencaoOpen(true)}>Registrar manutenção</Button>
+            )}
           </div>
         }
       />

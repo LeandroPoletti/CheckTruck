@@ -1,3 +1,4 @@
+using CheckTruck.Api.Acesso;
 using CheckTruck.Api.Dtos.Veiculos;
 using CheckTruck.Dominio.Entidades;
 using CheckTruck.Dominio.Enums;
@@ -7,8 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CheckTruck.Api.Controllers;
 
+// Ver: Ver frota. Criar, editar e apagar: Veículos. Somar km: Atualizar km
 [ApiController]
 [Route("api/[controller]")]
+[ExigePermissao(Permissao.VerFrota)]
 public class VeiculoController(
     ServicoVeiculo servicoVeiculo,
     ServicoSituacaoVeiculo servicoSituacao,
@@ -54,6 +57,7 @@ public class VeiculoController(
     public ActionResult<VeiculoResponseDto> GetById(long id) => GetByIdCore(id);
 
     [HttpPost]
+    [ExigePermissao(Permissao.Veiculos)]
     public async Task<ActionResult<VeiculoResponseDto>> Post([FromBody] VeiculoRequestDto dto)
     {
         var modelo = servicoModelo.GetById(dto.ModeloId);
@@ -72,6 +76,7 @@ public class VeiculoController(
     }
 
     [HttpPut("{id:long}")]
+    [ExigePermissao(Permissao.Veiculos)]
     public async Task<ActionResult<VeiculoResponseDto>> Put(long id, [FromBody] VeiculoRequestDto dto)
     {
         var modelo = servicoModelo.GetById(dto.ModeloId);
@@ -90,9 +95,11 @@ public class VeiculoController(
     }
 
     [HttpDelete("{id:long}")]
+    [ExigePermissao(Permissao.Veiculos)]
     public IActionResult Delete(long id) => DeleteCore(id);
 
     [HttpPut("{id:long}/kilometragem")]
+    [ExigePermissao(Permissao.AtualizarKm)]
     public IActionResult AtualizarKilometragem(long id, [FromBody] int distancia)
     {
         var res = servicoVeiculo.AtualizarKmVeiculo(id, distancia);

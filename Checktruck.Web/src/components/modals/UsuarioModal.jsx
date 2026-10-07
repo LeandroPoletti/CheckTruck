@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Modal } from '../ui/Overlay'
 import { Field, Input, Select, Toggle, Button } from '../ui/Form'
 import { usuarioService } from '../../services'
-import { CARGOS, CARGOS_GESTAO, PERMISSOES, PERMISSAO_BASE } from '../../data/acesso'
+import { CARGOS, CARGOS_GESTAO, PERMISSOES, PERMISSAO_BASE, DEPENDEM_DA_BASE } from '../../data/acesso'
 
 // Cadastro e edição de acesso. Quem abre só renderiza este modal quando ele está aberto,
 // então o formulário já nasce com os dados do acesso (ou vazio, no cadastro).
@@ -23,8 +23,8 @@ export default function UsuarioModal({ usuario, onClose, onSalvo }) {
 
   // Admin e Gestor podem tudo: as permissões nem aparecem para ligar
   const gestao = CARGOS_GESTAO.includes(form.cargo)
-  // "Ver frota" fica travada enquanto outra permissão estiver ligada
-  const baseTravada = form.permissoes.some((p) => p !== PERMISSAO_BASE)
+  // "Ver frota" fica travada enquanto Veículos, Atualizar km ou Ordem de serviço estiver ligada
+  const baseTravada = form.permissoes.some((p) => DEPENDEM_DA_BASE.includes(p))
 
   function set(campo, valor) {
     setForm((f) => ({ ...f, [campo]: valor }))
@@ -33,7 +33,7 @@ export default function UsuarioModal({ usuario, onClose, onSalvo }) {
   function alternarPermissao(id, ligar) {
     setForm((f) => {
       const permissoes = ligar ? [...f.permissoes, id] : f.permissoes.filter((p) => p !== id)
-      if (ligar && !permissoes.includes(PERMISSAO_BASE)) permissoes.push(PERMISSAO_BASE)
+      if (ligar && DEPENDEM_DA_BASE.includes(id) && !permissoes.includes(PERMISSAO_BASE)) permissoes.push(PERMISSAO_BASE)
       return { ...f, permissoes }
     })
   }

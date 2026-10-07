@@ -6,10 +6,13 @@ import {
   manutencaoService, tipoManutencaoService, intervaloService, mecanicoService, filtro,
 } from '../../services'
 import MecanicoModal from './MecanicoModal'
+import { obterUsuario } from '../../services/sessao'
+import { pode } from '../../data/acesso'
 
 const LISTAS_VAZIAS = { tiposManutencao: [], intervalos: [], registros: [], mecanicos: [] }
 
 export default function RegistrarManutencaoModal({ open, onClose, veiculo, onSalvo }) {
+  const podeCadastrarMecanico = pode(obterUsuario(), 'Cadastros')
   const [listas, setListas] = useState(LISTAS_VAZIAS)
   const [carregando, setCarregando] = useState(false)
   const [erroCarga, setErroCarga] = useState(null)
@@ -152,10 +155,14 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo, onSal
                 <option key={m.id} value={m.id}>{m.nome} — {m.funcao}</option>
               ))}
             </Select>
-            <Button type="button" variant="secondary" onClick={() => setNovoMecanicoOpen(true)}>+ Novo</Button>
+            {podeCadastrarMecanico && (
+              <Button type="button" variant="secondary" onClick={() => setNovoMecanicoOpen(true)}>+ Novo</Button>
+            )}
           </div>
           {!carregando && mecanicos.length === 0 && (
-            <p className="mt-1.5 text-xs text-amber-600">Nenhum mecânico cadastrado. Use “+ Novo” para cadastrar.</p>
+            <p className="mt-1.5 text-xs text-amber-600">
+              {podeCadastrarMecanico ? 'Nenhum mecânico cadastrado. Use “+ Novo” para cadastrar.' : 'Nenhum mecânico cadastrado. Peça para quem cuida dos cadastros.'}
+            </p>
           )}
         </Field>
 

@@ -161,9 +161,9 @@ public class ServicoUsuario(UserManager<Usuario> userManager)
         {
             Mensagens.Add("Ligue pelo menos uma permissão.");
         }
-        else
+        else if ((usuario.Permissoes & PermissaoUtil.DependemDeVerFrota) != 0)
         {
-            usuario.Permissoes |= Permissao.VerFrota; // quem faz qualquer coisa precisa ver a frota
+            usuario.Permissoes |= Permissao.VerFrota; // veículos, km e OS ficam dentro da tela de veículos
         }
     }
 

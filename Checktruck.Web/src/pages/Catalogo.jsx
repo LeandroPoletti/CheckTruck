@@ -6,10 +6,14 @@ import { fabricanteService, geracaoService, modeloService, veiculoService, inter
 import FabricanteModal from '../components/modals/FabricanteModal'
 import GeracaoModal from '../components/modals/GeracaoModal'
 import ModeloModal from '../components/modals/ModeloModal'
+import { obterUsuario } from '../services/sessao'
+import { pode } from '../data/acesso'
 
 const VAZIO = { fabricantes: [], geracoes: [], modelos: [], veiculos: [], intervalos: [] }
 
 export default function Catalogo() {
+  // A contagem de veículos por modelo só aparece para quem vê a frota
+  const verFrota = pode(obterUsuario(), 'VerFrota')
   const [selecionadoId, setFabricanteId] = useState(null)
   const [geracaoId, setGeracaoId] = useState(null)
   const [dados, setDados] = useState(VAZIO)
@@ -24,7 +28,7 @@ export default function Catalogo() {
       fabricanteService.listar(),
       geracaoService.listar(),
       modeloService.listar(),
-      veiculoService.listar(),
+      verFrota ? veiculoService.listar() : [],
       intervaloService.listar(),
     ])
       .then(([fabricantes, geracoes, modelos, veiculos, intervalos]) => {
@@ -33,7 +37,7 @@ export default function Catalogo() {
       .catch((e) => { if (!cancelado) setErro(e.message) })
       .finally(() => { if (!cancelado) setCarregando(false) })
     return () => { cancelado = true }
-  }, [versao])
+  }, [versao, verFrota])
 
   // Após salvar: atualiza em segundo plano, sem desmontar a tela
   function recarregar() {
@@ -164,7 +168,7 @@ export default function Catalogo() {
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-stone-900">{m.nome}</span>
                   <span className="text-xs text-stone-400">
-                    {veiculosDoModelo(m.id)} veículos · {intervalosDoModelo(m.id)} intervalos
+                    {verFrota && `${veiculosDoModelo(m.id)} veículos · `}{intervalosDoModelo(m.id)} intervalos
                   </span>
                 </div>
                 <div className="mt-2 grid grid-cols-4 gap-2 text-center text-xs text-stone-500">

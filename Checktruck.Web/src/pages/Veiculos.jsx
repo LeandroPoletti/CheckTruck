@@ -7,9 +7,12 @@ import { Search, Plus } from 'lucide-react'
 import { formatKm } from '../data/domain'
 import NovoVeiculoModal from '../components/modals/NovoVeiculoModal'
 import { veiculoService } from '../services'
+import { obterUsuario } from '../services/sessao'
+import { pode } from '../data/acesso'
 
 export default function Veiculos() {
   const navigate = useNavigate()
+  const podeCadastrar = pode(obterUsuario(), 'Veiculos')
   const [veiculos, setVeiculos] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState(null)
@@ -68,11 +71,11 @@ export default function Veiculos() {
       <PageHeader
         title="Veículos"
         subtitle={`${ativos} ativos · ${inativos} desativado${inativos === 1 ? '' : 's'}`}
-        action={
+        action={podeCadastrar && (
           <Button onClick={() => setNovoOpen(true)}>
             <Plus size={16} /> Novo veículo
           </Button>
-        }
+        )}
       />
 
       <div className="mb-5 flex gap-3">
@@ -141,14 +144,16 @@ export default function Veiculos() {
           )
         })}
 
-        <button
-          onClick={() => setNovoOpen(true)}
-          className="flex min-h-[190px] flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-stone-300 text-stone-400 transition hover:border-brand-400 hover:text-brand-600"
-        >
-          <Plus size={22} />
-          <span className="text-sm font-semibold">Cadastrar veículo</span>
-          <span className="text-xs">placa · chassi · modelo obrigatório</span>
-        </button>
+        {podeCadastrar && (
+          <button
+            onClick={() => setNovoOpen(true)}
+            className="flex min-h-[190px] flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-stone-300 text-stone-400 transition hover:border-brand-400 hover:text-brand-600"
+          >
+            <Plus size={22} />
+            <span className="text-sm font-semibold">Cadastrar veículo</span>
+            <span className="text-xs">placa · chassi · modelo obrigatório</span>
+          </button>
+        )}
       </div>
 
       <NovoVeiculoModal open={novoOpen} onClose={() => setNovoOpen(false)} onSalvo={recarregar} />

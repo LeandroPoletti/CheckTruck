@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Form'
 import { formatKm } from '../data/domain'
 import { dashboardService } from '../services'
 import { obterUsuario } from '../services/sessao'
+import { pode } from '../data/acesso'
 import NovoVeiculoModal from '../components/modals/NovoVeiculoModal'
 import UsuarioModal from '../components/modals/UsuarioModal'
 import MecanicoModal from '../components/modals/MecanicoModal'
@@ -15,6 +16,12 @@ const LIMITE_ALERTAS = 5
 export default function Dashboard() {
   const navigate = useNavigate()
   const usuario = obterUsuario()
+  // Atalhos de cadastro: cada um só para quem tem a permissão dele
+  const atalhos = {
+    veiculo: pode(usuario, 'Veiculos'),
+    acesso: usuario.cuidaDosAcessos,
+    mecanico: pode(usuario, 'Cadastros'),
+  }
   const [dados, setDados] = useState(null)
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState(null)
@@ -124,22 +131,28 @@ export default function Dashboard() {
         </Card>
 
         <div className="space-y-6">
-          <Card className="p-5">
-            <h3 className="mb-4 font-semibold text-stone-900">Cadastros rápidos</h3>
-            <div className="space-y-2">
-              <Button className="w-full justify-center" onClick={() => setNovoVeiculoOpen(true)}>
-                Novo veículo
-              </Button>
-              {usuario.cuidaDosAcessos && (
-                <Button variant="secondary" className="w-full justify-center" onClick={() => setNovoAcessoOpen(true)}>
-                  Novo acesso
-                </Button>
-              )}
-              <Button variant="secondary" className="w-full justify-center" onClick={() => setNovoMecanicoOpen(true)}>
-                Novo mecânico
-              </Button>
-            </div>
-          </Card>
+          {(atalhos.veiculo || atalhos.acesso || atalhos.mecanico) && (
+            <Card className="p-5">
+              <h3 className="mb-4 font-semibold text-stone-900">Cadastros rápidos</h3>
+              <div className="space-y-2">
+                {atalhos.veiculo && (
+                  <Button className="w-full justify-center" onClick={() => setNovoVeiculoOpen(true)}>
+                    Novo veículo
+                  </Button>
+                )}
+                {atalhos.acesso && (
+                  <Button variant="secondary" className="w-full justify-center" onClick={() => setNovoAcessoOpen(true)}>
+                    Novo acesso
+                  </Button>
+                )}
+                {atalhos.mecanico && (
+                  <Button variant="secondary" className="w-full justify-center" onClick={() => setNovoMecanicoOpen(true)}>
+                    Novo mecânico
+                  </Button>
+                )}
+              </div>
+            </Card>
+          )}
 
           <Card className="p-5">
             <h3 className="mb-4 font-semibold text-stone-900">Frota por geração</h3>

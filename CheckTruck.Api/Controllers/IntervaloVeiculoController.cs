@@ -1,5 +1,7 @@
+using CheckTruck.Api.Acesso;
 using CheckTruck.Api.Dtos.IntervalosVeiculo;
 using CheckTruck.Dominio.Entidades;
+using CheckTruck.Dominio.Enums;
 using CheckTruck.Dominio.Servicos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,9 +11,11 @@ namespace CheckTruck.Api.Controllers;
 /// <summary>
 /// Intervalos próprios de um caminhão (ex.: plano da concessionária). Têm prioridade sobre o
 /// intervalo do modelo e sobre o padrão seguro. Filtro útil: ?$filter=Veiculo/Id eq 5
+/// Ler: basta estar logado (a situação dos caminhões usa os intervalos). Criar, editar e apagar: Intervalos
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[ExigePermissao]
 public class IntervaloVeiculoController(
     ServicoCrud<IntervaloVeiculo> servicoCrud,
     ServicoCrud<Veiculo> servicoVeiculo,
@@ -29,6 +33,7 @@ public class IntervaloVeiculoController(
     public ActionResult<IntervaloVeiculoResponseDto> GetById(long id) => GetByIdCore(id);
 
     [HttpPost]
+    [ExigePermissao(Permissao.Intervalos)]
     public ActionResult<IntervaloVeiculoResponseDto> Post([FromBody] IntervaloVeiculoRequestDto dto)
     {
         var (veiculo, tipoManutencao, erro) = ResolverRelacionados(dto);
@@ -49,6 +54,7 @@ public class IntervaloVeiculoController(
     }
 
     [HttpPut("{id:long}")]
+    [ExigePermissao(Permissao.Intervalos)]
     public ActionResult<IntervaloVeiculoResponseDto> Put(long id, [FromBody] IntervaloVeiculoRequestDto dto)
     {
         var (veiculo, tipoManutencao, erro) = ResolverRelacionados(dto);
@@ -61,6 +67,7 @@ public class IntervaloVeiculoController(
     }
 
     [HttpDelete("{id:long}")]
+    [ExigePermissao(Permissao.Intervalos)]
     public IActionResult Delete(long id) => DeleteCore(id);
 
     private (Veiculo? veiculo, TipoManutencao? tipoManutencao, string? erro) ResolverRelacionados(IntervaloVeiculoRequestDto dto)

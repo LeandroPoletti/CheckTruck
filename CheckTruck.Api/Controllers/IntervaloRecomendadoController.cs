@@ -1,13 +1,17 @@
+using CheckTruck.Api.Acesso;
 using CheckTruck.Api.Dtos.IntervalosRecomendados;
 using CheckTruck.Dominio.Entidades;
+using CheckTruck.Dominio.Enums;
 using CheckTruck.Dominio.Servicos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CheckTruck.Api.Controllers;
 
+// Ler: basta estar logado (a situação dos caminhões usa os intervalos). Criar, editar e apagar: Intervalos
 [ApiController]
 [Route("api/[controller]")]
+[ExigePermissao]
 public class IntervaloRecomendadoController(
     ServicoCrud<IntervaloRecomendado> servicoCrud,
     ServicoCrud<Modelo> servicoModelo,
@@ -25,6 +29,7 @@ public class IntervaloRecomendadoController(
     public ActionResult<IntervaloRecomendadoResponseDto> GetById(long id) => GetByIdCore(id);
 
     [HttpPost]
+    [ExigePermissao(Permissao.Intervalos)]
     public ActionResult<IntervaloRecomendadoResponseDto> Post([FromBody] IntervaloRecomendadoRequestDto dto)
     {
         var modelo = servicoModelo.GetById(dto.ModeloId);
@@ -43,6 +48,7 @@ public class IntervaloRecomendadoController(
     }
 
     [HttpPut("{id:long}")]
+    [ExigePermissao(Permissao.Intervalos)]
     public ActionResult<IntervaloRecomendadoResponseDto> Put(long id, [FromBody] IntervaloRecomendadoRequestDto dto)
     {
         var modelo = servicoModelo.GetById(dto.ModeloId);
@@ -61,5 +67,6 @@ public class IntervaloRecomendadoController(
     }
 
     [HttpDelete("{id:long}")]
+    [ExigePermissao(Permissao.Intervalos)]
     public IActionResult Delete(long id) => DeleteCore(id);
 }

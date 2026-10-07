@@ -14,8 +14,13 @@ public abstract class FiltroDeAcessoAttribute : Attribute, IAsyncAuthorizationFi
 {
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
-        var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<Usuario>>();
-        var usuario = await userManager.GetUserAsync(context.HttpContext.User);
+        // O controller e a rota podem ter um filtro cada: o segundo reaproveita o usuário que o primeiro carregou
+        if (context.HttpContext.Items[typeof(Usuario)] is not Usuario usuario)
+        {
+            var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<Usuario>>();
+            usuario = await userManager.GetUserAsync(context.HttpContext.User);
+        }
+
         if (usuario is null || !usuario.Ativo)
         {
             context.Result = new UnauthorizedResult();

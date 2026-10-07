@@ -1,13 +1,17 @@
+using CheckTruck.Api.Acesso;
 using CheckTruck.Api.Dtos.GeracoesModelo;
 using CheckTruck.Dominio.Entidades;
+using CheckTruck.Dominio.Enums;
 using CheckTruck.Dominio.Servicos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CheckTruck.Api.Controllers;
 
+// Ler: basta estar logado (os formulários usam a lista). Criar, editar e apagar: Cadastros
 [ApiController]
 [Route("api/[controller]")]
+[ExigePermissao]
 public class GeracaoModeloController(
     ServicoCrud<GeracaoModelo> servicoCrud,
     ServicoCrud<Fabricante> servicoFabricante,
@@ -25,6 +29,7 @@ public class GeracaoModeloController(
     public ActionResult<GeracaoModeloResponseDto> GetById(long id) => GetByIdCore(id);
 
     [HttpPost]
+    [ExigePermissao(Permissao.Cadastros)]
     public ActionResult<GeracaoModeloResponseDto> Post([FromBody] GeracaoModeloRequestDto dto)
     {
         var fabricante = servicoFabricante.GetById(dto.FabricanteId);
@@ -37,6 +42,7 @@ public class GeracaoModeloController(
     }
 
     [HttpPut("{id:long}")]
+    [ExigePermissao(Permissao.Cadastros)]
     public ActionResult<GeracaoModeloResponseDto> Put(long id, [FromBody] GeracaoModeloRequestDto dto)
     {
         var fabricante = servicoFabricante.GetById(dto.FabricanteId);
@@ -49,6 +55,7 @@ public class GeracaoModeloController(
     }
 
     [HttpDelete("{id:long}")]
+    [ExigePermissao(Permissao.Cadastros)]
     public IActionResult Delete(long id)
     {
         var modelos = servicoModelo.Query(m => m.Geracao.Id == id).Count();

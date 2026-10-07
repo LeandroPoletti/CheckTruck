@@ -39,5 +39,5 @@ export const PAGINAS = [
 // Itens do menu que a pessoa pode usar
 export const itensDoMenu = (usuario) => PAGINAS.filter((p) => p.label && pode(usuario, p.permissao))
 
-// Primeira tela do menu que a pessoa pode usar (todo acesso tem pelo menos "Ver frota")
+// Primeira tela do menu que a pessoa pode usar (toda permissão abre pelo menos uma tela)
 export const paginaInicial = (usuario) => itensDoMenu(usuario)[0]?.path ?? '/dashboard'

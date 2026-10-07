@@ -8,8 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CheckTruck.Api.Controllers;
 
+// Ver o histórico: Ver frota. Lançar, corrigir e apagar OS: Ordem de serviço
 [ApiController]
 [Route("api/[controller]")]
+[ExigePermissao(Permissao.VerFrota)]
 public class ManutencaoController(
     ServicoManutencao servicoManutencao,
     ServicoCrud<Veiculo> servicoVeiculo,

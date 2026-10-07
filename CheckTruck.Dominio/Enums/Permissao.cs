@@ -12,7 +12,7 @@ public enum Permissao
 {
     Nenhuma = 0,
 
-    /// <summary>Dashboard, lista e detalhe dos veículos. Quem tem qualquer outra permissão tem esta também.</summary>
+    /// <summary>Dashboard, lista e detalhe dos veículos (e o histórico de OS).</summary>
     VerFrota = 1 << 0,
 
     /// <summary>Cadastrar e editar veículos.</summary>

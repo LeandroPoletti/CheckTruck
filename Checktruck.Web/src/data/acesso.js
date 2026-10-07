@@ -25,8 +25,9 @@ export const PERMISSOES = [
   { id: 'AtenderChamados', nome: 'Atender chamados', descricao: 'Ver todos, atender e resolver' },
 ]
 
-// Quem faz qualquer coisa precisa ver a frota: ligar outra permissão já liga esta junto
+// Veículos, km e OS ficam dentro da tela de veículos: ligar uma delas já liga "Ver frota" junto
 export const PERMISSAO_BASE = 'VerFrota'
+export const DEPENDEM_DA_BASE = ['Veiculos', 'AtualizarKm', 'OrdemServico']
 
 // Telas que só Admin e Gestor veem (Acesso)
 export const GESTAO = 'Gestao'

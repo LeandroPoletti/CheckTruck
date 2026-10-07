@@ -4,13 +4,11 @@ import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../c
 import { ChamadoStatusBadge, UrgenciaBadge, PlacaBadge } from '../components/ui/Badges'
 import { Select } from '../components/ui/Form'
 import { formatDataHora } from '../data/domain'
-import { chamadoService, veiculoService } from '../services'
-
-const VAZIO = { chamados: [], veiculos: [] }
+import { chamadoService } from '../services'
 
 export default function Chamados() {
   const navigate = useNavigate()
-  const [dados, setDados] = useState(VAZIO)
+  const [chamados, setChamados] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState(null)
   const [erroAcao, setErroAcao] = useState(null)
@@ -18,13 +16,8 @@ export default function Chamados() {
 
   useEffect(() => {
     let cancelado = false
-    Promise.all([
-      chamadoService.listar(),
-      veiculoService.listar(),
-    ])
-      .then(([chamados, veiculos]) => {
-        if (!cancelado) setDados({ chamados, veiculos })
-      })
+    chamadoService.listar()
+      .then((lista) => { if (!cancelado) setChamados(lista) })
       .catch((e) => { if (!cancelado) setErro(e.message) })
       .finally(() => { if (!cancelado) setCarregando(false) })
     return () => { cancelado = true }
@@ -51,7 +44,6 @@ export default function Chamados() {
     }
   }
 
-  const { chamados, veiculos } = dados
 
   const ordenados = [...chamados].sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm))
 
@@ -72,7 +64,6 @@ export default function Chamados() {
       ) : (
         <div className="space-y-3">
           {ordenados.map((c) => {
-            const veiculo = veiculos.find((v) => v.id === c.veiculoId)
             return (
               <Card key={c.id} className="p-4">
                 <div className="flex items-start justify-between gap-4">
@@ -86,9 +77,9 @@ export default function Chamados() {
                     <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-400">
                       <span>{c.abertoPorNome}</span>
                       <span>{formatDataHora(c.criadoEm)}</span>
-                      {veiculo && (
-                        <button onClick={() => navigate(`/veiculos/${veiculo.id}`)}>
-                          <PlacaBadge placa={veiculo.placa} size="sm" />
+                      {c.veiculoId && (
+                        <button onClick={() => navigate(`/veiculos/${c.veiculoId}`)}>
+                          <PlacaBadge placa={c.placa} size="sm" />
                         </button>
                       )}
                     </div>
