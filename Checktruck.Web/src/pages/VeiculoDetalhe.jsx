@@ -1,19 +1,19 @@
 import { useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import VeiculoDetalhePanel, { VeiculoNaoEncontrado } from '../../components/VeiculoDetalhePanel'
-import { Carregando, ErroCarregamento } from '../../components/Layout'
+import VeiculoDetalhePanel, { VeiculoNaoEncontrado } from '../components/VeiculoDetalhePanel'
+import { Carregando, ErroCarregamento } from '../components/Layout'
 import {
   veiculoService, modeloService, geracaoService, fabricanteService, tipoManutencaoService,
-  intervaloService, manutencaoService, motoristaService, filtro,
-} from '../../services'
-import { Button } from '../../components/ui/Form'
-import AtualizarKmModal from '../../components/modals/AtualizarKmModal'
-import NovoVeiculoModal from '../../components/modals/NovoVeiculoModal'
-import RegistrarManutencaoModal from '../../components/modals/RegistrarManutencaoModal'
+  intervaloService, manutencaoService, filtro,
+} from '../services'
+import { Button } from '../components/ui/Form'
+import AtualizarKmModal from '../components/modals/AtualizarKmModal'
+import NovoVeiculoModal from '../components/modals/NovoVeiculoModal'
+import RegistrarManutencaoModal from '../components/modals/RegistrarManutencaoModal'
 
-const BACK_TO = '/gerente/veiculos'
+const BACK_TO = '/veiculos'
 
-export default function VeiculoDetalheGerente() {
+export default function VeiculoDetalhe() {
   const { id } = useParams()
   const [kmOpen, setKmOpen] = useState(false)
   const [editarOpen, setEditarOpen] = useState(false)
@@ -27,17 +27,16 @@ export default function VeiculoDetalheGerente() {
     let cancelado = false
     async function carregar() {
       const veiculo = await veiculoService.obter(id)
-      const [modelo, geracoes, fabricantes, tiposManutencao, intervalos, registros, motorista] = await Promise.all([
+      const [modelo, geracoes, fabricantes, tiposManutencao, intervalos, registros] = await Promise.all([
         modeloService.obter(veiculo.modeloId),
         geracaoService.listar(),
         fabricanteService.listar(),
         tipoManutencaoService.listar(),
         intervaloService.listar(filtro.porId('Modelo', veiculo.modeloId)),
         manutencaoService.listar(filtro.porId('Veiculo', veiculo.id)),
-        veiculo.motoristaId ? motoristaService.obter(veiculo.motoristaId) : null,
       ])
       const catalogo = { modelos: [modelo], geracoes, fabricantes, tiposManutencao, intervalos }
-      return { veiculo, registros, motorista, catalogo }
+      return { veiculo, registros, catalogo }
     }
     carregar()
       .then((d) => { if (!cancelado) setDados(d) })
@@ -73,7 +72,6 @@ export default function VeiculoDetalheGerente() {
         veiculo={veiculo}
         catalogo={dados.catalogo}
         registros={dados.registros}
-        motorista={dados.motorista}
         backTo={BACK_TO}
         actions={
           <div className="flex gap-2">

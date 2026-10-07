@@ -1,18 +1,6 @@
 // Endpoints que o front precisa mas que ainda não existem na CheckTruck.Api.
 // Enquanto não forem implementados, o front avisa no console (uma vez por endpoint).
 export const ENDPOINTS_PENDENTES = {
-  usuarioListar: {
-    endpoint: 'GET /api/Usuario',
-    motivo: 'nome, e-mail e status ativo das pessoas (Motorista só expõe usuarioGuid + cpf)',
-  },
-  usuarioCriar: {
-    endpoint: 'POST /api/Usuario',
-    motivo: 'criar conta + papel + registro Motorista ({ nome, email, senha, perfil, cpf, veiculoId? })',
-  },
-  usuarioAtualizar: {
-    endpoint: 'PUT /api/Usuario/{id}',
-    motivo: 'alterar nome, senha e ativar/inativar pessoa',
-  },
   chamadoListar: {
     endpoint: 'GET /api/Chamado',
     motivo: 'listar chamados (entidade Chamado ainda não existe)',

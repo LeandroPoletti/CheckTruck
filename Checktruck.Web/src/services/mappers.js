@@ -2,7 +2,6 @@
 // Strings dos DTOs são não anuláveis na API (Nullable habilitado): textos opcionais vão como ''.
 import { toId, toApiId, anoParaApi, anoDaApi, dataParaApi, dataDaApi } from './api'
 import { COMPONENTES } from '../data/domain'
-import { ENDPOINTS_PENDENTES, avisarPendente } from './pendentes'
 
 // ---------------------------------------------------------------------------
 // Catálogo
@@ -109,7 +108,8 @@ export const veiculoFromApi = (dto) => ({
   anoModelo: anoDaApi(dto.anoModelo),
   kmAtual: dto.kmAtual,
   ativo: dto.ativo,
-  motoristaId: toId(dto.motorista?.id),
+  motoristaId: dto.motoristaAtual?.id ?? null,
+  motoristaNome: dto.motoristaAtual?.nome ?? null,
 })
 // Veículo com modelo/geração/motorista e situação de manutenção (GET /api/Veiculo/situacao)
 export const veiculoSituacaoFromApi = (dto) => ({
@@ -125,8 +125,7 @@ export const veiculoSituacaoFromApi = (dto) => ({
   potenciaCv: dto.modelo.potenciaCavalo,
   geracaoId: toId(dto.geracao.id),
   geracaoNome: dto.geracao.nome,
-  motoristaId: toId(dto.motorista?.id),
-  motoristaCpf: dto.motorista?.cpf ?? null,
+  motoristaNome: dto.motoristaAtual?.nome ?? null,
   status: dto.status, // 'ok' | 'atencao' | 'critico'
   itemMaisUrgente: dto.itemMaisUrgente && {
     tipoId: toId(dto.itemMaisUrgente.tipoManutencaoId),
@@ -147,7 +146,7 @@ export const veiculoToApi = (v) => ({
   anoModelo: anoParaApi(v.anoModelo),
   kmAtual: Number(v.kmAtual) || 0,
   ativo: !!v.ativo,
-  motoristaId: toApiId(v.motoristaId),
+  motoristaAtualId: v.motoristaId || null,
 })
 
 export const registroFromApi = (dto) => ({
@@ -210,27 +209,27 @@ export const dashboardFromApi = (dto) => ({
 })
 
 // ---------------------------------------------------------------------------
-// Pessoas — Motorista só tem usuarioGuid + cpf na API.
-// Nome, e-mail e status virão de GET /api/Usuario (pendente); até lá o CPF identifica a pessoa.
+// Acessos — o id do login é texto (GUID); cargo e permissões vêm com os nomes dos enums da API
 // ---------------------------------------------------------------------------
-function pessoaFromApi(perfil, dto) {
-  avisarPendente(ENDPOINTS_PENDENTES.usuarioListar)
-  return {
-    id: toId(dto.id),
-    key: `${perfil}-${dto.id}`,
-    perfil,
-    usuarioGuid: dto.usuarioGuid,
-    cpf: dto.cpf,
-    veiculoId: toId(dto.veiculo?.id),
-    veiculoPlaca: dto.veiculo?.placa ?? null,
-    nome: dto.cpf,
-    email: null,
-    ativo: true,
-  }
-}
-
-export const motoristaFromApi = (dto) => pessoaFromApi('motorista', dto)
-export const pessoaToApi = (p) => ({ usuarioGuid: p.usuarioGuid, cpf: p.cpf })
+export const usuarioFromApi = (dto) => ({
+  id: dto.id,
+  nome: dto.nome,
+  email: dto.email,
+  cpf: dto.cpf ?? '',
+  cargo: dto.cargo,
+  permissoes: dto.permissoes,
+  cuidaDosAcessos: dto.cuidaDosAcessos,
+  adminDoSistema: dto.adminDoSistema,
+  ativo: dto.ativo,
+})
+export const usuarioToApi = (u) => ({
+  nome: u.nome.trim(),
+  email: u.email.trim(),
+  cpf: u.cpf.trim() || null,
+  cargo: u.cargo,
+  permissoes: u.permissoes,
+  senha: u.senha || null,
+})
 
 // Mecânicos — cadastro simples (nome e função), sem login. Usado na OS.
 export const mecanicoFromApi = (dto) => ({

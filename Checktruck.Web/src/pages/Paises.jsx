@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Plus, Search } from 'lucide-react'
-import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../../components/Layout'
-import { Button, Input } from '../../components/ui/Form'
-import PaisModal from '../../components/modals/PaisModal'
-import ConfirmarExclusaoModal from '../../components/modals/ConfirmarExclusaoModal'
-import AcoesLinha from '../../components/ui/AcoesLinha'
-import { paisService } from '../../services'
+import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
+import { Button, Input } from '../components/ui/Form'
+import PaisModal from '../components/modals/PaisModal'
+import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
+import AcoesLinha from '../components/ui/AcoesLinha'
+import { paisService } from '../services'
 
 export default function Paises() {
   const [paises, setPaises] = useState([])

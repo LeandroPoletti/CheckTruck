@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Plus, Search } from 'lucide-react'
-import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../../components/Layout'
-import { Button, Input } from '../../components/ui/Form'
-import MecanicoModal from '../../components/modals/MecanicoModal'
-import ConfirmarExclusaoModal from '../../components/modals/ConfirmarExclusaoModal'
-import AcoesLinha from '../../components/ui/AcoesLinha'
-import { mecanicoService } from '../../services'
+import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
+import { Button, Input } from '../components/ui/Form'
+import MecanicoModal from '../components/modals/MecanicoModal'
+import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
+import AcoesLinha from '../components/ui/AcoesLinha'
+import { mecanicoService } from '../services'
 
 export default function Mecanicos() {
   const [mecanicos, setMecanicos] = useState([])

@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
-import { PageHeader, Card, Carregando, ErroCarregamento } from '../../components/Layout'
-import { Button } from '../../components/ui/Form'
-import { fabricanteService, geracaoService, modeloService, veiculoService, intervaloService } from '../../services'
-import FabricanteModal from '../../components/modals/FabricanteModal'
-import GeracaoModal from '../../components/modals/GeracaoModal'
-import ModeloModal from '../../components/modals/ModeloModal'
+import { PageHeader, Card, Carregando, ErroCarregamento } from '../components/Layout'
+import { Button } from '../components/ui/Form'
+import { fabricanteService, geracaoService, modeloService, veiculoService, intervaloService } from '../services'
+import FabricanteModal from '../components/modals/FabricanteModal'
+import GeracaoModal from '../components/modals/GeracaoModal'
+import ModeloModal from '../components/modals/ModeloModal'
 
 const VAZIO = { fabricantes: [], geracoes: [], modelos: [], veiculos: [], intervalos: [] }
 

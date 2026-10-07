@@ -110,8 +110,8 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
                 GeracaoNome = v.Modelo.Geracao.Nome,
                 NormaEmissao = v.Modelo.Geracao.NormaEmissao,
                 FabricanteNome = v.Modelo.Geracao.Fabricante.Nome,
-                MotoristaId = v.Motorista == null ? null : v.Motorista.Id,
-                MotoristaCpf = v.Motorista == null ? null : v.Motorista.Cpf,
+                MotoristaAtualId = v.MotoristaAtual == null ? null : v.MotoristaAtual.Id,
+                MotoristaAtualNome = v.MotoristaAtual == null ? null : v.MotoristaAtual.Nome,
             })
             .ToList();
 

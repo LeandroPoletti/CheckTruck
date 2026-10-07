@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
+using CheckTruck.Api.Acesso;
 using CheckTruck.Dominio.Entidades;
 using CheckTruck.Dominio.Enums;
 using CheckTruck.Repositorio;
-using CheckTruck.Repositorio.Entidades;
 using CheckTruck.Dominio.Interfaces;
 using CheckTruck.Dominio.Servicos;
 using Microsoft.AspNetCore.Identity;
@@ -28,8 +28,9 @@ modelBuilder.EntitySet<TipoManutencao>("TiposManutencao");
 modelBuilder.EntitySet<Manutencao>("Manutencao");
 modelBuilder.EntitySet<IntervaloRecomendado>("IntervaloRecomendado");
 modelBuilder.EntitySet<IntervaloVeiculo>("IntervaloVeiculo");
-modelBuilder.EntitySet<Motorista>("Motorista");
 modelBuilder.EntitySet<Mecanico>("Mecanico");
+// O motorista atual é um acesso (login): fica fora do OData para não expor os dados da conta
+modelBuilder.EntityType<Veiculo>().Ignore(v => v.MotoristaAtual);
 
 builder.Services.AddSingleton(modelBuilder.GetEdmModel());
 
@@ -47,13 +48,19 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Logging.AddConsole();
 
-builder.Services.AddAuthentication().AddBearerToken(IdentityConstants.BearerScheme);
+// Token Bearer em todas as rotas; quem pode o quê fica nos filtros da pasta Acesso
+builder.Services.AddAuthentication(IdentityConstants.BearerScheme).AddBearerToken(IdentityConstants.BearerScheme);
 builder.Services.AddAuthorization();
 
-builder.Services.AddIdentityCore<Usuario>()
-    .AddRoles<IdentityRole>()
+builder.Services.AddIdentityCore<Usuario>(options =>
+    {
+        options.User.RequireUniqueEmail = true;
+        // Faz o login perguntar à ConfirmacaoUsuarioAtivo se a conta pode entrar (inativo não entra)
+        options.SignIn.RequireConfirmedAccount = true;
+    })
     .AddEntityFrameworkStores<Context>()
-    .AddApiEndpoints();
+    .AddSignInManager();
+builder.Services.AddScoped<IUserConfirmation<Usuario>, ConfirmacaoUsuarioAtivo>();
 
 builder.Services.AddDbContext<Context>(options =>
 {
@@ -66,6 +73,7 @@ builder.Services.AddScoped<ServicoVeiculo>();
 builder.Services.AddScoped<ServicoSituacaoVeiculo>();
 builder.Services.AddScoped<ServicoManutencao>();
 builder.Services.AddScoped<ServicoDashboard>();
+builder.Services.AddScoped<ServicoUsuario>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy => policy.AllowAnyMethod().AllowAnyOrigin().AllowAnyHeader());
@@ -87,49 +95,39 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapGroup("/identity").MapIdentityApi<Usuario>();
 
 using (var scope = app.Services.CreateScope())
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    
-    var rolesStrings = new string[] { "Administrador", "Motorista", "Mecanico" };
-    
-    foreach (var role in rolesStrings)
-    {
-        if (!await roleManager.RoleExistsAsync(role))
-        {
-            await roleManager.CreateAsync(new IdentityRole(role));
-        }
-    }
-    
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
 
-    // O login do Identity procura pelo UserName, e a tela de login só aceita e-mail.
-    const string usuarioName = "admin@admin.com";
-    const string usuarioEmail = "admin@admin.com";
-    const string usuarioSenha = "Admin@123";
-
-    if (await userManager.FindByEmailAsync(usuarioEmail) is null)
+    // Admin do sistema: entra com o e-mail e a senha abaixo, não precisa de CPF e não pode ser desativado
+    var admin = await userManager.FindByEmailAsync(ServicoUsuario.EmailAdminDoSistema);
+    if (admin is null)
     {
-        var usuario = new Usuario()
+        admin = new Usuario
         {
-            Ativo = true,
-            Email = usuarioEmail,
-            UserName = usuarioName,
-
+            Nome = "Administrador",
+            Email = ServicoUsuario.EmailAdminDoSistema,
+            UserName = ServicoUsuario.EmailAdminDoSistema,
+            Cargo = Cargo.Admin,
+            Ativo = true
         };
-        await userManager.CreateAsync(usuario, usuarioSenha);
-        await userManager.AddToRoleAsync(usuario, "Administrador");
+        await userManager.CreateAsync(admin, "Admin@123");
     }
-    else
+    else if (admin.Cargo != Cargo.Admin || !admin.Ativo || admin.Nome.Length == 0 || admin.UserName != admin.Email)
     {
-        // Bancos criados antes da troca ficaram com UserName "Admin": corrige para o e-mail.
-        var admin = await userManager.FindByEmailAsync(usuarioEmail);
-        if (admin is not null && admin.UserName != usuarioName)
-            await userManager.SetUserNameAsync(admin, usuarioName);
+        // Banco de antes dos cargos: o admin ganha cargo, nome e login pelo e-mail
+        admin.Cargo = Cargo.Admin;
+        admin.Ativo = true;
+        admin.UserName = admin.Email;
+        if (admin.Nome.Length == 0)
+        {
+            admin.Nome = "Administrador";
+        }
+
+        await userManager.UpdateAsync(admin);
     }
-    
+
     var context = scope.ServiceProvider.GetRequiredService<Context>();
 
     if (!context.Paises.Any(p => p.Nome == "Brasil"))

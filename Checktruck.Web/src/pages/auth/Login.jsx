@@ -3,16 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { entrar } from '../../services/sessao'
 import { Field, Input, Button } from '../../components/ui/Form'
 
-// Conta criada pelo seed da API (Program.cs).
+// Admin criado pelo sistema (Program.cs da API).
 const DEMO = [
-  { perfil: 'Administrador', email: 'admin@admin.com', senha: 'Admin@123' },
+  { cargo: 'Admin', email: 'admin@admin.com', senha: 'Admin@123' },
 ]
-
-const HOME_BY_ROLE = {
-  gerente: '/gerente/dashboard',
-  mecanico: '/mecanico/dashboard',
-  motorista: '/motorista/inicio',
-}
 
 export default function Login() {
   const navigate = useNavigate()
@@ -26,10 +20,10 @@ export default function Login() {
     setEntrando(true)
     setError('')
     try {
-      const user = await entrar(email, senha)
-      navigate(HOME_BY_ROLE[user.perfil])
+      await entrar(email, senha)
+      navigate('/', { replace: true }) // a rota padrão leva para a primeira tela que a pessoa pode usar
     } catch (err) {
-      setError(err.status === 401 ? 'E-mail ou senha inválidos.' : err.message)
+      setError(err.message) // a API já explica: senha errada, acesso desativado ou muitas tentativas
       setEntrando(false)
     }
   }
@@ -50,7 +44,7 @@ export default function Login() {
         <div className="rounded-2xl bg-white px-7 py-7 shadow-2xl">
           <h2 className="text-lg font-bold text-stone-900">Entrar</h2>
           <p className="mt-1 text-sm text-stone-500">
-            Acesso para gerentes, mecânicos e motoristas.
+            Use o e-mail e a senha cadastrados pelo admin ou pelo gestor.
           </p>
 
           <form onSubmit={handleSubmit} className="mt-5 space-y-4">
@@ -83,7 +77,7 @@ export default function Login() {
           </form>
 
           <p className="mt-5 text-center text-xs text-stone-400">
-            Bearer Token · <span className="font-mono-label">POST /identity/login</span>
+            Bearer Token · <span className="font-mono-label">POST /api/Auth/login</span>
           </p>
         </div>
 
@@ -103,7 +97,7 @@ export default function Login() {
                 }}
                 className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-xs text-brand-100 hover:bg-brand-800"
               >
-                <span className="font-semibold">{d.perfil}</span>
+                <span className="font-semibold">{d.cargo}</span>
                 <span className="font-mono-label text-brand-300">{d.email}</span>
               </button>
             ))}

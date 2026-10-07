@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Drawer } from '../ui/Overlay'
 import { Field, Input, Select, Toggle, Button } from '../ui/Form'
 import { getModeloCompleto } from '../../data/domain'
-import { veiculoService, fabricanteService, geracaoService, modeloService, motoristaService } from '../../services'
+import { veiculoService, fabricanteService, geracaoService, modeloService, usuarioService } from '../../services'
 
 const LISTAS_VAZIAS = { fabricantes: [], geracoes: [], modelos: [], motoristas: [] }
 
@@ -37,7 +37,7 @@ export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar, onS
     setErrors({})
     setErroCarga(null)
     setCarregando(true)
-    Promise.all([fabricanteService.listar(), geracaoService.listar(), modeloService.listar(), motoristaService.listar()])
+    Promise.all([fabricanteService.listar(), geracaoService.listar(), modeloService.listar(), usuarioService.listarMotoristas()])
       .then(([fabricantes, geracoes, modelos, motoristas]) => {
         if (cancelado) return
         setListas({ fabricantes, geracoes, modelos, motoristas })
@@ -73,11 +73,6 @@ export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar, onS
   )
   const modeloSelecionado = modelos.find((m) => m.id === form.modeloId)
   const geracaoSelecionada = geracoes.find((g) => g.id === form.geracaoId)
-
-  // motoristas ainda sem veículo (o vínculo é 1:1), mais o atual do veículo em edição
-  const motoristasDisponiveis = motoristas.filter(
-    (m) => m.ativo && (m.id === veiculoParaEditar?.motoristaId || !m.veiculoId)
-  )
 
   function set(field, value) {
     setForm((f) => {
@@ -119,13 +114,6 @@ export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar, onS
         ? await veiculoService.atualizar(veiculoParaEditar.id, payload)
         : await veiculoService.criar(payload)
       onSalvo?.(salvo)
-      // o motorista escolhido deixa de estar livre para o próximo cadastro
-      if (salvo.motoristaId) {
-        setListas((l) => ({
-          ...l,
-          motoristas: l.motoristas.map((m) => (m.id === salvo.motoristaId ? { ...m, veiculoId: salvo.id } : m)),
-        }))
-      }
     } catch (err) {
       setErrors({ api: err.message })
       return
@@ -234,11 +222,11 @@ export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar, onS
 
         <div>
           <p className="mb-3 text-xs font-bold tracking-wide text-brand-700">3 · VÍNCULOS</p>
-          <Field label="Motorista (opcional)">
+          <Field label="Motorista atual (opcional)">
             <div className="flex items-center gap-3">
               <Select className="flex-1" value={form.motoristaId} onChange={(e) => set('motoristaId', e.target.value)}>
                 <option value="">Sem motorista</option>
-                {motoristasDisponiveis.map((m) => (
+                {motoristas.map((m) => (
                   <option key={m.id} value={m.id}>{m.nome}</option>
                 ))}
               </Select>

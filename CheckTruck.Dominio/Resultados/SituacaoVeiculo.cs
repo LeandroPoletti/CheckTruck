@@ -19,8 +19,8 @@ public class SituacaoVeiculo
     public string GeracaoNome { get; set; } = "";
     public string? NormaEmissao { get; set; }
     public string FabricanteNome { get; set; } = "";
-    public long? MotoristaId { get; set; }
-    public string? MotoristaCpf { get; set; }
+    public string? MotoristaAtualId { get; set; }
+    public string? MotoristaAtualNome { get; set; }
 
     /// <summary>Pior status entre os itens do veículo; sem itens, Ok.</summary>
     public StatusManutencao Status { get; set; }

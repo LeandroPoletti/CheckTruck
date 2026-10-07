@@ -1,0 +1,212 @@
+using CheckTruck.Dominio.Entidades;
+using CheckTruck.Dominio.Enums;
+using CheckTruck.Dominio.Util;
+using Microsoft.AspNetCore.Identity;
+
+namespace CheckTruck.Dominio.Servicos;
+
+/// <summary>
+/// Regras dos acessos: cadastrar, editar (inclusive e-mail e senha) e ativar/desativar.
+/// Quem chama é sempre Admin ou Gestor (a API confere antes).
+/// </summary>
+public class ServicoUsuario(UserManager<Usuario> userManager)
+{
+    /// <summary>Admin criado pelo sistema: não precisa de CPF, não troca de e-mail nem de cargo e não pode ser desativado.</summary>
+    public const string EmailAdminDoSistema = "admin@admin.com";
+
+    public List<string> Mensagens { get; } = new();
+
+    public static bool EhAdminDoSistema(Usuario usuario) =>
+        string.Equals(usuario.Email, EmailAdminDoSistema, StringComparison.OrdinalIgnoreCase);
+
+    public IQueryable<Usuario> Listar() => userManager.Users.OrderBy(u => u.Nome);
+
+    public IQueryable<Usuario> ListarMotoristasAtivos() =>
+        userManager.Users.Where(u => u.Ativo && u.Cargo == Cargo.Motorista).OrderBy(u => u.Nome);
+
+    public Task<Usuario?> ObterAsync(string id) => userManager.FindByIdAsync(id);
+
+    public async Task<Usuario?> CriarAsync(Usuario novo, string? senha)
+    {
+        if (string.IsNullOrWhiteSpace(senha))
+        {
+            Mensagens.Add("Informe a senha.");
+        }
+
+        Preparar(novo, adminDoSistema: false);
+        ValidarCpfUnico(novo.Cpf, idIgnorar: null);
+        if (Mensagens.Count > 0)
+        {
+            return null;
+        }
+
+        novo.UserName = novo.Email;
+        novo.Ativo = true;
+        return Concluir(await userManager.CreateAsync(novo, senha!)) ? novo : null;
+    }
+
+    /// <param name="dados">Dados novos (nome, e-mail, CPF, cargo e permissões).</param>
+    /// <param name="novaSenha">Em branco mantém a senha atual.</param>
+    /// <param name="idQuemAlterou">Quem está editando: ninguém tira o próprio acesso de gestão.</param>
+    public async Task<Usuario?> AtualizarAsync(string id, Usuario dados, string? novaSenha, string idQuemAlterou)
+    {
+        var usuario = await userManager.FindByIdAsync(id);
+        if (usuario is null)
+        {
+            Mensagens.Add("Acesso não encontrado.");
+            return null;
+        }
+
+        var adminDoSistema = EhAdminDoSistema(usuario);
+        Preparar(dados, adminDoSistema);
+        if (adminDoSistema && !string.Equals(dados.Email, usuario.Email, StringComparison.OrdinalIgnoreCase))
+        {
+            Mensagens.Add("O e-mail do admin do sistema não pode ser trocado.");
+        }
+
+        if (adminDoSistema && dados.Cargo != Cargo.Admin)
+        {
+            Mensagens.Add("O admin do sistema continua com o cargo Admin.");
+        }
+
+        if (usuario.Id == idQuemAlterou && !dados.CuidaDosAcessos)
+        {
+            Mensagens.Add("Você não pode tirar o seu próprio cargo de Admin ou Gestor.");
+        }
+
+        ValidarCpfUnico(dados.Cpf, usuario.Id);
+        if (!string.IsNullOrWhiteSpace(novaSenha))
+        {
+            await ValidarSenhaAsync(usuario, novaSenha);
+        }
+
+        if (Mensagens.Count > 0)
+        {
+            return null;
+        }
+
+        usuario.Nome = dados.Nome;
+        usuario.Email = dados.Email;
+        usuario.UserName = dados.Email;
+        usuario.Cpf = dados.Cpf;
+        usuario.Cargo = dados.Cargo;
+        usuario.Permissoes = dados.Permissoes;
+        if (!string.IsNullOrWhiteSpace(novaSenha))
+        {
+            usuario.PasswordHash = userManager.PasswordHasher.HashPassword(usuario, novaSenha);
+        }
+
+        return Concluir(await userManager.UpdateAsync(usuario)) ? usuario : null;
+    }
+
+    public async Task<Usuario?> AlterarAtivoAsync(string id, bool ativo, string idQuemAlterou)
+    {
+        var usuario = await userManager.FindByIdAsync(id);
+        if (usuario is null)
+        {
+            Mensagens.Add("Acesso não encontrado.");
+            return null;
+        }
+
+        if (!ativo && EhAdminDoSistema(usuario))
+        {
+            Mensagens.Add("O admin do sistema não pode ser desativado.");
+        }
+
+        if (!ativo && usuario.Id == idQuemAlterou)
+        {
+            Mensagens.Add("Você não pode desativar o seu próprio acesso.");
+        }
+
+        if (Mensagens.Count > 0)
+        {
+            return null;
+        }
+
+        usuario.Ativo = ativo;
+        return Concluir(await userManager.UpdateAsync(usuario)) ? usuario : null;
+    }
+
+    // Limpa os campos e confere nome, e-mail, cargo, CPF e permissões
+    private void Preparar(Usuario usuario, bool adminDoSistema)
+    {
+        usuario.Nome = usuario.Nome.Trim();
+        usuario.Email = usuario.Email?.Trim();
+        usuario.Cpf = string.IsNullOrWhiteSpace(usuario.Cpf) ? null : CpfUtil.RemoverMascaraCpf(usuario.Cpf.Trim());
+
+        if (usuario.Nome.Length == 0)
+        {
+            Mensagens.Add("Informe o nome.");
+        }
+
+        if (string.IsNullOrEmpty(usuario.Email))
+        {
+            Mensagens.Add("Informe o e-mail.");
+        }
+
+        if (usuario.Cpf is null && !adminDoSistema)
+        {
+            Mensagens.Add("Informe o CPF.");
+        }
+
+        if (!Enum.IsDefined(usuario.Cargo))
+        {
+            Mensagens.Add("Escolha um cargo válido.");
+        }
+        else if (usuario.CuidaDosAcessos)
+        {
+            usuario.Permissoes = Permissao.Nenhuma; // Admin e Gestor já podem tudo
+        }
+        else if (usuario.Permissoes == Permissao.Nenhuma)
+        {
+            Mensagens.Add("Ligue pelo menos uma permissão.");
+        }
+        else
+        {
+            usuario.Permissoes |= Permissao.VerFrota; // quem faz qualquer coisa precisa ver a frota
+        }
+    }
+
+    private void ValidarCpfUnico(string? cpf, string? idIgnorar)
+    {
+        if (cpf is not null && userManager.Users.Any(u => u.Cpf == cpf && u.Id != idIgnorar))
+        {
+            Mensagens.Add("Já existe um acesso com esse CPF.");
+        }
+    }
+
+    private async Task ValidarSenhaAsync(Usuario usuario, string senha)
+    {
+        foreach (var validador in userManager.PasswordValidators)
+        {
+            AdicionarErros(await validador.ValidateAsync(userManager, usuario, senha));
+        }
+    }
+
+    private bool Concluir(IdentityResult resultado)
+    {
+        AdicionarErros(resultado);
+        return resultado.Succeeded;
+    }
+
+    private void AdicionarErros(IdentityResult resultado)
+    {
+        foreach (var mensagem in resultado.Errors.Select(TraduzirErro).Where(m => !Mensagens.Contains(m)))
+        {
+            Mensagens.Add(mensagem);
+        }
+    }
+
+    // As mensagens do Identity vêm em inglês; traduz as que aparecem no cadastro
+    private static string TraduzirErro(IdentityError erro) => erro.Code switch
+    {
+        "DuplicateUserName" or "DuplicateEmail" => "Já existe um acesso com esse e-mail.",
+        "InvalidEmail" or "InvalidUserName" => "E-mail inválido.",
+        "PasswordTooShort" => "A senha precisa ter pelo menos 6 caracteres.",
+        "PasswordRequiresDigit" => "A senha precisa ter um número.",
+        "PasswordRequiresLower" => "A senha precisa ter uma letra minúscula.",
+        "PasswordRequiresUpper" => "A senha precisa ter uma letra maiúscula.",
+        "PasswordRequiresNonAlphanumeric" => "A senha precisa ter um símbolo (ex.: @).",
+        _ => erro.Description
+    };
+}

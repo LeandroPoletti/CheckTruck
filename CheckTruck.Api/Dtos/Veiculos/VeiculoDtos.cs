@@ -21,7 +21,8 @@ public class VeiculoRequestDto
     public int KmAtual { get; set; }
     public bool Ativo { get; set; }
 
-    public long? MotoristaId { get; set; }
+    /// <summary>Acesso com cargo Motorista que está com o caminhão agora. Opcional.</summary>
+    public string? MotoristaAtualId { get; set; }
 }
 
 public class VeiculoResponseDto
@@ -35,7 +36,7 @@ public class VeiculoResponseDto
     public DateTime AnoFabricacao { get; set; }
     public int KmAtual { get; set; }
     public bool Ativo { get; set; }
-    public MotoristaResumoDto Motorista { get; set; }
+    public UsuarioResumoDto? MotoristaAtual { get; set; }
 }
 
 public static class VeiculoDtoExtensions
@@ -51,10 +52,10 @@ public static class VeiculoDtoExtensions
         AnoFabricacao = entidade.AnoFabricacao,
         KmAtual = entidade.KmAtual,
         Ativo = entidade.Ativo,
-        Motorista = entidade.Motorista?.ToResumoDto()
+        MotoristaAtual = entidade.MotoristaAtual?.ToResumoDto()
     };
 
-    public static Veiculo ToEntity(this VeiculoRequestDto dto, Modelo modelo, Motorista? motorista) => new()
+    public static Veiculo ToEntity(this VeiculoRequestDto dto, Modelo modelo, Usuario? motoristaAtual) => new()
     {
         Placa = dto.Placa,
         Modelo = modelo,
@@ -64,6 +65,6 @@ public static class VeiculoDtoExtensions
         AnoFabricacao = dto.AnoFabricacao,
         KmAtual = dto.KmAtual,
         Ativo = dto.Ativo,
-        Motorista = motorista
+        MotoristaAtual = motoristaAtual
     };
 }

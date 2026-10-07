@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PageHeader, Card, Carregando, ErroCarregamento } from '../../components/Layout'
-import { StatusBadge, PlacaBadge } from '../../components/ui/Badges'
-import { Button, Select, Input } from '../../components/ui/Form'
+import { PageHeader, Card, Carregando, ErroCarregamento } from '../components/Layout'
+import { StatusBadge, PlacaBadge } from '../components/ui/Badges'
+import { Button, Select, Input } from '../components/ui/Form'
 import { Search, Plus } from 'lucide-react'
-import { formatKm } from '../../data/domain'
-import NovoVeiculoModal from '../../components/modals/NovoVeiculoModal'
-import { veiculoService } from '../../services'
+import { formatKm } from '../data/domain'
+import NovoVeiculoModal from '../components/modals/NovoVeiculoModal'
+import { veiculoService } from '../services'
 
 export default function Veiculos() {
   const navigate = useNavigate()
@@ -55,7 +55,7 @@ export default function Veiculos() {
       if (statusFiltro === 'ativos' && !v.ativo) return false
       if (statusFiltro === 'inativos' && v.ativo) return false
       if (geracaoFiltro !== 'todas' && v.geracaoId !== geracaoFiltro) return false
-      if (termo && !`${v.placa} ${v.chassi || ''} ${v.motoristaCpf || ''}`.toLowerCase().includes(termo)) return false
+      if (termo && !`${v.placa} ${v.chassi || ''} ${v.motoristaNome || ''}`.toLowerCase().includes(termo)) return false
       return true
     })
   }, [veiculos, busca, geracaoFiltro, statusFiltro])
@@ -81,7 +81,7 @@ export default function Veiculos() {
           <Input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar por placa, chassi ou CPF do motorista"
+            placeholder="Buscar por placa, chassi ou motorista"
             className="pl-9"
           />
         </div>
@@ -129,9 +129,9 @@ export default function Veiculos() {
               </div>
 
               <div className="mt-4 flex items-center justify-between border-t border-stone-100 pt-3 text-sm">
-                <span className="text-stone-600">{v.motoristaCpf ?? 'Sem motorista'}</span>
+                <span className="text-stone-600">{v.motoristaNome ?? 'Sem motorista'}</span>
                 <button
-                  onClick={() => navigate(`/gerente/veiculos/${v.id}`)}
+                  onClick={() => navigate(`/veiculos/${v.id}`)}
                   className="font-semibold text-brand-700 hover:text-brand-900"
                 >
                   Detalhes

@@ -1,25 +1,26 @@
-// Sessão do usuário logado, guardada no localStorage (sem context).
+// Sessão de quem está logado, guardada no localStorage (sem context).
 import { authService, usuarioService } from './index'
-import { lerSessao, salvarSessao, toId } from './api'
+import { lerSessao, salvarSessao } from './api'
 
-// Perfil e vínculos vêm de GET /api/Usuario/me, gravados na sessão no login.
-// Sessão antiga, sem perfil, obriga a entrar de novo.
+// Cargo e permissões vêm de GET /api/Usuario/me, gravados na sessão no login.
+// Sessão antiga, sem permissões, obriga a entrar de novo.
 export function obterUsuario() {
   const sessao = lerSessao()
-  if (!sessao?.perfil) return null
+  if (!Array.isArray(sessao?.permissoes)) return null
   return {
     id: sessao.usuarioId,
-    nome: sessao.nome || sessao.usuario,
-    email: sessao.usuario,
-    perfil: sessao.perfil,
-    motoristaId: sessao.motoristaId ?? null,
-    ativo: true,
+    nome: sessao.nome,
+    email: sessao.email,
+    cargo: sessao.cargo,
+    permissoes: sessao.permissoes,
+    cuidaDosAcessos: sessao.cuidaDosAcessos,
   }
 }
 
 export async function entrar(email, senha) {
+  salvarSessao(null) // sessão velha não pode atrapalhar o erro de login
   const token = await authService.login(email, senha)
-  const base = { usuario: email.trim(), accessToken: token.accessToken, refreshToken: token.refreshToken }
+  const base = { accessToken: token.accessToken }
   salvarSessao(base) // o /me já precisa do token
   try {
     const me = await usuarioService.obterMe()
@@ -27,14 +28,15 @@ export async function entrar(email, senha) {
       ...base,
       usuarioId: me.id,
       nome: me.nome,
-      perfil: me.perfil,
-      motoristaId: toId(me.motoristaId),
+      email: me.email,
+      cargo: me.cargo,
+      permissoes: me.permissoes,
+      cuidaDosAcessos: me.cuidaDosAcessos,
     })
   } catch (e) {
     salvarSessao(null)
     throw e
   }
-  return obterUsuario()
 }
 
 export function sair() {

@@ -21,7 +21,7 @@ export function VeiculoNaoEncontrado({ backTo }) {
 
 // Apresentacional: a página de detalhe carrega os dados e passa por props.
 // catalogo = { fabricantes, geracoes, modelos, tiposManutencao, intervalos } do veículo.
-export default function VeiculoDetalhePanel({ veiculo, catalogo, registros, motorista, backTo, actions }) {
+export default function VeiculoDetalhePanel({ veiculo, catalogo, registros, backTo, actions }) {
   const navigate = useNavigate()
 
   const mc = getModeloCompleto(catalogo, veiculo.modeloId)
@@ -59,7 +59,7 @@ export default function VeiculoDetalhePanel({ veiculo, catalogo, registros, moto
 
         <div className="mt-5 grid grid-cols-4 gap-4 border-t border-stone-100 pt-4">
           <Info label="Km atual" value={formatKm(veiculo.kmAtual)} />
-          <Info label="Motorista" value={motorista ? motorista.nome : 'Sem motorista'} />
+          <Info label="Motorista" value={veiculo.motoristaNome ?? 'Sem motorista'} />
           <Info label="Ano fabr./modelo" value={`${veiculo.anoFabricacao} / ${veiculo.anoModelo}`} />
           <Info label="Manutenções" value={`${historico.length} registro${historico.length === 1 ? '' : 's'}`} />
         </div>

@@ -12,7 +12,6 @@ export const modeloService = criarCrud('Modelo', { fromApi: m.modeloFromApi, toA
 export const tipoManutencaoService = criarCrud('TipoManutencao', { fromApi: m.tipoManutencaoFromApi, toApi: m.tipoManutencaoToApi })
 export const intervaloService = criarCrud('IntervaloRecomendado', { fromApi: m.intervaloFromApi, toApi: m.intervaloToApi })
 export const manutencaoService = criarCrud('Manutencao', { fromApi: m.registroFromApi, toApi: m.registroToApi })
-export const motoristaService = criarCrud('Motorista', { fromApi: m.motoristaFromApi, toApi: m.pessoaToApi })
 export const mecanicoService = criarCrud('Mecanico', { fromApi: m.mecanicoFromApi, toApi: m.mecanicoToApi })
 
 export const veiculoService = {
@@ -48,22 +47,42 @@ export const chamadoService = {
   atualizar: () => rejeitarPendente(ENDPOINTS_PENDENTES.chamadoAtualizar),
 }
 
-// Contas de usuário. Criar/atualizar conta de motorista ainda não existe na API.
+// Acessos (login, cargo e permissões). Listar, criar e editar: só Admin e Gestor.
 export const usuarioService = {
-  // → { id, email, nome, perfil: 'gerente'|'mecanico'|'motorista', motoristaId }
+  // Quem está logado, com cargo e permissões
   async obterMe() {
     const { data } = await api.get('/api/Usuario/me')
+    return m.usuarioFromApi(data)
+  },
+  async listar() {
+    const { data } = await api.get('/api/Usuario')
+    return data.map(m.usuarioFromApi)
+  },
+  async criar(dados) {
+    const { data } = await api.post('/api/Usuario', m.usuarioToApi(dados))
+    return m.usuarioFromApi(data)
+  },
+  async atualizar(id, dados) {
+    const { data } = await api.put(`/api/Usuario/${id}`, m.usuarioToApi(dados))
+    return m.usuarioFromApi(data)
+  },
+  // Corpo é só true/false; vai como texto JSON porque o axios não manda false sozinho
+  async alterarAtivo(id, ativo) {
+    await api.put(`/api/Usuario/${id}/ativo`, JSON.stringify(ativo), {
+      headers: { 'Content-Type': 'application/json' },
+    })
+  },
+  // Motoristas ativos ({ id, nome }), para escolher quem está com o caminhão
+  async listarMotoristas() {
+    const { data } = await api.get('/api/Usuario/motoristas')
     return data
   },
-  criar: () => rejeitarPendente(ENDPOINTS_PENDENTES.usuarioCriar),
-  atualizar: () => rejeitarPendente(ENDPOINTS_PENDENTES.usuarioAtualizar),
 }
 
-// Endpoints do ASP.NET Identity (MapIdentityApi em /identity).
 export const authService = {
   // → { tokenType, accessToken, expiresIn, refreshToken }
   async login(email, senha) {
-    const { data } = await api.post('/identity/login', { email: email.trim(), password: senha })
+    const { data } = await api.post('/api/Auth/login', { email: email.trim(), senha })
     return data
   },
 }

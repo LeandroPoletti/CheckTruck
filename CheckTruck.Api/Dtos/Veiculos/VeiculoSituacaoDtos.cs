@@ -16,7 +16,7 @@ public class VeiculoSituacaoResponseDto
     public GeracaoModeloResumoDto Geracao { get; set; }
     public string Fabricante { get; set; }
     public string? NormaEmissao { get; set; }
-    public MotoristaResumoDto? Motorista { get; set; }
+    public UsuarioResumoDto? MotoristaAtual { get; set; }
 
     /// <summary>"ok", "atencao" ou "critico"</summary>
     public string Status { get; set; }
@@ -91,9 +91,9 @@ public static class VeiculoSituacaoDtoExtensions
         Geracao = new GeracaoModeloResumoDto { Id = situacao.GeracaoId, Nome = situacao.GeracaoNome },
         Fabricante = situacao.FabricanteNome,
         NormaEmissao = situacao.NormaEmissao,
-        Motorista = situacao.MotoristaId is null
+        MotoristaAtual = situacao.MotoristaAtualId is null
             ? null
-            : new MotoristaResumoDto { Id = situacao.MotoristaId.Value, Cpf = situacao.MotoristaCpf },
+            : new UsuarioResumoDto { Id = situacao.MotoristaAtualId, Nome = situacao.MotoristaAtualNome ?? "" },
         Status = situacao.Status.ToApiString(),
         ItemMaisUrgente = situacao.ItemMaisUrgente?.ToDto(),
         Itens = incluirItens ? situacao.Itens.Select(i => i.ToDto()).ToList() : null

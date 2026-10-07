@@ -1,7 +1,8 @@
+using CheckTruck.Api.Acesso;
 using CheckTruck.Api.Dtos.Manutencoes;
 using CheckTruck.Dominio.Entidades;
+using CheckTruck.Dominio.Enums;
 using CheckTruck.Dominio.Servicos;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,13 +28,13 @@ public class ManutencaoController(
     public ActionResult<ManutencaoResponseDto> GetById(long id) => GetByIdCore(id);
 
     /// <summary>
-    /// Lança uma ordem de serviço. Só o gerente/almoxarife (papel Administrador) lança: o login de quem lançou e a data/hora
+    /// Lança uma ordem de serviço (permissão Ordem de serviço). O login de quem lançou e a data/hora
     /// ficam gravados (lancadoPor / lancadoEm). mecanicoId é quem fez a troca (cadastro de mecânicos).
     /// Se kmProximaTroca vier 0 ou dataProximaTroca vier null, o sistema calcula pelo intervalo
     /// do caminhão → modelo → padrão seguro. O kmAtual da OS atualiza o km do caminhão quando é maior.
     /// </summary>
     [HttpPost]
-    [Authorize(AuthenticationSchemes = "Identity.Bearer", Roles = "Administrador")]
+    [ExigePermissao(Permissao.OrdemServico)]
     public ActionResult<ManutencaoResponseDto> Post([FromBody] ManutencaoRequestDto dto)
     {
         var (veiculo, tipoManutencao, mecanico, erro) = ResolverRelacionados(dto, exigirAtivo: true);
@@ -54,7 +55,7 @@ public class ManutencaoController(
     /// correção fica em atualizadoEm.
     /// </summary>
     [HttpPut("{id:long}")]
-    [Authorize(AuthenticationSchemes = "Identity.Bearer", Roles = "Administrador")]
+    [ExigePermissao(Permissao.OrdemServico)]
     public ActionResult<ManutencaoResponseDto> Put(long id, [FromBody] ManutencaoRequestDto dto)
     {
         var original = Servico.Query(m => m.Id == id)
@@ -81,7 +82,7 @@ public class ManutencaoController(
     }
 
     [HttpDelete("{id:long}")]
-    [Authorize(AuthenticationSchemes = "Identity.Bearer", Roles = "Administrador")]
+    [ExigePermissao(Permissao.OrdemServico)]
     public IActionResult Delete(long id) => DeleteCore(id);
 
     // Login (UserName) de quem está autenticado pelo token do Identity

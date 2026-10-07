@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
-import { PageHeader, Card, Carregando, ErroCarregamento } from '../../components/Layout'
-import { Button, Select } from '../../components/ui/Form'
-import { formatKm } from '../../data/domain'
-import { modeloService, geracaoService, tipoManutencaoService, intervaloService, filtro } from '../../services'
+import { PageHeader, Card, Carregando, ErroCarregamento } from '../components/Layout'
+import { Button, Select } from '../components/ui/Form'
+import { formatKm } from '../data/domain'
+import { modeloService, geracaoService, tipoManutencaoService, intervaloService, filtro } from '../services'
 
 const VAZIO = { modelos: [], geracoes: [], tiposManutencao: [] }
 

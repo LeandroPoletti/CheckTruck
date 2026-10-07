@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Plus, Search } from 'lucide-react'
-import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../../components/Layout'
-import { Button, Input, Select } from '../../components/ui/Form'
-import AcoesLinha from '../../components/ui/AcoesLinha'
-import ModeloModal from '../../components/modals/ModeloModal'
-import ConfirmarExclusaoModal from '../../components/modals/ConfirmarExclusaoModal'
-import { modeloService, geracaoService } from '../../services'
+import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
+import { Button, Input, Select } from '../components/ui/Form'
+import AcoesLinha from '../components/ui/AcoesLinha'
+import ModeloModal from '../components/modals/ModeloModal'
+import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
+import { modeloService, geracaoService } from '../services'
 
 const VAZIO = { modelos: [], geracoes: [] }
 

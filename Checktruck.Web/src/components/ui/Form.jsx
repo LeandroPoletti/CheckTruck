@@ -15,7 +15,7 @@ export function Field({ label, required, hint, error, children, className = '' }
 }
 
 const inputBase =
-  'w-full rounded-lg border bg-white px-3 py-2 text-sm text-stone-800 placeholder:text-stone-400 outline-none transition focus:ring-2 focus:ring-brand-300'
+  'w-full rounded-lg border bg-white px-3 py-2 text-sm text-stone-800 placeholder:text-stone-400 outline-none transition focus:ring-2 focus:ring-brand-300 disabled:bg-stone-50 disabled:text-stone-500'
 
 export function Input({ error, className = '', ...props }) {
   return (
@@ -46,12 +46,13 @@ export function Select({ error, className = '', children, ...props }) {
   )
 }
 
-export function Toggle({ checked, onChange, label }) {
+export function Toggle({ checked, onChange, label, disabled = false }) {
   return (
     <button
       type="button"
       onClick={() => onChange(!checked)}
-      className="inline-flex items-center gap-2"
+      disabled={disabled}
+      className="inline-flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
     >
       <span
         className={`relative h-6 w-10 rounded-full transition ${checked ? 'bg-brand-600' : 'bg-stone-300'}`}

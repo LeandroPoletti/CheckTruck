@@ -19,8 +19,8 @@ public class VeiculoConfiguration : IEntityTypeConfiguration<Veiculo>
         
         builder.HasOne(v => v.Modelo).WithMany(m => m.Veiculos)
             .IsRequired().OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne(v => v.Motorista).WithOne(m => m.Veiculo)
-            .HasForeignKey<Veiculo>("MotoristaId")
+        builder.HasOne(v => v.MotoristaAtual).WithMany()
+            .HasForeignKey("MotoristaAtualId")
             .IsRequired(false).OnDelete(DeleteBehavior.Restrict);
     }   
 }

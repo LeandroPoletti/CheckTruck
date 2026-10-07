@@ -1,5 +1,6 @@
 using CheckTruck.Api.Dtos.Veiculos;
 using CheckTruck.Dominio.Entidades;
+using CheckTruck.Dominio.Enums;
 using CheckTruck.Dominio.Servicos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,12 +13,12 @@ public class VeiculoController(
     ServicoVeiculo servicoVeiculo,
     ServicoSituacaoVeiculo servicoSituacao,
     ServicoCrud<Modelo> servicoModelo,
-    ServicoCrud<Motorista> servicoMotorista,
+    ServicoUsuario servicoUsuario,
     ILogger<Veiculo> logger)
     : CrudController<Veiculo, VeiculoResponseDto>(
         servicoVeiculo, "veículo", logger,
         v => v.ToResponseDto(),
-        q => q.Include(v => v.Modelo).Include(v => v.Motorista))
+        q => q.Include(v => v.Modelo).Include(v => v.MotoristaAtual))
 {
     [HttpGet]
     public ActionResult<IEnumerable<VeiculoResponseDto>> Get() => GetODataCore();
@@ -53,7 +54,7 @@ public class VeiculoController(
     public ActionResult<VeiculoResponseDto> GetById(long id) => GetByIdCore(id);
 
     [HttpPost]
-    public ActionResult<VeiculoResponseDto> Post([FromBody] VeiculoRequestDto dto)
+    public async Task<ActionResult<VeiculoResponseDto>> Post([FromBody] VeiculoRequestDto dto)
     {
         var modelo = servicoModelo.GetById(dto.ModeloId);
         if (modelo is null)
@@ -61,21 +62,17 @@ public class VeiculoController(
             return BadRequest("Modelo não encontrado.");
         }
 
-        Motorista? motorista = null;
-        if (dto.MotoristaId.HasValue)
+        var (motorista, erro) = await ResolverMotoristaAsync(dto.MotoristaAtualId);
+        if (erro is not null)
         {
-            motorista = servicoMotorista.GetById(dto.MotoristaId.Value);
-            if (motorista is null)
-            {
-                return BadRequest("Motorista não encontrado.");
-            }
+            return BadRequest(erro);
         }
 
         return PostCore(dto.ToEntity(modelo, motorista));
     }
 
     [HttpPut("{id:long}")]
-    public ActionResult<VeiculoResponseDto> Put(long id, [FromBody] VeiculoRequestDto dto)
+    public async Task<ActionResult<VeiculoResponseDto>> Put(long id, [FromBody] VeiculoRequestDto dto)
     {
         var modelo = servicoModelo.GetById(dto.ModeloId);
         if (modelo is null)
@@ -83,14 +80,10 @@ public class VeiculoController(
             return BadRequest("Modelo não encontrado.");
         }
 
-        Motorista? motorista = null;
-        if (dto.MotoristaId.HasValue)
+        var (motorista, erro) = await ResolverMotoristaAsync(dto.MotoristaAtualId);
+        if (erro is not null)
         {
-            motorista = servicoMotorista.GetById(dto.MotoristaId.Value);
-            if (motorista is null)
-            {
-                return BadRequest("Motorista não encontrado.");
-            }
+            return BadRequest(erro);
         }
 
         return PutCore(id, dto.ToEntity(modelo, motorista));
@@ -104,5 +97,22 @@ public class VeiculoController(
     {
         var res = servicoVeiculo.AtualizarKmVeiculo(id, distancia);
         return res ? Ok() : BadRequest(servicoVeiculo.Mensagens);
+    }
+
+    // O motorista atual é opcional; quando vem, tem que ser um acesso ativo com cargo Motorista
+    private async Task<(Usuario? motorista, string? erro)> ResolverMotoristaAsync(string? motoristaId)
+    {
+        if (string.IsNullOrEmpty(motoristaId))
+        {
+            return (null, null);
+        }
+
+        var motorista = await servicoUsuario.ObterAsync(motoristaId);
+        if (motorista is not { Ativo: true, Cargo: Cargo.Motorista })
+        {
+            return (null, "Motorista não encontrado ou inativo.");
+        }
+
+        return (motorista, null);
     }
 }

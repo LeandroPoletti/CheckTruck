@@ -1,10 +1,10 @@
 import Sidebar from './Sidebar'
 import { Button } from './ui/Form'
 
-export default function Layout({ children }) {
+export default function Layout({ usuario, itensMenu, children }) {
   return (
     <div className="flex h-screen bg-mist-50">
-      <Sidebar />
+      <Sidebar usuario={usuario} itens={itensMenu} />
       <main className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-6xl px-8 py-8">{children}</div>
       </main>

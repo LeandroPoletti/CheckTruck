@@ -1,11 +1,11 @@
 ﻿using CheckTruck.Dominio.Entidades;
-using CheckTruck.Repositorio.Entidades;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace CheckTruck.Repositorio;
 
-public class Context : IdentityDbContext<Usuario>
+// Só usuários do Identity (sem tabelas de papéis): quem pode o quê fica no cargo e nas permissões do Usuario
+public class Context : IdentityUserContext<Usuario>
 {
     public DbSet<Fabricante> Fabricantes { get; set; }
     public DbSet<GeracaoModelo> GeracaoModelos { get; set; }
@@ -16,7 +16,6 @@ public class Context : IdentityDbContext<Usuario>
     public DbSet<Manutencao> Manutencoes { get; set; }
     public DbSet<IntervaloRecomendado> IntervalosRecomendados { get; set; }
     public DbSet<IntervaloVeiculo> IntervalosVeiculo { get; set; }
-    public DbSet<Motorista> Motoristas { get; set; }
     public DbSet<Mecanico> Mecanicos { get; set; }
 
     public Context(DbContextOptions options) : base(options)

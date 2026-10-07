@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Plus, Search } from 'lucide-react'
-import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../../components/Layout'
-import { Button, Input } from '../../components/ui/Form'
-import AcoesLinha from '../../components/ui/AcoesLinha'
-import FabricanteModal from '../../components/modals/FabricanteModal'
-import ConfirmarExclusaoModal from '../../components/modals/ConfirmarExclusaoModal'
-import { fabricanteService } from '../../services'
+import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
+import { Button, Input } from '../components/ui/Form'
+import AcoesLinha from '../components/ui/AcoesLinha'
+import FabricanteModal from '../components/modals/FabricanteModal'
+import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
+import { fabricanteService } from '../services'
 
 export default function Fabricantes() {
   const [fabricantes, setFabricantes] = useState([])

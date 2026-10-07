@@ -1,62 +1,88 @@
-using CheckTruck.Dominio.Entidades;
+using CheckTruck.Api.Acesso;
+using CheckTruck.Api.Dtos.Comuns;
+using CheckTruck.Api.Dtos.Usuarios;
 using CheckTruck.Dominio.Servicos;
-using CheckTruck.Repositorio.Entidades;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CheckTruck.Api.Controllers;
 
-/// <summary>Quem está logado e qual o perfil dele.</summary>
+/// <summary>Acessos ao sistema: quem entra, o cargo e o que cada um pode fazer.</summary>
 [ApiController]
 [Route("api/[controller]")]
-public class UsuarioController(
-    UserManager<Usuario> userManager,
-    ServicoCrud<Motorista> servicoMotorista) : ControllerBase
+public class UsuarioController(ServicoUsuario servicoUsuario) : ControllerBase
 {
-    /// <summary>
-    /// Usuário logado com o perfil que o front usa para escolher a área:
-    /// "gerente" (papel Administrador), "mecanico" ou "motorista".
-    /// </summary>
+    /// <summary>Quem está logado, com cargo e permissões (o front monta o menu com isso).</summary>
     [HttpGet("me")]
-    [Authorize(AuthenticationSchemes = "Identity.Bearer")]
-    public async Task<ActionResult<UsuarioLogadoDto>> Me()
+    [ExigePermissao]
+    public ActionResult<UsuarioResponseDto> Me() => HttpContext.UsuarioLogado().ToResponseDto();
+
+    /// <summary>Motoristas ativos, para escolher quem está com o caminhão.</summary>
+    [HttpGet("motoristas")]
+    [ExigePermissao]
+    public ActionResult<IEnumerable<UsuarioResumoDto>> Motoristas() =>
+        servicoUsuario.ListarMotoristasAtivos()
+            .Select(u => new UsuarioResumoDto { Id = u.Id, Nome = u.Nome })
+            .ToList();
+
+    /// <summary>Todos os acessos, ativos e inativos.</summary>
+    [HttpGet]
+    [SomenteGestao]
+    public ActionResult<IEnumerable<UsuarioResponseDto>> Get() =>
+        servicoUsuario.Listar().AsEnumerable().Select(u => u.ToResponseDto()).ToList();
+
+    [HttpGet("{id}")]
+    [SomenteGestao]
+    public async Task<ActionResult<UsuarioResponseDto>> GetById(string id)
     {
-        var usuario = await userManager.GetUserAsync(User);
+        var usuario = await servicoUsuario.ObterAsync(id);
         if (usuario is null)
         {
-            return Unauthorized();
+            return NotFound();
         }
 
-        var papeis = await userManager.GetRolesAsync(usuario);
-        var motoristaId = servicoMotorista.Query(m => m.UsuarioGuid == usuario.Id)
-            .Select(m => (long?)m.Id)
-            .FirstOrDefault();
-
-        // Sem papel conhecido, cai no perfil mais restrito
-        var perfil = papeis.Contains("Administrador") ? "gerente"
-            : papeis.Contains("Mecanico") ? "mecanico"
-            : "motorista";
-
-        return new UsuarioLogadoDto
-        {
-            Id = usuario.Id,
-            Email = usuario.Email ?? usuario.UserName ?? "",
-            Nome = usuario.UserName ?? "",
-            Perfil = perfil,
-            MotoristaId = motoristaId,
-        };
+        return usuario.ToResponseDto();
     }
-}
 
-public class UsuarioLogadoDto
-{
-    public string Id { get; set; } = "";
-    public string Email { get; set; } = "";
-    public string Nome { get; set; } = "";
+    [HttpPost]
+    [SomenteGestao]
+    public async Task<ActionResult<UsuarioResponseDto>> Post([FromBody] UsuarioRequestDto dto)
+    {
+        var usuario = await servicoUsuario.CriarAsync(dto.ToEntity(), dto.Senha);
+        if (usuario is null)
+        {
+            return Erro();
+        }
 
-    /// <summary>"gerente", "mecanico" ou "motorista"</summary>
-    public string Perfil { get; set; } = "";
+        return CreatedAtAction(nameof(GetById), new { id = usuario.Id }, usuario.ToResponseDto());
+    }
 
-    public long? MotoristaId { get; set; }
+    /// <summary>Edita dados, cargo e permissões. Senha em branco mantém a atual.</summary>
+    [HttpPut("{id}")]
+    [SomenteGestao]
+    public async Task<ActionResult<UsuarioResponseDto>> Put(string id, [FromBody] UsuarioRequestDto dto)
+    {
+        var usuario = await servicoUsuario.AtualizarAsync(id, dto.ToEntity(), dto.Senha, HttpContext.UsuarioLogado().Id);
+        if (usuario is null)
+        {
+            return Erro();
+        }
+
+        return usuario.ToResponseDto();
+    }
+
+    /// <summary>Ativa ou desativa (corpo: true ou false). Inativo não entra no sistema.</summary>
+    [HttpPut("{id}/ativo")]
+    [SomenteGestao]
+    public async Task<ActionResult<UsuarioResponseDto>> AlterarAtivo(string id, [FromBody] bool ativo)
+    {
+        var usuario = await servicoUsuario.AlterarAtivoAsync(id, ativo, HttpContext.UsuarioLogado().Id);
+        if (usuario is null)
+        {
+            return Erro();
+        }
+
+        return usuario.ToResponseDto();
+    }
+
+    private BadRequestObjectResult Erro() => BadRequest(string.Join(" ", servicoUsuario.Mensagens));
 }
