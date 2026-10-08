@@ -74,6 +74,7 @@ builder.Services.AddScoped<ServicoSituacaoVeiculo>();
 builder.Services.AddScoped<ServicoManutencao>();
 builder.Services.AddScoped<ServicoDashboard>();
 builder.Services.AddScoped<ServicoUsuario>();
+builder.Services.AddScoped<ServicoChamado>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy => policy.AllowAnyMethod().AllowAnyOrigin().AllowAnyHeader());

@@ -25,13 +25,14 @@ export function PlacaBadge({ placa, size = 'md' }) {
   )
 }
 
+// urgencia e status: nomes dos enums UrgenciaChamado e StatusChamado da API
 export function UrgenciaBadge({ urgencia }) {
   const map = {
-    alta: { label: 'URGENTE', cls: 'bg-red-50 text-red-700 border-red-300' },
-    media: { label: 'MÉDIA', cls: 'bg-amber-50 text-amber-700 border-amber-300' },
-    baixa: { label: 'BAIXA', cls: 'bg-mist-100 text-brand-700 border-brand-200' },
+    Alta: { label: 'URGENTE', cls: 'bg-red-50 text-red-700 border-red-300' },
+    Media: { label: 'MÉDIA', cls: 'bg-amber-50 text-amber-700 border-amber-300' },
+    Baixa: { label: 'BAIXA', cls: 'bg-mist-100 text-brand-700 border-brand-200' },
   }
-  const it = map[urgencia] || map.baixa
+  const it = map[urgencia] || map.Baixa
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] font-semibold tracking-wide ${it.cls}`}>
       {it.label}
@@ -41,11 +42,10 @@ export function UrgenciaBadge({ urgencia }) {
 
 export function ChamadoStatusBadge({ status }) {
   const map = {
-    aberto: { label: 'Aberto', cls: 'bg-red-50 text-red-700 border-red-300' },
-    em_andamento: { label: 'Em andamento', cls: 'bg-amber-50 text-amber-700 border-amber-300' },
-    resolvido: { label: 'Resolvido', cls: 'bg-emerald-50 text-emerald-700 border-emerald-300' },
+    Pendente: { label: 'Pendente', cls: 'bg-amber-50 text-amber-700 border-amber-300' },
+    Concluido: { label: 'Concluído', cls: 'bg-emerald-50 text-emerald-700 border-emerald-300' },
   }
-  const it = map[status] || map.aberto
+  const it = map[status] || map.Pendente
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] font-semibold tracking-wide ${it.cls}`}>
       {it.label}

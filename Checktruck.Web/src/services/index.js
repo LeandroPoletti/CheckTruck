@@ -1,7 +1,6 @@
-import { api } from './api'
+import { api, toId } from './api'
 import { criarCrud } from './crud'
 import * as m from './mappers'
-import { ENDPOINTS_PENDENTES, avisarPendente, rejeitarPendente } from './pendentes'
 
 export { filtro } from './crud'
 
@@ -37,14 +36,32 @@ export const dashboardService = {
   },
 }
 
-// Chamados ainda não existem na API: listar devolve [] e as escritas rejeitam com aviso.
+// Chamados. Quem só abre vê os próprios; quem atende vê todos (a API filtra).
 export const chamadoService = {
   async listar() {
-    avisarPendente(ENDPOINTS_PENDENTES.chamadoListar)
-    return []
+    const { data } = await api.get('/api/Chamado')
+    return data.map(m.chamadoFromApi)
   },
-  criar: () => rejeitarPendente(ENDPOINTS_PENDENTES.chamadoCriar),
-  atualizar: () => rejeitarPendente(ENDPOINTS_PENDENTES.chamadoAtualizar),
+  // Caminhões ativos ({ id, placa }) para escolher ao abrir: não precisa de "Ver frota"
+  async listarVeiculos() {
+    const { data } = await api.get('/api/Chamado/veiculos')
+    return data.map((v) => ({ id: toId(v.id), placa: v.placa }))
+  },
+  async abrir(dados) {
+    await api.post('/api/Chamado', m.chamadoToApi(dados))
+  },
+  async editar(id, dados) {
+    await api.put(`/api/Chamado/${id}`, m.chamadoToApi(dados))
+  },
+  async excluir(id) {
+    await api.delete(`/api/Chamado/${id}`)
+  },
+  async atender(id) {
+    await api.post(`/api/Chamado/${id}/atender`)
+  },
+  async resolver(id, solucao) {
+    await api.post(`/api/Chamado/${id}/resolver`, { solucao: solucao.trim() })
+  },
 }
 
 // Acessos (login, cargo e permissões). Listar, criar e editar: só Admin e Gestor.

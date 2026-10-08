@@ -15,11 +15,9 @@ public abstract class FiltroDeAcessoAttribute : Attribute, IAsyncAuthorizationFi
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
         // O controller e a rota podem ter um filtro cada: o segundo reaproveita o usuário que o primeiro carregou
-        if (context.HttpContext.Items[typeof(Usuario)] is not Usuario usuario)
-        {
-            var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<Usuario>>();
-            usuario = await userManager.GetUserAsync(context.HttpContext.User);
-        }
+        var usuario = context.HttpContext.Items[typeof(Usuario)] as Usuario
+            ?? await context.HttpContext.RequestServices.GetRequiredService<UserManager<Usuario>>()
+                .GetUserAsync(context.HttpContext.User);
 
         if (usuario is null || !usuario.Ativo)
         {
@@ -47,6 +45,13 @@ public abstract class FiltroDeAcessoAttribute : Attribute, IAsyncAuthorizationFi
 public class ExigePermissaoAttribute(Permissao permissao = Permissao.Nenhuma) : FiltroDeAcessoAttribute
 {
     protected override bool Permite(Usuario usuario) => usuario.Pode(permissao);
+}
+
+/// <summary>Exige estar logado, ativo e com pelo menos uma das permissões informadas (juntas com |).</summary>
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+public class ExigeUmaDasPermissoesAttribute(Permissao permissoes) : FiltroDeAcessoAttribute
+{
+    protected override bool Permite(Usuario usuario) => (usuario.PermissoesEfetivas & permissoes) != 0;
 }
 
 /// <summary>Só Admin e Gestor: são eles que cuidam dos acessos.</summary>

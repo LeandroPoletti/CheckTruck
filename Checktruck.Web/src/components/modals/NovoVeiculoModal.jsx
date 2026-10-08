@@ -222,7 +222,7 @@ export default function NovoVeiculoModal({ open, onClose, veiculoParaEditar, onS
 
         <div>
           <p className="mb-3 text-xs font-bold tracking-wide text-brand-700">3 · VÍNCULOS</p>
-          <Field label="Motorista atual (opcional)">
+          <Field label="Motorista atual (opcional)" hint="Muda sozinho quando um motorista abre chamado deste caminhão.">
             <div className="flex items-center gap-3">
               <Select className="flex-1" value={form.motoristaId} onChange={(e) => set('motoristaId', e.target.value)}>
                 <option value="">Sem motorista</option>

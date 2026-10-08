@@ -239,3 +239,29 @@ export const mecanicoFromApi = (dto) => ({
   ativo: dto.ativo,
 })
 export const mecanicoToApi = (m) => ({ nome: m.nome, funcao: m.funcao, ativo: m.ativo ?? true })
+
+// ---------------------------------------------------------------------------
+// Chamados — tipo, urgência e status vêm com os nomes dos enums da API
+// ---------------------------------------------------------------------------
+export const chamadoFromApi = (dto) => ({
+  id: toId(dto.id),
+  veiculoId: toId(dto.veiculo.id),
+  placa: dto.veiculo.placa,
+  tipo: dto.tipo,
+  urgencia: dto.urgencia,
+  descricao: dto.descricao,
+  status: dto.status, // 'Pendente' | 'Concluido'
+  abertoPorId: dto.abertoPor.id,
+  abertoPorNome: dto.abertoPor.nome,
+  abertoEm: dto.abertoEm,
+  atendidoPorId: dto.atendidoPor?.id ?? null,
+  atendidoPorNome: dto.atendidoPor?.nome ?? null,
+  solucao: dto.solucao,
+  concluidoEm: dto.concluidoEm,
+})
+export const chamadoToApi = (c) => ({
+  veiculoId: toApiId(c.veiculoId),
+  tipo: c.tipo,
+  urgencia: c.urgencia,
+  descricao: c.descricao.trim(),
+})
