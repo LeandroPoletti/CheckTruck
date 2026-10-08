@@ -1,12 +1,44 @@
-import { Fragment } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
-import { LogOut } from 'lucide-react'
+import { useState } from 'react'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { ChevronDown, LogOut } from 'lucide-react'
 import { sair } from '../services/sessao'
 import { nomeCargo } from '../data/acesso'
 
-// itens: telas que a pessoa pode usar (paginas.jsx). O título do grupo aparece antes do primeiro item dele.
+// Junta os itens em blocos, na ordem de paginas.jsx: item solto (sem grupo) ou grupo com os itens dele
+function montarBlocos(itens) {
+  const blocos = []
+  for (const item of itens) {
+    const ultimo = blocos.at(-1)
+    if (item.grupo && ultimo?.grupo === item.grupo) ultimo.itens.push(item)
+    else blocos.push(item.grupo ? { grupo: item.grupo, itens: [item] } : { item })
+  }
+  return blocos
+}
+
+// itens: telas que a pessoa pode usar (paginas.jsx). Cada grupo abre e fecha ao clicar, sem mexer nos outros.
 export default function Sidebar({ usuario, itens }) {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+
+  // Grupo da tela aberta (o detalhe /veiculos/5 conta como Veículos)
+  const grupoAtual = itens.find((i) => pathname === i.path || pathname.startsWith(`${i.path}/`))?.grupo
+  const [abertos, setAbertos] = useState(() => new Set(grupoAtual ? [grupoAtual] : []))
+
+  // Ao chegar numa tela de um grupo fechado (ex.: atalho do dashboard), o grupo dela abre
+  const [grupoVisto, setGrupoVisto] = useState(grupoAtual)
+  if (grupoAtual !== grupoVisto) {
+    setGrupoVisto(grupoAtual)
+    if (grupoAtual) setAbertos((a) => new Set(a).add(grupoAtual))
+  }
+
+  function alternar(grupo) {
+    setAbertos((a) => {
+      const novos = new Set(a)
+      if (novos.has(grupo)) novos.delete(grupo)
+      else novos.add(grupo)
+      return novos
+    })
+  }
 
   function logout() {
     sair()
@@ -25,27 +57,30 @@ export default function Sidebar({ usuario, itens }) {
         </p>
       </div>
 
-      <nav className="flex-1 space-y-0.5 px-3">
-        {itens.map(({ path, label, icon: Icon, grupo }, i) => (
-          <Fragment key={path}>
-            {grupo && grupo !== itens[i - 1]?.grupo && (
-              <p className="px-3 pt-4 pb-1 text-[10px] font-semibold tracking-widest text-brand-300">{grupo}</p>
-            )}
-            <NavLink
-              to={path}
-              className={({ isActive }) =>
-                `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition ${
-                  isActive
-                    ? 'bg-brand-700 text-white font-semibold'
-                    : 'text-brand-100/80 hover:bg-brand-800 hover:text-white'
-                }`
-              }
-            >
-              <Icon size={16} strokeWidth={2.2} />
-              {label}
-            </NavLink>
-          </Fragment>
-        ))}
+      <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 pb-4">
+        {montarBlocos(itens).map((bloco) => {
+          if (!bloco.grupo) return <ItemMenu key={bloco.item.path} item={bloco.item} />
+
+          const aberto = abertos.has(bloco.grupo)
+          return (
+            <div key={bloco.grupo} className="pt-2">
+              <button
+                type="button"
+                onClick={() => alternar(bloco.grupo)}
+                aria-expanded={aberto}
+                className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-[10px] font-semibold tracking-widest text-brand-300 transition hover:bg-brand-800 hover:text-white"
+              >
+                {bloco.grupo}
+                <ChevronDown size={14} className={`transition-transform ${aberto ? 'rotate-180' : ''}`} />
+              </button>
+              {aberto && (
+                <div className="space-y-0.5 pl-3">
+                  {bloco.itens.map((item) => <ItemMenu key={item.path} item={item} />)}
+                </div>
+              )}
+            </div>
+          )
+        })}
       </nav>
 
       <div className="border-t border-brand-800 px-5 py-4">
@@ -59,5 +94,23 @@ export default function Sidebar({ usuario, itens }) {
         </button>
       </div>
     </aside>
+  )
+}
+
+function ItemMenu({ item: { path, label, icon: Icon } }) {
+  return (
+    <NavLink
+      to={path}
+      className={({ isActive }) =>
+        `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition ${
+          isActive
+            ? 'bg-brand-700 text-white font-semibold'
+            : 'text-brand-100/80 hover:bg-brand-800 hover:text-white'
+        }`
+      }
+    >
+      <Icon size={16} strokeWidth={2.2} />
+      {label}
+    </NavLink>
   )
 }

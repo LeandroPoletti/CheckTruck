@@ -1,5 +1,5 @@
 // Ajudantes das telas do CheckTruck. As funções recebem o catálogo que cada página
-// carregou da API ({ fabricantes, geracoes, modelos, tiposManutencao }).
+// carregou da API ({ fabricantes, geracoes, modelos }).
 // A situação de manutenção (o que vence e quando) é calculada pela API, não aqui.
 
 // enum CheckTruck.Dominio.Enums.Componente
@@ -20,9 +20,6 @@ function getGeracao(catalogo, geracaoId) {
 }
 function getFabricante(catalogo, fabricanteId) {
   return catalogo.fabricantes.find((f) => f.id === fabricanteId)
-}
-export function getTipoManutencao(catalogo, tipoId) {
-  return catalogo.tiposManutencao.find((t) => t.id === tipoId)
 }
 
 export function getModeloCompleto(catalogo, modeloId) {

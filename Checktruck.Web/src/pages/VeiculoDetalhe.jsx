@@ -3,13 +3,12 @@ import { useEffect, useState } from 'react'
 import VeiculoDetalhePanel, { VeiculoNaoEncontrado } from '../components/VeiculoDetalhePanel'
 import { Carregando, ErroCarregamento } from '../components/Layout'
 import {
-  veiculoService, modeloService, geracaoService, fabricanteService, tipoManutencaoService,
-  manutencaoService, filtro,
+  veiculoService, modeloService, geracaoService, fabricanteService, manutencaoService, filtro,
 } from '../services'
 import { Button } from '../components/ui/Form'
 import AtualizarKmModal from '../components/modals/AtualizarKmModal'
 import NovoVeiculoModal from '../components/modals/NovoVeiculoModal'
-import RegistrarManutencaoModal from '../components/modals/RegistrarManutencaoModal'
+import OrdemServicoModal from '../components/modals/OrdemServicoModal'
 import { obterUsuario } from '../services/sessao'
 import { pode } from '../data/acesso'
 
@@ -31,14 +30,13 @@ export default function VeiculoDetalhe() {
     async function carregar() {
       // A situação (o que vence e quando) vem pronta da API: intervalo do caminhão → modelo → padrão, por km e por data
       const [veiculo, situacao] = await Promise.all([veiculoService.obter(id), veiculoService.obterSituacao(id)])
-      const [modelo, geracoes, fabricantes, tiposManutencao, registros] = await Promise.all([
+      const [modelo, geracoes, fabricantes, registros] = await Promise.all([
         modeloService.obter(veiculo.modeloId),
         geracaoService.listar(),
         fabricanteService.listar(),
-        tipoManutencaoService.listar(),
         manutencaoService.listar(filtro.porId('Veiculo', veiculo.id)),
       ])
-      const catalogo = { modelos: [modelo], geracoes, fabricantes, tiposManutencao }
+      const catalogo = { modelos: [modelo], geracoes, fabricantes }
       return { veiculo, situacao, registros, catalogo }
     }
     carregar()
@@ -86,14 +84,14 @@ export default function VeiculoDetalhe() {
               <Button variant="secondary" onClick={() => setEditarOpen(true)}>Editar</Button>
             )}
             {pode(usuario, 'OrdemServico') && (
-              <Button onClick={() => setManutencaoOpen(true)}>Registrar manutenção</Button>
+              <Button onClick={() => setManutencaoOpen(true)}>Lançar OS</Button>
             )}
           </div>
         }
       />
       <AtualizarKmModal open={kmOpen} onClose={() => setKmOpen(false)} veiculo={veiculo} onSalvo={recarregar} />
       <NovoVeiculoModal open={editarOpen} onClose={() => setEditarOpen(false)} veiculoParaEditar={veiculo} onSalvo={recarregar} />
-      <RegistrarManutencaoModal open={manutencaoOpen} onClose={() => setManutencaoOpen(false)} veiculo={veiculo} onSalvo={recarregar} />
+      {manutencaoOpen && <OrdemServicoModal veiculo={veiculo} onClose={() => setManutencaoOpen(false)} onSalvo={recarregar} />}
     </>
   )
 }

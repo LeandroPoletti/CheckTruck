@@ -157,13 +157,17 @@ export const veiculoToApi = (v) => ({
   motoristaAtualId: v.motoristaId || null,
 })
 
+// Ordem de serviço (o id é o número da OS)
 export const registroFromApi = (dto) => ({
   id: toId(dto.id),
   veiculoId: toId(dto.veiculo?.id),
+  placa: dto.veiculo?.placa ?? null,
   tipoId: toId(dto.tipoManutencao?.id),
+  tipoNome: dto.tipoManutencao?.nome ?? null,
   mecanicoId: toId(dto.mecanico?.id),
   mecanicoNome: dto.mecanico?.nome ?? null,
   mecanicoFuncao: dto.mecanico?.funcao ?? null,
+  motoristaId: dto.motorista?.id ?? null,
   motoristaNome: dto.motorista?.nome ?? null,
   kmNaTroca: dto.kmAtual,
   kmProximaTroca: dto.kmProximaTroca,

@@ -3,7 +3,7 @@ import { ChevronLeft } from 'lucide-react'
 import { Card } from './Layout'
 import { StatusBadge, PlacaBadge } from './ui/Badges'
 import {
-  formatKm, formatData, formatDataHora, getModeloCompleto, getHistoricoVeiculo, getTipoManutencao,
+  formatKm, formatData, formatDataHora, getModeloCompleto, getHistoricoVeiculo,
 } from '../data/domain'
 
 export function VeiculoNaoEncontrado({ backTo }) {
@@ -19,7 +19,7 @@ export function VeiculoNaoEncontrado({ backTo }) {
 }
 
 // Apresentacional: a página de detalhe carrega os dados e passa por props.
-// catalogo = { fabricantes, geracoes, modelos, tiposManutencao } do veículo.
+// catalogo = { fabricantes, geracoes, modelos } do veículo.
 // situacao = status geral e itens já calculados pela API (do mais urgente para o menos urgente).
 export default function VeiculoDetalhePanel({ veiculo, catalogo, situacao, registros, backTo, actions }) {
   const navigate = useNavigate()
@@ -109,7 +109,7 @@ export default function VeiculoDetalhePanel({ veiculo, catalogo, situacao, regis
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-stone-800">
-                      {getTipoManutencao(catalogo, r.tipoId)?.nome || r.tipoId}
+                      {r.tipoNome}
                       {r.isPrimeiraTroca && <span className="ml-2 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">1ª TROCA</span>}
                     </p>
                     <p className="text-xs text-stone-500">
