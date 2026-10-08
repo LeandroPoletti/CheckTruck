@@ -10,5 +10,5 @@ public class Fabricante : EntidadeBanco
     public string Nome { get; set; }
     [Required]
     public Pais PaisOrigem { get; set; }
-    public IList<GeracaoModelo> Geracoes { get; set; } = new List<GeracaoModelo>();
-}
+    public IList<Modelo> Modelos { get; set; } = new List<Modelo>();
+}

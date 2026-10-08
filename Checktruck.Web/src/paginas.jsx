@@ -15,8 +15,8 @@ import Chamados from './pages/Chamados'
 import Intervalos from './pages/Intervalos'
 import Paises from './pages/Paises'
 import Fabricantes from './pages/Fabricantes'
-import Geracoes from './pages/Geracoes'
 import Modelos from './pages/Modelos'
+import Geracoes from './pages/Geracoes'
 import TiposManutencao from './pages/TiposManutencao'
 import Mecanicos from './pages/Mecanicos'
 import Acesso from './pages/Acesso'
@@ -37,8 +37,8 @@ export const PAGINAS = [
 
   { path: '/paises', label: 'Países', icon: Globe, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Paises },
   { path: '/fabricantes', label: 'Fabricantes', icon: Factory, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Fabricantes },
-  { path: '/geracoes', label: 'Gerações', icon: Layers, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Geracoes },
   { path: '/modelos', label: 'Modelos', icon: Boxes, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Modelos },
+  { path: '/geracoes', label: 'Gerações', icon: Layers, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Geracoes },
   { path: '/tipos-manutencao', label: 'Tipos de manutenção', icon: Wrench, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: TiposManutencao },
   { path: '/mecanicos', label: 'Mecânicos', icon: HardHat, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Mecanicos },
 

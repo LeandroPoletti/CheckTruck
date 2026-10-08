@@ -19,7 +19,7 @@ export const PERMISSOES = [
   { id: 'Veiculos', nome: 'Veículos', descricao: 'Cadastrar e editar veículos' },
   { id: 'AtualizarKm', nome: 'Atualizar km', descricao: 'Lançar o km dos caminhões' },
   { id: 'OrdemServico', nome: 'Ordem de serviço', descricao: 'Lançar e editar OS' },
-  { id: 'Cadastros', nome: 'Cadastros', descricao: 'País, fabricante, geração, modelo e mecânicos da OS' },
+  { id: 'Cadastros', nome: 'Cadastros', descricao: 'País, fabricante, modelo, geração, tipos de manutenção e mecânicos da OS' },
   { id: 'Intervalos', nome: 'Intervalos', descricao: 'Intervalos de troca' },
   { id: 'AbrirChamados', nome: 'Abrir chamados', descricao: 'Abrir e editar os próprios chamados' },
   { id: 'AtenderChamados', nome: 'Atender chamados', descricao: 'Ver todos, atender e resolver' },

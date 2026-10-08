@@ -6,7 +6,7 @@ namespace CheckTruck.Dominio.Servicos;
 
 /// <summary>
 /// Lançamento das trocas feitas pela concessionária (OS). Se a OS ou a etiqueta trouxer a próxima
-/// troca, vale o que veio; se não, o sistema calcula pelo intervalo do caminhão → modelo → padrão.
+/// troca, vale o que veio; se não, o sistema calcula pelo intervalo do caminhão → geração → padrão.
 /// O km da OS também atualiza o km do caminhão quando é maior que o atual, e o motorista informado
 /// ao lançar vira o motorista atual do caminhão.
 /// </summary>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Card, PageHeader, Carregando, ErroCarregamento } from '../components/Layout'
 import { StatusBadge, PlacaBadge } from '../components/ui/Badges'
 import { Button } from '../components/ui/Form'
-import { formatKm } from '../data/domain'
+import { formatKm, nomeDoModelo } from '../data/domain'
 import { dashboardService } from '../services'
 import { obterUsuario } from '../services/sessao'
 import { pode } from '../data/acesso'
@@ -101,7 +101,7 @@ export default function Dashboard() {
                       <div className="flex items-center gap-2">
                         <PlacaBadge placa={alerta.placa} size="sm" />
                         <span className="text-sm text-stone-500">
-                          {alerta.modeloNome} · {alerta.geracaoNome}
+                          {nomeDoModelo(alerta)} · {alerta.geracaoNome}
                         </span>
                       </div>
                       <StatusBadge status={alerta.status} />
@@ -160,7 +160,7 @@ export default function Dashboard() {
               {frotaPorGeracao.map((g) => (
                 <div key={g.geracaoId}>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-stone-700">{g.geracaoNome}</span>
+                    <span className="text-stone-700">{nomeDoModelo(g)} · {g.geracaoNome}</span>
                     <span className="font-semibold text-stone-900">{g.quantidade}</span>
                   </div>
                   <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-stone-100">
@@ -173,7 +173,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <NovoVeiculoModal open={novoVeiculoOpen} onClose={() => setNovoVeiculoOpen(false)} onSalvo={recarregar} />
+      {novoVeiculoOpen && <NovoVeiculoModal onClose={() => setNovoVeiculoOpen(false)} onSalvo={recarregar} />}
       {novoAcessoOpen && <UsuarioModal onClose={() => setNovoAcessoOpen(false)} />}
       <MecanicoModal open={novoMecanicoOpen} onClose={() => setNovoMecanicoOpen(false)} />
     </>

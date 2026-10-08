@@ -4,20 +4,18 @@ using CheckTruck.Dominio.Resultados;
 namespace CheckTruck.Dominio.Servicos;
 
 /// <summary>
-/// Padrão seguro usado quando o caminhão e o modelo não têm intervalo cadastrado (ex.: dono de
+/// Padrão seguro usado quando o caminhão e a geração não têm intervalo cadastrado (ex.: dono de
 /// um caminhão só, sem plano de concessionária). Os valores ficam abaixo do que Volvo, Scania,
 /// Mercedes, Iveco e DAF permitem, usando o limite do óleo mineral, que é o mais curto.
 /// Fonte: pesquisa em Intervalos_Volvo_FH_CheckTruck.docx e Intervalos_Scania_Mercedes_Iveco_DAF_CheckTruck.docx.
 /// </summary>
 public static class IntervalosPadrao
 {
-    public static IntervaloResolvido? Obter(Componente componente, string? normaEmissao)
+    public static IntervaloResolvido? Obter(Componente componente, NormaEmissao normaEmissao)
     {
-        var euro6 = IsEuro6(normaEmissao);
-
         (int km, int meses)? padrao = componente switch
         {
-            Componente.Motor => (euro6 ? 40_000 : 30_000, 6),
+            Componente.Motor => (normaEmissao == NormaEmissao.Euro6 ? 40_000 : 30_000, 6),
             Componente.Cambio => (120_000, 12),
             Componente.Diferencial1 => (120_000, 12),
             Componente.Diferencial2 => (120_000, 12),
@@ -30,32 +28,23 @@ public static class IntervalosPadrao
             : new IntervaloResolvido(padrao.Value.km, padrao.Value.meses, 0, OrigemIntervalo.Padrao);
     }
 
-    /// <summary>Aceita "Euro 6", "Euro VI", "P8" e variações; qualquer outra coisa conta como Euro 5.</summary>
-    public static bool IsEuro6(string? normaEmissao)
-    {
-        if (string.IsNullOrWhiteSpace(normaEmissao)) return false;
-
-        var norma = normaEmissao.ToUpperInvariant().Replace(" ", "").Replace("-", "");
-        return norma.Contains("EURO6") || norma.Contains("EUROVI") || norma.Contains("P8");
-    }
-
     /// <summary>
-    /// Prioridade: intervalo do caminhão → intervalo do modelo → padrão seguro.
+    /// Prioridade: intervalo do caminhão → intervalo da geração → padrão seguro.
     /// </summary>
     public static IntervaloResolvido? Resolver(
         (int km, int meses)? doVeiculo,
-        (int km, int meses, int kmPrimeira)? doModelo,
+        (int km, int meses, int kmPrimeira)? daGeracao,
         Componente componente,
-        string? normaEmissao)
+        NormaEmissao normaEmissao)
     {
         if (doVeiculo is { } v && v.km > 0)
         {
             return new IntervaloResolvido(v.km, v.meses, 0, OrigemIntervalo.Veiculo);
         }
 
-        if (doModelo is { } m && m.km > 0)
+        if (daGeracao is { } g && g.km > 0)
         {
-            return new IntervaloResolvido(m.km, m.meses, m.kmPrimeira, OrigemIntervalo.Modelo);
+            return new IntervaloResolvido(g.km, g.meses, g.kmPrimeira, OrigemIntervalo.Geracao);
         }
 
         return Obter(componente, normaEmissao);

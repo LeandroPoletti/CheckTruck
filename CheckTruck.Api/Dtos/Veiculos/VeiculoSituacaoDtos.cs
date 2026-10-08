@@ -1,4 +1,5 @@
 using CheckTruck.Api.Dtos.Comuns;
+using CheckTruck.Dominio.Enums;
 using CheckTruck.Dominio.Resultados;
 
 namespace CheckTruck.Api.Dtos.Veiculos;
@@ -12,10 +13,11 @@ public class VeiculoSituacaoResponseDto
     public bool Ativo { get; set; }
     public DateTime AnoFabricacao { get; set; }
     public DateTime AnoModelo { get; set; }
-    public ModeloSituacaoDto Modelo { get; set; }
-    public GeracaoModeloResumoDto Geracao { get; set; }
     public string Fabricante { get; set; }
-    public string? NormaEmissao { get; set; }
+    public ModeloResumoDto Modelo { get; set; }
+    public GeracaoSituacaoDto Geracao { get; set; }
+    public int PotenciaCv { get; set; }
+    public Tracao Tracao { get; set; }
     public UsuarioResumoDto? MotoristaAtual { get; set; }
 
     /// <summary>"ok", "atencao" ou "critico"</summary>
@@ -31,11 +33,13 @@ public class VeiculoSituacaoResponseDto
     public IList<ItemManutencaoDto>? Itens { get; set; }
 }
 
-public class ModeloSituacaoDto
+public class GeracaoSituacaoDto
 {
     public long Id { get; set; }
     public string Nome { get; set; }
-    public int PotenciaCavalo { get; set; }
+    public NormaEmissao NormaEmissao { get; set; }
+    public string? Motor { get; set; }
+    public string? Caixa { get; set; }
 }
 
 public class ItemManutencaoDto
@@ -47,7 +51,7 @@ public class ItemManutencaoDto
     public int IntervaloKm { get; set; }
     public int IntervaloMeses { get; set; }
 
-    /// <summary>De onde veio o intervalo: "veiculo", "modelo" ou "padrao".</summary>
+    /// <summary>De onde veio o intervalo: "veiculo", "geracao" ou "padrao".</summary>
     public string OrigemIntervalo { get; set; }
 
     /// <summary>Última troca registrada; null quando não há histórico no sistema.</summary>
@@ -82,15 +86,18 @@ public static class VeiculoSituacaoDtoExtensions
         Ativo = situacao.Ativo,
         AnoFabricacao = situacao.AnoFabricacao,
         AnoModelo = situacao.AnoModelo,
-        Modelo = new ModeloSituacaoDto
-        {
-            Id = situacao.ModeloId,
-            Nome = situacao.ModeloNome,
-            PotenciaCavalo = situacao.PotenciaCavalo
-        },
-        Geracao = new GeracaoModeloResumoDto { Id = situacao.GeracaoId, Nome = situacao.GeracaoNome },
         Fabricante = situacao.FabricanteNome,
-        NormaEmissao = situacao.NormaEmissao,
+        Modelo = new ModeloResumoDto { Id = situacao.ModeloId, Nome = situacao.ModeloNome },
+        Geracao = new GeracaoSituacaoDto
+        {
+            Id = situacao.GeracaoId,
+            Nome = situacao.GeracaoNome,
+            NormaEmissao = situacao.NormaEmissao,
+            Motor = situacao.Motor,
+            Caixa = situacao.Caixa
+        },
+        PotenciaCv = situacao.PotenciaCv,
+        Tracao = situacao.Tracao,
         MotoristaAtual = situacao.MotoristaAtualId is null
             ? null
             : new UsuarioResumoDto { Id = situacao.MotoristaAtualId, Nome = situacao.MotoristaAtualNome ?? "" },

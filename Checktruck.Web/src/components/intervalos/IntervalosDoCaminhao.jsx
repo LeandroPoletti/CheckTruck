@@ -6,37 +6,37 @@ import AcoesLinha from '../ui/AcoesLinha'
 import IntervaloModal from '../modals/IntervaloModal'
 import ConfirmarExclusaoModal from '../modals/ConfirmarExclusaoModal'
 import { intervaloService, intervaloVeiculoService, filtro } from '../../services'
-import { formatKm } from '../../data/domain'
+import { formatKm, nomeDoCaminhao } from '../../data/domain'
 import { montarLinhas, textoPrazo } from '../../data/intervalos'
 
-// Aba "Por caminhão": para cada item, o que vale para o caminhão escolhido (dele, do modelo ou o padrão).
+// Aba "Por caminhão": para cada item, o que vale para o caminhão escolhido (dele, da geração ou o padrão).
 // O intervalo próprio do caminhão (ex.: plano da concessionária) passa na frente dos outros.
 // tipos já vêm filtrados pelo componente escolhido na página.
 export default function IntervalosDoCaminhao({ veiculos, tipos, veiculoId, onVeiculo }) {
   const veiculo = veiculos.find((v) => v.id === veiculoId)
-  const modeloId = veiculo?.modeloId
-  const [dados, setDados] = useState({ veiculoId: null, doCaminhao: [], doModelo: [], padrao: [] })
+  const geracaoId = veiculo?.geracaoId
+  const [dados, setDados] = useState({ veiculoId: null, doCaminhao: [], daGeracao: [], padrao: [] })
   const [erro, setErro] = useState(null)
   const [versao, setVersao] = useState(0)
   const [modal, setModal] = useState(null) // linha da tabela enquanto o modal está aberto
   const [excluindo, setExcluindo] = useState(null)
 
   useEffect(() => {
-    if (!veiculoId || !modeloId) return
+    if (!veiculoId || !geracaoId) return
     let cancelado = false
     Promise.all([
       intervaloVeiculoService.listar(filtro.porId('Veiculo', veiculoId)),
-      intervaloService.listar(filtro.porId('Modelo', modeloId)),
-      intervaloService.listarPadrao(modeloId),
+      intervaloService.listar(filtro.porId('Geracao', geracaoId)),
+      intervaloService.listarPadrao(geracaoId),
     ])
-      .then(([doCaminhao, doModelo, padrao]) => {
+      .then(([doCaminhao, daGeracao, padrao]) => {
         if (cancelado) return
         setErro(null)
-        setDados({ veiculoId, doCaminhao, doModelo, padrao })
+        setDados({ veiculoId, doCaminhao, daGeracao, padrao })
       })
       .catch((e) => { if (!cancelado) setErro(e.message) })
     return () => { cancelado = true }
-  }, [veiculoId, modeloId, versao])
+  }, [veiculoId, geracaoId, versao])
 
   const recarregar = () => setVersao((v) => v + 1)
 
@@ -47,12 +47,12 @@ export default function IntervalosDoCaminhao({ veiculos, tipos, veiculoId, onVei
 
   // Se tirar o intervalo do caminhão, ele volta a usar...
   const oQueVoltaAValer = (l) =>
-    l.modelo ? 'o intervalo do modelo' : l.padrao ? 'o padrão do sistema' : 'nada (o item deixa de ser acompanhado)'
+    l.geracao ? 'o intervalo da geração' : l.padrao ? 'o padrão do sistema' : 'nada (o item deixa de ser acompanhado)'
 
   return (
     <>
-      <Select value={veiculoId ?? ''} onChange={(e) => onVeiculo(e.target.value)} className="mb-5 w-80">
-        {veiculos.map((v) => <option key={v.id} value={v.id}>{v.placa} · {v.modeloNome}</option>)}
+      <Select value={veiculoId ?? ''} onChange={(e) => onVeiculo(e.target.value)} className="mb-5 w-96">
+        {veiculos.map((v) => <option key={v.id} value={v.id}>{v.placa} · {nomeDoCaminhao(v)} · {v.geracaoNome}</option>)}
       </Select>
 
       {erro && <ErroCarregamento mensagem={erro} onTentarNovamente={recarregar} />}

@@ -8,8 +8,9 @@ namespace CheckTruck.Repositorio;
 public class Context : IdentityUserContext<Usuario>
 {
     public DbSet<Fabricante> Fabricantes { get; set; }
-    public DbSet<GeracaoModelo> GeracaoModelos { get; set; }
     public DbSet<Modelo> Modelos { get; set; }
+    public DbSet<Geracao> Geracoes { get; set; }
+    public DbSet<Potencia> Potencias { get; set; }
     public DbSet<Pais> Paises { get; set; }
     public DbSet<TipoManutencao> TiposManutencao { get; set; }
     public DbSet<Veiculo> Veiculos { get; set; }

@@ -39,7 +39,7 @@ public class ManutencaoController(
     /// Quem lançou e a data/hora ficam gravados (lancadoPor / lancadoEm). mecanicoId é quem fez a troca
     /// (cadastro de mecânicos). motoristaId é opcional: quando vem, vira o motorista atual do caminhão.
     /// Se kmProximaTroca vier 0 ou dataProximaTroca vier null, o sistema calcula pelo intervalo
-    /// do caminhão → modelo → padrão seguro. O kmAtual da OS atualiza o km do caminhão quando é maior.
+    /// do caminhão → geração → padrão seguro. O kmAtual da OS atualiza o km do caminhão quando é maior.
     /// </summary>
     [HttpPost]
     [ExigePermissao(Permissao.OrdemServico)]

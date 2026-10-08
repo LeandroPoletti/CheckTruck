@@ -4,7 +4,7 @@ namespace CheckTruck.Dominio.Resultados;
 
 /// <summary>
 /// Intervalo que vale para um caminhão e um tipo de manutenção, depois de aplicar a prioridade
-/// caminhão → modelo → padrão seguro.
+/// caminhão → geração → padrão seguro.
 /// </summary>
 /// <param name="IntervaloKm">Km entre trocas.</param>
 /// <param name="IntervaloMeses">Meses entre trocas; 0 = vence só por km.</param>

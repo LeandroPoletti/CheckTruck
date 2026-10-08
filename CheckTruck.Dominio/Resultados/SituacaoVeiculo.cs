@@ -2,7 +2,8 @@ using CheckTruck.Dominio.Enums;
 
 namespace CheckTruck.Dominio.Resultados;
 
-// Veículo com os dados de exibição já resolvidos (modelo, geração, motorista) e a situação de manutenção.
+// Veículo com os dados de exibição já resolvidos (fabricante, modelo, geração, potência, motorista)
+// e a situação de manutenção.
 public class SituacaoVeiculo
 {
     public long VeiculoId { get; set; }
@@ -12,12 +13,15 @@ public class SituacaoVeiculo
     public bool Ativo { get; set; }
     public DateTime AnoFabricacao { get; set; }
     public DateTime AnoModelo { get; set; }
-    public long ModeloId { get; set; }
-    public string ModeloNome { get; set; } = "";
-    public int PotenciaCavalo { get; set; }
+    public Tracao Tracao { get; set; }
+    public int PotenciaCv { get; set; }
     public long GeracaoId { get; set; }
     public string GeracaoNome { get; set; } = "";
-    public string? NormaEmissao { get; set; }
+    public NormaEmissao NormaEmissao { get; set; }
+    public string? Motor { get; set; }
+    public string? Caixa { get; set; }
+    public long ModeloId { get; set; }
+    public string ModeloNome { get; set; } = "";
     public string FabricanteNome { get; set; } = "";
     public string? MotoristaAtualId { get; set; }
     public string? MotoristaAtualNome { get; set; }
@@ -37,7 +41,7 @@ public class ItemManutencao
     public long TipoManutencaoId { get; set; }
     public string TipoManutencaoNome { get; set; } = "";
 
-    /// <summary>Intervalo usado no cálculo e de onde ele veio (caminhão, modelo ou padrão).</summary>
+    /// <summary>Intervalo usado no cálculo e de onde ele veio (caminhão, geração ou padrão).</summary>
     public int IntervaloKm { get; set; }
     public int IntervaloMeses { get; set; }
     public OrigemIntervalo OrigemIntervalo { get; set; }

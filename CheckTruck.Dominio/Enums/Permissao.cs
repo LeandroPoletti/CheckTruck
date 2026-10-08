@@ -23,7 +23,7 @@ public enum Permissao
     /// <summary>Lançar e editar ordens de serviço.</summary>
     OrdemServico = 1 << 3,
 
-    /// <summary>País, fabricante, geração, modelo e mecânicos da OS.</summary>
+    /// <summary>País, fabricante, modelo, geração (com as potências), tipos de manutenção e mecânicos da OS.</summary>
     Cadastros = 1 << 4,
 
     /// <summary>Intervalos de troca.</summary>

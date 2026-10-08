@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using CheckTruck.Dominio.Enums;
 using CheckTruck.Dominio.Interfaces;
 
 namespace CheckTruck.Dominio.Entidades;
@@ -7,7 +8,9 @@ public class Veiculo : EntidadeBanco
 {
     public long Id { get; set; }
     public string Placa { get; set; }
-    public Modelo Modelo { get; set; }
+    /// <summary>Potência do caminhão. Por ela se chega à geração, ao modelo e ao fabricante.</summary>
+    public Potencia Potencia { get; set; }
+    public Tracao Tracao { get; set; }
     [StringLength(17, MinimumLength = 17), Required]
     public string Chassi { get; set; }
     public string Renavam { get; set; }

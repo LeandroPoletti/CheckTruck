@@ -12,11 +12,11 @@ public static class StatusManutencaoExtensions
         _ => "ok"
     };
 
-    /// <summary>De onde veio o intervalo: "veiculo", "modelo" ou "padrao".</summary>
+    /// <summary>De onde veio o intervalo: "veiculo", "geracao" ou "padrao".</summary>
     public static string ToApiString(this OrigemIntervalo origem) => origem switch
     {
         OrigemIntervalo.Veiculo => "veiculo",
-        OrigemIntervalo.Modelo => "modelo",
+        OrigemIntervalo.Geracao => "geracao",
         _ => "padrao"
     };
 }

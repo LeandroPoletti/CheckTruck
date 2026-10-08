@@ -4,7 +4,7 @@ import { PageHeader, Card, Carregando, ErroCarregamento } from '../components/La
 import { StatusBadge, PlacaBadge } from '../components/ui/Badges'
 import { Button, Select, CampoBusca } from '../components/ui/Form'
 import { Plus } from 'lucide-react'
-import { formatKm, contemBusca } from '../data/domain'
+import { formatKm, contemBusca, nomeDoModelo, nomeDoCaminhao, TRACOES } from '../data/domain'
 import NovoVeiculoModal from '../components/modals/NovoVeiculoModal'
 import { veiculoService } from '../services'
 import { obterUsuario } from '../services/sessao'
@@ -22,7 +22,7 @@ export default function Veiculos() {
   const [statusFiltro, setStatusFiltro] = useState('ativos')
   const [novoOpen, setNovoOpen] = useState(false)
 
-  // Uma request: a API devolve cada veículo com modelo, geração, motorista e situação já calculada
+  // Uma request: a API devolve cada veículo com fabricante, modelo, geração, potência, motorista e situação já calculada
   useEffect(() => {
     let cancelado = false
     veiculoService.listarSituacao()
@@ -46,9 +46,9 @@ export default function Veiculos() {
   const ativos = veiculos.filter((v) => v.ativo).length
   const inativos = veiculos.length - ativos
 
-  // Opções do filtro: só as gerações que têm veículos
+  // Opções do filtro: só as gerações que têm veículos ("Volvo FH · Novo FH (FH 4)")
   const geracoes = useMemo(() => {
-    const porId = new Map(veiculos.map((v) => [v.geracaoId, v.geracaoNome]))
+    const porId = new Map(veiculos.map((v) => [v.geracaoId, `${nomeDoModelo(v)} · ${v.geracaoNome}`]))
     return [...porId].map(([id, nome]) => ({ id, nome })).sort((a, b) => a.nome.localeCompare(b.nome))
   }, [veiculos])
 
@@ -57,7 +57,7 @@ export default function Veiculos() {
       if (statusFiltro === 'ativos' && !v.ativo) return false
       if (statusFiltro === 'inativos' && v.ativo) return false
       if (geracaoFiltro !== 'todas' && v.geracaoId !== geracaoFiltro) return false
-      if (!contemBusca(`${v.placa} ${v.chassi || ''} ${v.motoristaNome || ''}`, busca)) return false
+      if (!contemBusca(`${v.placa} ${v.chassi || ''} ${v.motoristaNome || ''} ${nomeDoCaminhao(v)}`, busca)) return false
       return true
     })
   }, [veiculos, busca, geracaoFiltro, statusFiltro])
@@ -78,8 +78,8 @@ export default function Veiculos() {
       />
 
       <div className="mb-5 flex gap-3">
-        <CampoBusca value={busca} onChange={setBusca} placeholder="Buscar por placa, chassi ou motorista" className="flex-1" />
-        <Select value={geracaoFiltro} onChange={(e) => setGeracaoFiltro(e.target.value)} className="w-56">
+        <CampoBusca value={busca} onChange={setBusca} placeholder="Buscar por placa, chassi, motorista ou modelo" className="flex-1" />
+        <Select value={geracaoFiltro} onChange={(e) => setGeracaoFiltro(e.target.value)} className="w-72">
           <option value="todas">Geração: todas</option>
           {geracoes.map((g) => (
             <option key={g.id} value={g.id}>{g.nome}</option>
@@ -109,9 +109,9 @@ export default function Veiculos() {
                 <PlacaBadge placa={v.placa} />
                 <StatusBadge status={v.ativo ? status : 'ok'} />
               </div>
-              <p className="mt-2.5 font-semibold text-stone-900">{v.modeloNome} · {v.potenciaCv} cv</p>
+              <p className="mt-2.5 font-semibold text-stone-900">{nomeDoCaminhao(v)}</p>
               <p className="text-xs text-stone-500">
-                {v.geracaoNome} · {v.anoFabricacao}/{v.anoModelo} · 6×4
+                {v.geracaoNome} · {v.anoFabricacao}/{v.anoModelo} · {TRACOES[v.tracao]}
               </p>
 
               <div className="mt-3 flex items-center justify-between text-sm">
@@ -142,12 +142,12 @@ export default function Veiculos() {
           >
             <Plus size={22} />
             <span className="text-sm font-semibold">Cadastrar veículo</span>
-            <span className="text-xs">placa · chassi · modelo obrigatório</span>
+            <span className="text-xs">placa · chassi · modelo e potência</span>
           </button>
         )}
       </div>
 
-      <NovoVeiculoModal open={novoOpen} onClose={() => setNovoOpen(false)} onSalvo={recarregar} />
+      {novoOpen && <NovoVeiculoModal onClose={() => setNovoOpen(false)} onSalvo={recarregar} />}
     </>
   )
 }

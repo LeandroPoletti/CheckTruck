@@ -8,6 +8,11 @@ public class ServicoVeiculo(IRepositorioCrud repositorioCrud, ILogger<ServicoVei
 {
     public override bool Valida(Veiculo entidade)
     {
+        if (!Enum.IsDefined(entidade.Tracao))
+        {
+            Mensagens.Add("Escolha a tração do caminhão.");
+        }
+
         if (entidade.Id != 0)
         {
             // Projeção evita rastrear a entidade antiga (conflito de tracking no Update)

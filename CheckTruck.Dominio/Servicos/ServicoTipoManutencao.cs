@@ -12,7 +12,7 @@ namespace CheckTruck.Dominio.Servicos;
 public class ServicoTipoManutencao(
     IRepositorioCrud repositorioCrud,
     ServicoCrud<Manutencao> servicoManutencao,
-    ServicoCrud<IntervaloRecomendado> servicoIntervaloModelo,
+    ServicoCrud<IntervaloRecomendado> servicoIntervaloGeracao,
     ServicoCrud<IntervaloVeiculo> servicoIntervaloVeiculo,
     ILogger<ServicoTipoManutencao> logger) : ServicoCrud<TipoManutencao>(repositorioCrud, logger)
 {
@@ -41,7 +41,7 @@ public class ServicoTipoManutencao(
     public override TipoManutencao? Deletar(long id)
     {
         var emUso = servicoManutencao.Query(m => m.TipoManutencao.Id == id).Any()
-            || servicoIntervaloModelo.Query(i => i.TipoManutencao.Id == id).Any()
+            || servicoIntervaloGeracao.Query(i => i.TipoManutencao.Id == id).Any()
             || servicoIntervaloVeiculo.Query(i => i.TipoManutencao.Id == id).Any();
         if (emUso)
         {

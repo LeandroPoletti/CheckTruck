@@ -3,6 +3,7 @@ using CheckTruck.Api.Acesso;
 using CheckTruck.Dominio.Entidades;
 using CheckTruck.Dominio.Enums;
 using CheckTruck.Repositorio;
+using CheckTruck.Repositorio.Seed;
 using CheckTruck.Dominio.Interfaces;
 using CheckTruck.Dominio.Servicos;
 using Microsoft.AspNetCore.Identity;
@@ -20,9 +21,9 @@ builder.Services.AddOpenApi();
 
 var modelBuilder = new ODataConventionModelBuilder();
 modelBuilder.EntitySet<Veiculo>("Veiculo");
-modelBuilder.EntitySet<Modelo>("Modelo");
 modelBuilder.EntitySet<Fabricante>("Fabricante");
-modelBuilder.EntitySet<GeracaoModelo>("GeracaoModelo");
+modelBuilder.EntitySet<Modelo>("Modelo");
+modelBuilder.EntitySet<Geracao>("Geracao");
 modelBuilder.EntitySet<Pais>("Pais");
 modelBuilder.EntitySet<TipoManutencao>("TiposManutencao");
 modelBuilder.EntitySet<Manutencao>("Manutencao");
@@ -79,6 +80,7 @@ builder.Services.AddScoped<ServicoDashboard>();
 builder.Services.AddScoped<ServicoUsuario>();
 builder.Services.AddScoped<ServicoChamado>();
 builder.Services.AddScoped<ServicoTipoManutencao>();
+builder.Services.AddScoped<ServicoGeracao>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy => policy.AllowAnyMethod().AllowAnyOrigin().AllowAnyHeader());
@@ -153,7 +155,8 @@ using (var scope = app.Services.CreateScope())
         context.SaveChanges();
     }
 
-    
+    // Fabricantes, modelos, gerações e potências mais comuns. Só cria num banco sem nenhum modelo.
+    CatalogoInicial.Aplicar(context);
 }
 
 

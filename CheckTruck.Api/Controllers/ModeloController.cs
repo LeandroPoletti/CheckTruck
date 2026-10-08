@@ -8,20 +8,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CheckTruck.Api.Controllers;
 
-// Ler: basta estar logado (os formulários usam a lista). Criar, editar e apagar: Cadastros
+/// <summary>
+/// Modelos (linhas) de cada fabricante: FH, FM, R, Actros... Filtro útil: ?$filter=Fabricante/Id eq 1
+/// Ler: basta estar logado (os formulários usam a lista). Criar, editar e apagar: Cadastros
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 [ExigePermissao]
 public class ModeloController(
     ServicoCrud<Modelo> servicoCrud,
-    ServicoCrud<GeracaoModelo> servicoGeracaoModelo,
-    ServicoCrud<Veiculo> servicoVeiculo,
-    ServicoCrud<IntervaloRecomendado> servicoIntervalo,
+    ServicoCrud<Fabricante> servicoFabricante,
+    ServicoCrud<Geracao> servicoGeracao,
     ILogger<Modelo> logger)
     : CrudController<Modelo, ModeloResponseDto>(
         servicoCrud, "modelo", logger,
         m => m.ToResponseDto(),
-        q => q.Include(m => m.Geracao))
+        q => q.Include(m => m.Fabricante))
 {
     [HttpGet]
     public ActionResult<IEnumerable<ModeloResponseDto>> Get() => GetODataCore();
@@ -33,39 +35,59 @@ public class ModeloController(
     [ExigePermissao(Permissao.Cadastros)]
     public ActionResult<ModeloResponseDto> Post([FromBody] ModeloRequestDto dto)
     {
-        var geracao = servicoGeracaoModelo.GetById(dto.GeracaoId);
-        if (geracao is null)
+        var (fabricante, erro) = ResolverFabricante(dto, idIgnorar: null);
+        if (erro is not null)
         {
-            return BadRequest("Geração de modelo não encontrada.");
+            return BadRequest(erro);
         }
 
-        return PostCore(dto.ToEntity(geracao));
+        return PostCore(dto.ToEntity(fabricante!));
     }
 
     [HttpPut("{id:long}")]
     [ExigePermissao(Permissao.Cadastros)]
     public ActionResult<ModeloResponseDto> Put(long id, [FromBody] ModeloRequestDto dto)
     {
-        var geracao = servicoGeracaoModelo.GetById(dto.GeracaoId);
-        if (geracao is null)
+        var (fabricante, erro) = ResolverFabricante(dto, idIgnorar: id);
+        if (erro is not null)
         {
-            return BadRequest("Geração de modelo não encontrada.");
+            return BadRequest(erro);
         }
 
-        return PutCore(id, dto.ToEntity(geracao));
+        return PutCore(id, dto.ToEntity(fabricante!));
     }
 
     [HttpDelete("{id:long}")]
     [ExigePermissao(Permissao.Cadastros)]
     public IActionResult Delete(long id)
     {
-        var veiculos = servicoVeiculo.Query(v => v.Modelo.Id == id).Count();
-        var intervalos = servicoIntervalo.Query(i => i.Modelo.Id == id).Count();
-        if (veiculos > 0 || intervalos > 0)
+        var geracoes = servicoGeracao.Query(g => g.Modelo.Id == id).Count();
+        if (geracoes > 0)
         {
-            return BadRequest($"Não é possível excluir: o modelo possui {veiculos} veículo(s) e {intervalos} intervalo(s) recomendado(s) cadastrado(s).");
+            return BadRequest($"Não é possível excluir: o modelo possui {geracoes} geração(ões) cadastrada(s).");
         }
 
         return DeleteCore(id);
+    }
+
+    // O fabricante existe e ainda não tem um modelo com esse nome
+    private (Fabricante? fabricante, string? erro) ResolverFabricante(ModeloRequestDto dto, long? idIgnorar)
+    {
+        var fabricante = servicoFabricante.GetById(dto.FabricanteId);
+        if (fabricante is null)
+        {
+            return (null, "Fabricante não encontrado.");
+        }
+
+        var nome = dto.Nome.Trim().ToLower();
+        var jaExiste = Servico
+            .Query(m => m.Id != idIgnorar && m.Fabricante.Id == dto.FabricanteId && m.Nome.ToLower() == nome)
+            .Any();
+        if (jaExiste)
+        {
+            return (null, "Esse fabricante já tem um modelo com esse nome.");
+        }
+
+        return (fabricante, null);
     }
 }

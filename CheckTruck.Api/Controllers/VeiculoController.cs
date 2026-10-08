@@ -15,19 +15,20 @@ namespace CheckTruck.Api.Controllers;
 public class VeiculoController(
     ServicoVeiculo servicoVeiculo,
     ServicoSituacaoVeiculo servicoSituacao,
-    ServicoCrud<Modelo> servicoModelo,
+    ServicoCrud<Potencia> servicoPotencia,
     ServicoUsuario servicoUsuario,
     ILogger<Veiculo> logger)
     : CrudController<Veiculo, VeiculoResponseDto>(
         servicoVeiculo, "veículo", logger,
         v => v.ToResponseDto(),
-        q => q.Include(v => v.Modelo).Include(v => v.MotoristaAtual))
+        q => q.Include(v => v.Potencia).ThenInclude(p => p.Geracao).ThenInclude(g => g.Modelo).ThenInclude(m => m.Fabricante)
+            .Include(v => v.MotoristaAtual))
 {
     [HttpGet]
     public ActionResult<IEnumerable<VeiculoResponseDto>> Get() => GetODataCore();
 
     /// <summary>
-    /// Veículos com modelo, geração, motorista e situação de manutenção já calculada
+    /// Veículos com fabricante, modelo, geração, potência, motorista e situação de manutenção já calculada
     /// (status e item mais urgente), para as listas de veículos.
     /// </summary>
     /// <param name="apenasAtivos">true para ignorar veículos desativados.</param>
@@ -58,7 +59,7 @@ public class VeiculoController(
 
     /// <summary>
     /// Situação completa de um caminhão: todos os itens, com km e dias restantes e de onde veio
-    /// o intervalo (caminhão, modelo ou padrão). É o que a tela de detalhe mostra.
+    /// o intervalo (caminhão, geração ou padrão). É o que a tela de detalhe mostra.
     /// </summary>
     [HttpGet("{id:long}/situacao")]
     public ActionResult<VeiculoSituacaoResponseDto> GetSituacaoPorId(long id)
@@ -76,10 +77,10 @@ public class VeiculoController(
     [ExigePermissao(Permissao.Veiculos)]
     public async Task<ActionResult<VeiculoResponseDto>> Post([FromBody] VeiculoRequestDto dto)
     {
-        var modelo = servicoModelo.GetById(dto.ModeloId);
-        if (modelo is null)
+        var potencia = servicoPotencia.GetById(dto.PotenciaId);
+        if (potencia is null)
         {
-            return BadRequest("Modelo não encontrado.");
+            return BadRequest("Potência não encontrada.");
         }
 
         var (motorista, erro) = await ResolverMotoristaAsync(dto.MotoristaAtualId);
@@ -88,17 +89,17 @@ public class VeiculoController(
             return BadRequest(erro);
         }
 
-        return PostCore(dto.ToEntity(modelo, motorista));
+        return PostCore(dto.ToEntity(potencia, motorista));
     }
 
     [HttpPut("{id:long}")]
     [ExigePermissao(Permissao.Veiculos)]
     public async Task<ActionResult<VeiculoResponseDto>> Put(long id, [FromBody] VeiculoRequestDto dto)
     {
-        var modelo = servicoModelo.GetById(dto.ModeloId);
-        if (modelo is null)
+        var potencia = servicoPotencia.GetById(dto.PotenciaId);
+        if (potencia is null)
         {
-            return BadRequest("Modelo não encontrado.");
+            return BadRequest("Potência não encontrada.");
         }
 
         var (motorista, erro) = await ResolverMotoristaAsync(dto.MotoristaAtualId);
@@ -107,7 +108,7 @@ public class VeiculoController(
             return BadRequest(erro);
         }
 
-        return PutCore(id, dto.ToEntity(modelo, motorista));
+        return PutCore(id, dto.ToEntity(potencia, motorista));
     }
 
     [HttpDelete("{id:long}")]

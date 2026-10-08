@@ -32,13 +32,16 @@ public class IntervaloVeiculoResponseDto
     public string? Observacao { get; set; }
 }
 
-/// <summary>Caminhão para escolher na tela de intervalos. O modelo diz de quem ele herda o intervalo e o padrão.</summary>
+/// <summary>Caminhão para escolher na tela de intervalos. A geração diz de quem ele herda o intervalo e o padrão.</summary>
 public class VeiculoDoIntervaloDto
 {
     public long Id { get; set; }
     public string Placa { get; set; } = "";
-    public long ModeloId { get; set; }
+    public string FabricanteNome { get; set; } = "";
     public string ModeloNome { get; set; } = "";
+    public long GeracaoId { get; set; }
+    public string GeracaoNome { get; set; } = "";
+    public int PotenciaCv { get; set; }
 }
 
 public static class IntervaloVeiculoDtoExtensions

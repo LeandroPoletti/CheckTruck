@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { intervaloService, intervaloVeiculoService } from '../../services'
 import { Modal } from '../ui/Overlay'
 import { Field, Input, Button } from '../ui/Form'
+import { nomeDoModelo } from '../../data/domain'
 
-// Intervalo de um item para um modelo (modelo) ou para um caminhão só (veiculo). O item (tipo) é fixo.
+// Intervalo de um item para uma geração (geracao) ou para um caminhão só (veiculo). O item (tipo) é fixo.
 // intervalo = o que já existe (editar); sem ele, define um novo começando pela sugestão (o que vale hoje).
-// O do modelo também tem km da 1ª troca (amaciamento) e fonte. Quem abre a tela só renderiza este modal quando ele está aberto.
-export default function IntervaloModal({ modelo, veiculo, tipo, intervalo, sugestao, onClose, onSalvo }) {
-  const doModelo = !!modelo
+// O da geração também tem km da 1ª troca (amaciamento) e fonte. Quem abre a tela só renderiza este modal quando ele está aberto.
+export default function IntervaloModal({ geracao, veiculo, tipo, intervalo, sugestao, onClose, onSalvo }) {
+  const daGeracao = !!geracao
   const base = intervalo ?? sugestao
   const [form, setForm] = useState(() => ({
     intervaloKm: base?.intervaloKm ?? '',
@@ -35,8 +36,8 @@ export default function IntervaloModal({ modelo, veiculo, tipo, intervalo, suges
     setErro('')
     try {
       const dados = { ...form, tipoId: tipo.id, fonte: form.fonte.trim(), observacao: form.observacao.trim() }
-      const servico = doModelo ? intervaloService : intervaloVeiculoService
-      const alvo = doModelo ? { modeloId: modelo.id } : { veiculoId: veiculo.id }
+      const servico = daGeracao ? intervaloService : intervaloVeiculoService
+      const alvo = daGeracao ? { geracaoId: geracao.id } : { veiculoId: veiculo.id }
       if (intervalo) await servico.atualizar(intervalo.id, { ...dados, ...alvo })
       else await servico.criar({ ...dados, ...alvo })
       onSalvo()
@@ -51,8 +52,8 @@ export default function IntervaloModal({ modelo, veiculo, tipo, intervalo, suges
     <Modal
       open
       onClose={onClose}
-      title={intervalo ? 'Editar intervalo' : doModelo ? 'Definir intervalo do modelo' : 'Definir intervalo do caminhão'}
-      subtitle={`${doModelo ? modelo.nome : veiculo.placa} · ${tipo.nome}`}
+      title={intervalo ? 'Editar intervalo' : daGeracao ? 'Definir intervalo da geração' : 'Definir intervalo do caminhão'}
+      subtitle={`${daGeracao ? `${nomeDoModelo(geracao)} · ${geracao.nome}` : veiculo.placa} · ${tipo.nome}`}
       width="max-w-lg"
       footer={
         <>
@@ -68,11 +69,11 @@ export default function IntervaloModal({ modelo, veiculo, tipo, intervalo, suges
           </p>
         )}
 
-        <div className={doModelo ? 'grid grid-cols-2 gap-3' : ''}>
+        <div className={daGeracao ? 'grid grid-cols-2 gap-3' : ''}>
           <Field label="Intervalo (km)" required>
             <Input type="number" min="1" value={form.intervaloKm} onChange={(e) => set('intervaloKm', e.target.value)} placeholder="40000" />
           </Field>
-          {doModelo && (
+          {daGeracao && (
             <Field label="1ª troca (km)" hint="Vazio = igual ao intervalo">
               <Input type="number" min="0" value={form.intervaloKmPrimeira} onChange={(e) => set('intervaloKmPrimeira', e.target.value)} placeholder="Amaciamento" />
             </Field>
@@ -83,7 +84,7 @@ export default function IntervaloModal({ modelo, veiculo, tipo, intervalo, suges
           <Input type="number" min="0" max="120" value={form.intervaloMeses} onChange={(e) => set('intervaloMeses', e.target.value)} placeholder="6" />
         </Field>
 
-        {doModelo && (
+        {daGeracao && (
           <Field label="Fonte">
             <Input value={form.fonte} onChange={(e) => set('fonte', e.target.value)} placeholder="Ex.: manual do fabricante" />
           </Field>
@@ -93,7 +94,7 @@ export default function IntervaloModal({ modelo, veiculo, tipo, intervalo, suges
           <Input
             value={form.observacao}
             onChange={(e) => set('observacao', e.target.value)}
-            placeholder={doModelo ? 'Opcional' : 'Ex.: plano da concessionária'}
+            placeholder={daGeracao ? 'Opcional' : 'Ex.: plano da concessionária'}
           />
         </Field>
 

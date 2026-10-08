@@ -8,20 +8,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CheckTruck.Api.Controllers;
 
+// Intervalos recomendados de cada geração (ex.: manual do fabricante). Filtro útil: ?$filter=Geracao/Id eq 4
 // Ler: basta estar logado (a situação dos caminhões usa os intervalos). Criar, editar e apagar: Intervalos
 [ApiController]
 [Route("api/[controller]")]
 [ExigePermissao]
 public class IntervaloRecomendadoController(
     ServicoCrud<IntervaloRecomendado> servicoCrud,
-    ServicoCrud<Modelo> servicoModelo,
+    ServicoCrud<Geracao> servicoGeracao,
     ServicoCrud<TipoManutencao> servicoTipoManutencao,
     ServicoSituacaoVeiculo servicoSituacao,
     ILogger<IntervaloRecomendado> logger)
     : CrudController<IntervaloRecomendado, IntervaloRecomendadoResponseDto>(
         servicoCrud, "intervalo recomendado", logger,
         i => i.ToResponseDto(),
-        q => q.Include(i => i.Modelo).Include(i => i.TipoManutencao))
+        q => q.Include(i => i.Geracao).Include(i => i.TipoManutencao))
 {
     [HttpGet]
     public ActionResult<IEnumerable<IntervaloRecomendadoResponseDto>> Get() => GetODataCore();
@@ -30,16 +31,16 @@ public class IntervaloRecomendadoController(
     public ActionResult<IntervaloRecomendadoResponseDto> GetById(long id) => GetByIdCore(id);
 
     /// <summary>
-    /// Padrão seguro do sistema para os caminhões deste modelo, por tipo de manutenção. Vale quando
-    /// nem o caminhão nem o modelo têm intervalo. Tipo sem padrão (ex.: embreagem) não vem na lista.
+    /// Padrão seguro do sistema para os caminhões desta geração, por tipo de manutenção. Vale quando
+    /// nem o caminhão nem a geração têm intervalo. Tipo sem padrão (ex.: embreagem) não vem na lista.
     /// </summary>
-    [HttpGet("padrao/{modeloId:long}")]
-    public ActionResult<IEnumerable<IntervaloPadraoResponseDto>> GetPadrao(long modeloId)
+    [HttpGet("padrao/{geracaoId:long}")]
+    public ActionResult<IEnumerable<IntervaloPadraoResponseDto>> GetPadrao(long geracaoId)
     {
-        var padrao = servicoSituacao.ObterPadraoDoModelo(modeloId);
+        var padrao = servicoSituacao.ObterPadraoDaGeracao(geracaoId);
         if (padrao is null)
         {
-            return NotFound("Modelo não encontrado.");
+            return NotFound("Geração não encontrada.");
         }
 
         return padrao
@@ -56,41 +57,41 @@ public class IntervaloRecomendadoController(
     [ExigePermissao(Permissao.Intervalos)]
     public ActionResult<IntervaloRecomendadoResponseDto> Post([FromBody] IntervaloRecomendadoRequestDto dto)
     {
-        var (modelo, tipoManutencao, erro) = ResolverRelacionados(dto, idIgnorar: null);
+        var (geracao, tipoManutencao, erro) = ResolverRelacionados(dto, idIgnorar: null);
         if (erro is not null)
         {
             return BadRequest(erro);
         }
 
-        return PostCore(dto.ToEntity(modelo!, tipoManutencao!));
+        return PostCore(dto.ToEntity(geracao!, tipoManutencao!));
     }
 
     [HttpPut("{id:long}")]
     [ExigePermissao(Permissao.Intervalos)]
     public ActionResult<IntervaloRecomendadoResponseDto> Put(long id, [FromBody] IntervaloRecomendadoRequestDto dto)
     {
-        var (modelo, tipoManutencao, erro) = ResolverRelacionados(dto, idIgnorar: id);
+        var (geracao, tipoManutencao, erro) = ResolverRelacionados(dto, idIgnorar: id);
         if (erro is not null)
         {
             return BadRequest(erro);
         }
 
-        return PutCore(id, dto.ToEntity(modelo!, tipoManutencao!));
+        return PutCore(id, dto.ToEntity(geracao!, tipoManutencao!));
     }
 
-    /// <summary>Sem o intervalo do modelo, os caminhões voltam ao intervalo próprio (se tiverem) ou ao padrão do sistema.</summary>
+    /// <summary>Sem o intervalo da geração, os caminhões voltam ao intervalo próprio (se tiverem) ou ao padrão do sistema.</summary>
     [HttpDelete("{id:long}")]
     [ExigePermissao(Permissao.Intervalos)]
     public IActionResult Delete(long id) => DeleteCore(id);
 
-    // Modelo e tipo existem, e o modelo ainda não tem intervalo para esse tipo (um por modelo e tipo)
-    private (Modelo? modelo, TipoManutencao? tipoManutencao, string? erro) ResolverRelacionados(
+    // Geração e tipo existem, e a geração ainda não tem intervalo para esse tipo (um por geração e tipo)
+    private (Geracao? geracao, TipoManutencao? tipoManutencao, string? erro) ResolverRelacionados(
         IntervaloRecomendadoRequestDto dto, long? idIgnorar)
     {
-        var modelo = servicoModelo.GetById(dto.ModeloId);
-        if (modelo is null)
+        var geracao = servicoGeracao.GetById(dto.GeracaoId);
+        if (geracao is null)
         {
-            return (null, null, "Modelo não encontrado.");
+            return (null, null, "Geração não encontrada.");
         }
 
         var tipoManutencao = servicoTipoManutencao.GetById(dto.TipoManutencaoId);
@@ -100,13 +101,13 @@ public class IntervaloRecomendadoController(
         }
 
         var jaExiste = Servico
-            .Query(i => i.Id != idIgnorar && i.Modelo.Id == dto.ModeloId && i.TipoManutencao.Id == dto.TipoManutencaoId)
+            .Query(i => i.Id != idIgnorar && i.Geracao.Id == dto.GeracaoId && i.TipoManutencao.Id == dto.TipoManutencaoId)
             .Any();
         if (jaExiste)
         {
-            return (null, null, "Esse modelo já tem intervalo para esse item. Altere o existente.");
+            return (null, null, "Essa geração já tem intervalo para esse item. Altere o existente.");
         }
 
-        return (modelo, tipoManutencao, null);
+        return (geracao, tipoManutencao, null);
     }
 }

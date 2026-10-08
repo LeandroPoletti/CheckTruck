@@ -1,5 +1,4 @@
-// Ajudantes das telas do CheckTruck. As funções recebem o catálogo que cada página
-// carregou da API ({ fabricantes, geracoes, modelos }).
+// Ajudantes das telas do CheckTruck.
 // A situação de manutenção (o que vence e quando) é calculada pela API, não aqui.
 
 // enum CheckTruck.Dominio.Enums.Componente
@@ -12,22 +11,41 @@ export const COMPONENTES = {
   6: 'Embreagem',
 }
 
-function getModelo(catalogo, modeloId) {
-  return catalogo.modelos.find((m) => m.id === modeloId)
-}
-function getGeracao(catalogo, geracaoId) {
-  return catalogo.geracoes.find((g) => g.id === geracaoId)
-}
-function getFabricante(catalogo, fabricanteId) {
-  return catalogo.fabricantes.find((f) => f.id === fabricanteId)
+// enum CheckTruck.Dominio.Enums.NormaEmissao (a API manda o nome)
+export const NORMAS = {
+  AntesDoEuro5: 'Antes do Euro 5',
+  Euro5: 'Euro 5 (P7)',
+  Euro6: 'Euro 6 (P8)',
 }
 
-export function getModeloCompleto(catalogo, modeloId) {
-  const modelo = getModelo(catalogo, modeloId)
-  if (!modelo) return null
-  const geracao = getGeracao(catalogo, modelo.geracaoId)
-  const fabricante = geracao ? getFabricante(catalogo, geracao.fabricanteId) : null
-  return { modelo, geracao, fabricante }
+// enum CheckTruck.Dominio.Enums.Tracao (a API manda o nome)
+export const TRACOES = {
+  QuatroPorDois: '4x2',
+  SeisPorDois: '6x2',
+  SeisPorQuatro: '6x4',
+  OitoPorDois: '8x2',
+  OitoPorQuatro: '8x4',
+}
+
+// "Volvo FH" — para listas e seletores ({ fabricanteNome, modeloNome } ou { fabricanteNome, nome })
+export const nomeDoModelo = ({ fabricanteNome, modeloNome, nome }) => `${fabricanteNome ?? ''} ${modeloNome ?? nome}`.trim()
+
+// "Volvo FH 540" — o caminhão pelo fabricante, modelo e potência
+export const nomeDoCaminhao = (v) => `${nomeDoModelo(v)} ${v.potenciaCv}`
+
+// Ordem das gerações nas listas: fabricante, modelo e ano
+export const ordemDasGeracoes = (a, b) =>
+  nomeDoModelo(a).localeCompare(nomeDoModelo(b)) || a.anoInicio - b.anoInicio || a.nome.localeCompare(b.nome)
+
+// Gerações agrupadas por "Fabricante Modelo" (na ordem acima) — para <optgroup>
+export function agruparPorModelo(geracoes) {
+  const grupos = new Map()
+  for (const g of [...geracoes].sort(ordemDasGeracoes)) {
+    const chave = nomeDoModelo(g)
+    if (!grupos.has(chave)) grupos.set(chave, [])
+    grupos.get(chave).push(g)
+  }
+  return [...grupos]
 }
 
 export function getUltimoRegistro(veiculoId, tipoId, registros) {

@@ -1,36 +1,38 @@
 import { useEffect, useState } from 'react'
 import { PageHeader, Carregando, ErroCarregamento } from '../components/Layout'
 import { Select } from '../components/ui/Form'
-import IntervalosDoModelo from '../components/intervalos/IntervalosDoModelo'
+import IntervalosDaGeracao from '../components/intervalos/IntervalosDaGeracao'
 import IntervalosDoCaminhao from '../components/intervalos/IntervalosDoCaminhao'
-import { modeloService, geracaoService, tipoManutencaoService, intervaloVeiculoService } from '../services'
+import { geracaoService, tipoManutencaoService, intervaloVeiculoService } from '../services'
+import { ordemDasGeracoes } from '../data/domain'
 
 const ABAS = [
-  { id: 'modelo', label: 'Por modelo' },
+  { id: 'geracao', label: 'Por geração' },
   { id: 'caminhao', label: 'Por caminhão' },
 ]
 
-// Intervalos de troca. Vale o primeiro que existir: do caminhão → do modelo → padrão do sistema.
-// O modelo e o caminhão escolhidos ficam aqui para não se perderem ao trocar de aba.
+// Intervalos de troca. Vale o primeiro que existir: do caminhão → da geração → padrão do sistema.
+// A geração e o caminhão escolhidos ficam aqui para não se perderem ao trocar de aba.
+// Sem escolha, abre na geração do primeiro caminhão da frota.
 export default function Intervalos() {
-  const [aba, setAba] = useState('modelo')
+  const [aba, setAba] = useState('geracao')
   const [componente, setComponente] = useState('todos')
-  const [modeloId, setModeloId] = useState(null)
+  const [geracaoId, setGeracaoId] = useState(null)
   const [veiculoId, setVeiculoId] = useState(null)
 
-  // Listas fixas da página: modelos (e gerações, para o rótulo), caminhões ativos e tipos de manutenção
+  // Listas fixas da página: gerações (com fabricante e modelo), caminhões ativos e tipos de manutenção
   const [dados, setDados] = useState(null)
   const [erro, setErro] = useState(null)
   const [versao, setVersao] = useState(0)
 
   useEffect(() => {
     let cancelado = false
-    Promise.all([modeloService.listar(), geracaoService.listar(), intervaloVeiculoService.listarVeiculos(), tipoManutencaoService.listar()])
-      .then(([modelos, geracoes, veiculos, tipos]) => {
+    Promise.all([geracaoService.listar(), intervaloVeiculoService.listarVeiculos(), tipoManutencaoService.listar()])
+      .then(([geracoes, veiculos, tipos]) => {
         if (cancelado) return
-        modelos.sort((a, b) => a.nome.localeCompare(b.nome))
+        geracoes.sort(ordemDasGeracoes)
         tipos.sort((a, b) => a.componenteId - b.componenteId || a.nome.localeCompare(b.nome))
-        setDados({ modelos, geracoes, veiculos, tipos })
+        setDados({ geracoes, veiculos, tipos })
       })
       .catch((e) => { if (!cancelado) setErro(e.message) })
     return () => { cancelado = true }
@@ -44,7 +46,7 @@ export default function Intervalos() {
   if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
   if (!dados) return <Carregando />
 
-  const { modelos, geracoes, veiculos, tipos } = dados
+  const { geracoes, veiculos, tipos } = dados
   const componentes = [...new Set(tipos.map((t) => t.componente))]
   const tiposDoFiltro = tipos.filter((t) => componente === 'todos' || t.componente === componente)
 
@@ -52,7 +54,7 @@ export default function Intervalos() {
     <>
       <PageHeader
         title="Intervalos de troca"
-        subtitle="Vale o primeiro que existir: do caminhão → do modelo → padrão do sistema. Vence o que chegar primeiro: km ou prazo."
+        subtitle="Vale o primeiro que existir: do caminhão → da geração → padrão do sistema. Vence o que chegar primeiro: km ou prazo."
       />
 
       <div className="mb-5 flex items-end justify-between gap-4 border-b border-stone-200">
@@ -75,13 +77,12 @@ export default function Intervalos() {
         </Select>
       </div>
 
-      {aba === 'modelo' ? (
-        <IntervalosDoModelo
-          modelos={modelos}
+      {aba === 'geracao' ? (
+        <IntervalosDaGeracao
           geracoes={geracoes}
           tipos={tiposDoFiltro}
-          modeloId={modeloId ?? modelos[0]?.id}
-          onModelo={setModeloId}
+          geracaoId={geracaoId ?? veiculos[0]?.geracaoId ?? geracoes[0]?.id}
+          onGeracao={setGeracaoId}
         />
       ) : (
         <IntervalosDoCaminhao

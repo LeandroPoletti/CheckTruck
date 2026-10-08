@@ -25,6 +25,7 @@ public class AlertaManutencaoDto
     public long VeiculoId { get; set; }
     public string Placa { get; set; }
     public int KmAtual { get; set; }
+    public string FabricanteNome { get; set; }
     public string ModeloNome { get; set; }
     public string GeracaoNome { get; set; }
     public long TipoManutencaoId { get; set; }
@@ -48,6 +49,8 @@ public class FrotaPorGeracaoDto
 {
     public long GeracaoId { get; set; }
     public string GeracaoNome { get; set; }
+    public string ModeloNome { get; set; }
+    public string FabricanteNome { get; set; }
     public int Quantidade { get; set; }
 }
 
@@ -69,6 +72,7 @@ public static class DashboardDtoExtensions
             VeiculoId = a.VeiculoId,
             Placa = a.Placa,
             KmAtual = a.KmAtual,
+            FabricanteNome = a.FabricanteNome,
             ModeloNome = a.ModeloNome,
             GeracaoNome = a.GeracaoNome,
             TipoManutencaoId = a.TipoManutencaoId,
@@ -84,6 +88,8 @@ public static class DashboardDtoExtensions
         {
             GeracaoId = g.GeracaoId,
             GeracaoNome = g.GeracaoNome,
+            ModeloNome = g.ModeloNome,
+            FabricanteNome = g.FabricanteNome,
             Quantidade = g.Quantidade
         }).ToList()
     };

@@ -6,20 +6,20 @@ export { filtro } from './crud'
 
 export const paisService = criarCrud('Pais', { fromApi: m.paisFromApi, toApi: m.paisToApi })
 export const fabricanteService = criarCrud('Fabricante', { fromApi: m.fabricanteFromApi, toApi: m.fabricanteToApi })
-export const geracaoService = criarCrud('GeracaoModelo', { fromApi: m.geracaoFromApi, toApi: m.geracaoToApi })
 export const modeloService = criarCrud('Modelo', { fromApi: m.modeloFromApi, toApi: m.modeloToApi })
+export const geracaoService = criarCrud('Geracao', { fromApi: m.geracaoFromApi, toApi: m.geracaoToApi })
 export const tipoManutencaoService = criarCrud('TipoManutencao', { fromApi: m.tipoManutencaoFromApi, toApi: m.tipoManutencaoToApi })
 export const intervaloService = {
   ...criarCrud('IntervaloRecomendado', { fromApi: m.intervaloFromApi, toApi: m.intervaloToApi }),
-  // Padrão seguro do sistema por tipo, para os caminhões do modelo (tipo sem padrão não vem)
-  async listarPadrao(modeloId) {
-    const { data } = await api.get(`/api/IntervaloRecomendado/padrao/${modeloId}`)
+  // Padrão seguro do sistema por tipo, para os caminhões da geração (tipo sem padrão não vem)
+  async listarPadrao(geracaoId) {
+    const { data } = await api.get(`/api/IntervaloRecomendado/padrao/${geracaoId}`)
     return data.map(m.intervaloPadraoFromApi)
   },
 }
 export const intervaloVeiculoService = {
   ...criarCrud('IntervaloVeiculo', { fromApi: m.intervaloVeiculoFromApi, toApi: m.intervaloVeiculoToApi }),
-  // Caminhões ativos (com o modelo) para a tela de intervalos, sem precisar de Ver frota
+  // Caminhões ativos (com a geração) para a tela de intervalos, sem precisar de Ver frota
   async listarVeiculos() {
     const { data } = await api.get('/api/IntervaloVeiculo/veiculos')
     return data.map(m.veiculoDoIntervaloFromApi)
@@ -30,7 +30,7 @@ export const mecanicoService = criarCrud('Mecanico', { fromApi: m.mecanicoFromAp
 
 export const veiculoService = {
   ...criarCrud('Veiculo', { fromApi: m.veiculoFromApi, toApi: m.veiculoToApi }),
-  // Lista com modelo, geração, motorista e situação de manutenção já calculada pela API
+  // Lista com fabricante, modelo, geração, potência, motorista e situação de manutenção já calculada pela API
   async listarSituacao({ apenasAtivos = false } = {}) {
     const { data } = await api.get('/api/Veiculo/situacao', { params: { apenasAtivos } })
     return data.map(m.veiculoSituacaoFromApi)

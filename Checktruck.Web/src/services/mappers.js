@@ -1,7 +1,7 @@
 // Conversão entre os DTOs da API e o formato "plano" usado pelas páginas.
 // Strings dos DTOs são não anuláveis na API (Nullable habilitado): textos opcionais vão como ''.
 import { toId, toApiId, anoParaApi, anoDaApi, dataParaApi, dataDaApi } from './api'
-import { COMPONENTES } from '../data/domain'
+import { COMPONENTES, NORMAS } from '../data/domain'
 
 // ---------------------------------------------------------------------------
 // Catálogo
@@ -17,50 +17,42 @@ export const fabricanteFromApi = (dto) => ({
 })
 export const fabricanteToApi = (f) => ({ nome: f.nome, paisOrigemId: toApiId(f.paisOrigemId) })
 
-export const geracaoFromApi = (dto) => {
-  const anoInicio = anoDaApi(dto.anoInicio)
-  const anoFim = anoDaApi(dto.anoFim)
-  return {
-    id: toId(dto.id),
-    nome: dto.nome,
-    fabricanteId: toId(dto.fabricante?.id),
-    fabricanteNome: dto.fabricante?.nome ?? null,
-    motor: dto.motor,
-    cambio: dto.caixa,
-    norma: dto.normaEmissao,
-    anoInicio,
-    anoFim,
-    periodo: anoInicio ? `${anoInicio}–${anoFim ?? 'atual'}` : '—',
-  }
-}
-export const geracaoToApi = (g) => ({
-  nome: g.nome,
-  fabricanteId: toApiId(g.fabricanteId),
-  motor: g.motor ?? '',
-  normaEmissao: g.norma ?? '',
-  caixa: g.cambio ?? '',
-  anoInicio: anoParaApi(g.anoInicio),
-  anoFim: anoParaApi(g.anoFim),
-})
-
+// Modelo = linha do fabricante (FH, FM, R, Actros...)
 export const modeloFromApi = (dto) => ({
   id: toId(dto.id),
   nome: dto.nome,
-  geracaoId: toId(dto.geracao?.id),
-  geracaoNome: dto.geracao?.nome ?? null,
-  potenciaCv: dto.potenciaCavalo,
-  eixoDianteiroPneus: dto.eixoDianteiroPneus,
-  eixoTraseiroTandem: dto.eixoTraseiroTandem,
-  tandem: dto.eixoTraseiroTandem > 0,
-  pneusPorEixoTraseiro: dto.pneusPorEixoTraseiro,
+  fabricanteId: toId(dto.fabricante?.id),
+  fabricanteNome: dto.fabricante?.nome ?? null,
 })
-export const modeloToApi = (m) => ({
-  nome: m.nome,
-  geracaoId: toApiId(m.geracaoId),
-  potenciaCavalo: Number(m.potenciaCv) || 0,
-  eixoDianteiroPneus: Number(m.eixoDianteiroPneus) || 0,
-  eixoTraseiroTandem: Number(m.eixoTraseiroTandem ?? (m.tandem ? 2 : 0)) || 0,
-  pneusPorEixoTraseiro: Number(m.pneusPorEixoTraseiro) || 0,
+export const modeloToApi = (m) => ({ nome: m.nome, fabricanteId: toApiId(m.fabricanteId) })
+
+// Geração = época do modelo (anos, norma, motor, câmbio) com as potências em que foi vendida.
+// Os anos são o ano-modelo (número); anoFim null = ainda é vendida.
+export const geracaoFromApi = (dto) => ({
+  id: toId(dto.id),
+  nome: dto.nome,
+  modeloId: toId(dto.modelo?.id),
+  modeloNome: dto.modelo?.nome ?? null,
+  fabricanteId: toId(dto.fabricante?.id),
+  fabricanteNome: dto.fabricante?.nome ?? null,
+  anoInicio: dto.anoInicio,
+  anoFim: dto.anoFim,
+  periodo: `${dto.anoInicio}–${dto.anoFim ?? 'atual'}`,
+  norma: dto.normaEmissao, // nome do enum: 'AntesDoEuro5' | 'Euro5' | 'Euro6'
+  normaNome: NORMAS[dto.normaEmissao] ?? dto.normaEmissao,
+  motor: dto.motor ?? '',
+  cambio: dto.caixa ?? '',
+  potencias: dto.potencias.map((p) => ({ id: toId(p.id), cv: p.cv })),
+})
+export const geracaoToApi = (g) => ({
+  nome: g.nome,
+  modeloId: toApiId(g.modeloId),
+  anoInicio: Number(g.anoInicio),
+  anoFim: g.anoFim === '' || g.anoFim === null ? null : Number(g.anoFim),
+  normaEmissao: g.norma,
+  motor: g.motor || null,
+  caixa: g.cambio || null,
+  potencias: g.potencias.map(Number), // só os cv: a API acrescenta e tira o que mudou
 })
 
 export const tipoManutencaoFromApi = (dto) => ({
@@ -79,7 +71,7 @@ export const tipoManutencaoToApi = (t) => ({
 // Na API, intervaloKmPrimeira = 0 é "igual ao intervalo" e intervaloMeses = 0 é "vence só por km" (null no front)
 export const intervaloFromApi = (dto) => ({
   id: toId(dto.id),
-  modeloId: toId(dto.modelo?.id),
+  geracaoId: toId(dto.geracao?.id),
   tipoId: toId(dto.tipoManutencao?.id),
   intervaloKm: dto.intervaloKm,
   intervaloKmPrimeira: dto.intervaloKmPrimeira || null,
@@ -88,7 +80,7 @@ export const intervaloFromApi = (dto) => ({
   observacao: dto.observacao,
 })
 export const intervaloToApi = (i) => ({
-  modeloId: toApiId(i.modeloId),
+  geracaoId: toApiId(i.geracaoId),
   tipoManutencaoId: toApiId(i.tipoId),
   intervaloKm: Number(i.intervaloKm) || 0,
   intervaloKmPrimeira: Number(i.intervaloKmPrimeira) || 0,
@@ -96,13 +88,13 @@ export const intervaloToApi = (i) => ({
   fonte: i.fonte ?? '',
   observacao: i.observacao ?? '',
 })
-// Padrão seguro do sistema para um tipo, nos caminhões de um modelo
+// Padrão seguro do sistema para um tipo, nos caminhões de uma geração
 export const intervaloPadraoFromApi = (dto) => ({
   tipoId: toId(dto.tipoManutencaoId),
   intervaloKm: dto.intervaloKm,
   intervaloMeses: dto.intervaloMeses || null,
 })
-// Intervalo próprio de um caminhão (ex.: plano da concessionária): passa na frente do modelo e do padrão
+// Intervalo próprio de um caminhão (ex.: plano da concessionária): passa na frente da geração e do padrão
 export const intervaloVeiculoFromApi = (dto) => ({
   id: toId(dto.id),
   veiculoId: toId(dto.veiculo?.id),
@@ -121,8 +113,11 @@ export const intervaloVeiculoToApi = (i) => ({
 export const veiculoDoIntervaloFromApi = (dto) => ({
   id: toId(dto.id),
   placa: dto.placa,
-  modeloId: toId(dto.modeloId),
+  fabricanteNome: dto.fabricanteNome,
   modeloNome: dto.modeloNome,
+  geracaoId: toId(dto.geracaoId),
+  geracaoNome: dto.geracaoNome,
+  potenciaCv: dto.potenciaCv,
 })
 
 // ---------------------------------------------------------------------------
@@ -131,7 +126,11 @@ export const veiculoDoIntervaloFromApi = (dto) => ({
 export const veiculoFromApi = (dto) => ({
   id: toId(dto.id),
   placa: dto.placa,
+  fabricanteId: toId(dto.fabricante?.id),
   modeloId: toId(dto.modelo?.id),
+  geracaoId: toId(dto.geracao?.id),
+  potenciaId: toId(dto.potencia?.id),
+  tracao: dto.tracao, // nome do enum (TRACOES)
   chassi: dto.chassi,
   renavam: dto.renavam,
   anoFabricacao: anoDaApi(dto.anoFabricacao),
@@ -152,7 +151,7 @@ const itemSituacaoFromApi = (item) => ({
   isPrimeiraTroca: item.isPrimeiraTroca,
   status: item.status,
 })
-// Veículo com modelo/geração/motorista e situação de manutenção (GET /api/Veiculo/situacao).
+// Veículo com fabricante/modelo/geração/potência/motorista e situação de manutenção (GET /api/Veiculo/situacao).
 // Os itens só vêm na situação de um caminhão (GET /api/Veiculo/{id}/situacao).
 export const veiculoSituacaoFromApi = (dto) => ({
   id: toId(dto.id),
@@ -162,11 +161,15 @@ export const veiculoSituacaoFromApi = (dto) => ({
   ativo: dto.ativo,
   anoFabricacao: anoDaApi(dto.anoFabricacao),
   anoModelo: anoDaApi(dto.anoModelo),
-  modeloId: toId(dto.modelo.id),
+  fabricanteNome: dto.fabricante,
   modeloNome: dto.modelo.nome,
-  potenciaCv: dto.modelo.potenciaCavalo,
   geracaoId: toId(dto.geracao.id),
   geracaoNome: dto.geracao.nome,
+  normaNome: NORMAS[dto.geracao.normaEmissao] ?? dto.geracao.normaEmissao,
+  motor: dto.geracao.motor ?? '',
+  cambio: dto.geracao.caixa ?? '',
+  potenciaCv: dto.potenciaCv,
+  tracao: dto.tracao,
   motoristaNome: dto.motoristaAtual?.nome ?? null,
   status: dto.status, // 'ok' | 'atencao' | 'critico'
   itemMaisUrgente: dto.itemMaisUrgente && itemSituacaoFromApi(dto.itemMaisUrgente),
@@ -175,7 +178,8 @@ export const veiculoSituacaoFromApi = (dto) => ({
 
 export const veiculoToApi = (v) => ({
   placa: v.placa,
-  modeloId: toApiId(v.modeloId),
+  potenciaId: toApiId(v.potenciaId),
+  tracao: v.tracao,
   chassi: v.chassi,
   renavam: v.renavam ?? '',
   anoFabricacao: anoParaApi(v.anoFabricacao),
@@ -232,6 +236,7 @@ export const dashboardFromApi = (dto) => ({
     veiculoId: toId(a.veiculoId),
     placa: a.placa,
     kmAtual: a.kmAtual,
+    fabricanteNome: a.fabricanteNome,
     modeloNome: a.modeloNome,
     geracaoNome: a.geracaoNome,
     tipoId: toId(a.tipoManutencaoId),
@@ -244,6 +249,8 @@ export const dashboardFromApi = (dto) => ({
   frotaPorGeracao: dto.frotaPorGeracao.map((g) => ({
     geracaoId: toId(g.geracaoId),
     geracaoNome: g.geracaoNome,
+    modeloNome: g.modeloNome,
+    fabricanteNome: g.fabricanteNome,
     quantidade: g.quantidade,
   })),
 })

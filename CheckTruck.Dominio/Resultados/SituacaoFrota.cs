@@ -20,6 +20,7 @@ public class AlertaManutencao
     public long VeiculoId { get; set; }
     public string Placa { get; set; } = "";
     public int KmAtual { get; set; }
+    public string FabricanteNome { get; set; } = "";
     public string ModeloNome { get; set; } = "";
     public string GeracaoNome { get; set; } = "";
     public long TipoManutencaoId { get; set; }
@@ -36,5 +37,7 @@ public class QuantidadePorGeracao
 {
     public long GeracaoId { get; set; }
     public string GeracaoNome { get; set; } = "";
+    public string ModeloNome { get; set; } = "";
+    public string FabricanteNome { get; set; } = "";
     public int Quantidade { get; set; }
 }

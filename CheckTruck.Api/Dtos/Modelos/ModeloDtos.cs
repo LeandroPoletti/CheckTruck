@@ -6,27 +6,19 @@ namespace CheckTruck.Api.Dtos.Modelos;
 
 public class ModeloRequestDto
 {
-    [Required]
+    [Required(ErrorMessage = "Informe o nome do modelo.")]
+    [MaxLength(100, ErrorMessage = "O nome pode ter até 100 caracteres.")]
     public string Nome { get; set; }
 
     [Required]
-    public long GeracaoId { get; set; }
-
-    public int PotenciaCavalo { get; set; }
-    public int EixoDianteiroPneus { get; set; }
-    public int EixoTraseiroTandem { get; set; }
-    public int PneusPorEixoTraseiro { get; set; }
+    public long FabricanteId { get; set; }
 }
 
 public class ModeloResponseDto
 {
     public long Id { get; set; }
     public string Nome { get; set; }
-    public GeracaoModeloResumoDto Geracao { get; set; }
-    public int PotenciaCavalo { get; set; }
-    public int EixoDianteiroPneus { get; set; }
-    public int EixoTraseiroTandem { get; set; }
-    public int PneusPorEixoTraseiro { get; set; }
+    public FabricanteResumoDto Fabricante { get; set; }
 }
 
 public static class ModeloDtoExtensions
@@ -35,20 +27,12 @@ public static class ModeloDtoExtensions
     {
         Id = entidade.Id,
         Nome = entidade.Nome,
-        Geracao = entidade.Geracao?.ToResumoDto(),
-        PotenciaCavalo = entidade.PotenciaCavalo,
-        EixoDianteiroPneus = entidade.EixoDianteiroPneus,
-        EixoTraseiroTandem = entidade.EixoTraseiroTandem,
-        PneusPorEixoTraseiro = entidade.PneusPorEixoTraseiro
+        Fabricante = entidade.Fabricante?.ToResumoDto()
     };
 
-    public static Modelo ToEntity(this ModeloRequestDto dto, GeracaoModelo geracao) => new()
+    public static Modelo ToEntity(this ModeloRequestDto dto, Fabricante fabricante) => new()
     {
-        Nome = dto.Nome,
-        Geracao = geracao,
-        PotenciaCavalo = dto.PotenciaCavalo,
-        EixoDianteiroPneus = dto.EixoDianteiroPneus,
-        EixoTraseiroTandem = dto.EixoTraseiroTandem,
-        PneusPorEixoTraseiro = dto.PneusPorEixoTraseiro
+        Nome = dto.Nome.Trim(),
+        Fabricante = fabricante
     };
 }

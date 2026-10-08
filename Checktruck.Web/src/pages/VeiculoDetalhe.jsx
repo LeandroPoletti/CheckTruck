@@ -2,9 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import VeiculoDetalhePanel, { VeiculoNaoEncontrado } from '../components/VeiculoDetalhePanel'
 import { Carregando, ErroCarregamento } from '../components/Layout'
-import {
-  veiculoService, modeloService, geracaoService, fabricanteService, manutencaoService, filtro,
-} from '../services'
+import { veiculoService, manutencaoService, filtro } from '../services'
 import { Button } from '../components/ui/Form'
 import AtualizarKmModal from '../components/modals/AtualizarKmModal'
 import NovoVeiculoModal from '../components/modals/NovoVeiculoModal'
@@ -28,16 +26,14 @@ export default function VeiculoDetalhe() {
   useEffect(() => {
     let cancelado = false
     async function carregar() {
-      // A situação (o que vence e quando) vem pronta da API: intervalo do caminhão → modelo → padrão, por km e por data
-      const [veiculo, situacao] = await Promise.all([veiculoService.obter(id), veiculoService.obterSituacao(id)])
-      const [modelo, geracoes, fabricantes, registros] = await Promise.all([
-        modeloService.obter(veiculo.modeloId),
-        geracaoService.listar(),
-        fabricanteService.listar(),
-        manutencaoService.listar(filtro.porId('Veiculo', veiculo.id)),
+      // A situação (o que vence e quando) vem pronta da API: intervalo do caminhão → geração → padrão, por km e por data.
+      // Ela também traz fabricante, modelo, geração e potência para o cabeçalho.
+      const [veiculo, situacao, registros] = await Promise.all([
+        veiculoService.obter(id),
+        veiculoService.obterSituacao(id),
+        manutencaoService.listar(filtro.porId('Veiculo', id)),
       ])
-      const catalogo = { modelos: [modelo], geracoes, fabricantes }
-      return { veiculo, situacao, registros, catalogo }
+      return { veiculo, situacao, registros }
     }
     carregar()
       .then((d) => { if (!cancelado) setDados(d) })
@@ -71,7 +67,6 @@ export default function VeiculoDetalhe() {
     <>
       <VeiculoDetalhePanel
         veiculo={veiculo}
-        catalogo={dados.catalogo}
         situacao={dados.situacao}
         registros={dados.registros}
         backTo={BACK_TO}
@@ -90,7 +85,7 @@ export default function VeiculoDetalhe() {
         }
       />
       <AtualizarKmModal open={kmOpen} onClose={() => setKmOpen(false)} veiculo={veiculo} onSalvo={recarregar} />
-      <NovoVeiculoModal open={editarOpen} onClose={() => setEditarOpen(false)} veiculoParaEditar={veiculo} onSalvo={recarregar} />
+      {editarOpen && <NovoVeiculoModal veiculoParaEditar={veiculo} onClose={() => setEditarOpen(false)} onSalvo={recarregar} />}
       {manutencaoOpen && <OrdemServicoModal veiculo={veiculo} onClose={() => setManutencaoOpen(false)} onSalvo={recarregar} />}
     </>
   )

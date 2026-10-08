@@ -25,6 +25,7 @@ public class ServicoDashboard(ServicoSituacaoVeiculo servicoSituacao, ILogger<Se
                 VeiculoId = v.VeiculoId,
                 Placa = v.Placa,
                 KmAtual = v.KmAtual,
+                FabricanteNome = v.FabricanteNome,
                 ModeloNome = v.ModeloNome,
                 GeracaoNome = v.GeracaoNome,
                 TipoManutencaoId = v.ItemMaisUrgente!.TipoManutencaoId,
@@ -47,12 +48,16 @@ public class ServicoDashboard(ServicoSituacaoVeiculo servicoSituacao, ILogger<Se
             QuantidadeCritico = veiculos.Count(v => v.Status == StatusManutencao.Critico),
             Alertas = (limiteAlertas is > 0 ? alertas.Take(limiteAlertas.Value) : alertas).ToList(),
             FrotaPorGeracao = veiculos
-                .GroupBy(v => new { v.GeracaoId, v.GeracaoNome })
-                .OrderBy(g => g.Key.GeracaoId)
+                .GroupBy(v => new { v.GeracaoId, v.GeracaoNome, v.ModeloNome, v.FabricanteNome })
+                .OrderBy(g => g.Key.FabricanteNome)
+                .ThenBy(g => g.Key.ModeloNome)
+                .ThenBy(g => g.Key.GeracaoId)
                 .Select(g => new QuantidadePorGeracao
                 {
                     GeracaoId = g.Key.GeracaoId,
                     GeracaoNome = g.Key.GeracaoNome,
+                    ModeloNome = g.Key.ModeloNome,
+                    FabricanteNome = g.Key.FabricanteNome,
                     Quantidade = g.Count(),
                 })
                 .ToList(),

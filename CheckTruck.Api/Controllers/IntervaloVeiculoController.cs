@@ -10,7 +10,7 @@ namespace CheckTruck.Api.Controllers;
 
 /// <summary>
 /// Intervalos próprios de um caminhão (ex.: plano da concessionária). Têm prioridade sobre o
-/// intervalo do modelo e sobre o padrão seguro. Filtro útil: ?$filter=Veiculo/Id eq 5
+/// intervalo da geração e sobre o padrão seguro. Filtro útil: ?$filter=Veiculo/Id eq 5
 /// Ler: basta estar logado (a situação dos caminhões usa os intervalos). Criar, editar e apagar: Intervalos
 /// </summary>
 [ApiController]
@@ -33,7 +33,7 @@ public class IntervaloVeiculoController(
     public ActionResult<IntervaloVeiculoResponseDto> GetById(long id) => GetByIdCore(id);
 
     /// <summary>
-    /// Caminhões ativos (com o modelo) para escolher na tela de intervalos. Fica aqui porque quem cuida
+    /// Caminhões ativos (com a geração) para escolher na tela de intervalos. Fica aqui porque quem cuida
     /// dos intervalos pode não ter a permissão Ver frota.
     /// </summary>
     [HttpGet("veiculos")]
@@ -41,7 +41,16 @@ public class IntervaloVeiculoController(
     public ActionResult<IEnumerable<VeiculoDoIntervaloDto>> Veiculos() =>
         servicoVeiculo.Query(v => v.Ativo)
             .OrderBy(v => v.Placa)
-            .Select(v => new VeiculoDoIntervaloDto { Id = v.Id, Placa = v.Placa, ModeloId = v.Modelo.Id, ModeloNome = v.Modelo.Nome })
+            .Select(v => new VeiculoDoIntervaloDto
+            {
+                Id = v.Id,
+                Placa = v.Placa,
+                FabricanteNome = v.Potencia.Geracao.Modelo.Fabricante.Nome,
+                ModeloNome = v.Potencia.Geracao.Modelo.Nome,
+                GeracaoId = v.Potencia.Geracao.Id,
+                GeracaoNome = v.Potencia.Geracao.Nome,
+                PotenciaCv = v.Potencia.Cv,
+            })
             .ToList();
 
     [HttpPost]

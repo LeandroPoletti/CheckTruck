@@ -79,23 +79,23 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
     return () => { cancelado = true }
   }, [escolhePlaca, registro, veiculo])
 
-  // Intervalos do modelo (dica do intervalo) e histórico do caminhão (sugere 1ª troca), só ao lançar
+  // Intervalos da geração (dica do intervalo) e histórico do caminhão (sugere 1ª troca), só ao lançar
   const [doCaminhao, setDoCaminhao] = useState({ veiculoId: null, intervalos: [], registros: [] })
-  const modeloId = caminhao?.modeloId
+  const geracaoId = caminhao?.geracaoId
   useEffect(() => {
-    if (corrigindo || !veiculoId || !modeloId) return
+    if (corrigindo || !veiculoId || !geracaoId) return
     let cancelado = false
     Promise.all([
-      intervaloService.listar(filtro.porId('Modelo', modeloId)),
+      intervaloService.listar(filtro.porId('Geracao', geracaoId)),
       manutencaoService.listar(filtro.porId('Veiculo', veiculoId)),
     ])
       .then(([intervalos, registros]) => { if (!cancelado) setDoCaminhao({ veiculoId, intervalos, registros }) })
       .catch((e) => { if (!cancelado) setErroCarga(e.message) })
     return () => { cancelado = true }
-  }, [corrigindo, veiculoId, modeloId])
+  }, [corrigindo, veiculoId, geracaoId])
 
   const historicoPronto = doCaminhao.veiculoId === veiculoId
-  const intervaloDoModelo = historicoPronto ? doCaminhao.intervalos.find((i) => i.tipoId === form.tipoId) : null
+  const intervaloDaGeracao = historicoPronto ? doCaminhao.intervalos.find((i) => i.tipoId === form.tipoId) : null
   const sugerePrimeira = !corrigindo && historicoPronto && !!form.tipoId
     && !getUltimoRegistro(veiculoId, form.tipoId, doCaminhao.registros)
 
@@ -128,7 +128,7 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
     setSalvando(true)
     setErro('')
     try {
-      // Próxima troca (km e data) em branco: a API calcula pelo intervalo do caminhão → modelo → padrão.
+      // Próxima troca (km e data) em branco: a API calcula pelo intervalo do caminhão → geração → padrão.
       // O km da OS atualiza o km do caminhão quando é maior que o atual. Ao lançar, o motorista
       // escolhido vira o motorista atual do caminhão (na correção, não).
       const dados = {
@@ -190,9 +190,9 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
             ))}
           </Select>
           <p className="mt-1.5 text-xs text-stone-400">
-            {intervaloDoModelo
-              ? <>Intervalo do modelo {formatKm(intervaloDoModelo.intervaloKm)}</>
-              : 'A próxima troca é calculada pelo intervalo do caminhão, do modelo ou pelo padrão.'}
+            {intervaloDaGeracao
+              ? <>Intervalo da geração {formatKm(intervaloDaGeracao.intervaloKm)}</>
+              : 'A próxima troca é calculada pelo intervalo do caminhão, da geração ou pelo padrão.'}
           </p>
         </Field>
 

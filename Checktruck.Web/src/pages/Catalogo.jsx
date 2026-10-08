@@ -2,37 +2,44 @@ import { useEffect, useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Card, Carregando, ErroCarregamento } from '../components/Layout'
 import { Button } from '../components/ui/Form'
-import { fabricanteService, geracaoService, modeloService, veiculoService, intervaloService } from '../services'
+import { fabricanteService, modeloService, geracaoService, veiculoService, intervaloService } from '../services'
 import FabricanteModal from '../components/modals/FabricanteModal'
-import GeracaoModal from '../components/modals/GeracaoModal'
 import ModeloModal from '../components/modals/ModeloModal'
+import GeracaoModal from '../components/modals/GeracaoModal'
 import { obterUsuario } from '../services/sessao'
 import { pode } from '../data/acesso'
 
-const VAZIO = { fabricantes: [], geracoes: [], modelos: [], veiculos: [], intervalos: [] }
+const VAZIO = { fabricantes: [], modelos: [], geracoes: [], veiculos: [], intervalos: [] }
+const porNome = (a, b) => a.nome.localeCompare(b.nome)
+const quantos = (n, um, varios) => `${n} ${n === 1 ? um : varios}`
 
+// Fabricante → modelo → gerações (com anos, norma, motor, câmbio e potências), usados no cadastro de veículos
 export default function Catalogo() {
-  // A contagem de veículos por modelo só aparece para quem vê a frota
+  // A contagem de caminhões por geração só aparece para quem vê a frota
   const verFrota = pode(obterUsuario(), 'VerFrota')
-  const [selecionadoId, setFabricanteId] = useState(null)
-  const [geracaoId, setGeracaoId] = useState(null)
+  const [fabricanteSel, setFabricanteSel] = useState(null)
+  const [modeloSel, setModeloSel] = useState(null)
   const [dados, setDados] = useState(VAZIO)
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState(null)
   const [versao, setVersao] = useState(0)
-  const [modalAberto, setModalAberto] = useState(null) // 'fabricante' | 'geracao' | 'modelo'
+  const [modal, setModal] = useState(null) // 'fabricante' | 'modelo' | 'geracao' enquanto o modal está aberto
 
   useEffect(() => {
     let cancelado = false
     Promise.all([
       fabricanteService.listar(),
-      geracaoService.listar(),
       modeloService.listar(),
+      geracaoService.listar(),
       verFrota ? veiculoService.listar() : [],
       intervaloService.listar(),
     ])
-      .then(([fabricantes, geracoes, modelos, veiculos, intervalos]) => {
-        if (!cancelado) setDados({ fabricantes, geracoes, modelos, veiculos, intervalos })
+      .then(([fabricantes, modelos, geracoes, veiculos, intervalos]) => {
+        if (cancelado) return
+        fabricantes.sort(porNome)
+        modelos.sort(porNome)
+        geracoes.sort((a, b) => a.anoInicio - b.anoInicio || a.nome.localeCompare(b.nome))
+        setDados({ fabricantes, modelos, geracoes, veiculos, intervalos })
       })
       .catch((e) => { if (!cancelado) setErro(e.message) })
       .finally(() => { if (!cancelado) setCarregando(false) })
@@ -50,30 +57,19 @@ export default function Catalogo() {
     recarregar()
   }
 
-  const { fabricantes, geracoes, modelos, veiculos, intervalos } = dados
-  // sem seleção explícita, o primeiro fabricante carregado fica ativo
-  const fabricanteId = selecionadoId ?? fabricantes[0]?.id
+  const { fabricantes, modelos, geracoes, veiculos, intervalos } = dados
+  // Sem seleção, o primeiro fabricante e o primeiro modelo dele ficam ativos
+  const fabricante = fabricantes.find((f) => f.id === fabricanteSel) ?? fabricantes[0]
+  const modelosDoFabricante = useMemo(() => modelos.filter((m) => m.fabricanteId === fabricante?.id), [modelos, fabricante])
+  const modelo = modelosDoFabricante.find((m) => m.id === modeloSel) ?? modelosDoFabricante[0]
+  const geracoesDoModelo = geracoes.filter((g) => g.modeloId === modelo?.id)
 
-  const geracoesDoFabricante = useMemo(
-    () => geracoes.filter((g) => g.fabricanteId === fabricanteId),
-    [geracoes, fabricanteId]
-  )
-  const geracaoAtiva = geracoesDoFabricante.find((g) => g.id === geracaoId) || geracoesDoFabricante[0]
-  const modelosDaGeracao = useMemo(
-    () => (geracaoAtiva ? modelos.filter((m) => m.geracaoId === geracaoAtiva.id) : []),
-    [modelos, geracaoAtiva]
-  )
+  const contar = (lista, campo, id, um, varios) => quantos(lista.filter((x) => x[campo] === id).length, um, varios)
 
-  function veiculosDoModelo(modeloId) {
-    return veiculos.filter((v) => v.modeloId === modeloId && v.ativo).length
+  function escolherFabricante(id) {
+    setFabricanteSel(id)
+    setModeloSel(null)
   }
-  function intervalosDoModelo(modeloId) {
-    return intervalos.filter((i) => i.modeloId === modeloId).length
-  }
-
-  // Pré-seleção dos modais a partir da coluna ativa (memo para não resetar o formulário a cada render)
-  const iniciaisGeracao = useMemo(() => ({ fabricanteId: fabricanteId ?? '' }), [fabricanteId])
-  const iniciaisModelo = useMemo(() => ({ geracaoId: geracaoAtiva?.id ?? '' }), [geracaoAtiva?.id])
 
   if (carregando) return <Carregando />
   if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
@@ -82,139 +78,126 @@ export default function Catalogo() {
     <>
       <PageHeader
         title="Catálogo"
-        subtitle="Fabricantes, gerações e modelos usados no cadastro de veículos"
-        action={<Button onClick={() => setModalAberto('modelo')}><Plus size={16} /> Novo modelo</Button>}
+        subtitle="Fabricante → modelo → geração → potência, usados no cadastro de veículos"
+        action={<Button onClick={() => setModal('geracao')}><Plus size={16} /> Nova geração</Button>}
       />
 
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-4 gap-5">
         <Card className="p-4">
           <p className="mb-3 text-xs font-bold tracking-wide text-stone-400">FABRICANTE</p>
           <div className="space-y-1">
-            {fabricantes.map((f) => {
-              const qtdGeracoes = geracoes.filter((g) => g.fabricanteId === f.id).length
-              const ativo = f.id === fabricanteId
-              return (
-                <button
-                  key={f.id}
-                  onClick={() => { setFabricanteId(f.id); setGeracaoId(null) }}
-                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left transition ${
-                    ativo ? 'bg-brand-50 text-brand-800' : 'hover:bg-stone-50'
-                  }`}
-                >
-                  <span>
-                    <span className="block text-sm font-semibold">{f.nome}</span>
-                    <span className="block text-xs text-stone-400">{f.pais} · {qtdGeracoes} gerações</span>
-                  </span>
-                  <span className="text-stone-300">›</span>
-                </button>
-              )
-            })}
-            <button
-              onClick={() => setModalAberto('fabricante')}
-              className="mt-1 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-600 hover:bg-brand-50"
-            >
-              + Fabricante
-            </button>
+            {fabricantes.map((f) => (
+              <ItemColuna
+                key={f.id}
+                ativo={f.id === fabricante?.id}
+                onClick={() => escolherFabricante(f.id)}
+                titulo={f.nome}
+                detalhe={`${f.pais} · ${contar(modelos, 'fabricanteId', f.id, 'modelo', 'modelos')}`}
+              />
+            ))}
+            <BotaoNovo onClick={() => setModal('fabricante')}>+ Fabricante</BotaoNovo>
           </div>
         </Card>
 
         <Card className="p-4">
-          <p className="mb-3 text-xs font-bold tracking-wide text-stone-400">
-            GERAÇÃO · {fabricantes.find((f) => f.id === fabricanteId)?.nome?.toUpperCase()}
-          </p>
+          <p className="mb-3 text-xs font-bold tracking-wide text-stone-400">MODELO · {fabricante?.nome?.toUpperCase() ?? '—'}</p>
           <div className="space-y-1">
-            {geracoesDoFabricante.length === 0 && (
-              <p className="px-3 py-4 text-sm text-stone-400">Nenhuma geração cadastrada.</p>
-            )}
-            {geracoesDoFabricante.map((g) => {
-              const ativo = g.id === (geracaoAtiva && geracaoAtiva.id)
-              return (
-                <button
-                  key={g.id}
-                  onClick={() => setGeracaoId(g.id)}
-                  className={`w-full rounded-lg border px-3 py-2.5 text-left transition ${
-                    ativo ? 'border-brand-500 bg-brand-50' : 'border-transparent hover:bg-stone-50'
-                  }`}
-                >
-                  <span className="block text-sm font-semibold text-stone-900">{g.nome}</span>
-                  <span className="block text-xs text-stone-400">{g.periodo} · {g.motor.split(' ')[0]} · {g.norma}</span>
-                </button>
-              )
-            })}
-            <button
-              onClick={() => setModalAberto('geracao')}
-              className="mt-1 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-600 hover:bg-brand-50"
-            >
-              + Geração
-            </button>
+            {modelosDoFabricante.length === 0 && <p className="px-3 py-4 text-sm text-stone-400">Nenhum modelo cadastrado.</p>}
+            {modelosDoFabricante.map((m) => (
+              <ItemColuna
+                key={m.id}
+                ativo={m.id === modelo?.id}
+                onClick={() => setModeloSel(m.id)}
+                titulo={m.nome}
+                detalhe={contar(geracoes, 'modeloId', m.id, 'geração', 'gerações')}
+              />
+            ))}
+            {fabricante && <BotaoNovo onClick={() => setModal('modelo')}>+ Modelo</BotaoNovo>}
           </div>
         </Card>
 
-        <Card className="p-4">
+        <Card className="col-span-2 p-4">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-xs font-bold tracking-wide text-stone-400">
-              MODELOS · {geracaoAtiva?.nome?.toUpperCase() || '—'}
+              GERAÇÕES · {modelo ? `${fabricante.nome} ${modelo.nome}`.toUpperCase() : '—'}
             </p>
-            <button
-              onClick={() => setModalAberto('modelo')}
-              className="text-xs font-semibold text-brand-600 hover:text-brand-800"
-            >
-              + Modelo
-            </button>
+            {modelo && (
+              <button onClick={() => setModal('geracao')} className="text-xs font-semibold text-brand-600 hover:text-brand-800">
+                + Geração
+              </button>
+            )}
           </div>
           <div className="space-y-3">
-            {modelosDaGeracao.map((m) => (
-              <div key={m.id} className="rounded-lg border border-stone-200 p-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-stone-900">{m.nome}</span>
-                  <span className="text-xs text-stone-400">
-                    {verFrota && `${veiculosDoModelo(m.id)} veículos · `}{intervalosDoModelo(m.id)} intervalos
+            {modelo && geracoesDoModelo.length === 0 && <p className="px-3 py-4 text-sm text-stone-400">Nenhuma geração cadastrada.</p>}
+            {geracoesDoModelo.map((g) => (
+              <div key={g.id} className="rounded-lg border border-stone-200 p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-stone-900">{g.nome}</p>
+                    <p className="text-xs text-stone-500">
+                      {[g.periodo, g.normaNome, g.motor && `Motor ${g.motor}`, g.cambio].filter(Boolean).join(' · ')}
+                    </p>
+                  </div>
+                  <span className="whitespace-nowrap text-xs text-stone-400">
+                    {verFrota && `${contar(veiculos, 'geracaoId', g.id, 'caminhão', 'caminhões')} · `}
+                    {contar(intervalos, 'geracaoId', g.id, 'intervalo', 'intervalos')}
                   </span>
                 </div>
-                <div className="mt-2 grid grid-cols-4 gap-2 text-center text-xs text-stone-500">
-                  <div>
-                    <p className="font-semibold text-stone-800">{m.potenciaCv} cv</p>
-                    <p>Potência</p>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-stone-800">{m.eixoDianteiroPneus} pneus</p>
-                    <p>Eixo diant.</p>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-stone-800">{m.tandem ? '2 eixos' : '1 eixo'}</p>
-                    <p>Tandem tras.</p>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-stone-800">{m.pneusPorEixoTraseiro}</p>
-                    <p>Pneus/eixo</p>
-                  </div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {g.potencias.map((p) => (
+                    <span key={p.id} className="rounded-full bg-mist-100 px-2.5 py-0.5 text-xs font-semibold text-brand-800">{p.cv} cv</span>
+                  ))}
                 </div>
               </div>
             ))}
           </div>
-          <p className="mt-4 text-xs text-stone-400">
-            Todos os FH cavalo são 6×4 com tandem duplo Meritor.
-          </p>
         </Card>
       </div>
 
       <FabricanteModal
-        open={modalAberto === 'fabricante'}
-        onClose={() => setModalAberto(null)}
-        onSalvo={(f) => { setFabricanteId(f.id); setGeracaoId(null); recarregar() }}
+        open={modal === 'fabricante'}
+        onClose={() => setModal(null)}
+        onSalvo={(f) => { escolherFabricante(f.id); recarregar() }}
       />
-      <GeracaoModal
-        open={modalAberto === 'geracao'}
-        valoresIniciais={iniciaisGeracao}
-        onClose={() => setModalAberto(null)}
-        onSalvo={(g) => { setFabricanteId(g.fabricanteId); setGeracaoId(g.id); recarregar() }}
-      />
-      <ModeloModal
-        open={modalAberto === 'modelo'}
-        valoresIniciais={iniciaisModelo}
-        onClose={() => setModalAberto(null)}
-        onSalvo={recarregar}
-      />
+      {modal === 'modelo' && (
+        <ModeloModal
+          valoresIniciais={{ fabricanteId: fabricante?.id }}
+          onClose={() => setModal(null)}
+          onSalvo={(m) => { setFabricanteSel(m.fabricanteId); setModeloSel(m.id); recarregar() }}
+        />
+      )}
+      {modal === 'geracao' && (
+        <GeracaoModal
+          valoresIniciais={{ modeloId: modelo?.id }}
+          onClose={() => setModal(null)}
+          onSalvo={(g) => { setFabricanteSel(g.fabricanteId); setModeloSel(g.modeloId); recarregar() }}
+        />
+      )}
     </>
+  )
+}
+
+function ItemColuna({ ativo, onClick, titulo, detalhe }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left transition ${
+        ativo ? 'bg-brand-50 text-brand-800' : 'hover:bg-stone-50'
+      }`}
+    >
+      <span>
+        <span className="block text-sm font-semibold">{titulo}</span>
+        <span className="block text-xs text-stone-400">{detalhe}</span>
+      </span>
+      <span className="text-stone-300">›</span>
+    </button>
+  )
+}
+
+function BotaoNovo({ onClick, children }) {
+  return (
+    <button onClick={onClick} className="mt-1 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-600 hover:bg-brand-50">
+      {children}
+    </button>
   )
 }

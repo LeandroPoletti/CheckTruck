@@ -7,7 +7,7 @@ namespace CheckTruck.Api.Dtos.IntervalosRecomendados;
 public class IntervaloRecomendadoRequestDto
 {
     [Required]
-    public long ModeloId { get; set; }
+    public long GeracaoId { get; set; }
 
     [Required]
     public long TipoManutencaoId { get; set; }
@@ -30,7 +30,7 @@ public class IntervaloRecomendadoRequestDto
 public class IntervaloRecomendadoResponseDto
 {
     public long Id { get; set; }
-    public ModeloResumoDto Modelo { get; set; }
+    public GeracaoResumoDto Geracao { get; set; }
     public TipoManutencaoResumoDto TipoManutencao { get; set; }
     public int IntervaloKm { get; set; }
     public int IntervaloKmPrimeira { get; set; }
@@ -39,7 +39,7 @@ public class IntervaloRecomendadoResponseDto
     public string Observacao { get; set; }
 }
 
-/// <summary>Padrão seguro do sistema para um tipo de manutenção (vale sem intervalo do caminhão nem do modelo).</summary>
+/// <summary>Padrão seguro do sistema para um tipo de manutenção (vale sem intervalo do caminhão nem da geração).</summary>
 public class IntervaloPadraoResponseDto
 {
     public long TipoManutencaoId { get; set; }
@@ -54,7 +54,7 @@ public static class IntervaloRecomendadoDtoExtensions
     public static IntervaloRecomendadoResponseDto ToResponseDto(this IntervaloRecomendado entidade) => new()
     {
         Id = entidade.Id,
-        Modelo = entidade.Modelo?.ToResumoDto(),
+        Geracao = entidade.Geracao?.ToResumoDto(),
         TipoManutencao = entidade.TipoManutencao?.ToResumoDto(),
         IntervaloKm = entidade.IntervaloKm,
         IntervaloKmPrimeira = entidade.IntervaloKmPrimeira,
@@ -63,9 +63,9 @@ public static class IntervaloRecomendadoDtoExtensions
         Observacao = entidade.Observacao
     };
 
-    public static IntervaloRecomendado ToEntity(this IntervaloRecomendadoRequestDto dto, Modelo modelo, TipoManutencao tipoManutencao) => new()
+    public static IntervaloRecomendado ToEntity(this IntervaloRecomendadoRequestDto dto, Geracao geracao, TipoManutencao tipoManutencao) => new()
     {
-        Modelo = modelo,
+        Geracao = geracao,
         TipoManutencao = tipoManutencao,
         IntervaloKm = dto.IntervaloKm,
         IntervaloKmPrimeira = dto.IntervaloKmPrimeira,

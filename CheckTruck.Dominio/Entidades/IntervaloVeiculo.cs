@@ -4,7 +4,7 @@ using CheckTruck.Dominio.Interfaces;
 namespace CheckTruck.Dominio.Entidades;
 
 /// <summary>
-/// Intervalo próprio de um caminhão, para quando ele tem um plano diferente do padrão do modelo
+/// Intervalo próprio de um caminhão, para quando ele tem um plano diferente do padrão da geração
 /// (ex.: plano da concessionária). Quando existe, tem prioridade sobre o IntervaloRecomendado.
 /// </summary>
 public class IntervaloVeiculo : EntidadeBanco

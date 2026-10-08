@@ -3,7 +3,7 @@ import { ChevronLeft } from 'lucide-react'
 import { Card } from './Layout'
 import { StatusBadge, PlacaBadge } from './ui/Badges'
 import {
-  formatKm, formatData, formatDataHora, getModeloCompleto, getHistoricoVeiculo,
+  formatKm, formatData, formatDataHora, getHistoricoVeiculo, nomeDoCaminhao, TRACOES,
 } from '../data/domain'
 
 export function VeiculoNaoEncontrado({ backTo }) {
@@ -19,13 +19,21 @@ export function VeiculoNaoEncontrado({ backTo }) {
 }
 
 // Apresentacional: a página de detalhe carrega os dados e passa por props.
-// catalogo = { fabricantes, geracoes, modelos } do veículo.
-// situacao = status geral e itens já calculados pela API (do mais urgente para o menos urgente).
-export default function VeiculoDetalhePanel({ veiculo, catalogo, situacao, registros, backTo, actions }) {
+// situacao = fabricante, modelo, geração e potência, mais o status geral e os itens já calculados pela API
+// (do mais urgente para o menos urgente).
+export default function VeiculoDetalhePanel({ veiculo, situacao, registros, backTo, actions }) {
   const navigate = useNavigate()
 
-  const mc = getModeloCompleto(catalogo, veiculo.modeloId)
   const historico = getHistoricoVeiculo(veiculo.id, registros)
+  const detalhes = [
+    situacao.geracaoNome,
+    situacao.normaNome,
+    TRACOES[situacao.tracao],
+    situacao.motor && `Motor ${situacao.motor}`,
+    situacao.cambio,
+    veiculo.chassi && `Chassi ${veiculo.chassi}`,
+    veiculo.renavam && `Renavam ${veiculo.renavam}`,
+  ]
 
   return (
     <>
@@ -41,16 +49,10 @@ export default function VeiculoDetalhePanel({ veiculo, catalogo, situacao, regis
           <div>
             <div className="flex items-center gap-3">
               <PlacaBadge placa={veiculo.placa} size="lg" />
-              <h1 className="text-xl font-bold text-stone-900">
-                {mc?.fabricante?.nome} {mc?.modelo?.nome}
-              </h1>
+              <h1 className="text-xl font-bold text-stone-900">{nomeDoCaminhao(situacao)} cv</h1>
               <StatusBadge status={situacao.status} />
             </div>
-            <p className="mt-1.5 text-sm text-stone-500">
-              {mc?.geracao?.nome} · {mc?.geracao?.motor} · {mc?.geracao?.cambio}
-              {veiculo.chassi && <> · Chassi {veiculo.chassi}</>}
-              {veiculo.renavam && <> · Renavam {veiculo.renavam}</>}
-            </p>
+            <p className="mt-1.5 text-sm text-stone-500">{detalhes.filter(Boolean).join(' · ')}</p>
           </div>
           {actions}
         </div>
