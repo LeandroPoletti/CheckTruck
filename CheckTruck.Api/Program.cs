@@ -29,8 +29,11 @@ modelBuilder.EntitySet<Manutencao>("Manutencao");
 modelBuilder.EntitySet<IntervaloRecomendado>("IntervaloRecomendado");
 modelBuilder.EntitySet<IntervaloVeiculo>("IntervaloVeiculo");
 modelBuilder.EntitySet<Mecanico>("Mecanico");
-// O motorista atual é um acesso (login): fica fora do OData para não expor os dados da conta
+// Motorista do caminhão, motorista da OS e quem lançou a OS são acessos (login):
+// ficam fora do OData para não expor os dados da conta
 modelBuilder.EntityType<Veiculo>().Ignore(v => v.MotoristaAtual);
+modelBuilder.EntityType<Manutencao>().Ignore(m => m.Motorista);
+modelBuilder.EntityType<Manutencao>().Ignore(m => m.LancadoPor);
 
 builder.Services.AddSingleton(modelBuilder.GetEdmModel());
 

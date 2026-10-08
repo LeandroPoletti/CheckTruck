@@ -112,7 +112,11 @@ export default function VeiculoDetalhePanel({ veiculo, catalogo, registros, back
                       {formatKm(r.kmNaTroca)} → próx. {formatKm(r.kmProximaTroca)}
                       {r.mecanicoNome && <> · {r.mecanicoNome}{r.mecanicoFuncao && ` (${r.mecanicoFuncao})`}</>}
                       {r.concessionaria && <> · {r.concessionaria}</>}
-                      {r.nrNotaFiscal && <> · OS {r.nrNotaFiscal}</>}
+                    </p>
+                    <p className="text-xs text-stone-400">
+                      OS nº {r.id}
+                      {r.motoristaNome && <> · Motorista {r.motoristaNome}</>}
+                      {r.lancadoPorNome && <> · Lançada por {r.lancadoPorNome}</>}
                     </p>
                   </div>
                 </div>

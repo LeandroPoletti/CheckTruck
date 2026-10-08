@@ -114,8 +114,8 @@ public class VeiculoController(
             return (null, null);
         }
 
-        var motorista = await servicoUsuario.ObterAsync(motoristaId);
-        if (motorista is not { Ativo: true, Cargo: Cargo.Motorista })
+        var motorista = await servicoUsuario.ObterMotoristaAtivoAsync(motoristaId);
+        if (motorista is null)
         {
             return (null, "Motorista não encontrado ou inativo.");
         }

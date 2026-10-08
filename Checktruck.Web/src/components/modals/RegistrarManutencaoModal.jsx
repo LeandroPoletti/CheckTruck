@@ -3,27 +3,27 @@ import { Modal } from '../ui/Overlay'
 import { Field, Input, Select, Toggle, Button } from '../ui/Form'
 import { formatKm, getUltimoRegistro } from '../../data/domain'
 import {
-  manutencaoService, tipoManutencaoService, intervaloService, mecanicoService, filtro,
+  manutencaoService, tipoManutencaoService, intervaloService, mecanicoService, usuarioService, filtro,
 } from '../../services'
 import MecanicoModal from './MecanicoModal'
 import { obterUsuario } from '../../services/sessao'
 import { pode } from '../../data/acesso'
 
-const LISTAS_VAZIAS = { tiposManutencao: [], intervalos: [], registros: [], mecanicos: [] }
+const LISTAS_VAZIAS = { tiposManutencao: [], intervalos: [], registros: [], mecanicos: [], motoristas: [] }
 
 export default function RegistrarManutencaoModal({ open, onClose, veiculo, onSalvo }) {
   const podeCadastrarMecanico = pode(obterUsuario(), 'Cadastros')
   const [listas, setListas] = useState(LISTAS_VAZIAS)
   const [carregando, setCarregando] = useState(false)
   const [erroCarga, setErroCarga] = useState(null)
-  const { tiposManutencao, intervalos, registros, mecanicos } = listas
+  const { tiposManutencao, intervalos, registros, mecanicos, motoristas } = listas
   const [tipoId, setTipoId] = useState('')
   const [mecanicoId, setMecanicoId] = useState('')
+  const [motoristaId, setMotoristaId] = useState('')
   const [novoMecanicoOpen, setNovoMecanicoOpen] = useState(false)
   const [kmNaTroca, setKmNaTroca] = useState('')
   const [dataRealizacao, setDataRealizacao] = useState(() => new Date().toISOString().slice(0, 10))
   const [isPrimeiraTroca, setIsPrimeiraTroca] = useState(false)
-  const [nrNotaFiscal, setNrNotaFiscal] = useState('')
   const [concessionaria, setConcessionaria] = useState('')
   const [observacoes, setObservacoes] = useState('')
   const [error, setError] = useState('')
@@ -34,10 +34,10 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo, onSal
     if (open && veiculo) {
       setTipoId('')
       setMecanicoId('')
+      setMotoristaId('')
       setKmNaTroca(String(veiculo.kmAtual))
       setDataRealizacao(new Date().toISOString().slice(0, 10))
       setIsPrimeiraTroca(false)
-      setNrNotaFiscal('')
       setConcessionaria('')
       setObservacoes('')
       setError('')
@@ -45,7 +45,8 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo, onSal
     }
   }, [open, veiculo])
 
-  // Ao abrir: tipos, intervalos do modelo, histórico do veículo (para sugerir 1ª troca) e mecânicos
+  // Ao abrir: tipos, intervalos do modelo, histórico do veículo (para sugerir 1ª troca), mecânicos e motoristas.
+  // O motorista já vem marcado com quem está com o caminhão (se ainda estiver ativo).
   useEffect(() => {
     if (!open || !veiculo) return
     let cancelado = false
@@ -56,9 +57,12 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo, onSal
       intervaloService.listar(filtro.porId('Modelo', veiculo.modeloId)),
       manutencaoService.listar(filtro.porId('Veiculo', veiculo.id)),
       mecanicoService.listar(filtro.ativos()),
+      usuarioService.listarMotoristas(),
     ])
-      .then(([tiposManutencao, intervalos, registros, mecanicos]) => {
-        if (!cancelado) setListas({ tiposManutencao, intervalos, registros, mecanicos })
+      .then(([tiposManutencao, intervalos, registros, mecanicos, motoristas]) => {
+        if (cancelado) return
+        setListas({ tiposManutencao, intervalos, registros, mecanicos, motoristas })
+        setMotoristaId(motoristas.some((m) => m.id === veiculo.motoristaId) ? veiculo.motoristaId : '')
       })
       .catch((e) => { if (!cancelado) setErroCarga(e.message) })
       .finally(() => { if (!cancelado) setCarregando(false) })
@@ -83,24 +87,24 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo, onSal
     const km = Number(kmNaTroca)
     if (!tipoId) { setError('Selecione o tipo de manutenção.'); return }
     if (!mecanicoId) { setError('Escolha o mecânico que fez a troca.'); return }
-    if (!nrNotaFiscal.trim()) { setError('Informe o nº da OS ou da nota fiscal.'); return }
     // OS antiga pode ter km menor que o atual; só não aceita km inválido
     if (!Number.isFinite(km) || km < 0) { setError('Informe o km do caminhão na troca.'); return }
 
     setSalvando(true)
     try {
       // Próxima troca (km e data) em branco: a API calcula pelo intervalo do caminhão → modelo → padrão.
-      // O km da OS também atualiza o km do caminhão na API quando é maior que o atual.
+      // O km da OS também atualiza o km do caminhão na API quando é maior que o atual,
+      // e o motorista escolhido vira o motorista atual do caminhão.
       await manutencaoService.criar({
         veiculoId: veiculo.id,
         tipoId,
         mecanicoId,
+        motoristaId,
         kmNaTroca: km,
         kmProximaTroca: 0,
         dataProximaTroca: null,
         dataRealizacao,
         isPrimeiraTroca: isPrimeiraTroca || sugerePrimeira,
-        nrNotaFiscal: nrNotaFiscal.trim(),
         concessionaria: concessionaria.trim() || null,
         observacoes: observacoes.trim() || null,
       })
@@ -131,7 +135,7 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo, onSal
       }
     >
       <div className="space-y-4">
-        {carregando && <p className="text-sm text-stone-400">Carregando tipos, intervalos e mecânicos…</p>}
+        {carregando && <p className="text-sm text-stone-400">Carregando tipos, intervalos, mecânicos e motoristas…</p>}
         {erroCarga && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erroCarga}</p>}
         <Field label="Tipo de manutenção" required>
           <Select value={tipoId} onChange={(e) => setTipoId(e.target.value)}>
@@ -166,6 +170,15 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo, onSal
           )}
         </Field>
 
+        <Field label="Motorista" hint="Quem estava com o caminhão. Se escolher alguém, ele vira o motorista atual do caminhão.">
+          <Select value={motoristaId} onChange={(e) => setMotoristaId(e.target.value)}>
+            <option value="">Sem motorista</option>
+            {motoristas.map((m) => (
+              <option key={m.id} value={m.id}>{m.nome}</option>
+            ))}
+          </Select>
+        </Field>
+
         <div className="grid grid-cols-2 gap-3">
           <Field label="Km na troca" required>
             <Input type="number" value={kmNaTroca} onChange={(e) => setKmNaTroca(e.target.value)} />
@@ -181,14 +194,9 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo, onSal
           label={sugerePrimeira ? 'Primeira troca (sugerido — sem histórico anterior)' : 'Marcar como primeira troca (amaciamento)'}
         />
 
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Concessionária / oficina">
-            <Input value={concessionaria} onChange={(e) => setConcessionaria(e.target.value)} placeholder="Opcional" />
-          </Field>
-          <Field label="Nº da OS / nota fiscal" required>
-            <Input value={nrNotaFiscal} onChange={(e) => setNrNotaFiscal(e.target.value)} placeholder="118.442" />
-          </Field>
-        </div>
+        <Field label="Concessionária / oficina">
+          <Input value={concessionaria} onChange={(e) => setConcessionaria(e.target.value)} placeholder="Opcional" />
+        </Field>
 
         <Field label="Observações">
           <Input value={observacoes} onChange={(e) => setObservacoes(e.target.value)} placeholder="Opcional" />

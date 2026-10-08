@@ -25,13 +25,12 @@ public class ManutencaoRequestDto
 
     public bool IsPrimeiraTroca { get; set; }
 
-    /// <summary>Número da OS ou da nota fiscal.</summary>
-    [Required]
-    public string NumNotaFiscal { get; set; }
-
     /// <summary>Mecânico que fez a troca (id do cadastro de mecânicos).</summary>
     [Required(ErrorMessage = "Escolha o mecânico que fez a troca.")]
     public long MecanicoId { get; set; }
+
+    /// <summary>Motorista que estava com o caminhão (id do acesso). Opcional; ao lançar, vira o motorista atual do caminhão.</summary>
+    public string? MotoristaId { get; set; }
 
     public string? Observacao { get; set; }
 
@@ -40,6 +39,7 @@ public class ManutencaoRequestDto
 
 public class ManutencaoResponseDto
 {
+    /// <summary>Número da OS.</summary>
     public long Id { get; set; }
     public VeiculoResumoDto Veiculo { get; set; }
     public TipoManutencaoResumoDto TipoManutencao { get; set; }
@@ -48,16 +48,18 @@ public class ManutencaoResponseDto
     public int KmAtual { get; set; }
     public int KmProximaTroca { get; set; }
     public bool IsPrimeiraTroca { get; set; }
-    public string NumNotaFiscal { get; set; }
 
     /// <summary>Mecânico que fez a troca.</summary>
     public MecanicoResumoDto Mecanico { get; set; }
 
+    /// <summary>Motorista que estava com o caminhão.</summary>
+    public UsuarioResumoDto? Motorista { get; set; }
+
     public string? Observacao { get; set; }
     public string? Concessionaria { get; set; }
 
-    /// <summary>Login de quem lançou a OS no sistema.</summary>
-    public string LancadoPor { get; set; }
+    /// <summary>Quem lançou a OS no sistema.</summary>
+    public UsuarioResumoDto? LancadoPor { get; set; }
 
     /// <summary>Data e hora em que a OS foi lançada no sistema.</summary>
     public DateTime LancadoEm { get; set; }
@@ -77,26 +79,27 @@ public static class ManutencaoDtoExtensions
         KmAtual = entidade.KmAtual,
         KmProximaTroca = entidade.KmProximaTroca,
         IsPrimeiraTroca = entidade.IsPrimeiraTroca,
-        NumNotaFiscal = entidade.NumNotaFiscal,
         Mecanico = entidade.Mecanico?.ToResumoDto(),
+        Motorista = entidade.Motorista?.ToResumoDto(),
         Observacao = entidade.Observacao,
         Concessionaria = entidade.Concessionaria,
-        LancadoPor = entidade.LancadoPor,
+        LancadoPor = entidade.LancadoPor?.ToResumoDto(),
         LancadoEm = entidade.CriadoEm,
         AtualizadoEm = entidade.AtualizadoEm
     };
 
-    public static Manutencao ToEntity(this ManutencaoRequestDto dto, Veiculo veiculo, TipoManutencao tipoManutencao, Mecanico mecanico) => new()
+    public static Manutencao ToEntity(
+        this ManutencaoRequestDto dto, Veiculo veiculo, TipoManutencao tipoManutencao, Mecanico mecanico, Usuario? motorista) => new()
     {
         Veiculo = veiculo,
         TipoManutencao = tipoManutencao,
         Mecanico = mecanico,
+        Motorista = motorista,
         RealizadoEm = dto.RealizadoEm,
         DataProximaTroca = dto.DataProximaTroca,
         KmAtual = dto.KmAtual,
         KmProximaTroca = dto.KmProximaTroca,
         IsPrimeiraTroca = dto.IsPrimeiraTroca,
-        NumNotaFiscal = dto.NumNotaFiscal,
         Observacao = dto.Observacao,
         Concessionaria = dto.Concessionaria
     };

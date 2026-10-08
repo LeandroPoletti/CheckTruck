@@ -156,27 +156,27 @@ export const registroFromApi = (dto) => ({
   mecanicoId: toId(dto.mecanico?.id),
   mecanicoNome: dto.mecanico?.nome ?? null,
   mecanicoFuncao: dto.mecanico?.funcao ?? null,
+  motoristaNome: dto.motorista?.nome ?? null,
   kmNaTroca: dto.kmAtual,
   kmProximaTroca: dto.kmProximaTroca,
   dataRealizacao: dataDaApi(dto.realizadoEm),
   dataProximaTroca: dataDaApi(dto.dataProximaTroca),
   isPrimeiraTroca: dto.isPrimeiraTroca,
-  nrNotaFiscal: dto.numNotaFiscal,
   concessionaria: dto.concessionaria,
   observacoes: dto.observacao,
-  lancadoPor: dto.lancadoPor, // login de quem lançou a OS
+  lancadoPorNome: dto.lancadoPor?.nome ?? null, // quem lançou a OS
   lancadoEm: dto.lancadoEm, // data e hora do lançamento
 })
 export const registroToApi = (r) => ({
   veiculoId: toApiId(r.veiculoId),
   tipoManutencaoId: toApiId(r.tipoId),
   mecanicoId: toApiId(r.mecanicoId),
+  motoristaId: r.motoristaId || null, // id do acesso (texto)
   realizadoEm: dataParaApi(r.dataRealizacao),
   dataProximaTroca: dataParaApi(r.dataProximaTroca),
   kmAtual: Number(r.kmNaTroca) || 0,
   kmProximaTroca: Number(r.kmProximaTroca) || 0,
   isPrimeiraTroca: !!r.isPrimeiraTroca,
-  numNotaFiscal: r.nrNotaFiscal,
   concessionaria: r.concessionaria ?? null,
   observacao: r.observacoes ?? null,
 })

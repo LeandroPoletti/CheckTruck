@@ -26,6 +26,10 @@ public class ServicoUsuario(UserManager<Usuario> userManager)
 
     public Task<Usuario?> ObterAsync(string id) => userManager.FindByIdAsync(id);
 
+    /// <summary>Motorista escolhido numa tela: só vale um acesso ativo com cargo Motorista (senão, null).</summary>
+    public async Task<Usuario?> ObterMotoristaAtivoAsync(string id) =>
+        await userManager.FindByIdAsync(id) is { Ativo: true, Cargo: Cargo.Motorista } motorista ? motorista : null;
+
     public async Task<Usuario?> CriarAsync(Usuario novo, string? senha)
     {
         if (string.IsNullOrWhiteSpace(senha))

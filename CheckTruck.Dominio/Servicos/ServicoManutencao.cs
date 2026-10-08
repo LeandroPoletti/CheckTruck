@@ -7,7 +7,8 @@ namespace CheckTruck.Dominio.Servicos;
 /// <summary>
 /// Lançamento das trocas feitas pela concessionária (OS). Se a OS ou a etiqueta trouxer a próxima
 /// troca, vale o que veio; se não, o sistema calcula pelo intervalo do caminhão → modelo → padrão.
-/// O km da OS também atualiza o km do caminhão quando é maior que o atual.
+/// O km da OS também atualiza o km do caminhão quando é maior que o atual, e o motorista informado
+/// ao lançar vira o motorista atual do caminhão.
 /// </summary>
 public class ServicoManutencao(
     IRepositorioCrud repositorioCrud,
@@ -42,6 +43,7 @@ public class ServicoManutencao(
         }
 
         AtualizarKmDoVeiculo(entidade);
+        AtualizarMotoristaDoVeiculo(entidade);
         return base.Inserir(entidade);
     }
 
@@ -99,6 +101,16 @@ public class ServicoManutencao(
         if (entidade.Veiculo is not null && entidade.KmAtual > entidade.Veiculo.KmAtual)
         {
             entidade.Veiculo.KmAtual = entidade.KmAtual;
+        }
+    }
+
+    // Só no lançamento: corrigir uma OS antiga não muda quem está com o caminhão agora.
+    // Sem motorista na OS, o caminhão continua com o que já tinha.
+    private static void AtualizarMotoristaDoVeiculo(Manutencao entidade)
+    {
+        if (entidade.Motorista is not null)
+        {
+            entidade.Veiculo.MotoristaAtual = entidade.Motorista;
         }
     }
 }

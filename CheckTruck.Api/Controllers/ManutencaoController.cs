@@ -17,12 +17,17 @@ public class ManutencaoController(
     ServicoCrud<Veiculo> servicoVeiculo,
     ServicoCrud<TipoManutencao> servicoTipoManutencao,
     ServicoCrud<Mecanico> servicoMecanico,
+    ServicoUsuario servicoUsuario,
     ILogger<Manutencao> logger)
     : CrudController<Manutencao, ManutencaoResponseDto>(
         servicoManutencao, "manutenção", logger,
         m => m.ToResponseDto(),
-        q => q.Include(m => m.Veiculo).Include(m => m.TipoManutencao).Include(m => m.Mecanico))
+        q => q.Include(m => m.Veiculo).Include(m => m.TipoManutencao).Include(m => m.Mecanico)
+            .Include(m => m.Motorista).Include(m => m.LancadoPor))
 {
+    // O que a OS aponta, já conferido
+    private record Relacionados(Veiculo Veiculo, TipoManutencao TipoManutencao, Mecanico Mecanico, Usuario? Motorista);
+
     [HttpGet]
     public ActionResult<IEnumerable<ManutencaoResponseDto>> Get() => GetODataCore();
 
@@ -30,23 +35,24 @@ public class ManutencaoController(
     public ActionResult<ManutencaoResponseDto> GetById(long id) => GetByIdCore(id);
 
     /// <summary>
-    /// Lança uma ordem de serviço (permissão Ordem de serviço). O login de quem lançou e a data/hora
-    /// ficam gravados (lancadoPor / lancadoEm). mecanicoId é quem fez a troca (cadastro de mecânicos).
+    /// Lança uma ordem de serviço (permissão Ordem de serviço). O número da OS é o id, gerado em sequência.
+    /// Quem lançou e a data/hora ficam gravados (lancadoPor / lancadoEm). mecanicoId é quem fez a troca
+    /// (cadastro de mecânicos). motoristaId é opcional: quando vem, vira o motorista atual do caminhão.
     /// Se kmProximaTroca vier 0 ou dataProximaTroca vier null, o sistema calcula pelo intervalo
     /// do caminhão → modelo → padrão seguro. O kmAtual da OS atualiza o km do caminhão quando é maior.
     /// </summary>
     [HttpPost]
     [ExigePermissao(Permissao.OrdemServico)]
-    public ActionResult<ManutencaoResponseDto> Post([FromBody] ManutencaoRequestDto dto)
+    public async Task<ActionResult<ManutencaoResponseDto>> Post([FromBody] ManutencaoRequestDto dto)
     {
-        var (veiculo, tipoManutencao, mecanico, erro) = ResolverRelacionados(dto, exigirAtivo: true);
-        if (erro is not null)
+        var (relacionados, erro) = await ResolverRelacionadosAsync(dto, exigirAtivo: true);
+        if (relacionados is null)
         {
             return BadRequest(erro);
         }
 
-        var entidade = dto.ToEntity(veiculo!, tipoManutencao!, mecanico!);
-        entidade.LancadoPor = UsuarioLogado();
+        var entidade = dto.ToEntity(relacionados.Veiculo, relacionados.TipoManutencao, relacionados.Mecanico, relacionados.Motorista);
+        entidade.LancadoPor = HttpContext.UsuarioLogado();
         entidade.CriadoEm = DateTime.UtcNow;
 
         return PostCore(entidade);
@@ -54,11 +60,11 @@ public class ManutencaoController(
 
     /// <summary>
     /// Corrige uma OS já lançada. Quem lançou e quando continuam os originais; a hora da
-    /// correção fica em atualizadoEm.
+    /// correção fica em atualizadoEm. O motorista do caminhão não muda.
     /// </summary>
     [HttpPut("{id:long}")]
     [ExigePermissao(Permissao.OrdemServico)]
-    public ActionResult<ManutencaoResponseDto> Put(long id, [FromBody] ManutencaoRequestDto dto)
+    public async Task<ActionResult<ManutencaoResponseDto>> Put(long id, [FromBody] ManutencaoRequestDto dto)
     {
         var original = Servico.Query(m => m.Id == id)
             .Select(m => new { m.LancadoPor, m.CriadoEm })
@@ -68,14 +74,14 @@ public class ManutencaoController(
             return NotFound();
         }
 
-        // Na correção aceita mecânico inativo: a OS pode ser antiga
-        var (veiculo, tipoManutencao, mecanico, erro) = ResolverRelacionados(dto, exigirAtivo: false);
-        if (erro is not null)
+        // Na correção aceita mecânico e motorista inativos: a OS pode ser antiga
+        var (relacionados, erro) = await ResolverRelacionadosAsync(dto, exigirAtivo: false);
+        if (relacionados is null)
         {
             return BadRequest(erro);
         }
 
-        var entidade = dto.ToEntity(veiculo!, tipoManutencao!, mecanico!);
+        var entidade = dto.ToEntity(relacionados.Veiculo, relacionados.TipoManutencao, relacionados.Mecanico, relacionados.Motorista);
         entidade.LancadoPor = original.LancadoPor;
         entidade.CriadoEm = original.CriadoEm;
         entidade.AtualizadoEm = DateTime.UtcNow;
@@ -87,35 +93,44 @@ public class ManutencaoController(
     [ExigePermissao(Permissao.OrdemServico)]
     public IActionResult Delete(long id) => DeleteCore(id);
 
-    // Login (UserName) de quem está autenticado pelo token do Identity
-    private string UsuarioLogado() => User.Identity?.Name ?? "desconhecido";
-
-    private (Veiculo? veiculo, TipoManutencao? tipoManutencao, Mecanico? mecanico, string? erro) ResolverRelacionados(
+    private async Task<(Relacionados? relacionados, string? erro)> ResolverRelacionadosAsync(
         ManutencaoRequestDto dto, bool exigirAtivo)
     {
         var veiculo = servicoVeiculo.GetById(dto.VeiculoId);
         if (veiculo is null)
         {
-            return (null, null, null, "Veículo não encontrado.");
+            return (null, "Veículo não encontrado.");
         }
 
         var tipoManutencao = servicoTipoManutencao.GetById(dto.TipoManutencaoId);
         if (tipoManutencao is null)
         {
-            return (null, null, null, "Tipo de manutenção não encontrado.");
+            return (null, "Tipo de manutenção não encontrado.");
         }
 
         var mecanico = servicoMecanico.GetById(dto.MecanicoId);
         if (mecanico is null)
         {
-            return (null, null, null, "Mecânico não encontrado.");
+            return (null, "Mecânico não encontrado.");
         }
 
         if (exigirAtivo && !mecanico.Ativo)
         {
-            return (null, null, null, "Esse mecânico está inativo. Ative o cadastro ou escolha outro.");
+            return (null, "Esse mecânico está inativo. Ative o cadastro ou escolha outro.");
         }
 
-        return (veiculo, tipoManutencao, mecanico, null);
+        Usuario? motorista = null;
+        if (!string.IsNullOrEmpty(dto.MotoristaId))
+        {
+            motorista = exigirAtivo
+                ? await servicoUsuario.ObterMotoristaAtivoAsync(dto.MotoristaId)
+                : await servicoUsuario.ObterAsync(dto.MotoristaId);
+            if (motorista is null)
+            {
+                return (null, "Motorista não encontrado ou inativo.");
+            }
+        }
+
+        return (new Relacionados(veiculo, tipoManutencao, mecanico, motorista), null);
     }
 }
