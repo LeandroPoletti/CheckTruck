@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
-import { Button, Input } from '../components/ui/Form'
+import { Button, CampoBusca } from '../components/ui/Form'
 import PaisModal from '../components/modals/PaisModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import AcoesLinha from '../components/ui/AcoesLinha'
 import { paisService } from '../services'
+import { contemBusca } from '../data/domain'
 
 export default function Paises() {
   const [paises, setPaises] = useState([])
@@ -37,9 +38,8 @@ export default function Paises() {
   }
 
   const filtrados = useMemo(() => {
-    const termo = busca.trim().toLowerCase()
     return paises
-      .filter((p) => !termo || p.nome.toLowerCase().includes(termo))
+      .filter((p) => contemBusca(p.nome, busca))
       .sort((a, b) => a.nome.localeCompare(b.nome))
   }, [paises, busca])
 
@@ -54,10 +54,7 @@ export default function Paises() {
         action={<Button onClick={() => setModal({ registro: null })}><Plus size={16} /> Novo país</Button>}
       />
 
-      <div className="relative mb-5">
-        <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-        <Input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por nome" className="pl-9" />
-      </div>
+      <CampoBusca value={busca} onChange={setBusca} placeholder="Buscar por nome" className="mb-5" />
 
       {filtrados.length === 0 ? (
         <EmptyState

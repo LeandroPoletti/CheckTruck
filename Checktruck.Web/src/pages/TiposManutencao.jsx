@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
-import { Button, Input } from '../components/ui/Form'
+import { Button, CampoBusca } from '../components/ui/Form'
 import TipoManutencaoModal from '../components/modals/TipoManutencaoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import AcoesLinha from '../components/ui/AcoesLinha'
 import { tipoManutencaoService } from '../services'
+import { contemBusca } from '../data/domain'
 
 // Itens que o sistema acompanha nos caminhões (óleo do motor, filtro de ar...)
 export default function TiposManutencao() {
@@ -38,9 +39,8 @@ export default function TiposManutencao() {
   }
 
   const filtrados = useMemo(() => {
-    const termo = busca.trim().toLowerCase()
     return tipos
-      .filter((t) => !termo || `${t.nome} ${t.componente}`.toLowerCase().includes(termo))
+      .filter((t) => contemBusca(`${t.nome} ${t.componente}`, busca))
       .sort((a, b) => a.componenteId - b.componenteId || a.nome.localeCompare(b.nome))
   }, [tipos, busca])
 
@@ -55,10 +55,7 @@ export default function TiposManutencao() {
         action={<Button onClick={() => setModal({ registro: null })}><Plus size={16} /> Novo tipo</Button>}
       />
 
-      <div className="relative mb-5">
-        <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-        <Input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por nome ou componente" className="pl-9" />
-      </div>
+      <CampoBusca value={busca} onChange={setBusca} placeholder="Buscar por nome ou componente" className="mb-5" />
 
       {filtrados.length === 0 ? (
         <EmptyState

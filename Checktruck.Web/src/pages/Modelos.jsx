@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
-import { Button, Input, Select } from '../components/ui/Form'
+import { Button, CampoBusca, Select } from '../components/ui/Form'
 import AcoesLinha from '../components/ui/AcoesLinha'
 import ModeloModal from '../components/modals/ModeloModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { modeloService, geracaoService } from '../services'
+import { contemBusca } from '../data/domain'
 
 const VAZIO = { modelos: [], geracoes: [] }
 
@@ -43,10 +44,9 @@ export default function Modelos() {
   const { modelos, geracoes } = dados
 
   const filtrados = useMemo(() => {
-    const termo = busca.trim().toLowerCase()
     return modelos
       .filter((m) => geracaoFiltro === 'todas' || m.geracaoId === geracaoFiltro)
-      .filter((m) => !termo || `${m.nome} ${m.geracaoNome ?? ''}`.toLowerCase().includes(termo))
+      .filter((m) => contemBusca(`${m.nome} ${m.geracaoNome ?? ''}`, busca))
       .sort((a, b) => (a.geracaoNome ?? '').localeCompare(b.geracaoNome ?? '') || a.nome.localeCompare(b.nome))
   }, [modelos, busca, geracaoFiltro])
 
@@ -64,10 +64,7 @@ export default function Modelos() {
       />
 
       <div className="mb-5 flex gap-3">
-        <div className="relative flex-1">
-          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-          <Input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por nome ou geração" className="pl-9" />
-        </div>
+        <CampoBusca value={busca} onChange={setBusca} placeholder="Buscar por nome ou geração" className="flex-1" />
         <Select value={geracaoFiltro} onChange={(e) => setGeracaoFiltro(e.target.value)} className="w-64">
           <option value="todas">Geração: todas</option>
           {geracoes.map((g) => (

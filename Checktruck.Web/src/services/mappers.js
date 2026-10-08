@@ -96,6 +96,34 @@ export const intervaloToApi = (i) => ({
   fonte: i.fonte ?? '',
   observacao: i.observacao ?? '',
 })
+// Padrão seguro do sistema para um tipo, nos caminhões de um modelo
+export const intervaloPadraoFromApi = (dto) => ({
+  tipoId: toId(dto.tipoManutencaoId),
+  intervaloKm: dto.intervaloKm,
+  intervaloMeses: dto.intervaloMeses || null,
+})
+// Intervalo próprio de um caminhão (ex.: plano da concessionária): passa na frente do modelo e do padrão
+export const intervaloVeiculoFromApi = (dto) => ({
+  id: toId(dto.id),
+  veiculoId: toId(dto.veiculo?.id),
+  tipoId: toId(dto.tipoManutencao?.id),
+  intervaloKm: dto.intervaloKm,
+  intervaloMeses: dto.intervaloMeses || null,
+  observacao: dto.observacao ?? '',
+})
+export const intervaloVeiculoToApi = (i) => ({
+  veiculoId: toApiId(i.veiculoId),
+  tipoManutencaoId: toApiId(i.tipoId),
+  intervaloKm: Number(i.intervaloKm) || 0,
+  intervaloMeses: Number(i.intervaloMeses) || 0,
+  observacao: i.observacao || null,
+})
+export const veiculoDoIntervaloFromApi = (dto) => ({
+  id: toId(dto.id),
+  placa: dto.placa,
+  modeloId: toId(dto.modeloId),
+  modeloNome: dto.modeloNome,
+})
 
 // ---------------------------------------------------------------------------
 // Frota

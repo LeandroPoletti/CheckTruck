@@ -16,6 +16,7 @@ public class IntervaloRecomendadoController(
     ServicoCrud<IntervaloRecomendado> servicoCrud,
     ServicoCrud<Modelo> servicoModelo,
     ServicoCrud<TipoManutencao> servicoTipoManutencao,
+    ServicoSituacaoVeiculo servicoSituacao,
     ILogger<IntervaloRecomendado> logger)
     : CrudController<IntervaloRecomendado, IntervaloRecomendadoResponseDto>(
         servicoCrud, "intervalo recomendado", logger,
@@ -27,6 +28,29 @@ public class IntervaloRecomendadoController(
 
     [HttpGet("{id:long}")]
     public ActionResult<IntervaloRecomendadoResponseDto> GetById(long id) => GetByIdCore(id);
+
+    /// <summary>
+    /// Padrão seguro do sistema para os caminhões deste modelo, por tipo de manutenção. Vale quando
+    /// nem o caminhão nem o modelo têm intervalo. Tipo sem padrão (ex.: embreagem) não vem na lista.
+    /// </summary>
+    [HttpGet("padrao/{modeloId:long}")]
+    public ActionResult<IEnumerable<IntervaloPadraoResponseDto>> GetPadrao(long modeloId)
+    {
+        var padrao = servicoSituacao.ObterPadraoDoModelo(modeloId);
+        if (padrao is null)
+        {
+            return NotFound("Modelo não encontrado.");
+        }
+
+        return padrao
+            .Select(p => new IntervaloPadraoResponseDto
+            {
+                TipoManutencaoId = p.Key,
+                IntervaloKm = p.Value.IntervaloKm,
+                IntervaloMeses = p.Value.IntervaloMeses
+            })
+            .ToList();
+    }
 
     [HttpPost]
     [ExigePermissao(Permissao.Intervalos)]

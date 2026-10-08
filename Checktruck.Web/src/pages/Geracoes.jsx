@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
-import { Button, Input, Select } from '../components/ui/Form'
+import { Button, CampoBusca, Select } from '../components/ui/Form'
 import AcoesLinha from '../components/ui/AcoesLinha'
 import GeracaoModal from '../components/modals/GeracaoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { geracaoService, fabricanteService } from '../services'
+import { contemBusca } from '../data/domain'
 
 const VAZIO = { geracoes: [], fabricantes: [] }
 
@@ -43,10 +44,9 @@ export default function Geracoes() {
   const { geracoes, fabricantes } = dados
 
   const filtradas = useMemo(() => {
-    const termo = busca.trim().toLowerCase()
     return geracoes
       .filter((g) => fabricanteFiltro === 'todos' || g.fabricanteId === fabricanteFiltro)
-      .filter((g) => !termo || `${g.nome} ${g.motor} ${g.cambio} ${g.norma}`.toLowerCase().includes(termo))
+      .filter((g) => contemBusca(`${g.nome} ${g.motor} ${g.cambio} ${g.norma}`, busca))
       .sort((a, b) => (a.fabricanteNome ?? '').localeCompare(b.fabricanteNome ?? '') || (a.anoInicio ?? 0) - (b.anoInicio ?? 0))
   }, [geracoes, busca, fabricanteFiltro])
 
@@ -62,10 +62,7 @@ export default function Geracoes() {
       />
 
       <div className="mb-5 flex gap-3">
-        <div className="relative flex-1">
-          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-          <Input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por nome, motor, câmbio ou norma" className="pl-9" />
-        </div>
+        <CampoBusca value={busca} onChange={setBusca} placeholder="Buscar por nome, motor, câmbio ou norma" className="flex-1" />
         <Select value={fabricanteFiltro} onChange={(e) => setFabricanteFiltro(e.target.value)} className="w-56">
           <option value="todos">Fabricante: todos</option>
           {fabricantes.map((f) => (

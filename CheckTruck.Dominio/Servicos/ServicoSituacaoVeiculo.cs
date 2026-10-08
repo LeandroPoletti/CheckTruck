@@ -43,6 +43,25 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
     }
 
     /// <summary>
+    /// Padrão seguro de cada tipo de manutenção para os caminhões de um modelo (depende da norma de emissão).
+    /// Tipo sem padrão (ex.: embreagem) fica de fora. null quando o modelo não existe.
+    /// </summary>
+    public IDictionary<long, IntervaloResolvido>? ObterPadraoDoModelo(long modeloId)
+    {
+        var modelo = repositorioCrud.Query<Modelo>(m => m.Id == modeloId)
+            .Select(m => new { m.Geracao.NormaEmissao })
+            .FirstOrDefault();
+        if (modelo is null) return null;
+
+        return repositorioCrud.Query<TipoManutencao>(_ => true)
+            .Select(t => new { t.Id, t.Componente })
+            .ToList()
+            .Select(t => (t.Id, Padrao: IntervalosPadrao.Obter(t.Componente, modelo.NormaEmissao)))
+            .Where(t => t.Padrao is not null)
+            .ToDictionary(t => t.Id, t => t.Padrao!);
+    }
+
+    /// <summary>
     /// Intervalo que vale para um caminhão e um tipo de manutenção (caminhão → modelo → padrão seguro).
     /// null quando o veículo ou o tipo não existem, ou quando não há intervalo nem padrão para o item.
     /// </summary>

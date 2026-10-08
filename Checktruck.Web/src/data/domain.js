@@ -43,6 +43,11 @@ export function getHistoricoVeiculo(veiculoId, registros) {
     .sort((a, b) => new Date(b.dataRealizacao) - new Date(a.dataRealizacao))
 }
 
+// Busca nas listas sem ligar para maiúscula, acento, hífen ou espaço (ABC-1234 acha ABC1234)
+const normalizarBusca = (texto) =>
+  String(texto ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[-\s]/g, '').toLowerCase()
+export const contemBusca = (texto, busca) => normalizarBusca(texto).includes(normalizarBusca(busca))
+
 export function formatKm(km) {
   return Math.round(km).toLocaleString('pt-BR') + ' km'
 }

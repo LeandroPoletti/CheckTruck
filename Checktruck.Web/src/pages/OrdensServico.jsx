@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
-import { Button, Input, Select } from '../components/ui/Form'
+import { Button, CampoBusca, Select } from '../components/ui/Form'
 import { PlacaBadge } from '../components/ui/Badges'
 import AcoesLinha from '../components/ui/AcoesLinha'
 import OrdemServicoModal from '../components/modals/OrdemServicoModal'
@@ -10,7 +10,7 @@ import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { manutencaoService } from '../services'
 import { obterUsuario } from '../services/sessao'
 import { pode } from '../data/acesso'
-import { formatKm, formatData, formatDataHora } from '../data/domain'
+import { formatKm, formatData, formatDataHora, contemBusca } from '../data/domain'
 
 // Todas as ordens de serviço da frota, da mais nova para a mais velha.
 // Ver: Ver frota. Lançar, corrigir e excluir: Ordem de serviço.
@@ -54,10 +54,9 @@ export default function OrdensServico() {
   )
 
   const filtradas = useMemo(() => {
-    const termo = busca.trim().toLowerCase().replace(/[-\s]/g, '')
     return ordens
       .filter((o) => !tipo || o.tipoId === tipo)
-      .filter((o) => !termo || o.placa.toLowerCase().replace(/[-\s]/g, '').includes(termo) || o.id === termo)
+      .filter((o) => contemBusca(o.placa, busca) || o.id === busca.trim())
       .sort((a, b) => b.dataRealizacao.localeCompare(a.dataRealizacao) || Number(b.id) - Number(a.id))
   }, [ordens, busca, tipo])
 
@@ -73,10 +72,7 @@ export default function OrdensServico() {
       />
 
       <div className="mb-5 flex gap-3">
-        <div className="relative flex-1">
-          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-          <Input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por placa ou nº da OS" className="pl-9" />
-        </div>
+        <CampoBusca value={busca} onChange={setBusca} placeholder="Buscar por placa ou nº da OS" className="flex-1" />
         <Select value={tipo} onChange={(e) => setTipo(e.target.value)} className="w-64">
           <option value="">Tipo: todos</option>
           {tipos.map(([id, nome]) => <option key={id} value={id}>{nome}</option>)}

@@ -32,6 +32,18 @@ public class IntervaloVeiculoController(
     [HttpGet("{id:long}")]
     public ActionResult<IntervaloVeiculoResponseDto> GetById(long id) => GetByIdCore(id);
 
+    /// <summary>
+    /// Caminhões ativos (com o modelo) para escolher na tela de intervalos. Fica aqui porque quem cuida
+    /// dos intervalos pode não ter a permissão Ver frota.
+    /// </summary>
+    [HttpGet("veiculos")]
+    [ExigePermissao(Permissao.Intervalos)]
+    public ActionResult<IEnumerable<VeiculoDoIntervaloDto>> Veiculos() =>
+        servicoVeiculo.Query(v => v.Ativo)
+            .OrderBy(v => v.Placa)
+            .Select(v => new VeiculoDoIntervaloDto { Id = v.Id, Placa = v.Placa, ModeloId = v.Modelo.Id, ModeloNome = v.Modelo.Nome })
+            .ToList();
+
     [HttpPost]
     [ExigePermissao(Permissao.Intervalos)]
     public ActionResult<IntervaloVeiculoResponseDto> Post([FromBody] IntervaloVeiculoRequestDto dto)

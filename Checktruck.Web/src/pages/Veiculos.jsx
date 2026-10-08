@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader, Card, Carregando, ErroCarregamento } from '../components/Layout'
 import { StatusBadge, PlacaBadge } from '../components/ui/Badges'
-import { Button, Select, Input } from '../components/ui/Form'
-import { Search, Plus } from 'lucide-react'
-import { formatKm } from '../data/domain'
+import { Button, Select, CampoBusca } from '../components/ui/Form'
+import { Plus } from 'lucide-react'
+import { formatKm, contemBusca } from '../data/domain'
 import NovoVeiculoModal from '../components/modals/NovoVeiculoModal'
 import { veiculoService } from '../services'
 import { obterUsuario } from '../services/sessao'
@@ -53,12 +53,11 @@ export default function Veiculos() {
   }, [veiculos])
 
   const filtrados = useMemo(() => {
-    const termo = busca.trim().toLowerCase()
     return veiculos.filter((v) => {
       if (statusFiltro === 'ativos' && !v.ativo) return false
       if (statusFiltro === 'inativos' && v.ativo) return false
       if (geracaoFiltro !== 'todas' && v.geracaoId !== geracaoFiltro) return false
-      if (termo && !`${v.placa} ${v.chassi || ''} ${v.motoristaNome || ''}`.toLowerCase().includes(termo)) return false
+      if (!contemBusca(`${v.placa} ${v.chassi || ''} ${v.motoristaNome || ''}`, busca)) return false
       return true
     })
   }, [veiculos, busca, geracaoFiltro, statusFiltro])
@@ -79,15 +78,7 @@ export default function Veiculos() {
       />
 
       <div className="mb-5 flex gap-3">
-        <div className="relative flex-1">
-          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-          <Input
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar por placa, chassi ou motorista"
-            className="pl-9"
-          />
-        </div>
+        <CampoBusca value={busca} onChange={setBusca} placeholder="Buscar por placa, chassi ou motorista" className="flex-1" />
         <Select value={geracaoFiltro} onChange={(e) => setGeracaoFiltro(e.target.value)} className="w-56">
           <option value="todas">Geração: todas</option>
           {geracoes.map((g) => (

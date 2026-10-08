@@ -39,6 +39,16 @@ public class IntervaloRecomendadoResponseDto
     public string Observacao { get; set; }
 }
 
+/// <summary>Padrão seguro do sistema para um tipo de manutenção (vale sem intervalo do caminhão nem do modelo).</summary>
+public class IntervaloPadraoResponseDto
+{
+    public long TipoManutencaoId { get; set; }
+    public int IntervaloKm { get; set; }
+
+    /// <summary>Prazo máximo entre trocas, em meses.</summary>
+    public int IntervaloMeses { get; set; }
+}
+
 public static class IntervaloRecomendadoDtoExtensions
 {
     public static IntervaloRecomendadoResponseDto ToResponseDto(this IntervaloRecomendado entidade) => new()

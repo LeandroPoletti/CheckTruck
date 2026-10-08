@@ -1,3 +1,6 @@
+import { useRef } from 'react'
+import { Search } from 'lucide-react'
+
 export function Field({ label, required, hint, error, children, className = '' }) {
   return (
     <label className={`block ${className}`}>
@@ -15,12 +18,16 @@ export function Field({ label, required, hint, error, children, className = '' }
 }
 
 const inputBase =
-  'w-full rounded-lg border bg-white px-3 py-2 text-sm text-stone-800 placeholder:text-stone-400 outline-none transition focus:ring-2 focus:ring-brand-300 disabled:bg-stone-50 disabled:text-stone-500'
+  'rounded-lg border bg-white px-3 py-2 text-sm text-stone-800 placeholder:text-stone-400 outline-none transition focus:ring-2 focus:ring-brand-300 disabled:bg-stone-50 disabled:text-stone-500'
+
+// Os campos ocupam a largura toda, a não ser que a tela passe uma largura (w-56, w-64...).
+// Com as duas classes juntas o w-full sempre ganharia, e o filtro espremia a busca ao lado.
+const largura = (className) => (/(^|\s)w-/.test(className) ? '' : 'w-full')
 
 export function Input({ error, className = '', ...props }) {
   return (
     <input
-      className={`${inputBase} ${error ? 'border-red-400 focus:ring-red-200' : 'border-stone-300 focus:border-brand-500'} ${className}`}
+      className={`${inputBase} ${largura(className)} ${error ? 'border-red-400 focus:ring-red-200' : 'border-stone-300 focus:border-brand-500'} ${className}`}
       {...props}
     />
   )
@@ -29,7 +36,7 @@ export function Input({ error, className = '', ...props }) {
 export function Textarea({ error, className = '', ...props }) {
   return (
     <textarea
-      className={`${inputBase} resize-none ${error ? 'border-red-400 focus:ring-red-200' : 'border-stone-300 focus:border-brand-500'} ${className}`}
+      className={`${inputBase} ${largura(className)} resize-none ${error ? 'border-red-400 focus:ring-red-200' : 'border-stone-300 focus:border-brand-500'} ${className}`}
       {...props}
     />
   )
@@ -38,7 +45,7 @@ export function Textarea({ error, className = '', ...props }) {
 export function Select({ error, className = '', children, ...props }) {
   return (
     <select
-      className={`${inputBase} appearance-none bg-white ${error ? 'border-red-400 focus:ring-red-200' : 'border-stone-300 focus:border-brand-500'} ${className}`}
+      className={`${inputBase} ${largura(className)} appearance-none bg-white ${error ? 'border-red-400 focus:ring-red-200' : 'border-stone-300 focus:border-brand-500'} ${className}`}
       {...props}
     >
       {children}
@@ -85,5 +92,23 @@ export function Button({ variant = 'primary', size = 'md', className = '', child
     >
       {children}
     </button>
+  )
+}
+
+// Campo de busca das listas. Clicar na lupa põe o cursor no campo; onChange recebe o texto digitado.
+export function CampoBusca({ value, onChange, placeholder, className = '' }) {
+  const campo = useRef(null)
+  return (
+    <div className={`relative ${className}`}>
+      <button
+        type="button"
+        onClick={() => campo.current?.focus()}
+        aria-label="Buscar"
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 transition hover:text-stone-600"
+      >
+        <Search size={16} />
+      </button>
+      <Input ref={campo} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="pl-9" />
+    </div>
   )
 }

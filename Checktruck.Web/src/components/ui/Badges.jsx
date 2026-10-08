@@ -52,3 +52,19 @@ export function ChamadoStatusBadge({ status }) {
     </span>
   )
 }
+
+// De onde vem o intervalo que vale (prioridade: caminhão → modelo → padrão do sistema)
+export function OrigemIntervaloBadge({ origem }) {
+  const map = {
+    caminhao: { label: 'DO CAMINHÃO', cls: 'bg-brand-700 text-white border-brand-700' },
+    modelo: { label: 'DO MODELO', cls: 'bg-mist-100 text-brand-700 border-brand-300' },
+    padrao: { label: 'PADRÃO DO SISTEMA', cls: 'bg-white text-stone-500 border-stone-300' },
+    nenhum: { label: 'NÃO ACOMPANHADO', cls: 'bg-amber-50 text-amber-700 border-amber-300' },
+  }
+  const it = map[origem] || map.nenhum
+  return (
+    <span className={`inline-flex items-center whitespace-nowrap px-2 py-0.5 rounded-full border text-[10px] font-semibold tracking-wide ${it.cls}`}>
+      {it.label}
+    </span>
+  )
+}

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
-import { Button, Input } from '../components/ui/Form'
+import { Button, CampoBusca } from '../components/ui/Form'
 import MecanicoModal from '../components/modals/MecanicoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import AcoesLinha from '../components/ui/AcoesLinha'
 import { mecanicoService } from '../services'
+import { contemBusca } from '../data/domain'
 
 export default function Mecanicos() {
   const [mecanicos, setMecanicos] = useState([])
@@ -38,9 +39,8 @@ export default function Mecanicos() {
 
   // Ativos primeiro, depois por nome
   const filtrados = useMemo(() => {
-    const termo = busca.trim().toLowerCase()
     return mecanicos
-      .filter((m) => !termo || m.nome.toLowerCase().includes(termo) || m.funcao.toLowerCase().includes(termo))
+      .filter((m) => contemBusca(`${m.nome} ${m.funcao}`, busca))
       .sort((a, b) => (a.ativo === b.ativo ? a.nome.localeCompare(b.nome) : a.ativo ? -1 : 1))
   }, [mecanicos, busca])
 
@@ -57,10 +57,7 @@ export default function Mecanicos() {
         action={<Button onClick={() => setModal({ registro: null })}><Plus size={16} /> Novo mecânico</Button>}
       />
 
-      <div className="relative mb-5">
-        <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-        <Input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por nome ou função" className="pl-9" />
-      </div>
+      <CampoBusca value={busca} onChange={setBusca} placeholder="Buscar por nome ou função" className="mb-5" />
 
       {filtrados.length === 0 ? (
         <EmptyState

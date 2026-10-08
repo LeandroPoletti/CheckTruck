@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
-import { Button, Input } from '../components/ui/Form'
+import { Button, CampoBusca } from '../components/ui/Form'
 import AcoesLinha from '../components/ui/AcoesLinha'
 import FabricanteModal from '../components/modals/FabricanteModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { fabricanteService } from '../services'
+import { contemBusca } from '../data/domain'
 
 export default function Fabricantes() {
   const [fabricantes, setFabricantes] = useState([])
@@ -38,9 +39,8 @@ export default function Fabricantes() {
   }
 
   const filtrados = useMemo(() => {
-    const termo = busca.trim().toLowerCase()
     return fabricantes
-      .filter((f) => !termo || `${f.nome} ${f.pais ?? ''}`.toLowerCase().includes(termo))
+      .filter((f) => contemBusca(`${f.nome} ${f.pais ?? ''}`, busca))
       .sort((a, b) => a.nome.localeCompare(b.nome))
   }, [fabricantes, busca])
 
@@ -55,10 +55,7 @@ export default function Fabricantes() {
         action={<Button onClick={() => setModal({ registro: null })}><Plus size={16} /> Novo fabricante</Button>}
       />
 
-      <div className="relative mb-5">
-        <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-        <Input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por nome ou país" className="pl-9" />
-      </div>
+      <CampoBusca value={busca} onChange={setBusca} placeholder="Buscar por nome ou país" className="mb-5" />
 
       {filtrados.length === 0 ? (
         <EmptyState

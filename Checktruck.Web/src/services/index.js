@@ -9,7 +9,22 @@ export const fabricanteService = criarCrud('Fabricante', { fromApi: m.fabricante
 export const geracaoService = criarCrud('GeracaoModelo', { fromApi: m.geracaoFromApi, toApi: m.geracaoToApi })
 export const modeloService = criarCrud('Modelo', { fromApi: m.modeloFromApi, toApi: m.modeloToApi })
 export const tipoManutencaoService = criarCrud('TipoManutencao', { fromApi: m.tipoManutencaoFromApi, toApi: m.tipoManutencaoToApi })
-export const intervaloService = criarCrud('IntervaloRecomendado', { fromApi: m.intervaloFromApi, toApi: m.intervaloToApi })
+export const intervaloService = {
+  ...criarCrud('IntervaloRecomendado', { fromApi: m.intervaloFromApi, toApi: m.intervaloToApi }),
+  // Padrão seguro do sistema por tipo, para os caminhões do modelo (tipo sem padrão não vem)
+  async listarPadrao(modeloId) {
+    const { data } = await api.get(`/api/IntervaloRecomendado/padrao/${modeloId}`)
+    return data.map(m.intervaloPadraoFromApi)
+  },
+}
+export const intervaloVeiculoService = {
+  ...criarCrud('IntervaloVeiculo', { fromApi: m.intervaloVeiculoFromApi, toApi: m.intervaloVeiculoToApi }),
+  // Caminhões ativos (com o modelo) para a tela de intervalos, sem precisar de Ver frota
+  async listarVeiculos() {
+    const { data } = await api.get('/api/IntervaloVeiculo/veiculos')
+    return data.map(m.veiculoDoIntervaloFromApi)
+  },
+}
 export const manutencaoService = criarCrud('Manutencao', { fromApi: m.registroFromApi, toApi: m.registroToApi })
 export const mecanicoService = criarCrud('Mecanico', { fromApi: m.mecanicoFromApi, toApi: m.mecanicoToApi })
 

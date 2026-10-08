@@ -16,7 +16,7 @@ public class IntervaloVeiculoRequestDto
     public int IntervaloKm { get; set; }
 
     /// <summary>Prazo máximo entre trocas, em meses. 0 = vence só por km.</summary>
-    [Range(0, 120)]
+    [Range(0, 120, ErrorMessage = "O prazo vai de 0 a 120 meses (0 = só por km).")]
     public int IntervaloMeses { get; set; }
 
     public string? Observacao { get; set; }
@@ -30,6 +30,15 @@ public class IntervaloVeiculoResponseDto
     public int IntervaloKm { get; set; }
     public int IntervaloMeses { get; set; }
     public string? Observacao { get; set; }
+}
+
+/// <summary>Caminhão para escolher na tela de intervalos. O modelo diz de quem ele herda o intervalo e o padrão.</summary>
+public class VeiculoDoIntervaloDto
+{
+    public long Id { get; set; }
+    public string Placa { get; set; } = "";
+    public long ModeloId { get; set; }
+    public string ModeloNome { get; set; } = "";
 }
 
 public static class IntervaloVeiculoDtoExtensions
