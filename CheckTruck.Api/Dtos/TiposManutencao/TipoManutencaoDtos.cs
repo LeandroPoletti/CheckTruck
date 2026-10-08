@@ -6,10 +6,13 @@ namespace CheckTruck.Api.Dtos.TiposManutencao;
 
 public class TipoManutencaoRequestDto
 {
-    [Required]
+    [Required(ErrorMessage = "Informe o nome.")]
+    [MaxLength(100, ErrorMessage = "O nome pode ter até 100 caracteres.")]
     public string Nome { get; set; }
 
-    public string Descricao { get; set; }
+    public string? Descricao { get; set; }
+
+    /// <summary>Componente do caminhão: define o padrão seguro quando não há intervalo cadastrado.</summary>
     public Componente Componente { get; set; }
 }
 
@@ -34,7 +37,7 @@ public static class TipoManutencaoDtoExtensions
     public static TipoManutencao ToEntity(this TipoManutencaoRequestDto dto) => new()
     {
         Nome = dto.Nome,
-        Descricao = dto.Descricao,
+        Descricao = dto.Descricao?.Trim() ?? "",
         Componente = dto.Componente
     };
 }

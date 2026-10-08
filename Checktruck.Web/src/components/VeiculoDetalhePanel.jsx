@@ -3,8 +3,7 @@ import { ChevronLeft } from 'lucide-react'
 import { Card } from './Layout'
 import { StatusBadge, PlacaBadge } from './ui/Badges'
 import {
-  formatKm, formatData, getModeloCompleto, getSituacaoVeiculo, getHistoricoVeiculo,
-  getStatusGeralVeiculo, getTipoManutencao,
+  formatKm, formatData, formatDataHora, getModeloCompleto, getHistoricoVeiculo, getTipoManutencao,
 } from '../data/domain'
 
 export function VeiculoNaoEncontrado({ backTo }) {
@@ -20,14 +19,13 @@ export function VeiculoNaoEncontrado({ backTo }) {
 }
 
 // Apresentacional: a página de detalhe carrega os dados e passa por props.
-// catalogo = { fabricantes, geracoes, modelos, tiposManutencao, intervalos } do veículo.
-export default function VeiculoDetalhePanel({ veiculo, catalogo, registros, backTo, actions }) {
+// catalogo = { fabricantes, geracoes, modelos, tiposManutencao } do veículo.
+// situacao = status geral e itens já calculados pela API (do mais urgente para o menos urgente).
+export default function VeiculoDetalhePanel({ veiculo, catalogo, situacao, registros, backTo, actions }) {
   const navigate = useNavigate()
 
   const mc = getModeloCompleto(catalogo, veiculo.modeloId)
-  const situacao = getSituacaoVeiculo(catalogo, veiculo, registros)
   const historico = getHistoricoVeiculo(veiculo.id, registros)
-  const status = getStatusGeralVeiculo(catalogo, veiculo, registros)
 
   return (
     <>
@@ -46,7 +44,7 @@ export default function VeiculoDetalhePanel({ veiculo, catalogo, registros, back
               <h1 className="text-xl font-bold text-stone-900">
                 {mc?.fabricante?.nome} {mc?.modelo?.nome}
               </h1>
-              <StatusBadge status={status} />
+              <StatusBadge status={situacao.status} />
             </div>
             <p className="mt-1.5 text-sm text-stone-500">
               {mc?.geracao?.nome} · {mc?.geracao?.motor} · {mc?.geracao?.cambio}
@@ -68,28 +66,34 @@ export default function VeiculoDetalhePanel({ veiculo, catalogo, registros, back
       <div className="grid grid-cols-2 gap-6">
         <Card className="p-5">
           <h3 className="mb-4 font-semibold text-stone-900">Situação por tipo</h3>
-          <div className="space-y-4">
-            {situacao.map((s) => {
-              const pct = Math.max(2, Math.min(100, (veiculo.kmAtual / s.kmProximaTroca) * 100))
-              const barColor = s.status === 'critico' ? 'bg-red-500' : s.status === 'atencao' ? 'bg-amber-500' : 'bg-brand-600'
-              const textColor = s.status === 'critico' ? 'text-red-600' : s.status === 'atencao' ? 'text-amber-600' : 'text-stone-400'
-              return (
-                <div key={s.tipoId}>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-stone-800">
-                      {s.tipo?.nome} {s.isPrimeira && <span className="text-[10px] font-semibold text-amber-600">1ª TROCA</span>}
-                    </span>
-                    <span className={`text-xs font-semibold ${textColor}`}>
-                      {s.kmRestante <= 0 ? '+' : '−'}{formatKm(Math.abs(s.kmRestante))}
-                    </span>
+          {situacao.itens.length === 0 ? (
+            <p className="py-6 text-center text-sm text-stone-400">Nenhum item com intervalo para acompanhar.</p>
+          ) : (
+            <div className="space-y-4">
+              {situacao.itens.map((s) => {
+                // Quanto do intervalo já foi usado (barra cheia = na hora de trocar)
+                const pct = Math.max(2, Math.min(100, ((s.intervaloKm - s.kmRestante) / s.intervaloKm) * 100))
+                const barColor = s.status === 'critico' ? 'bg-red-500' : s.status === 'atencao' ? 'bg-amber-500' : 'bg-brand-600'
+                const textColor = s.status === 'critico' ? 'text-red-600' : s.status === 'atencao' ? 'text-amber-600' : 'text-stone-400'
+                return (
+                  <div key={s.tipoId}>
+                    <div className="flex items-center justify-between gap-3 text-sm">
+                      <span className="font-medium text-stone-800">
+                        {s.tipoNome} {s.isPrimeiraTroca && <span className="text-[10px] font-semibold text-amber-600">1ª TROCA</span>}
+                      </span>
+                      <span className={`text-right text-xs font-semibold ${textColor}`}>
+                        {textoKm(s.kmRestante)}
+                        {s.diasRestantes !== null && <> · {textoDias(s.diasRestantes)}</>}
+                      </span>
+                    </div>
+                    <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-stone-100">
+                      <div className={`h-full rounded-full ${barColor}`} style={{ width: `${pct}%` }} />
+                    </div>
                   </div>
-                  <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-stone-100">
-                    <div className={`h-full rounded-full ${barColor}`} style={{ width: `${pct}%` }} />
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
+          )}
         </Card>
 
         <Card className="p-5">
@@ -116,7 +120,7 @@ export default function VeiculoDetalhePanel({ veiculo, catalogo, registros, back
                     <p className="text-xs text-stone-400">
                       OS nº {r.id}
                       {r.motoristaNome && <> · Motorista {r.motoristaNome}</>}
-                      {r.lancadoPorNome && <> · Lançada por {r.lancadoPorNome}</>}
+                      {' · '}Lançada{r.lancadoPorNome && ` por ${r.lancadoPorNome}`} em {formatDataHora(r.lancadoEm)}
                     </p>
                   </div>
                 </div>
@@ -128,6 +132,10 @@ export default function VeiculoDetalhePanel({ veiculo, catalogo, registros, back
     </>
   )
 }
+
+// Negativo = já passou do ponto de troca
+const textoKm = (kmRestante) => (kmRestante > 0 ? `faltam ${formatKm(kmRestante)}` : `passou ${formatKm(-kmRestante)}`)
+const textoDias = (dias) => (dias >= 0 ? `${dias} dia${dias === 1 ? '' : 's'}` : `venceu há ${-dias} dia${dias === -1 ? '' : 's'}`)
 
 function Info({ label, value }) {
   return (

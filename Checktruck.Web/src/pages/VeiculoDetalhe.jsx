@@ -4,7 +4,7 @@ import VeiculoDetalhePanel, { VeiculoNaoEncontrado } from '../components/Veiculo
 import { Carregando, ErroCarregamento } from '../components/Layout'
 import {
   veiculoService, modeloService, geracaoService, fabricanteService, tipoManutencaoService,
-  intervaloService, manutencaoService, filtro,
+  manutencaoService, filtro,
 } from '../services'
 import { Button } from '../components/ui/Form'
 import AtualizarKmModal from '../components/modals/AtualizarKmModal'
@@ -29,17 +29,17 @@ export default function VeiculoDetalhe() {
   useEffect(() => {
     let cancelado = false
     async function carregar() {
-      const veiculo = await veiculoService.obter(id)
-      const [modelo, geracoes, fabricantes, tiposManutencao, intervalos, registros] = await Promise.all([
+      // A situação (o que vence e quando) vem pronta da API: intervalo do caminhão → modelo → padrão, por km e por data
+      const [veiculo, situacao] = await Promise.all([veiculoService.obter(id), veiculoService.obterSituacao(id)])
+      const [modelo, geracoes, fabricantes, tiposManutencao, registros] = await Promise.all([
         modeloService.obter(veiculo.modeloId),
         geracaoService.listar(),
         fabricanteService.listar(),
         tipoManutencaoService.listar(),
-        intervaloService.listar(filtro.porId('Modelo', veiculo.modeloId)),
         manutencaoService.listar(filtro.porId('Veiculo', veiculo.id)),
       ])
-      const catalogo = { modelos: [modelo], geracoes, fabricantes, tiposManutencao, intervalos }
-      return { veiculo, registros, catalogo }
+      const catalogo = { modelos: [modelo], geracoes, fabricantes, tiposManutencao }
+      return { veiculo, situacao, registros, catalogo }
     }
     carregar()
       .then((d) => { if (!cancelado) setDados(d) })
@@ -74,6 +74,7 @@ export default function VeiculoDetalhe() {
       <VeiculoDetalhePanel
         veiculo={veiculo}
         catalogo={dados.catalogo}
+        situacao={dados.situacao}
         registros={dados.registros}
         backTo={BACK_TO}
         actions={

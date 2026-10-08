@@ -10,7 +10,8 @@ public class ManutencaoConfiguration : IEntityTypeConfiguration<Manutencao>
     {
         builder.HasKey(m => m.Id);
         builder.HasOne(m => m.Veiculo).WithMany(v => v.Manutencoes).IsRequired();
-        builder.HasOne(m => m.TipoManutencao).WithMany().IsRequired();
+        builder.HasOne(m => m.TipoManutencao).WithMany()
+            .IsRequired().OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(m => m.Mecanico).WithMany()
             .IsRequired().OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(m => m.Motorista).WithMany()

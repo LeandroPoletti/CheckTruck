@@ -20,6 +20,11 @@ export const veiculoService = {
     const { data } = await api.get('/api/Veiculo/situacao', { params: { apenasAtivos } })
     return data.map(m.veiculoSituacaoFromApi)
   },
+  // Situação de um caminhão com todos os itens (km e dias que faltam), calculada pela API
+  async obterSituacao(id) {
+    const { data } = await api.get(`/api/Veiculo/${id}/situacao`)
+    return m.veiculoSituacaoFromApi(data)
+  },
   // A API recebe a distância percorrida (km a somar), não o km absoluto.
   async somarKm(id, distancia) {
     await api.put(`/api/Veiculo/${id}/kilometragem`, distancia, {

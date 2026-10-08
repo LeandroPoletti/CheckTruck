@@ -7,12 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CheckTruck.Api.Controllers;
 
-// Ler: basta estar logado (os formulários usam a lista). Criar, editar e apagar: Cadastros
+// Ler: basta estar logado (os formulários usam a lista). Criar, editar e apagar: Cadastros.
+// Item com OS lançada ou intervalo cadastrado não pode ser apagado.
 [ApiController]
 [Route("api/[controller]")]
 [ExigePermissao]
-public class TipoManutencaoController(ServicoCrud<TipoManutencao> servicoCrud, ILogger<TipoManutencao> logger)
-    : CrudController<TipoManutencao, TipoManutencaoResponseDto>(servicoCrud, "tipo de manutenção", logger, t => t.ToResponseDto())
+public class TipoManutencaoController(ServicoTipoManutencao servicoTipoManutencao, ILogger<TipoManutencao> logger)
+    : CrudController<TipoManutencao, TipoManutencaoResponseDto>(servicoTipoManutencao, "tipo de manutenção", logger, t => t.ToResponseDto())
 {
     [HttpGet]
     public ActionResult<IEnumerable<TipoManutencaoResponseDto>> Get() => GetODataCore();

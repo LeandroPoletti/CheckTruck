@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Card, Carregando, ErroCarregamento } from '../components/Layout'
 import { Button, Select } from '../components/ui/Form'
+import AcoesLinha from '../components/ui/AcoesLinha'
+import IntervaloModal from '../components/modals/IntervaloModal'
+import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { formatKm } from '../data/domain'
 import { modeloService, geracaoService, tipoManutencaoService, intervaloService, filtro } from '../services'
 
@@ -37,10 +40,13 @@ export default function Intervalos() {
   const { modelos, geracoes, tiposManutencao } = dados
   const modeloId = selecionadoId ?? modelos[0]?.id
 
-  // Intervalos só do modelo selecionado ($filter=Modelo/Id eq X), recarregados ao trocar o modelo
+  // Intervalos só do modelo selecionado ($filter=Modelo/Id eq X), recarregados ao trocar o modelo e depois de salvar
   const [intervalos, setIntervalos] = useState([])
   const [carregandoIntervalos, setCarregandoIntervalos] = useState(false)
   const [erroIntervalos, setErroIntervalos] = useState(null)
+  const [versaoIntervalos, setVersaoIntervalos] = useState(0)
+  const [modal, setModal] = useState(null) // { intervalo } (null ao criar) enquanto o modal está aberto
+  const [excluindo, setExcluindo] = useState(null)
 
   useEffect(() => {
     if (!modeloId) return
@@ -52,7 +58,9 @@ export default function Intervalos() {
       .catch((e) => { if (!cancelado) setErroIntervalos(e.message) })
       .finally(() => { if (!cancelado) setCarregandoIntervalos(false) })
     return () => { cancelado = true }
-  }, [modeloId])
+  }, [modeloId, versaoIntervalos])
+
+  const recarregarIntervalos = () => setVersaoIntervalos((v) => v + 1)
 
   const linhas = useMemo(() => {
     return intervalos
@@ -61,6 +69,10 @@ export default function Intervalos() {
   }, [intervalos, componente, tiposManutencao])
 
   const componentes = [...new Set(tiposManutencao.map((t) => t.componente))]
+  const modelo = modelos.find((m) => m.id === modeloId)
+  // Um intervalo por modelo e tipo: no "+ Intervalo" só aparecem os tipos que ainda não têm
+  const tiposSemIntervalo = tiposManutencao.filter((t) => !intervalos.some((it) => it.tipoId === t.id))
+  const nomeDoTipo = (tipoId) => tiposManutencao.find((t) => t.id === tipoId)?.nome ?? ''
 
   if (carregando) return <Carregando />
   if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
@@ -71,10 +83,13 @@ export default function Intervalos() {
         title="Intervalos recomendados"
         subtitle="Um intervalo por modelo e tipo de manutenção · seed oficial Volvo e Meritor"
         action={
-          <div className="flex gap-2">
-            <Button variant="secondary"><Plus size={16} /> Tipo de manutenção</Button>
-            <Button><Plus size={16} /> Intervalo</Button>
-          </div>
+          <Button
+            onClick={() => setModal({ intervalo: null })}
+            disabled={!modelo || carregandoIntervalos || tiposSemIntervalo.length === 0}
+            title={tiposSemIntervalo.length === 0 ? 'Todos os tipos já têm intervalo neste modelo' : undefined}
+          >
+            <Plus size={16} /> Intervalo
+          </Button>
         }
       />
 
@@ -100,8 +115,9 @@ export default function Intervalos() {
             <tr className="border-b border-stone-100 bg-stone-50/70 text-left text-xs font-semibold tracking-wide text-stone-400">
               <th className="px-5 py-3">TIPO DE MANUTENÇÃO</th>
               <th className="px-5 py-3">COMPONENTE</th>
-              <th className="px-5 py-3">INTERVALO PADRÃO</th>
+              <th className="px-5 py-3">INTERVALO</th>
               <th className="px-5 py-3">1ª TROCA</th>
+              <th className="px-5 py-3">PRAZO</th>
               <th className="px-5 py-3">FONTE</th>
               <th className="px-5 py-3" />
             </tr>
@@ -116,15 +132,27 @@ export default function Intervalos() {
                   {it.intervaloKmPrimeira ? (
                     <span className="font-semibold text-amber-600">{formatKm(it.intervaloKmPrimeira)}</span>
                   ) : (
-                    <span className="text-stone-400">igual ao padrão</span>
+                    <span className="text-stone-400">igual ao intervalo</span>
                   )}
+                </td>
+                <td className="px-5 py-3.5 text-stone-700">
+                  {it.intervaloMeses ? `${it.intervaloMeses} ${it.intervaloMeses === 1 ? 'mês' : 'meses'}` : <span className="text-stone-400">só por km</span>}
                 </td>
                 <td className="px-5 py-3.5 text-stone-500">{it.fonte}</td>
                 <td className="px-5 py-3.5 text-right">
-                  <button className="text-xs font-semibold text-brand-700 hover:text-brand-900">Editar</button>
+                  <AcoesLinha onEditar={() => setModal({ intervalo: it })} onExcluir={() => setExcluindo(it)} />
                 </td>
               </tr>
             ))}
+            {!carregandoIntervalos && linhas.length === 0 && (
+              <tr>
+                <td colSpan={7} className="px-5 py-8 text-center text-sm text-stone-400">
+                  {intervalos.length === 0
+                    ? 'Nenhum intervalo cadastrado neste modelo. Os caminhões dele usam o intervalo próprio (se tiverem) ou o padrão do sistema.'
+                    : 'Nenhum intervalo deste componente.'}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </Card>
@@ -134,6 +162,27 @@ export default function Intervalos() {
         Quando o registro de manutenção marca primeira troca, o sistema usa o intervalo de
         amaciamento em vez do padrão. Câmbio Gen 4/5 zerômetro: 200.000 km. Diferencial Meritor: 10.000 km.
       </div>
+
+      {modal && (
+        <IntervaloModal
+          modelo={modelo}
+          intervalo={modal.intervalo}
+          tipos={tiposSemIntervalo}
+          nomeDoTipo={nomeDoTipo}
+          onClose={() => setModal(null)}
+          onSalvo={recarregarIntervalos}
+        />
+      )}
+      <ConfirmarExclusaoModal
+        open={!!excluindo}
+        onClose={() => setExcluindo(null)}
+        titulo="Excluir intervalo"
+        descricao={`Excluir o intervalo de "${nomeDoTipo(excluindo?.tipoId)}" do ${modelo?.nome}? Os caminhões deste modelo passam a usar o intervalo próprio (se tiverem) ou o padrão do sistema.`}
+        onConfirmar={async () => {
+          await intervaloService.remover(excluindo.id)
+          recarregarIntervalos()
+        }}
+      />
     </>
   )
 }

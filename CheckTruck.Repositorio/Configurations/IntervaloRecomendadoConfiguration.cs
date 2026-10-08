@@ -11,9 +11,10 @@ public class IntervaloRecomendadoConfiguration : IEntityTypeConfiguration<Interv
         builder.HasKey(i => i.Id);
         builder.HasOne(i => i.Modelo).WithMany(m => m.IntervaloRecomendados)
             .IsRequired().OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne(i => i.TipoManutencao).WithMany(t => t.IntervaloRecomendados).IsRequired();
+        builder.HasOne(i => i.TipoManutencao).WithMany(t => t.IntervaloRecomendados)
+            .IsRequired().OnDelete(DeleteBehavior.Restrict);
         builder.Property(i => i.IntervaloKm).IsRequired();
         builder.Property(i => i.IntervaloKmPrimeira).IsRequired();
         builder.Property(i => i.IntervaloMeses).IsRequired();
     }
-}
+}

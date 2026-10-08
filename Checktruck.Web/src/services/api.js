@@ -2,7 +2,7 @@
 // As requisições vão direto para VITE_API_URL — o CORS é liberado no backend, sem proxy.
 import axios from 'axios'
 
-export const SESSION_KEY = 'checktruck.session'
+const SESSION_KEY = 'checktruck.session'
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5202',

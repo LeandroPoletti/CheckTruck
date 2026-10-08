@@ -76,13 +76,14 @@ export const tipoManutencaoToApi = (t) => ({
   componente: Number(t.componenteId),
 })
 
-// intervaloKmPrimeira = 0 na API significa "igual ao intervalo padrão" (null no front)
+// Na API, intervaloKmPrimeira = 0 é "igual ao intervalo" e intervaloMeses = 0 é "vence só por km" (null no front)
 export const intervaloFromApi = (dto) => ({
   id: toId(dto.id),
   modeloId: toId(dto.modelo?.id),
   tipoId: toId(dto.tipoManutencao?.id),
   intervaloKm: dto.intervaloKm,
   intervaloKmPrimeira: dto.intervaloKmPrimeira || null,
+  intervaloMeses: dto.intervaloMeses || null,
   fonte: dto.fonte,
   observacao: dto.observacao,
 })
@@ -91,6 +92,7 @@ export const intervaloToApi = (i) => ({
   tipoManutencaoId: toApiId(i.tipoId),
   intervaloKm: Number(i.intervaloKm) || 0,
   intervaloKmPrimeira: Number(i.intervaloKmPrimeira) || 0,
+  intervaloMeses: Number(i.intervaloMeses) || 0,
   fonte: i.fonte ?? '',
   observacao: i.observacao ?? '',
 })
@@ -111,7 +113,19 @@ export const veiculoFromApi = (dto) => ({
   motoristaId: dto.motoristaAtual?.id ?? null,
   motoristaNome: dto.motoristaAtual?.nome ?? null,
 })
-// Veículo com modelo/geração/motorista e situação de manutenção (GET /api/Veiculo/situacao)
+// Um item da situação (km e dias que faltam; negativo = vencido). diasRestantes null = vence só por km.
+const itemSituacaoFromApi = (item) => ({
+  tipoId: toId(item.tipoManutencaoId),
+  tipoNome: item.tipoManutencaoNome,
+  intervaloKm: item.intervaloKm,
+  kmProximaTroca: item.kmProximaTroca,
+  kmRestante: item.kmRestante,
+  diasRestantes: item.diasRestantes,
+  isPrimeiraTroca: item.isPrimeiraTroca,
+  status: item.status,
+})
+// Veículo com modelo/geração/motorista e situação de manutenção (GET /api/Veiculo/situacao).
+// Os itens só vêm na situação de um caminhão (GET /api/Veiculo/{id}/situacao).
 export const veiculoSituacaoFromApi = (dto) => ({
   id: toId(dto.id),
   placa: dto.placa,
@@ -127,14 +141,8 @@ export const veiculoSituacaoFromApi = (dto) => ({
   geracaoNome: dto.geracao.nome,
   motoristaNome: dto.motoristaAtual?.nome ?? null,
   status: dto.status, // 'ok' | 'atencao' | 'critico'
-  itemMaisUrgente: dto.itemMaisUrgente && {
-    tipoId: toId(dto.itemMaisUrgente.tipoManutencaoId),
-    tipoNome: dto.itemMaisUrgente.tipoManutencaoNome,
-    kmProximaTroca: dto.itemMaisUrgente.kmProximaTroca,
-    kmRestante: dto.itemMaisUrgente.kmRestante,
-    isPrimeiraTroca: dto.itemMaisUrgente.isPrimeiraTroca,
-    status: dto.itemMaisUrgente.status,
-  },
+  itemMaisUrgente: dto.itemMaisUrgente && itemSituacaoFromApi(dto.itemMaisUrgente),
+  itens: (dto.itens ?? []).map(itemSituacaoFromApi),
 })
 
 export const veiculoToApi = (v) => ({
@@ -164,7 +172,7 @@ export const registroFromApi = (dto) => ({
   isPrimeiraTroca: dto.isPrimeiraTroca,
   concessionaria: dto.concessionaria,
   observacoes: dto.observacao,
-  lancadoPorNome: dto.lancadoPor?.nome ?? null, // quem lançou a OS
+  lancadoPorNome: dto.lancadoPor?.nome ?? null, // quem lançou a OS (OS antigas podem estar sem)
   lancadoEm: dto.lancadoEm, // data e hora do lançamento
 })
 export const registroToApi = (r) => ({

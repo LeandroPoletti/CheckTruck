@@ -25,36 +25,6 @@ public class ServicoVeiculo(IRepositorioCrud repositorioCrud, ILogger<ServicoVei
         return base.Valida(entidade);
     }
 
-    public float ObterDistanciaProximaManutencao(long veiculoId, TipoManutencao tipoManutencao)
-    {
-        var veiculo = GetById(veiculoId);
-
-        if (veiculo is null)
-        {
-            Mensagens.Add("Veículo não encontrado.");
-            return 0;
-        }
-
-        var intervaloRecomendado = veiculo.Modelo.IntervaloRecomendados
-            .FirstOrDefault(i => i.TipoManutencao == tipoManutencao);
-
-        if (intervaloRecomendado is null)
-        {
-            Mensagens.Add("Intervalo de manutenção não encontrado para o tipo especificado.");
-            return 0;
-        }
-
-        var ultimaManutencao = veiculo.Manutencoes
-            .OrderBy(m => m.Id)
-            .FirstOrDefault();
-
-
-        var distanciaParaProximaManutencao =
-            (ultimaManutencao?.KmProximaTroca ?? intervaloRecomendado.IntervaloKmPrimeira) - veiculo.KmAtual;
-
-        return distanciaParaProximaManutencao;
-    }
-
     public bool AtualizarKmVeiculo(long veiculoId, int distancia)
     {
         var veiculo = GetById(veiculoId);
@@ -70,4 +40,4 @@ public class ServicoVeiculo(IRepositorioCrud repositorioCrud, ILogger<ServicoVei
         Mensagens.Add("Erro ao atualizar");
         return false;
     }
-}
+}

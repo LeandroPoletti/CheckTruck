@@ -24,6 +24,13 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
         return Calcular(v => !apenasAtivos || v.Ativo);
     }
 
+    /// <summary>Situação completa de um caminhão (todos os itens), para a tela de detalhe.</summary>
+    public SituacaoVeiculo? ObterSituacao(long veiculoId)
+    {
+        logger.LogDebug("Calculando situação do veículo {VeiculoId}", veiculoId);
+        return Calcular(v => v.Id == veiculoId).FirstOrDefault();
+    }
+
     /// <summary>Situação completa de um caminhão pela placa (com ou sem hífen, maiúscula ou minúscula).</summary>
     public SituacaoVeiculo? ObterSituacaoPorPlaca(string placa)
     {

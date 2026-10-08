@@ -2,7 +2,7 @@
 // O App monta as rotas e o menu a partir desta lista (item sem label não aparece no menu).
 import {
   LayoutDashboard, Truck, ShieldCheck, LibraryBig, Clock, MessageSquareWarning,
-  Globe, Factory, Layers, Boxes, HardHat,
+  Globe, Factory, Layers, Boxes, Wrench, HardHat,
 } from 'lucide-react'
 import { GESTAO, pode } from './data/acesso'
 import Dashboard from './pages/Dashboard'
@@ -16,6 +16,7 @@ import Paises from './pages/Paises'
 import Fabricantes from './pages/Fabricantes'
 import Geracoes from './pages/Geracoes'
 import Modelos from './pages/Modelos'
+import TiposManutencao from './pages/TiposManutencao'
 import Mecanicos from './pages/Mecanicos'
 
 export const PAGINAS = [
@@ -33,6 +34,7 @@ export const PAGINAS = [
   { path: '/fabricantes', label: 'Fabricantes', icon: Factory, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Fabricantes },
   { path: '/geracoes', label: 'Gerações', icon: Layers, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Geracoes },
   { path: '/modelos', label: 'Modelos', icon: Boxes, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Modelos },
+  { path: '/tipos-manutencao', label: 'Tipos de manutenção', icon: Wrench, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: TiposManutencao },
   { path: '/mecanicos', label: 'Mecânicos', icon: HardHat, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Mecanicos },
 ]
 

@@ -28,7 +28,6 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo, onSal
   const [observacoes, setObservacoes] = useState('')
   const [error, setError] = useState('')
   const [salvando, setSalvando] = useState(false)
-  const [registrado, setRegistrado] = useState(false) // POST ok, mas falhou o km: não reenviar
 
   useEffect(() => {
     if (open && veiculo) {
@@ -41,7 +40,6 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo, onSal
       setConcessionaria('')
       setObservacoes('')
       setError('')
-      setRegistrado(false)
     }
   }, [open, veiculo])
 
@@ -108,7 +106,6 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo, onSal
         concessionaria: concessionaria.trim() || null,
         observacoes: observacoes.trim() || null,
       })
-      setRegistrado(true)
       onSalvo?.()
       onClose()
     } catch (e) {
@@ -130,7 +127,7 @@ export default function RegistrarManutencaoModal({ open, onClose, veiculo, onSal
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>Cancelar</Button>
-          <Button onClick={handleSubmit} disabled={salvando || registrado || carregando || !!erroCarga}>{salvando ? 'Registrando…' : 'Registrar manutenção'}</Button>
+          <Button onClick={handleSubmit} disabled={salvando || carregando || !!erroCarga}>{salvando ? 'Registrando…' : 'Registrar manutenção'}</Button>
         </>
       }
     >

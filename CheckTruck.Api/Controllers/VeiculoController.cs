@@ -56,6 +56,22 @@ public class VeiculoController(
     [HttpGet("{id:long}")]
     public ActionResult<VeiculoResponseDto> GetById(long id) => GetByIdCore(id);
 
+    /// <summary>
+    /// Situação completa de um caminhão: todos os itens, com km e dias restantes e de onde veio
+    /// o intervalo (caminhão, modelo ou padrão). É o que a tela de detalhe mostra.
+    /// </summary>
+    [HttpGet("{id:long}/situacao")]
+    public ActionResult<VeiculoSituacaoResponseDto> GetSituacaoPorId(long id)
+    {
+        var situacao = servicoSituacao.ObterSituacao(id);
+        if (situacao is null)
+        {
+            return NotFound();
+        }
+
+        return situacao.ToResponseDto(incluirItens: true);
+    }
+
     [HttpPost]
     [ExigePermissao(Permissao.Veiculos)]
     public async Task<ActionResult<VeiculoResponseDto>> Post([FromBody] VeiculoRequestDto dto)

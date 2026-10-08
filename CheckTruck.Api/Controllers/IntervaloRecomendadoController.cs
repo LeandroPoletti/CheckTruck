@@ -32,41 +32,57 @@ public class IntervaloRecomendadoController(
     [ExigePermissao(Permissao.Intervalos)]
     public ActionResult<IntervaloRecomendadoResponseDto> Post([FromBody] IntervaloRecomendadoRequestDto dto)
     {
-        var modelo = servicoModelo.GetById(dto.ModeloId);
-        if (modelo is null)
+        var (modelo, tipoManutencao, erro) = ResolverRelacionados(dto, idIgnorar: null);
+        if (erro is not null)
         {
-            return BadRequest("Modelo não encontrado.");
+            return BadRequest(erro);
         }
 
-        var tipoManutencao = servicoTipoManutencao.GetById(dto.TipoManutencaoId);
-        if (tipoManutencao is null)
-        {
-            return BadRequest("Tipo de manutenção não encontrado.");
-        }
-
-        return PostCore(dto.ToEntity(modelo, tipoManutencao));
+        return PostCore(dto.ToEntity(modelo!, tipoManutencao!));
     }
 
     [HttpPut("{id:long}")]
     [ExigePermissao(Permissao.Intervalos)]
     public ActionResult<IntervaloRecomendadoResponseDto> Put(long id, [FromBody] IntervaloRecomendadoRequestDto dto)
     {
+        var (modelo, tipoManutencao, erro) = ResolverRelacionados(dto, idIgnorar: id);
+        if (erro is not null)
+        {
+            return BadRequest(erro);
+        }
+
+        return PutCore(id, dto.ToEntity(modelo!, tipoManutencao!));
+    }
+
+    /// <summary>Sem o intervalo do modelo, os caminhões voltam ao intervalo próprio (se tiverem) ou ao padrão do sistema.</summary>
+    [HttpDelete("{id:long}")]
+    [ExigePermissao(Permissao.Intervalos)]
+    public IActionResult Delete(long id) => DeleteCore(id);
+
+    // Modelo e tipo existem, e o modelo ainda não tem intervalo para esse tipo (um por modelo e tipo)
+    private (Modelo? modelo, TipoManutencao? tipoManutencao, string? erro) ResolverRelacionados(
+        IntervaloRecomendadoRequestDto dto, long? idIgnorar)
+    {
         var modelo = servicoModelo.GetById(dto.ModeloId);
         if (modelo is null)
         {
-            return BadRequest("Modelo não encontrado.");
+            return (null, null, "Modelo não encontrado.");
         }
 
         var tipoManutencao = servicoTipoManutencao.GetById(dto.TipoManutencaoId);
         if (tipoManutencao is null)
         {
-            return BadRequest("Tipo de manutenção não encontrado.");
+            return (null, null, "Tipo de manutenção não encontrado.");
         }
 
-        return PutCore(id, dto.ToEntity(modelo, tipoManutencao));
-    }
+        var jaExiste = Servico
+            .Query(i => i.Id != idIgnorar && i.Modelo.Id == dto.ModeloId && i.TipoManutencao.Id == dto.TipoManutencaoId)
+            .Any();
+        if (jaExiste)
+        {
+            return (null, null, "Esse modelo já tem intervalo para esse item. Altere o existente.");
+        }
 
-    [HttpDelete("{id:long}")]
-    [ExigePermissao(Permissao.Intervalos)]
-    public IActionResult Delete(long id) => DeleteCore(id);
+        return (modelo, tipoManutencao, null);
+    }
 }
