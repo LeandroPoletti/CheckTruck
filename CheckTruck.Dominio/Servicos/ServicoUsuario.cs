@@ -1,5 +1,6 @@
 using CheckTruck.Dominio.Entidades;
 using CheckTruck.Dominio.Enums;
+using CheckTruck.Dominio.Interfaces;
 using CheckTruck.Dominio.Util;
 using Microsoft.AspNetCore.Identity;
 
@@ -7,9 +8,9 @@ namespace CheckTruck.Dominio.Servicos;
 
 /// <summary>
 /// Regras dos acessos: cadastrar, editar (inclusive e-mail e senha) e ativar/desativar.
-/// Quem chama é sempre Admin ou Gestor (a API confere antes).
+/// Quem chama é sempre Admin ou Gestor (a API confere antes), e só vê os acessos da própria empresa.
 /// </summary>
-public class ServicoUsuario(UserManager<Usuario> userManager)
+public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usuarioLogado)
 {
     /// <summary>Admin criado pelo sistema: não precisa de CPF, não troca de e-mail nem de cargo e não pode ser desativado.</summary>
     public const string EmailAdminDoSistema = "admin@admin.com";
@@ -19,16 +20,18 @@ public class ServicoUsuario(UserManager<Usuario> userManager)
     public static bool EhAdminDoSistema(Usuario usuario) =>
         string.Equals(usuario.Email, EmailAdminDoSistema, StringComparison.OrdinalIgnoreCase);
 
-    public IQueryable<Usuario> Listar() => userManager.Users.OrderBy(u => u.Nome);
+    public IQueryable<Usuario> Listar() => DaEmpresa().OrderBy(u => u.Nome);
 
     public IQueryable<Usuario> ListarMotoristasAtivos() =>
-        userManager.Users.Where(u => u.Ativo && u.Cargo == Cargo.Motorista).OrderBy(u => u.Nome);
+        DaEmpresa().Where(u => u.Ativo && u.Cargo == Cargo.Motorista).OrderBy(u => u.Nome);
 
-    public Task<Usuario?> ObterAsync(string id) => userManager.FindByIdAsync(id);
+    /// <summary>Acesso da empresa de quem está logado (de outra empresa volta null).</summary>
+    public async Task<Usuario?> ObterAsync(string id) =>
+        await userManager.FindByIdAsync(id) is { } usuario && usuario.EmpresaId == EmpresaAtual() ? usuario : null;
 
     /// <summary>Motorista escolhido numa tela: só vale um acesso ativo com cargo Motorista (senão, null).</summary>
     public async Task<Usuario?> ObterMotoristaAtivoAsync(string id) =>
-        await userManager.FindByIdAsync(id) is { Ativo: true, Cargo: Cargo.Motorista } motorista ? motorista : null;
+        await ObterAsync(id) is { Ativo: true, Cargo: Cargo.Motorista } motorista ? motorista : null;
 
     public async Task<Usuario?> CriarAsync(Usuario novo, string? senha)
     {
@@ -46,6 +49,7 @@ public class ServicoUsuario(UserManager<Usuario> userManager)
 
         novo.UserName = novo.Email;
         novo.Ativo = true;
+        novo.EmpresaId = EmpresaAtual();
         return Concluir(await userManager.CreateAsync(novo, senha!)) ? novo : null;
     }
 
@@ -54,7 +58,7 @@ public class ServicoUsuario(UserManager<Usuario> userManager)
     /// <param name="idQuemAlterou">Quem está editando: ninguém tira o próprio acesso de gestão.</param>
     public async Task<Usuario?> AtualizarAsync(string id, Usuario dados, string? novaSenha, string idQuemAlterou)
     {
-        var usuario = await userManager.FindByIdAsync(id);
+        var usuario = await ObterAsync(id);
         if (usuario is null)
         {
             Mensagens.Add("Acesso não encontrado.");
@@ -105,7 +109,7 @@ public class ServicoUsuario(UserManager<Usuario> userManager)
 
     public async Task<Usuario?> AlterarAtivoAsync(string id, bool ativo, string idQuemAlterou)
     {
-        var usuario = await userManager.FindByIdAsync(id);
+        var usuario = await ObterAsync(id);
         if (usuario is null)
         {
             Mensagens.Add("Acesso não encontrado.");
@@ -173,10 +177,19 @@ public class ServicoUsuario(UserManager<Usuario> userManager)
 
     private void ValidarCpfUnico(string? cpf, string? idIgnorar)
     {
-        if (cpf is not null && userManager.Users.Any(u => u.Cpf == cpf && u.Id != idIgnorar))
+        if (cpf is not null && DaEmpresa().Any(u => u.Cpf == cpf && u.Id != idIgnorar))
         {
             Mensagens.Add("Já existe um acesso com esse CPF.");
         }
+    }
+
+    // O login (e-mail) vale para o sistema todo, então os acessos não têm o filtro automático do Context
+    private long EmpresaAtual() => usuarioLogado.Usuario!.EmpresaId;
+
+    private IQueryable<Usuario> DaEmpresa()
+    {
+        var empresaId = EmpresaAtual();
+        return userManager.Users.Where(u => u.EmpresaId == empresaId);
     }
 
     private async Task ValidarSenhaAsync(Usuario usuario, string senha)

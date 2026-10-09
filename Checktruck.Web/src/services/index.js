@@ -95,10 +95,10 @@ export const chamadoService = {
 
 // Acessos (login, cargo e permissões). Listar, criar e editar: só Admin e Gestor.
 export const usuarioService = {
-  // Quem está logado, com cargo e permissões
+  // Quem está logado, com cargo, permissões e empresa
   async obterMe() {
     const { data } = await api.get('/api/Usuario/me')
-    return m.usuarioFromApi(data)
+    return m.usuarioLogadoFromApi(data)
   },
   async listar() {
     const { data } = await api.get('/api/Usuario')

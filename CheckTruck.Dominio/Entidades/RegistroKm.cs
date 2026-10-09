@@ -8,7 +8,7 @@ namespace CheckTruck.Dominio.Entidades;
 /// Uma mudança no km do caminhão: de quanto pra quanto, o que mudou, quem e quando.
 /// Serve para achar e corrigir km digitado errado (ex.: um zero a mais).
 /// </summary>
-public class RegistroKm : EntidadeBanco
+public class RegistroKm : EntidadeDaEmpresa
 {
     public long Id { get; set; }
     [Required]

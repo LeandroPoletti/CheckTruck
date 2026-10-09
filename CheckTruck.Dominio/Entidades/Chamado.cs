@@ -7,7 +7,7 @@ namespace CheckTruck.Dominio.Entidades;
 /// Reclamação do motorista (ou de quem tem a permissão) sobre um caminhão, para o mecânico ir ver.
 /// Fica pendente até alguém resolver e contar o que foi feito.
 /// </summary>
-public class Chamado : EntidadeBanco
+public class Chamado : EntidadeDaEmpresa
 {
     public long Id { get; set; }
     public Veiculo Veiculo { get; set; } = null!;

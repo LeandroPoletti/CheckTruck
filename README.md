@@ -64,8 +64,21 @@ npm run dev
 
 O front abre em `http://localhost:5173` e chama a API do endereço em `Checktruck.Web/.env.development`.
 
-**Primeiro acesso:** a API cria o admin do sistema, `admin@admin.com` com a senha `Admin@123`.
-Troque a senha fora do ambiente de desenvolvimento.
+**Primeiro acesso:** a API cria o admin do sistema, `admin@admin.com` com a senha `Admin@123`, na empresa
+Transportadora Almeida. Troque a senha fora do ambiente de desenvolvimento.
+
+## Empresas
+
+Cada cliente do CheckTruck é uma **empresa**. Caminhões, ordens de serviço, chamados, mecânicos, intervalos por
+caminhão, histórico de km e acessos são da empresa: quem entra só vê e mexe nos da própria. O catálogo (países,
+fabricantes, modelos, gerações e potências), os intervalos da geração e os tipos de manutenção são de todas.
+
+Como funciona: essas tabelas têm a coluna `EmpresaId`, que o front nunca manda. O `Context` grava nela a
+empresa de quem está logado e filtra todas as consultas por ela (global query filter do EF Core); alterar ou
+excluir leva a empresa no WHERE, então um id de outra empresa não muda nada. Placa, chassi e CPF não repetem
+dentro da empresa, e o e-mail (login) não repete em nenhuma.
+
+O banco começa com a empresa **Transportadora Almeida**, que fica com todos os dados de antes da separação.
 
 ## Acessos
 

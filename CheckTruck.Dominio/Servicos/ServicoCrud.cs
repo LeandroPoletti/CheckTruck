@@ -40,6 +40,10 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
             }
         }
 
+        /// <summary>Como o Query, mas olhando todas as empresas. Só para conferir se um item do catálogo está em uso.</summary>
+        public IQueryable<T> QueryTodasAsEmpresas(Expression<Func<T, bool>> where) =>
+            _repositorioCrud.QueryTodasAsEmpresas(where);
+
         public T? GetById(long id, Func<IQueryable<T>, IQueryable<T>>? include = null)
         {
             _logger.LogDebug($"Consultando entidade do tipo {typeof(T).Name} com ID: {id}");
@@ -143,4 +147,4 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
         }
     
     #endregion
-}
+}

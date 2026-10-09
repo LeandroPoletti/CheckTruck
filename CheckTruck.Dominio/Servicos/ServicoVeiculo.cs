@@ -26,6 +26,17 @@ public class ServicoVeiculo(
             Mensagens.Add("Escolha a tração do caminhão.");
         }
 
+        // A consulta só olha a empresa de quem está logado: em outra empresa a placa pode existir
+        if (Query(v => v.Id != entidade.Id && v.Placa == entidade.Placa).Any())
+        {
+            Mensagens.Add("Já existe um caminhão com essa placa.");
+        }
+
+        if (Query(v => v.Id != entidade.Id && v.Chassi == entidade.Chassi).Any())
+        {
+            Mensagens.Add("Já existe um caminhão com esse chassi.");
+        }
+
         if (entidade.KmAtual < 0)
         {
             Mensagens.Add("O km do caminhão não pode ser negativo.");

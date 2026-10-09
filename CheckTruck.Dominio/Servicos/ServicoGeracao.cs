@@ -77,7 +77,8 @@ public class ServicoGeracao(
             .ToList();
         var saem = atuais.Where(p => !cvs.Contains(p.Cv)).Select(p => p.Id).ToList();
 
-        var emUso = servicoVeiculo.Query(v => saem.Contains(v.Potencia.Id))
+        // O catálogo é de todas as empresas: caminhão de qualquer uma segura a potência
+        var emUso = servicoVeiculo.QueryTodasAsEmpresas(v => saem.Contains(v.Potencia.Id))
             .Select(v => v.Potencia.Cv)
             .Distinct()
             .OrderBy(cv => cv)
@@ -105,7 +106,7 @@ public class ServicoGeracao(
     /// <summary>As potências saem junto com a geração (cascata no banco).</summary>
     public override Geracao? Deletar(long id)
     {
-        var veiculos = servicoVeiculo.Query(v => v.Potencia.Geracao.Id == id).Count();
+        var veiculos = servicoVeiculo.QueryTodasAsEmpresas(v => v.Potencia.Geracao.Id == id).Count();
         var intervalos = servicoIntervalo.Query(i => i.Geracao.Id == id).Count();
         if (veiculos > 0 || intervalos > 0)
         {

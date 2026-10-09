@@ -2,15 +2,16 @@
 import { authService, usuarioService } from './index'
 import { lerSessao, salvarSessao } from './api'
 
-// Cargo e permissões vêm de GET /api/Usuario/me, gravados na sessão no login.
-// Sessão antiga, sem permissões, obriga a entrar de novo.
+// Cargo, permissões e empresa vêm de GET /api/Usuario/me, gravados na sessão no login.
+// Sessão antiga, sem permissões ou sem empresa, obriga a entrar de novo.
 export function obterUsuario() {
   const sessao = lerSessao()
-  if (!Array.isArray(sessao?.permissoes)) return null
+  if (!Array.isArray(sessao?.permissoes) || !sessao.empresa) return null
   return {
     id: sessao.usuarioId,
     nome: sessao.nome,
     email: sessao.email,
+    empresa: sessao.empresa,
     cargo: sessao.cargo,
     permissoes: sessao.permissoes,
     cuidaDosAcessos: sessao.cuidaDosAcessos,
@@ -29,6 +30,7 @@ export async function entrar(email, senha) {
       usuarioId: me.id,
       nome: me.nome,
       email: me.email,
+      empresa: me.empresa,
       cargo: me.cargo,
       permissoes: me.permissoes,
       cuidaDosAcessos: me.cuidaDosAcessos,

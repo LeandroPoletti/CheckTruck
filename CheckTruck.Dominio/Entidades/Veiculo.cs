@@ -4,7 +4,7 @@ using CheckTruck.Dominio.Interfaces;
 
 namespace CheckTruck.Dominio.Entidades;
 
-public class Veiculo : EntidadeBanco
+public class Veiculo : EntidadeDaEmpresa
 {
     public long Id { get; set; }
     public string Placa { get; set; }

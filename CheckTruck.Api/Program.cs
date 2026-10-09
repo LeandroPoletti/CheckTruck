@@ -111,6 +111,7 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
+    var context = scope.ServiceProvider.GetRequiredService<Context>();
 
     // Admin do sistema: entra com o e-mail e a senha abaixo, não precisa de CPF e não pode ser desativado
     var admin = await userManager.FindByEmailAsync(ServicoUsuario.EmailAdminDoSistema);
@@ -122,7 +123,9 @@ using (var scope = app.Services.CreateScope())
             Email = ServicoUsuario.EmailAdminDoSistema,
             UserName = ServicoUsuario.EmailAdminDoSistema,
             Cargo = Cargo.Admin,
-            Ativo = true
+            Ativo = true,
+            // A primeira empresa é a do TCC: a migration SepararPorEmpresa cria e põe nela o que já existia
+            EmpresaId = context.Empresas.OrderBy(e => e.Id).First().Id
         };
         await userManager.CreateAsync(admin, "Admin@123");
     }
@@ -139,8 +142,6 @@ using (var scope = app.Services.CreateScope())
 
         await userManager.UpdateAsync(admin);
     }
-
-    var context = scope.ServiceProvider.GetRequiredService<Context>();
 
     if (!context.Paises.Any(p => p.Nome == "Brasil"))
     {

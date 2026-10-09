@@ -7,7 +7,7 @@ namespace CheckTruck.Dominio.Entidades;
 /// Intervalo próprio de um caminhão, para quando ele tem um plano diferente do padrão da geração
 /// (ex.: plano da concessionária). Quando existe, tem prioridade sobre o IntervaloRecomendado.
 /// </summary>
-public class IntervaloVeiculo : EntidadeBanco
+public class IntervaloVeiculo : EntidadeDaEmpresa
 {
     public long Id { get; set; }
     [Required]

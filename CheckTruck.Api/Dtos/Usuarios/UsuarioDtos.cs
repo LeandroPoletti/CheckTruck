@@ -51,20 +51,32 @@ public class UsuarioResponseDto
     public bool Ativo { get; set; }
 }
 
+/// <summary>Quem está logado: os dados do acesso e o nome da empresa (aparece no menu).</summary>
+public class UsuarioLogadoResponseDto : UsuarioResponseDto
+{
+    public string Empresa { get; set; } = "";
+}
+
 public static class UsuarioDtoExtensions
 {
-    public static UsuarioResponseDto ToResponseDto(this Usuario entidade) => new()
+    public static UsuarioResponseDto ToResponseDto(this Usuario entidade) => Preencher(new UsuarioResponseDto(), entidade);
+
+    public static UsuarioLogadoResponseDto ToLogadoResponseDto(this Usuario entidade, string empresa) =>
+        Preencher(new UsuarioLogadoResponseDto { Empresa = empresa }, entidade);
+
+    private static T Preencher<T>(T dto, Usuario entidade) where T : UsuarioResponseDto
     {
-        Id = entidade.Id,
-        Nome = entidade.Nome,
-        Email = entidade.Email ?? "",
-        Cpf = entidade.Cpf,
-        Cargo = entidade.Cargo,
-        Permissoes = PermissaoUtil.ParaLista(entidade.PermissoesEfetivas),
-        CuidaDosAcessos = entidade.CuidaDosAcessos,
-        AdminDoSistema = ServicoUsuario.EhAdminDoSistema(entidade),
-        Ativo = entidade.Ativo
-    };
+        dto.Id = entidade.Id;
+        dto.Nome = entidade.Nome;
+        dto.Email = entidade.Email ?? "";
+        dto.Cpf = entidade.Cpf;
+        dto.Cargo = entidade.Cargo;
+        dto.Permissoes = PermissaoUtil.ParaLista(entidade.PermissoesEfetivas);
+        dto.CuidaDosAcessos = entidade.CuidaDosAcessos;
+        dto.AdminDoSistema = ServicoUsuario.EhAdminDoSistema(entidade);
+        dto.Ativo = entidade.Ativo;
+        return dto;
+    }
 
     // Os dados vão num Usuario solto: o serviço confere e copia para o acesso de verdade
     public static Usuario ToEntity(this UsuarioRequestDto dto) => new()

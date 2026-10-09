@@ -64,6 +64,9 @@ public class RepositorioCrud : IRepositorioCrud
         return res;
     }
 
+    public IQueryable<T> QueryTodasAsEmpresas<T>(Expression<Func<T, bool>> where) where T : class =>
+        _context.Set<T>().IgnoreQueryFilters().Where(where);
+
     public void Commit()
     {
         _context.SaveChanges();

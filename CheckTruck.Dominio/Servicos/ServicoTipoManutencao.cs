@@ -40,9 +40,10 @@ public class ServicoTipoManutencao(
 
     public override TipoManutencao? Deletar(long id)
     {
-        var emUso = servicoManutencao.Query(m => m.TipoManutencao.Id == id).Any()
+        // O tipo é de todas as empresas: OS e intervalo de qualquer uma seguram a exclusão
+        var emUso = servicoManutencao.QueryTodasAsEmpresas(m => m.TipoManutencao.Id == id).Any()
             || servicoIntervaloGeracao.Query(i => i.TipoManutencao.Id == id).Any()
-            || servicoIntervaloVeiculo.Query(i => i.TipoManutencao.Id == id).Any();
+            || servicoIntervaloVeiculo.QueryTodasAsEmpresas(i => i.TipoManutencao.Id == id).Any();
         if (emUso)
         {
             Mensagens.Add("Esse item já tem OS lançada ou intervalo cadastrado, então não dá para excluir.");

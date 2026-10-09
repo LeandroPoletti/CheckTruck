@@ -10,8 +10,10 @@ public class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
     {
         builder.Property(u => u.Nome).IsRequired().HasMaxLength(150);
 
-        // Só números; o admin do sistema fica sem CPF
+        builder.HasOne<Empresa>().WithMany().HasForeignKey(u => u.EmpresaId).OnDelete(DeleteBehavior.Restrict);
+
+        // Só números; o admin do sistema fica sem CPF. Não repete dentro da empresa
         builder.Property(u => u.Cpf).HasMaxLength(11);
-        builder.HasIndex(u => u.Cpf).IsUnique();
+        builder.HasIndex(u => new { u.EmpresaId, u.Cpf }).IsUnique();
     }
 }

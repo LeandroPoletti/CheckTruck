@@ -6,7 +6,7 @@ namespace CheckTruck.Dominio.Entidades;
 /// <summary>
 /// Ordem de serviço lançada no sistema: o que foi trocado, por qual mecânico, com qual motorista e quem lançou.
 /// </summary>
-public class Manutencao : EntidadeBanco
+public class Manutencao : EntidadeDaEmpresa
 {
     /// <summary>Número da OS: o banco gera em sequência.</summary>
     public long Id { get; set; }
