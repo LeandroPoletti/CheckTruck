@@ -3,11 +3,10 @@ import { X } from 'lucide-react'
 import { Modal } from '../ui/Overlay'
 import { Field, Input, Select, Button } from '../ui/Form'
 import { geracaoService, modeloService } from '../../services'
-import { NORMAS } from '../../data/domain'
+import { NORMAS, ANO_MINIMO, ANO_MAXIMO, anoValido } from '../../data/domain'
 
 const CV_MIN = 100
 const CV_MAX = 1000
-const ANO_MAX = new Date().getFullYear() + 1
 
 // Geração = época de um modelo (anos, norma, motor, câmbio) com as potências em que foi vendida.
 // Quem abre a tela só renderiza este modal quando ele está aberto.
@@ -61,9 +60,9 @@ export default function GeracaoModal({ registro, valoresIniciais, onClose, onSal
     const anoFim = form.anoFim === '' ? null : Number(form.anoFim)
     if (!form.modeloId) { setErro('Selecione o modelo.'); return }
     if (!form.nome.trim()) { setErro('Informe o nome da geração.'); return }
-    if (!Number.isInteger(anoInicio) || anoInicio < 1950 || anoInicio > ANO_MAX) { setErro('Informe o primeiro ano-modelo (ex.: 2015).'); return }
-    if (anoFim !== null && (!Number.isInteger(anoFim) || anoFim < anoInicio)) {
-      setErro('O último ano-modelo não pode ser antes do primeiro.')
+    if (!anoValido(anoInicio)) { setErro(`O primeiro ano-modelo vai de ${ANO_MINIMO} a ${ANO_MAXIMO}.`); return }
+    if (anoFim !== null && (!anoValido(anoFim) || anoFim < anoInicio)) {
+      setErro(`O último ano-modelo vai do primeiro até ${ANO_MAXIMO}.`)
       return
     }
     if (!form.norma) { setErro('Escolha a norma de emissão.'); return }
@@ -123,10 +122,10 @@ export default function GeracaoModal({ registro, valoresIniciais, onClose, onSal
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Primeiro ano-modelo" required>
-            <Input type="number" value={form.anoInicio} onChange={(e) => set('anoInicio', e.target.value)} placeholder="2015" />
+            <Input type="number" min={ANO_MINIMO} max={ANO_MAXIMO} value={form.anoInicio} onChange={(e) => set('anoInicio', e.target.value)} placeholder="2015" />
           </Field>
           <Field label="Último ano-modelo" hint="Vazio = ainda é vendida">
-            <Input type="number" value={form.anoFim} onChange={(e) => set('anoFim', e.target.value)} placeholder="2021" />
+            <Input type="number" min={ANO_MINIMO} max={ANO_MAXIMO} value={form.anoFim} onChange={(e) => set('anoFim', e.target.value)} placeholder="2021" />
           </Field>
         </div>
         <Field label="Norma de emissão" required hint="Muda o padrão do sistema para o óleo do motor.">
@@ -148,6 +147,8 @@ export default function GeracaoModal({ registro, valoresIniciais, onClose, onSal
           <div className="flex gap-2">
             <Input
               type="number"
+              min={CV_MIN}
+              max={CV_MAX}
               value={novaCv}
               onChange={(e) => setNovaCv(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); adicionarPotencia() } }}

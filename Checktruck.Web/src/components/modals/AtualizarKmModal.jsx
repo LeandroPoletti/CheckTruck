@@ -20,8 +20,9 @@ export default function AtualizarKmModal({ open, onClose, veiculo, onSalvo }) {
 
   async function handleSubmit() {
     const valor = Number(km)
-    if (!Number.isFinite(valor) || valor < veiculo.kmAtual) {
-      setError(`Km atual nunca pode diminuir (RN-02). Valor mínimo: ${formatKm(veiculo.kmAtual)}.`)
+    // O km só sobe (RN-02): a API recebe quanto o caminhão rodou, e precisa ser mais que zero
+    if (!Number.isInteger(valor) || valor <= veiculo.kmAtual) {
+      setError(`Informe um km maior que o atual (${formatKm(veiculo.kmAtual)}).`)
       return
     }
     setSalvando(true)
@@ -53,7 +54,7 @@ export default function AtualizarKmModal({ open, onClose, veiculo, onSalvo }) {
       }
     >
       <Field label="Km atual" required error={error} hint={!error ? `Atual registrado: ${formatKm(veiculo.kmAtual)}` : undefined}>
-        <Input type="number" value={km} onChange={(e) => setKm(e.target.value)} error={!!error} autoFocus />
+        <Input type="number" min={veiculo.kmAtual + 1} value={km} onChange={(e) => setKm(e.target.value)} error={!!error} autoFocus />
       </Field>
     </Modal>
   )

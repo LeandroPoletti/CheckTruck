@@ -1,5 +1,6 @@
 using CheckTruck.Dominio.Entidades;
 using CheckTruck.Dominio.Interfaces;
+using CheckTruck.Dominio.Util;
 using Microsoft.Extensions.Logging;
 
 namespace CheckTruck.Dominio.Servicos;
@@ -34,13 +35,13 @@ public class ServicoGeracao(
             Mensagens.Add("Escolha a norma de emissão.");
         }
 
-        if (entidade.AnoInicio < 1950 || entidade.AnoInicio > DateTime.UtcNow.Year + 1)
+        if (!AnoUtil.IsValido(entidade.AnoInicio))
         {
-            Mensagens.Add("Informe o primeiro ano-modelo (ex.: 2015).");
+            Mensagens.Add($"O primeiro ano-modelo vai de {AnoUtil.AnoMinimo} a {AnoUtil.AnoMaximo}.");
         }
-        else if (entidade.AnoFim is { } anoFim && anoFim < entidade.AnoInicio)
+        else if (entidade.AnoFim is { } anoFim && (anoFim < entidade.AnoInicio || anoFim > AnoUtil.AnoMaximo))
         {
-            Mensagens.Add("O último ano-modelo não pode ser antes do primeiro.");
+            Mensagens.Add($"O último ano-modelo vai do primeiro até {AnoUtil.AnoMaximo}.");
         }
 
         if (entidade.Potencias.Count == 0)

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Drawer } from '../ui/Overlay'
 import { Field, Input, Select, Toggle, Button } from '../ui/Form'
-import { TRACOES } from '../../data/domain'
+import { TRACOES, ANO_MINIMO, ANO_MAXIMO, anoValido } from '../../data/domain'
 import { veiculoService, fabricanteService, modeloService, geracaoService, usuarioService } from '../../services'
 
 const LISTAS_VAZIAS = { fabricantes: [], modelos: [], geracoes: [], motoristas: [] }
@@ -70,9 +70,17 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
     if (!form.tracao) e.tracao = 'Escolha a tração.'
     if (!form.placa.trim()) e.placa = 'Placa é obrigatória.'
     if (form.chassi.length !== 17) e.chassi = `${form.chassi.length} de 17 caracteres`
-    if (veiculoParaEditar && Number(form.kmAtual) < veiculoParaEditar.kmAtual) {
-      e.kmAtual = 'Km atual nunca pode diminuir (RN-02).'
+    // Ano modelo = ano de fabricação ou o seguinte (ex.: fabricado em 2019, modelo 2019 ou 2020)
+    const anoFabricacao = Number(form.anoFabricacao)
+    const anoModelo = Number(form.anoModelo)
+    if (!anoValido(anoFabricacao)) e.anoFabricacao = `De ${ANO_MINIMO} a ${ANO_MAXIMO}`
+    if (!anoValido(anoModelo)) e.anoModelo = `De ${ANO_MINIMO} a ${ANO_MAXIMO}`
+    else if (!e.anoFabricacao && anoModelo !== anoFabricacao && anoModelo !== anoFabricacao + 1) {
+      e.anoModelo = `${anoFabricacao} ou ${anoFabricacao + 1}`
     }
+    const km = Number(form.kmAtual || 0)
+    if (!Number.isInteger(km) || km < 0) e.kmAtual = 'O km não pode ser negativo.'
+    else if (veiculoParaEditar && km < veiculoParaEditar.kmAtual) e.kmAtual = 'Km atual nunca pode diminuir (RN-02).'
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -85,9 +93,9 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
       placa: form.placa.trim().toUpperCase(),
       chassi: form.chassi.trim(),
       renavam: form.renavam.trim() || null,
-      anoFabricacao: Number(form.anoFabricacao) || null,
-      anoModelo: Number(form.anoModelo) || null,
-      kmAtual: Number(form.kmAtual) || 0,
+      anoFabricacao: Number(form.anoFabricacao),
+      anoModelo: Number(form.anoModelo),
+      kmAtual: Number(form.kmAtual || 0),
       motoristaId: form.motoristaId || null,
       ativo: form.ativo,
     }
@@ -187,14 +195,14 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
             <Field label="Chassi (17 caracteres)" required className="col-span-2" error={errors.chassi}>
               <Input value={form.chassi} onChange={(e) => set('chassi', e.target.value.toUpperCase())} placeholder="9BVR4X20DJE882301" error={errors.chassi} maxLength={17} />
             </Field>
-            <Field label="Ano fabr.">
-              <Input type="number" value={form.anoFabricacao} onChange={(e) => set('anoFabricacao', e.target.value)} />
+            <Field label="Ano fabr." required error={errors.anoFabricacao}>
+              <Input type="number" min={ANO_MINIMO} max={ANO_MAXIMO} value={form.anoFabricacao} onChange={(e) => set('anoFabricacao', e.target.value)} placeholder="2019" error={errors.anoFabricacao} />
             </Field>
-            <Field label="Ano modelo">
-              <Input type="number" value={form.anoModelo} onChange={(e) => set('anoModelo', e.target.value)} />
+            <Field label="Ano modelo" required hint="O de fabricação ou o seguinte" error={errors.anoModelo}>
+              <Input type="number" min={ANO_MINIMO} max={ANO_MAXIMO} value={form.anoModelo} onChange={(e) => set('anoModelo', e.target.value)} placeholder="2020" error={errors.anoModelo} />
             </Field>
             <Field label="Km atual" className="col-span-2" error={errors.kmAtual}>
-              <Input type="number" value={form.kmAtual} onChange={(e) => set('kmAtual', e.target.value)} error={errors.kmAtual} />
+              <Input type="number" min="0" value={form.kmAtual} onChange={(e) => set('kmAtual', e.target.value)} error={errors.kmAtual} />
             </Field>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Modal } from '../ui/Overlay'
 import { Field, Input, Select, Toggle, Button } from '../ui/Form'
-import { formatKm, getUltimoRegistro } from '../../data/domain'
+import { formatKm, getUltimoRegistro, hoje, ANO_MINIMO } from '../../data/domain'
 import {
   manutencaoService, tipoManutencaoService, intervaloService, mecanicoService, usuarioService, veiculoService, filtro,
 } from '../../services'
@@ -10,7 +10,6 @@ import { obterUsuario } from '../../services/sessao'
 import { pode } from '../../data/acesso'
 
 const LISTAS_VAZIAS = { veiculos: [], tiposManutencao: [], mecanicos: [], motoristas: [] }
-const hoje = () => new Date().toISOString().slice(0, 10)
 
 // Lançar ou corrigir uma ordem de serviço. Quem abre a tela só renderiza este modal quando ele está aberto.
 //   veiculo  → lançar no caminhão já escolhido (atalho na tela do caminhão)
@@ -123,7 +122,12 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
     if (!form.tipoId) { setErro('Selecione o tipo de manutenção.'); return }
     if (!form.mecanicoId) { setErro('Escolha o mecânico que fez a troca.'); return }
     // OS antiga pode ter km menor que o atual; só não aceita km inválido
-    if (!Number.isFinite(km) || km < 0) { setErro('Informe o km do caminhão na troca.'); return }
+    if (form.kmNaTroca === '' || !Number.isInteger(km) || km < 0) { setErro('Informe o km do caminhão na troca (sem negativo).'); return }
+    // A troca já foi feita: a data vai de 1900 até hoje
+    if (!form.dataRealizacao || form.dataRealizacao < `${ANO_MINIMO}-01-01` || form.dataRealizacao > hoje()) {
+      setErro(`A data da troca vai de ${ANO_MINIMO} até hoje.`)
+      return
+    }
 
     setSalvando(true)
     setErro('')
@@ -231,10 +235,10 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Km na troca" required>
-            <Input type="number" value={form.kmNaTroca} onChange={(e) => set('kmNaTroca', e.target.value)} />
+            <Input type="number" min="0" value={form.kmNaTroca} onChange={(e) => set('kmNaTroca', e.target.value)} />
           </Field>
           <Field label="Data da realização" required>
-            <Input type="date" value={form.dataRealizacao} onChange={(e) => set('dataRealizacao', e.target.value)} />
+            <Input type="date" min={`${ANO_MINIMO}-01-01`} max={hoje()} value={form.dataRealizacao} onChange={(e) => set('dataRealizacao', e.target.value)} />
           </Field>
         </div>
 

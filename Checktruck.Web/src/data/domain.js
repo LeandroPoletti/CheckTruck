@@ -11,6 +11,15 @@ export const COMPONENTES = {
   6: 'Embreagem',
 }
 
+// Limite de ano em todo o sistema (o mesmo da API, AnoUtil): o primeiro caminhão é de 1896, então nada
+// antes de 1900; e nada depois do ano que vem, porque o ano-modelo pode ser o do ano seguinte.
+export const ANO_MINIMO = 1900
+export const ANO_MAXIMO = new Date().getFullYear() + 1
+export const anoValido = (ano) => Number.isInteger(ano) && ano >= ANO_MINIMO && ano <= ANO_MAXIMO
+
+// Hoje no fuso de quem usa (toISOString daria a data de Londres, que à noite já é amanhã)
+export const hoje = () => new Date().toLocaleDateString('sv-SE')
+
 // enum CheckTruck.Dominio.Enums.NormaEmissao (a API manda o nome)
 export const NORMAS = {
   AntesDoEuro5: 'Antes do Euro 5',

@@ -1,5 +1,6 @@
 using CheckTruck.Dominio.Entidades;
 using CheckTruck.Dominio.Interfaces;
+using CheckTruck.Dominio.Util;
 using Microsoft.Extensions.Logging;
 
 namespace CheckTruck.Dominio.Servicos;
@@ -20,6 +21,12 @@ public class ServicoManutencao(
         if (entidade.KmAtual < 0)
         {
             Mensagens.Add("O km da troca não pode ser negativo.");
+        }
+
+        // A troca já foi feita: a data não pode ser depois de hoje (nem antes de 1900)
+        if (entidade.RealizadoEm.Year < AnoUtil.AnoMinimo || entidade.RealizadoEm.Date > DateTime.UtcNow.Date)
+        {
+            Mensagens.Add($"A data da troca vai de {AnoUtil.AnoMinimo} até hoje.");
         }
 
         if (entidade.KmProximaTroca > 0 && entidade.KmProximaTroca <= entidade.KmAtual)
