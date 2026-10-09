@@ -16,6 +16,7 @@ public class VeiculoController(
     ServicoVeiculo servicoVeiculo,
     ServicoSituacaoVeiculo servicoSituacao,
     ServicoCrud<Potencia> servicoPotencia,
+    ServicoCrud<RegistroKm> servicoRegistroKm,
     ServicoUsuario servicoUsuario,
     ILogger<Veiculo> logger)
     : CrudController<Veiculo, VeiculoResponseDto>(
@@ -121,6 +122,36 @@ public class VeiculoController(
     {
         var res = servicoVeiculo.AtualizarKmVeiculo(id, distancia);
         return res ? Ok() : BadRequest(servicoVeiculo.Mensagens);
+    }
+
+    /// <summary>
+    /// Histórico de km do caminhão, do mais novo para o mais velho: cadastro, Atualizar km, OS,
+    /// edição e correções, com quem mudou, quando e de quanto pra quanto.
+    /// </summary>
+    [HttpGet("{id:long}/historico-km")]
+    public ActionResult<IEnumerable<RegistroKmResponseDto>> GetHistoricoKm(long id) =>
+        servicoRegistroKm.Query(r => r.Veiculo.Id == id)
+            .OrderByDescending(r => r.RegistradoEm)
+            .ThenByDescending(r => r.Id)
+            .Select(RegistroKmDtoExtensions.Projecao)
+            .ToList();
+
+    /// <summary>
+    /// Corrige o km (ex.: um zero a mais no Atualizar km ou na OS). Só Admin e Gestor. Pode baixar o km,
+    /// mas não para menos que o km da maior OS do caminhão. O motivo é obrigatório e fica no histórico.
+    /// </summary>
+    [HttpPut("{id:long}/corrigir-km")]
+    [SomenteGestao]
+    public IActionResult CorrigirKm(long id, [FromBody] CorrecaoKmRequestDto dto)
+    {
+        if (servicoVeiculo.CorrigirKm(id, dto.Km, dto.Motivo) is not null)
+        {
+            return NoContent();
+        }
+
+        return servicoVeiculo.Mensagens.Count == 0
+            ? NotFound()
+            : BadRequest(string.Join(" ", servicoVeiculo.Mensagens));
     }
 
     // O motorista atual é opcional; quando vem, tem que ser um acesso ativo com cargo Motorista

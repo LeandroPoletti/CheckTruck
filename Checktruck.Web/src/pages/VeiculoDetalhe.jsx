@@ -7,8 +7,9 @@ import { Button } from '../components/ui/Form'
 import AtualizarKmModal from '../components/modals/AtualizarKmModal'
 import NovoVeiculoModal from '../components/modals/NovoVeiculoModal'
 import OrdemServicoModal from '../components/modals/OrdemServicoModal'
+import CorrigirKmModal from '../components/modals/CorrigirKmModal'
 import { obterUsuario } from '../services/sessao'
-import { pode } from '../data/acesso'
+import { pode, GESTAO } from '../data/acesso'
 
 const BACK_TO = '/veiculos'
 
@@ -18,6 +19,7 @@ export default function VeiculoDetalhe() {
   const [kmOpen, setKmOpen] = useState(false)
   const [editarOpen, setEditarOpen] = useState(false)
   const [manutencaoOpen, setManutencaoOpen] = useState(false)
+  const [corrigirKmOpen, setCorrigirKmOpen] = useState(false)
   const [dados, setDados] = useState(null)
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState(null)
@@ -28,12 +30,13 @@ export default function VeiculoDetalhe() {
     async function carregar() {
       // A situação (o que vence e quando) vem pronta da API: intervalo do caminhão → geração → padrão, por km e por data.
       // Ela também traz fabricante, modelo, geração e potência para o cabeçalho.
-      const [veiculo, situacao, registros] = await Promise.all([
+      const [veiculo, situacao, registros, historicoKm] = await Promise.all([
         veiculoService.obter(id),
         veiculoService.obterSituacao(id),
         manutencaoService.listar(filtro.porId('Veiculo', id)),
+        veiculoService.listarHistoricoKm(id),
       ])
-      return { veiculo, situacao, registros }
+      return { veiculo, situacao, registros, historicoKm }
     }
     carregar()
       .then((d) => { if (!cancelado) setDados(d) })
@@ -62,6 +65,8 @@ export default function VeiculoDetalhe() {
   if (!dados) return <VeiculoNaoEncontrado backTo={BACK_TO} />
 
   const { veiculo } = dados
+  // A correção de km não pode ficar abaixo do km da maior OS do caminhão
+  const kmMaiorOs = dados.registros.length > 0 ? Math.max(...dados.registros.map((r) => r.kmNaTroca)) : null
 
   return (
     <>
@@ -69,11 +74,15 @@ export default function VeiculoDetalhe() {
         veiculo={veiculo}
         situacao={dados.situacao}
         registros={dados.registros}
+        historicoKm={dados.historicoKm}
         backTo={BACK_TO}
         actions={
           <div className="flex gap-2">
             {pode(usuario, 'AtualizarKm') && (
               <Button variant="secondary" onClick={() => setKmOpen(true)}>Atualizar km</Button>
+            )}
+            {pode(usuario, GESTAO) && (
+              <Button variant="secondary" onClick={() => setCorrigirKmOpen(true)}>Corrigir km</Button>
             )}
             {pode(usuario, 'Veiculos') && (
               <Button variant="secondary" onClick={() => setEditarOpen(true)}>Editar</Button>
@@ -87,6 +96,9 @@ export default function VeiculoDetalhe() {
       <AtualizarKmModal open={kmOpen} onClose={() => setKmOpen(false)} veiculo={veiculo} onSalvo={recarregar} />
       {editarOpen && <NovoVeiculoModal veiculoParaEditar={veiculo} onClose={() => setEditarOpen(false)} onSalvo={recarregar} />}
       {manutencaoOpen && <OrdemServicoModal veiculo={veiculo} onClose={() => setManutencaoOpen(false)} onSalvo={recarregar} />}
+      {corrigirKmOpen && (
+        <CorrigirKmModal veiculo={veiculo} kmMaiorOs={kmMaiorOs} onClose={() => setCorrigirKmOpen(false)} onSalvo={recarregar} />
+      )}
     </>
   )
 }

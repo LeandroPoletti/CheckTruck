@@ -17,6 +17,7 @@ public class Context : IdentityUserContext<Usuario>
     public DbSet<Manutencao> Manutencoes { get; set; }
     public DbSet<IntervaloRecomendado> IntervalosRecomendados { get; set; }
     public DbSet<IntervaloVeiculo> IntervalosVeiculo { get; set; }
+    public DbSet<RegistroKm> RegistrosKm { get; set; }
     public DbSet<Mecanico> Mecanicos { get; set; }
     public DbSet<Chamado> Chamados { get; set; }
 

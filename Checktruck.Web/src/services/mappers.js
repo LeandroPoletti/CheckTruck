@@ -189,6 +189,18 @@ export const veiculoToApi = (v) => ({
   motoristaAtualId: v.motoristaId || null,
 })
 
+// Uma mudança no km do caminhão. kmAnterior null = cadastro; ordemServicoId null = não foi OS (ou a OS foi excluída)
+export const registroKmFromApi = (dto) => ({
+  id: toId(dto.id),
+  kmAnterior: dto.kmAnterior,
+  kmNovo: dto.kmNovo,
+  origem: dto.origem, // nome do enum (ORIGENS_KM)
+  motivo: dto.motivo,
+  ordemServicoId: toId(dto.ordemServicoId),
+  registradoPorNome: dto.registradoPor?.nome ?? null,
+  registradoEm: dto.registradoEm,
+})
+
 // Ordem de serviço (o id é o número da OS)
 export const registroFromApi = (dto) => ({
   id: toId(dto.id),

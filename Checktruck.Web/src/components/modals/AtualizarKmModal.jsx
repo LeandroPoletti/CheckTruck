@@ -22,7 +22,7 @@ export default function AtualizarKmModal({ open, onClose, veiculo, onSalvo }) {
     const valor = Number(km)
     // O km só sobe (RN-02): a API recebe quanto o caminhão rodou, e precisa ser mais que zero
     if (!Number.isInteger(valor) || valor <= veiculo.kmAtual) {
-      setError(`Informe um km maior que o atual (${formatKm(veiculo.kmAtual)}).`)
+      setError(`Informe um km maior que o atual (${formatKm(veiculo.kmAtual)}). Se o atual está errado, peça para o Admin ou o Gestor usar Corrigir km.`)
       return
     }
     setSalvando(true)

@@ -3,7 +3,7 @@ import { ChevronLeft } from 'lucide-react'
 import { Card } from './Layout'
 import { StatusBadge, PlacaBadge } from './ui/Badges'
 import {
-  formatKm, formatData, formatDataHora, getHistoricoVeiculo, nomeDoCaminhao, TRACOES,
+  formatKm, formatData, formatDataHora, getHistoricoVeiculo, nomeDoCaminhao, TRACOES, ORIGENS_KM,
 } from '../data/domain'
 
 export function VeiculoNaoEncontrado({ backTo }) {
@@ -20,8 +20,8 @@ export function VeiculoNaoEncontrado({ backTo }) {
 
 // Apresentacional: a página de detalhe carrega os dados e passa por props.
 // situacao = fabricante, modelo, geração e potência, mais o status geral e os itens já calculados pela API
-// (do mais urgente para o menos urgente).
-export default function VeiculoDetalhePanel({ veiculo, situacao, registros, backTo, actions }) {
+// (do mais urgente para o menos urgente). historicoKm = toda mudança de km, da mais nova para a mais velha.
+export default function VeiculoDetalhePanel({ veiculo, situacao, registros, historicoKm, backTo, actions }) {
   const navigate = useNavigate()
 
   const historico = getHistoricoVeiculo(veiculo.id, registros)
@@ -130,9 +130,49 @@ export default function VeiculoDetalhePanel({ veiculo, situacao, registros, back
             </div>
           )}
         </Card>
+
+        <Card className="col-span-2 p-5">
+          <h3 className="mb-4 font-semibold text-stone-900">Histórico de km</h3>
+          {historicoKm.length === 0 ? (
+            <p className="py-6 text-center text-sm text-stone-400">Nenhuma mudança de km registrada ainda.</p>
+          ) : (
+            <div className="max-h-[300px] overflow-y-auto pr-1">
+              <table className="w-full text-sm">
+                <tbody>
+                  {historicoKm.map((h) => (
+                    <tr key={h.id} className="border-b border-stone-100 align-top last:border-0">
+                      <td className="w-36 py-2.5 pr-3 text-xs text-stone-400">{formatDataHora(h.registradoEm)}</td>
+                      <td className="w-36 py-2.5 pr-3">
+                        <span className={`font-medium ${h.origem === 'Correcao' ? 'text-amber-700' : 'text-stone-700'}`}>
+                          {textoOrigemKm(h)}
+                        </span>
+                      </td>
+                      <td className="py-2.5 pr-3 text-stone-700">
+                        {h.kmAnterior === null ? formatKm(h.kmNovo) : <>{formatKm(h.kmAnterior)} → {formatKm(h.kmNovo)}</>}
+                        {h.kmAnterior !== null && (
+                          <span className={`ml-2 text-xs ${h.kmNovo < h.kmAnterior ? 'text-amber-700' : 'text-stone-400'}`}>
+                            ({h.kmNovo > h.kmAnterior ? '+' : '−'}{formatKm(Math.abs(h.kmNovo - h.kmAnterior))})
+                          </span>
+                        )}
+                        {h.motivo && <p className="text-xs text-stone-500">Motivo: {h.motivo}</p>}
+                      </td>
+                      <td className="py-2.5 text-right text-xs text-stone-400">{h.registradoPorNome ? `por ${h.registradoPorNome}` : ''}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
       </div>
     </>
   )
+}
+
+// "OS nº 12" quando foi uma OS (ou "OS excluída", se ela saiu); o resto pelo nome da origem
+function textoOrigemKm(h) {
+  if (h.origem !== 'OrdemServico') return ORIGENS_KM[h.origem] ?? h.origem
+  return h.ordemServicoId ? `OS nº ${h.ordemServicoId}` : 'OS excluída'
 }
 
 // Negativo = já passou do ponto de troca

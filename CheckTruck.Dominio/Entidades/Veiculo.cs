@@ -21,4 +21,6 @@ public class Veiculo : EntidadeBanco
     /// <summary>Motorista que está com o caminhão agora (acesso com cargo Motorista). Opcional.</summary>
     public Usuario? MotoristaAtual { get; set; }
     public IList<Manutencao> Manutencoes { get; set; } = new List<Manutencao>();
+    /// <summary>Toda mudança de km: quem, quando, de quanto pra quanto e por quê.</summary>
+    public IList<RegistroKm> RegistrosKm { get; set; } = new List<RegistroKm>();
 }

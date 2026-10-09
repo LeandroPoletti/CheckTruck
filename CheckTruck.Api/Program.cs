@@ -33,6 +33,8 @@ modelBuilder.EntitySet<Mecanico>("Mecanico");
 // Motorista do caminhão, motorista da OS e quem lançou a OS são acessos (login):
 // ficam fora do OData para não expor os dados da conta
 modelBuilder.EntityType<Veiculo>().Ignore(v => v.MotoristaAtual);
+// O histórico de km tem quem mudou (acesso) e sai por rota própria (GET api/Veiculo/{id}/historico-km)
+modelBuilder.EntityType<Veiculo>().Ignore(v => v.RegistrosKm);
 modelBuilder.EntityType<Manutencao>().Ignore(m => m.Motorista);
 modelBuilder.EntityType<Manutencao>().Ignore(m => m.LancadoPor);
 
@@ -72,6 +74,9 @@ builder.Services.AddDbContext<Context>(options =>
 });
 
 builder.Services.AddScoped<IRepositorioCrud, RepositorioCrud>();
+// Quem está logado, para os serviços gravarem no histórico (ex.: mudanças de km)
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUsuarioLogado, UsuarioLogadoHttp>();
 builder.Services.AddScoped(typeof(ServicoCrud<>));
 builder.Services.AddScoped<ServicoVeiculo>();
 builder.Services.AddScoped<ServicoSituacaoVeiculo>();

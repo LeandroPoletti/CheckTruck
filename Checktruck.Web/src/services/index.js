@@ -46,6 +46,15 @@ export const veiculoService = {
       headers: { 'Content-Type': 'application/json' },
     })
   },
+  // Toda mudança de km do caminhão, da mais nova para a mais velha
+  async listarHistoricoKm(id) {
+    const { data } = await api.get(`/api/Veiculo/${id}/historico-km`)
+    return data.map(m.registroKmFromApi)
+  },
+  // Só Admin e Gestor: pode baixar o km (não abaixo da maior OS); o motivo fica no histórico
+  async corrigirKm(id, km, motivo) {
+    await api.put(`/api/Veiculo/${id}/corrigir-km`, { km: Number(km), motivo: motivo.trim() })
+  },
 }
 
 export const dashboardService = {

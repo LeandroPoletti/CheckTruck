@@ -80,7 +80,7 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
     }
     const km = Number(form.kmAtual || 0)
     if (!Number.isInteger(km) || km < 0) e.kmAtual = 'O km não pode ser negativo.'
-    else if (veiculoParaEditar && km < veiculoParaEditar.kmAtual) e.kmAtual = 'Km atual nunca pode diminuir (RN-02).'
+    else if (veiculoParaEditar && km < veiculoParaEditar.kmAtual) e.kmAtual = 'O km não pode diminuir (RN-02). Para km digitado errado, Admin ou Gestor usam Corrigir km.'
     setErrors(e)
     return Object.keys(e).length === 0
   }

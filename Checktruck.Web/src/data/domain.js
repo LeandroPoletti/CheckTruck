@@ -36,6 +36,15 @@ export const TRACOES = {
   OitoPorQuatro: '8x4',
 }
 
+// enum CheckTruck.Dominio.Enums.OrigemKm: o que mudou o km do caminhão (a API manda o nome)
+export const ORIGENS_KM = {
+  Cadastro: 'Cadastro',
+  AtualizarKm: 'Atualizar km',
+  OrdemServico: 'OS',
+  Edicao: 'Editar veículo',
+  Correcao: 'Correção',
+}
+
 // "Volvo FH" — para listas e seletores ({ fabricanteNome, modeloNome } ou { fabricanteNome, nome })
 export const nomeDoModelo = ({ fabricanteNome, modeloNome, nome }) => `${fabricanteNome ?? ''} ${modeloNome ?? nome}`.trim()
 

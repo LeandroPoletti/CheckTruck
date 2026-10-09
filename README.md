@@ -103,6 +103,10 @@ Marcar Veículos, Atualizar km ou Ordem de serviço já liga o Ver frota.
   (o primeiro caminhão é de 1896) até o ano que vem, e o ano modelo é o de fabricação ou o seguinte. A OS não
   pode ter data no futuro, e atualizar o km só aceita um valor maior que o atual. A API valida tudo isso e a
   tela avisa antes de enviar.
+- **Km do caminhão:** só sobe (cadastro, Atualizar km, OS e Editar veículo). Se alguém digitar errado (ex.: um
+  zero a mais), Admin ou Gestor usam **Corrigir km** na tela do caminhão: pode baixar, mas não para menos que o
+  km da maior OS, e o motivo é obrigatório. Toda mudança de km fica no **histórico de km** (quem, quando, de
+  quanto pra quanto e por quê).
 
 ## Catálogo
 
