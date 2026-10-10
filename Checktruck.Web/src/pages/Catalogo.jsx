@@ -7,16 +7,18 @@ import FabricanteModal from '../components/modals/FabricanteModal'
 import ModeloModal from '../components/modals/ModeloModal'
 import GeracaoModal from '../components/modals/GeracaoModal'
 import { obterUsuario } from '../services/sessao'
-import { pode } from '../data/acesso'
+import { pode, ehDonoDoSistema } from '../data/acesso'
 
 const VAZIO = { fabricantes: [], modelos: [], geracoes: [], veiculos: [], intervalos: [] }
 const porNome = (a, b) => a.nome.localeCompare(b.nome)
 const quantos = (n, um, varios) => `${n} ${n === 1 ? um : varios}`
 
-// Fabricante → modelo → gerações (com anos, norma, motor, câmbio e potências), usados no cadastro de veículos
+// Fabricante → modelo → gerações (com anos, norma, motor, câmbio e potências), usados no cadastro de veículos.
+// Aparece o catálogo do sistema e o que a empresa cadastrou (marcado com DA EMPRESA).
 export default function Catalogo() {
+  const usuario = obterUsuario()
   // A contagem de caminhões por geração só aparece para quem vê a frota
-  const verFrota = pode(obterUsuario(), 'VerFrota')
+  const verFrota = pode(usuario, 'VerFrota')
   const [fabricanteSel, setFabricanteSel] = useState(null)
   const [modeloSel, setModeloSel] = useState(null)
   const [dados, setDados] = useState(VAZIO)
@@ -78,7 +80,9 @@ export default function Catalogo() {
     <>
       <PageHeader
         title="Catálogo"
-        subtitle="Fabricante → modelo → geração → potência, usados no cadastro de veículos"
+        subtitle={ehDonoDoSistema(usuario)
+          ? 'Catálogo do sistema: fabricante → modelo → geração → potência. Todas as empresas veem.'
+          : 'Fabricante → modelo → geração → potência. O que a sua empresa cadastra aparece com DA EMPRESA e só ela vê.'}
         action={<Button onClick={() => setModal('geracao')}><Plus size={16} /> Nova geração</Button>}
       />
 
@@ -92,6 +96,7 @@ export default function Catalogo() {
                 ativo={f.id === fabricante?.id}
                 onClick={() => escolherFabricante(f.id)}
                 titulo={f.nome}
+                daEmpresa={!f.doSistema}
                 detalhe={`${f.pais} · ${contar(modelos, 'fabricanteId', f.id, 'modelo', 'modelos')}`}
               />
             ))}
@@ -109,6 +114,7 @@ export default function Catalogo() {
                 ativo={m.id === modelo?.id}
                 onClick={() => setModeloSel(m.id)}
                 titulo={m.nome}
+                daEmpresa={!m.doSistema}
                 detalhe={contar(geracoes, 'modeloId', m.id, 'geração', 'gerações')}
               />
             ))}
@@ -133,7 +139,7 @@ export default function Catalogo() {
               <div key={g.id} className="rounded-lg border border-stone-200 p-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-stone-900">{g.nome}</p>
+                    <p className="font-semibold text-stone-900">{g.nome}{!g.doSistema && <SeloDaEmpresa />}</p>
                     <p className="text-xs text-stone-500">
                       {[g.periodo, g.normaNome, g.motor && `Motor ${g.motor}`, g.cambio].filter(Boolean).join(' · ')}
                     </p>
@@ -177,7 +183,7 @@ export default function Catalogo() {
   )
 }
 
-function ItemColuna({ ativo, onClick, titulo, detalhe }) {
+function ItemColuna({ ativo, onClick, titulo, daEmpresa, detalhe }) {
   return (
     <button
       onClick={onClick}
@@ -186,12 +192,17 @@ function ItemColuna({ ativo, onClick, titulo, detalhe }) {
       }`}
     >
       <span>
-        <span className="block text-sm font-semibold">{titulo}</span>
+        <span className="block text-sm font-semibold">{titulo}{daEmpresa && <SeloDaEmpresa />}</span>
         <span className="block text-xs text-stone-400">{detalhe}</span>
       </span>
       <span className="text-stone-300">›</span>
     </button>
   )
+}
+
+// Item que a empresa cadastrou (só ela vê)
+function SeloDaEmpresa() {
+  return <span className="ml-1.5 rounded-full bg-brand-500 px-1.5 py-0.5 align-middle text-[10px] font-semibold text-white">DA EMPRESA</span>
 }
 
 function BotaoNovo({ onClick, children }) {

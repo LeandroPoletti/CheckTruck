@@ -3,10 +3,10 @@ import { authService, usuarioService } from './index'
 import { lerSessao, salvarSessao } from './api'
 
 // Cargo, permissões e empresa vêm de GET /api/Usuario/me, gravados na sessão no login.
-// Sessão antiga, sem permissões ou sem empresa, obriga a entrar de novo.
+// Sessão antiga, sem permissões ou sem empresa, obriga a entrar de novo (o dono do sistema tem empresa null).
 export function obterUsuario() {
   const sessao = lerSessao()
-  if (!Array.isArray(sessao?.permissoes) || !sessao.empresa) return null
+  if (!Array.isArray(sessao?.permissoes) || sessao.empresa === undefined) return null
   return {
     id: sessao.usuarioId,
     nome: sessao.nome,

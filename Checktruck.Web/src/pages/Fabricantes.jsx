@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
 import { Button, CampoBusca } from '../components/ui/Form'
-import AcoesLinha from '../components/ui/AcoesLinha'
+import { AcoesDoCatalogo } from '../components/ui/AcoesLinha'
 import FabricanteModal from '../components/modals/FabricanteModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { fabricanteService } from '../services'
@@ -78,7 +78,7 @@ export default function Fabricantes() {
                   <td className="px-5 py-3.5 font-semibold text-stone-800">{f.nome}</td>
                   <td className="px-5 py-3.5 text-stone-500">{f.pais ?? '—'}</td>
                   <td className="px-5 py-3.5 text-right">
-                    <AcoesLinha onEditar={() => setModal({ registro: f })} onExcluir={() => setExcluindo(f)} />
+                    <AcoesDoCatalogo item={f} onEditar={() => setModal({ registro: f })} onExcluir={() => setExcluindo(f)} />
                   </td>
                 </tr>
               ))}

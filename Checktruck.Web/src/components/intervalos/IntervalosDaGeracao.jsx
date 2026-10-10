@@ -6,12 +6,16 @@ import AcoesLinha from '../ui/AcoesLinha'
 import IntervaloModal from '../modals/IntervaloModal'
 import ConfirmarExclusaoModal from '../modals/ConfirmarExclusaoModal'
 import { intervaloService, filtro } from '../../services'
+import { obterUsuario } from '../../services/sessao'
+import { ehDonoDoSistema } from '../../data/acesso'
 import { formatKm, nomeDoModelo, agruparPorModelo } from '../../data/domain'
 import { montarLinhas, textoPrazo } from '../../data/intervalos'
 
-// Aba "Por geração": todos os itens, com o intervalo da geração ou o padrão do sistema que vale para ela.
+// Aba "Por geração": todos os itens, com o intervalo que vale para a geração (da empresa, de fábrica ou o padrão).
+// O dono do sistema cadastra o de fábrica; a empresa cadastra o dela, que vale antes do de fábrica.
 // tipos já vêm filtrados pelo componente escolhido na página.
 export default function IntervalosDaGeracao({ geracoes, tipos, geracaoId, onGeracao }) {
+  const dono = ehDonoDoSistema(obterUsuario())
   const geracao = geracoes.find((g) => g.id === geracaoId)
   const [dados, setDados] = useState({ geracaoId: null, intervalos: [], padrao: [] })
   const [erro, setErro] = useState(null)
@@ -39,6 +43,13 @@ export default function IntervalosDaGeracao({ geracoes, tipos, geracaoId, onGera
 
   const carregado = dados.geracaoId === geracaoId
   const linhas = carregado ? montarLinhas(tipos, { daGeracao: dados.intervalos, padrao: dados.padrao }) : []
+
+  // O intervalo que quem está logado cadastra e muda aqui: o de fábrica (dono do sistema) ou o da empresa
+  const meu = (l) => (dono ? l.fabrica : l.empresa)
+
+  // Se tirar esse intervalo, os caminhões da geração passam a usar...
+  const oQueVoltaAValer = (l) =>
+    !dono && l.fabrica ? 'o intervalo de fábrica' : l.padrao ? 'o padrão do sistema' : 'nada (o item deixa de ser acompanhado)'
 
   return (
     <>
@@ -69,17 +80,17 @@ export default function IntervalosDaGeracao({ geracoes, tipos, geracaoId, onGera
               <tr><td colSpan={6} className="px-5 py-8 text-center text-sm text-stone-400">Carregando intervalos da geração…</td></tr>
             )}
             {linhas.map((l) => {
-              const proprio = l.origem === 'geracao'
+              const proprio = !!meu(l)
               return (
                 <tr key={l.tipo.id} className="border-b border-stone-100 last:border-0">
                   <td className="px-5 py-3.5">
                     <p className="font-semibold text-stone-800">{l.tipo.nome}</p>
-                    <p className="text-xs text-stone-400">{l.tipo.componente}{l.geracao?.fonte && ` · ${l.geracao.fonte}`}</p>
+                    <p className="text-xs text-stone-400">{l.tipo.componente}{l.vale?.fonte && ` · ${l.vale.fonte}`}</p>
                   </td>
                   <td className={`px-5 py-3.5 ${proprio ? 'text-stone-700' : 'text-stone-400'}`}>{l.vale ? formatKm(l.vale.intervaloKm) : '—'}</td>
                   <td className="px-5 py-3.5">
-                    {l.geracao?.intervaloKmPrimeira
-                      ? <span className="font-semibold text-amber-600">{formatKm(l.geracao.intervaloKmPrimeira)}</span>
+                    {l.vale?.intervaloKmPrimeira
+                      ? <span className="font-semibold text-amber-600">{formatKm(l.vale.intervaloKmPrimeira)}</span>
                       : <span className="text-stone-400">{l.vale ? 'igual ao intervalo' : '—'}</span>}
                   </td>
                   <td className={`px-5 py-3.5 ${proprio ? 'text-stone-700' : 'text-stone-400'}`}>{l.vale ? textoPrazo(l.vale.intervaloMeses) : '—'}</td>
@@ -89,7 +100,7 @@ export default function IntervalosDaGeracao({ geracoes, tipos, geracaoId, onGera
                       <AcoesLinha onEditar={() => setModal(l)} onExcluir={() => setExcluindo(l)} />
                     ) : (
                       <button onClick={() => setModal(l)} className="whitespace-nowrap text-xs font-semibold text-brand-700 hover:text-brand-900">
-                        Definir pra geração
+                        {dono ? 'Definir de fábrica' : 'Definir pra empresa'}
                       </button>
                     )}
                   </td>
@@ -110,8 +121,8 @@ export default function IntervalosDaGeracao({ geracoes, tipos, geracaoId, onGera
         <IntervaloModal
           geracao={geracao}
           tipo={modal.tipo}
-          intervalo={modal.geracao}
-          sugestao={modal.padrao}
+          intervalo={meu(modal)}
+          sugestao={modal.vale}
           onClose={() => setModal(null)}
           onSalvo={recarregar}
         />
@@ -119,12 +130,12 @@ export default function IntervalosDaGeracao({ geracoes, tipos, geracaoId, onGera
       <ConfirmarExclusaoModal
         open={!!excluindo}
         onClose={() => setExcluindo(null)}
-        titulo="Excluir intervalo da geração"
+        titulo={dono ? 'Excluir intervalo de fábrica' : 'Excluir intervalo da empresa'}
         descricao={excluindo && `Excluir o intervalo de "${excluindo.tipo.nome}" da geração ${geracao && `${nomeDoModelo(geracao)} · ${geracao.nome}`}? Os caminhões desta geração passam a usar ${
-          excluindo.padrao ? 'o padrão do sistema' : 'nada (o item deixa de ser acompanhado)'
-        }, menos os que têm intervalo próprio.`}
+          oQueVoltaAValer(excluindo)
+        }, menos os que têm intervalo ${dono ? 'da empresa ou ' : ''}do caminhão.`}
         onConfirmar={async () => {
-          await intervaloService.remover(excluindo.geracao.id)
+          await intervaloService.remover(meu(excluindo).id)
           recarregar()
         }}
       />

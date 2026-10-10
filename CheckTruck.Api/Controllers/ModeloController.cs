@@ -11,12 +11,13 @@ namespace CheckTruck.Api.Controllers;
 /// <summary>
 /// Modelos (linhas) de cada fabricante: FH, FM, R, Actros... Filtro útil: ?$filter=Fabricante/Id eq 1
 /// Ler: basta estar logado (os formulários usam a lista). Criar, editar e apagar: Cadastros
+/// (o modelo do sistema só o dono do sistema muda; a empresa cadastra os dela)
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
 [ExigePermissao]
 public class ModeloController(
-    ServicoCrud<Modelo> servicoCrud,
+    ServicoCatalogo<Modelo> servicoCrud,
     ServicoCrud<Fabricante> servicoFabricante,
     ServicoCrud<Geracao> servicoGeracao,
     ILogger<Modelo> logger)
@@ -61,7 +62,7 @@ public class ModeloController(
     [ExigePermissao(Permissao.Cadastros)]
     public IActionResult Delete(long id)
     {
-        var geracoes = servicoGeracao.Query(g => g.Modelo.Id == id).Count();
+        var geracoes = servicoGeracao.QueryTodasAsEmpresas(g => g.Modelo.Id == id).Count();
         if (geracoes > 0)
         {
             return BadRequest($"Não é possível excluir: o modelo possui {geracoes} geração(ões) cadastrada(s).");

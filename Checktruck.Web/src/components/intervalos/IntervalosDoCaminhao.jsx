@@ -9,7 +9,7 @@ import { intervaloService, intervaloVeiculoService, filtro } from '../../service
 import { formatKm, nomeDoCaminhao } from '../../data/domain'
 import { montarLinhas, textoPrazo } from '../../data/intervalos'
 
-// Aba "Por caminhão": para cada item, o que vale para o caminhão escolhido (dele, da geração ou o padrão).
+// Aba "Por caminhão": para cada item, o que vale para o caminhão escolhido (dele, da empresa, de fábrica ou o padrão).
 // O intervalo próprio do caminhão (ex.: plano da concessionária) passa na frente dos outros.
 // tipos já vêm filtrados pelo componente escolhido na página.
 export default function IntervalosDoCaminhao({ veiculos, tipos, veiculoId, onVeiculo }) {
@@ -47,7 +47,9 @@ export default function IntervalosDoCaminhao({ veiculos, tipos, veiculoId, onVei
 
   // Se tirar o intervalo do caminhão, ele volta a usar...
   const oQueVoltaAValer = (l) =>
-    l.geracao ? 'o intervalo da geração' : l.padrao ? 'o padrão do sistema' : 'nada (o item deixa de ser acompanhado)'
+    l.empresa ? 'o intervalo da empresa'
+      : l.fabrica ? 'o intervalo de fábrica'
+        : l.padrao ? 'o padrão do sistema' : 'nada (o item deixa de ser acompanhado)'
 
   return (
     <>

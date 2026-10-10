@@ -1,11 +1,12 @@
 // Todas as telas depois do login: rota, item do menu e a permissão que libera.
 // O App monta as rotas e o menu a partir desta lista (item sem label não aparece no menu).
 // Itens com o mesmo grupo, em sequência, viram um grupo que abre e fecha no menu.
+// daEmpresa: a tela mostra dados da empresa e não abre para o dono do sistema, que não é de nenhuma.
 import {
   LayoutDashboard, Truck, ShieldCheck, LibraryBig, Clock, MessageSquareWarning, ClipboardList,
   Globe, Factory, Layers, Boxes, Wrench, HardHat,
 } from 'lucide-react'
-import { GESTAO, pode } from './data/acesso'
+import { GESTAO, pode, ehDonoDoSistema } from './data/acesso'
 import Dashboard from './pages/Dashboard'
 import Veiculos from './pages/Veiculos'
 import VeiculoDetalhe from './pages/VeiculoDetalhe'
@@ -40,13 +41,16 @@ export const PAGINAS = [
   { path: '/modelos', label: 'Modelos', icon: Boxes, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Modelos },
   { path: '/geracoes', label: 'Gerações', icon: Layers, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Geracoes },
   { path: '/tipos-manutencao', label: 'Tipos de manutenção', icon: Wrench, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: TiposManutencao },
-  { path: '/mecanicos', label: 'Mecânicos', icon: HardHat, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Mecanicos },
+  { path: '/mecanicos', label: 'Mecânicos', icon: HardHat, grupo: 'CADASTROS', permissao: 'Cadastros', daEmpresa: true, Pagina: Mecanicos },
 
   { path: '/acesso', label: 'Acesso', icon: ShieldCheck, permissao: GESTAO, Pagina: Acesso },
 ]
 
+// A pessoa tem a permissão da tela (e é de uma empresa, se a tela é de dados da empresa)
+export const podeAbrir = (usuario, pagina) => pode(usuario, pagina.permissao) && !(pagina.daEmpresa && ehDonoDoSistema(usuario))
+
 // Itens do menu que a pessoa pode usar
-export const itensDoMenu = (usuario) => PAGINAS.filter((p) => p.label && pode(usuario, p.permissao))
+export const itensDoMenu = (usuario) => PAGINAS.filter((p) => p.label && podeAbrir(usuario, p))
 
 // Primeira tela do menu que a pessoa pode usar (toda permissão abre pelo menos uma tela)
 export const paginaInicial = (usuario) => itensDoMenu(usuario)[0]?.path ?? '/dashboard'

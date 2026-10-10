@@ -78,6 +78,7 @@ builder.Services.AddScoped<IRepositorioCrud, RepositorioCrud>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUsuarioLogado, UsuarioLogadoHttp>();
 builder.Services.AddScoped(typeof(ServicoCrud<>));
+builder.Services.AddScoped(typeof(ServicoCatalogo<>));
 builder.Services.AddScoped<ServicoVeiculo>();
 builder.Services.AddScoped<ServicoSituacaoVeiculo>();
 builder.Services.AddScoped<ServicoManutencao>();
@@ -141,6 +142,20 @@ using (var scope = app.Services.CreateScope())
         }
 
         await userManager.UpdateAsync(admin);
+    }
+
+    // Dono do sistema: cuida do catálogo de todas as empresas e não é de nenhuma (sem CPF e sem empresa)
+    if (await userManager.FindByEmailAsync(ServicoUsuario.EmailDonoDoSistema) is null)
+    {
+        await userManager.CreateAsync(new Usuario
+        {
+            Nome = "Dono do sistema",
+            Email = ServicoUsuario.EmailDonoDoSistema,
+            UserName = ServicoUsuario.EmailDonoDoSistema,
+            Cargo = Cargo.DonoDoSistema,
+            Permissoes = Permissao.Cadastros | Permissao.Intervalos,
+            Ativo = true
+        }, "Dono@123");
     }
 
     if (!context.Paises.Any(p => p.Nome == "Brasil"))

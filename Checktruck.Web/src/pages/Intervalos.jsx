@@ -4,17 +4,21 @@ import { Select } from '../components/ui/Form'
 import IntervalosDaGeracao from '../components/intervalos/IntervalosDaGeracao'
 import IntervalosDoCaminhao from '../components/intervalos/IntervalosDoCaminhao'
 import { geracaoService, tipoManutencaoService, intervaloVeiculoService } from '../services'
+import { obterUsuario } from '../services/sessao'
+import { ehDonoDoSistema } from '../data/acesso'
 import { ordemDasGeracoes } from '../data/domain'
 
+// O dono do sistema não é de nenhuma empresa: não tem caminhão, só a aba da geração
 const ABAS = [
   { id: 'geracao', label: 'Por geração' },
-  { id: 'caminhao', label: 'Por caminhão' },
+  { id: 'caminhao', label: 'Por caminhão', daEmpresa: true },
 ]
 
-// Intervalos de troca. Vale o primeiro que existir: do caminhão → da geração → padrão do sistema.
+// Intervalos de troca. Vale o primeiro que existir: do caminhão → da empresa → de fábrica → padrão do sistema.
 // A geração e o caminhão escolhidos ficam aqui para não se perderem ao trocar de aba.
 // Sem escolha, abre na geração do primeiro caminhão da frota.
 export default function Intervalos() {
+  const dono = ehDonoDoSistema(obterUsuario())
   const [aba, setAba] = useState('geracao')
   const [componente, setComponente] = useState('todos')
   const [geracaoId, setGeracaoId] = useState(null)
@@ -54,12 +58,12 @@ export default function Intervalos() {
     <>
       <PageHeader
         title="Intervalos de troca"
-        subtitle="Vale o primeiro que existir: do caminhão → da geração → padrão do sistema. Vence o que chegar primeiro: km ou prazo."
+        subtitle="Vale o primeiro que existir: do caminhão → da empresa → de fábrica → padrão do sistema. Vence o que chegar primeiro: km ou prazo."
       />
 
       <div className="mb-5 flex items-end justify-between gap-4 border-b border-stone-200">
         <div className="flex gap-6">
-          {ABAS.map((a) => (
+          {ABAS.filter((a) => !(a.daEmpresa && dono)).map((a) => (
             <button
               key={a.id}
               onClick={() => setAba(a.id)}

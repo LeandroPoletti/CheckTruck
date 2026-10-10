@@ -19,6 +19,10 @@ public class TipoManutencaoRequestDto
 public class TipoManutencaoResponseDto
 {
     public long Id { get; set; }
+
+    /// <summary>Do catálogo do sistema (só o dono do sistema muda). false = da empresa de quem está logado.</summary>
+    public bool DoSistema { get; set; }
+
     public string Nome { get; set; }
     public string Descricao { get; set; }
     public Componente Componente { get; set; }
@@ -29,6 +33,7 @@ public static class TipoManutencaoDtoExtensions
     public static TipoManutencaoResponseDto ToResponseDto(this TipoManutencao entidade) => new()
     {
         Id = entidade.Id,
+        DoSistema = entidade.EmpresaId is null,
         Nome = entidade.Nome,
         Descricao = entidade.Descricao,
         Componente = entidade.Componente

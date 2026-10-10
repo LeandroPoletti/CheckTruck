@@ -17,4 +17,7 @@ public enum Cargo
     TecnicoLogistica = 6,
     AuxiliarLogistica = 7,
     Motorista = 8,
+
+    /// <summary>Dono do CheckTruck: cuida do catálogo do sistema e não é de nenhuma empresa. Só existe o criado pelo sistema.</summary>
+    DonoDoSistema = 9,
 }

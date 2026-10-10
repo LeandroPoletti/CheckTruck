@@ -12,6 +12,10 @@ public class PaisRequestDto
 public class PaisResponseDto
 {
     public long Id { get; set; }
+
+    /// <summary>Do catálogo do sistema (só o dono do sistema muda). false = da empresa de quem está logado.</summary>
+    public bool DoSistema { get; set; }
+
     public string Nome { get; set; }
 }
 
@@ -20,6 +24,7 @@ public static class PaisDtoExtensions
     public static PaisResponseDto ToResponseDto(this Pais entidade) => new()
     {
         Id = entidade.Id,
+        DoSistema = entidade.EmpresaId is null,
         Nome = entidade.Nome
     };
 

@@ -2,9 +2,12 @@ import { useState } from 'react'
 import { intervaloService, intervaloVeiculoService } from '../../services'
 import { Modal } from '../ui/Overlay'
 import { Field, Input, Button } from '../ui/Form'
+import { obterUsuario } from '../../services/sessao'
+import { ehDonoDoSistema } from '../../data/acesso'
 import { nomeDoModelo } from '../../data/domain'
 
 // Intervalo de um item para uma geração (geracao) ou para um caminhão só (veiculo). O item (tipo) é fixo.
+// Na geração, o dono do sistema define o de fábrica e a empresa define o dela.
 // intervalo = o que já existe (editar); sem ele, define um novo começando pela sugestão (o que vale hoje).
 // O da geração também tem km da 1ª troca (amaciamento) e fonte. Quem abre a tela só renderiza este modal quando ele está aberto.
 export default function IntervaloModal({ geracao, veiculo, tipo, intervalo, sugestao, onClose, onSalvo }) {
@@ -12,7 +15,7 @@ export default function IntervaloModal({ geracao, veiculo, tipo, intervalo, suge
   const base = intervalo ?? sugestao
   const [form, setForm] = useState(() => ({
     intervaloKm: base?.intervaloKm ?? '',
-    intervaloKmPrimeira: intervalo?.intervaloKmPrimeira ?? '',
+    intervaloKmPrimeira: base?.intervaloKmPrimeira ?? '',
     intervaloMeses: base?.intervaloMeses ?? '',
     fonte: intervalo?.fonte ?? '',
     observacao: intervalo?.observacao ?? '',
@@ -52,7 +55,9 @@ export default function IntervaloModal({ geracao, veiculo, tipo, intervalo, suge
     <Modal
       open
       onClose={onClose}
-      title={intervalo ? 'Editar intervalo' : daGeracao ? 'Definir intervalo da geração' : 'Definir intervalo do caminhão'}
+      title={intervalo ? 'Editar intervalo'
+        : !daGeracao ? 'Definir intervalo do caminhão'
+          : ehDonoDoSistema(obterUsuario()) ? 'Definir intervalo de fábrica' : 'Definir intervalo da empresa'}
       subtitle={`${daGeracao ? `${nomeDoModelo(geracao)} · ${geracao.nome}` : veiculo.placa} · ${tipo.nome}`}
       width="max-w-lg"
       footer={

@@ -35,6 +35,10 @@ public class GeracaoRequestDto
 public class GeracaoResponseDto
 {
     public long Id { get; set; }
+
+    /// <summary>Do catálogo do sistema (só o dono do sistema muda). false = da empresa de quem está logado.</summary>
+    public bool DoSistema { get; set; }
+
     public string Nome { get; set; }
     public ModeloResumoDto Modelo { get; set; }
     public FabricanteResumoDto Fabricante { get; set; }
@@ -53,6 +57,7 @@ public static class GeracaoDtoExtensions
     public static GeracaoResponseDto ToResponseDto(this Geracao entidade) => new()
     {
         Id = entidade.Id,
+        DoSistema = entidade.EmpresaId is null,
         Nome = entidade.Nome,
         Modelo = entidade.Modelo?.ToResumoDto(),
         Fabricante = entidade.Modelo?.Fabricante?.ToResumoDto(),

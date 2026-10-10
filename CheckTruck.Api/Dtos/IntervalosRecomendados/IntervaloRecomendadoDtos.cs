@@ -30,6 +30,10 @@ public class IntervaloRecomendadoRequestDto
 public class IntervaloRecomendadoResponseDto
 {
     public long Id { get; set; }
+
+    /// <summary>Do catálogo do sistema (só o dono do sistema muda). false = da empresa de quem está logado.</summary>
+    public bool DoSistema { get; set; }
+
     public GeracaoResumoDto Geracao { get; set; }
     public TipoManutencaoResumoDto TipoManutencao { get; set; }
     public int IntervaloKm { get; set; }
@@ -54,6 +58,7 @@ public static class IntervaloRecomendadoDtoExtensions
     public static IntervaloRecomendadoResponseDto ToResponseDto(this IntervaloRecomendado entidade) => new()
     {
         Id = entidade.Id,
+        DoSistema = entidade.EmpresaId is null,
         Geracao = entidade.Geracao?.ToResumoDto(),
         TipoManutencao = entidade.TipoManutencao?.ToResumoDto(),
         IntervaloKm = entidade.IntervaloKm,

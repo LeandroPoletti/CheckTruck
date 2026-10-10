@@ -4,9 +4,11 @@ using CheckTruck.Dominio.Interfaces;
 namespace CheckTruck.Dominio.Entidades;
 
 /// <summary>Intervalo de troca de um item para os caminhões de uma geração (ex.: manual do fabricante).</summary>
-public class IntervaloRecomendado : EntidadeBanco
+public class IntervaloRecomendado : ItemDoCatalogo
 {
     public long Id { get; set; }
+    /// <summary>null = do catálogo do sistema; senão, a empresa que cadastrou (só ela vê).</summary>
+    public long? EmpresaId { get; set; }
     [Required]
     public Geracao Geracao { get; set; }
     [Required]

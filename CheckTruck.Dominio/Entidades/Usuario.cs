@@ -12,10 +12,13 @@ public class Usuario : IdentityUser
 {
     public string Nome { get; set; } = "";
 
-    /// <summary>Empresa da pessoa: ela só vê e mexe nos dados dessa empresa. O e-mail (login) não repete em nenhuma.</summary>
-    public long EmpresaId { get; set; }
+    /// <summary>
+    /// Empresa da pessoa: ela só vê e mexe nos dados dessa empresa. O e-mail (login) não repete em nenhuma.
+    /// Só o dono do sistema fica sem empresa (null).
+    /// </summary>
+    public long? EmpresaId { get; set; }
 
-    /// <summary>Só números. Obrigatório para todos, menos o admin criado pelo sistema.</summary>
+    /// <summary>Só números. Obrigatório para todos, menos o admin e o dono do sistema (criados pelo sistema).</summary>
     public string? Cpf { get; set; }
 
     public Cargo Cargo { get; set; }

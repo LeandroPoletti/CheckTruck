@@ -52,7 +52,7 @@ export default function Sidebar({ usuario, itens }) {
           <span className="h-2.5 w-2.5 rounded-full bg-brand-400" />
           <span className="text-[15px] font-bold text-white">CheckTruck</span>
         </div>
-        <p className="mt-1.5 truncate text-sm font-semibold text-brand-100" title={usuario.empresa}>{usuario.empresa}</p>
+        {usuario.empresa && <p className="mt-1.5 truncate text-sm font-semibold text-brand-100" title={usuario.empresa}>{usuario.empresa}</p>}
         <p className="mt-0.5 text-[10px] font-semibold tracking-widest text-brand-300">
           {nomeCargo(usuario.cargo).toUpperCase()}
         </p>

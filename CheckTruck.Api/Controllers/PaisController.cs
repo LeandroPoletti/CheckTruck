@@ -8,10 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace CheckTruck.Api.Controllers;
 
 // Ler: basta estar logado (os formulários usam a lista). Criar, editar e apagar: Cadastros
+// (o país do sistema só o dono do sistema muda; a empresa cadastra os dela)
 [ApiController]
 [Route("api/[controller]")]
 [ExigePermissao]
-public class PaisController(ServicoCrud<Pais> servicoCrud, ServicoCrud<Fabricante> servicoFabricante, ILogger<Pais> logger)
+public class PaisController(ServicoCatalogo<Pais> servicoCrud, ServicoCrud<Fabricante> servicoFabricante, ILogger<Pais> logger)
     : CrudController<Pais, PaisResponseDto>(servicoCrud, "país", logger, p => p.ToResponseDto())
 {
     [HttpGet]
@@ -32,7 +33,7 @@ public class PaisController(ServicoCrud<Pais> servicoCrud, ServicoCrud<Fabricant
     [ExigePermissao(Permissao.Cadastros)]
     public IActionResult Delete(long id)
     {
-        var fabricantes = servicoFabricante.Query(f => f.PaisOrigem.Id == id).Count();
+        var fabricantes = servicoFabricante.QueryTodasAsEmpresas(f => f.PaisOrigem.Id == id).Count();
         if (fabricantes > 0)
         {
             return BadRequest($"Não é possível excluir: o país possui {fabricantes} fabricante(s) cadastrado(s).");

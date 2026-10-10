@@ -9,11 +9,12 @@ using Microsoft.EntityFrameworkCore;
 namespace CheckTruck.Api.Controllers;
 
 // Ler: basta estar logado (os formulários usam a lista). Criar, editar e apagar: Cadastros
+// (o fabricante do sistema só o dono do sistema muda; a empresa cadastra os dela)
 [ApiController]
 [Route("api/[controller]")]
 [ExigePermissao]
 public class FabricanteController(
-    ServicoCrud<Fabricante> servicoCrud,
+    ServicoCatalogo<Fabricante> servicoCrud,
     ServicoCrud<Pais> servicoPais,
     ServicoCrud<Modelo> servicoModelo,
     ILogger<Fabricante> logger)
@@ -58,7 +59,7 @@ public class FabricanteController(
     [ExigePermissao(Permissao.Cadastros)]
     public IActionResult Delete(long id)
     {
-        var modelos = servicoModelo.Query(m => m.Fabricante.Id == id).Count();
+        var modelos = servicoModelo.QueryTodasAsEmpresas(m => m.Fabricante.Id == id).Count();
         if (modelos > 0)
         {
             return BadRequest($"Não é possível excluir: o fabricante possui {modelos} modelo(s) cadastrado(s).");

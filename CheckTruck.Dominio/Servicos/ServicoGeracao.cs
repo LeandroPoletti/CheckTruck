@@ -9,13 +9,15 @@ namespace CheckTruck.Dominio.Servicos;
 /// Gerações de um modelo, com as potências em que foram vendidas. As potências chegam junto com a
 /// geração (lista de cv): ao salvar, entram as novas e saem as que não vieram. Potência com caminhão
 /// cadastrado não pode sair, e geração com caminhão ou intervalo cadastrado não pode ser excluída.
+/// A geração do sistema só o dono do sistema muda (ver <see cref="ServicoCatalogo{T}"/>).
 /// </summary>
 public class ServicoGeracao(
     IRepositorioCrud repositorioCrud,
     ServicoCrud<Potencia> servicoPotencia,
     ServicoCrud<Veiculo> servicoVeiculo,
     ServicoCrud<IntervaloRecomendado> servicoIntervalo,
-    ILogger<ServicoGeracao> logger) : ServicoCrud<Geracao>(repositorioCrud, logger)
+    IUsuarioLogado usuarioLogado,
+    ILogger<ServicoGeracao> logger) : ServicoCatalogo<Geracao>(repositorioCrud, usuarioLogado, logger)
 {
     public const int PotenciaMinimaCv = 100;
     public const int PotenciaMaximaCv = 1000;
@@ -65,7 +67,7 @@ public class ServicoGeracao(
 
     public override Geracao? Atualizar(Geracao entidade)
     {
-        if (!Valida(entidade))
+        if (!PodeMexer(entidade.Id) || !Valida(entidade))
         {
             return null;
         }
@@ -107,7 +109,7 @@ public class ServicoGeracao(
     public override Geracao? Deletar(long id)
     {
         var veiculos = servicoVeiculo.QueryTodasAsEmpresas(v => v.Potencia.Geracao.Id == id).Count();
-        var intervalos = servicoIntervalo.Query(i => i.Geracao.Id == id).Count();
+        var intervalos = servicoIntervalo.QueryTodasAsEmpresas(i => i.Geracao.Id == id).Count();
         if (veiculos > 0 || intervalos > 0)
         {
             Mensagens.Add($"Não dá para excluir: a geração tem {veiculos} caminhão(ões) e {intervalos} intervalo(s) cadastrado(s).");

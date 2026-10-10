@@ -4,13 +4,14 @@ import { toId, toApiId, anoParaApi, anoDaApi, dataParaApi, dataDaApi } from './a
 import { COMPONENTES, NORMAS } from '../data/domain'
 
 // ---------------------------------------------------------------------------
-// Catálogo
+// Catálogo — doSistema: item do catálogo do sistema (só o dono do sistema muda); false = da empresa
 // ---------------------------------------------------------------------------
-export const paisFromApi = (dto) => ({ id: toId(dto.id), nome: dto.nome })
+export const paisFromApi = (dto) => ({ id: toId(dto.id), doSistema: dto.doSistema, nome: dto.nome })
 export const paisToApi = (p) => ({ nome: p.nome })
 
 export const fabricanteFromApi = (dto) => ({
   id: toId(dto.id),
+  doSistema: dto.doSistema,
   nome: dto.nome,
   paisOrigemId: toId(dto.paisOrigem?.id),
   pais: dto.paisOrigem?.nome ?? null,
@@ -20,6 +21,7 @@ export const fabricanteToApi = (f) => ({ nome: f.nome, paisOrigemId: toApiId(f.p
 // Modelo = linha do fabricante (FH, FM, R, Actros...)
 export const modeloFromApi = (dto) => ({
   id: toId(dto.id),
+  doSistema: dto.doSistema,
   nome: dto.nome,
   fabricanteId: toId(dto.fabricante?.id),
   fabricanteNome: dto.fabricante?.nome ?? null,
@@ -30,6 +32,7 @@ export const modeloToApi = (m) => ({ nome: m.nome, fabricanteId: toApiId(m.fabri
 // Os anos são o ano-modelo (número); anoFim null = ainda é vendida.
 export const geracaoFromApi = (dto) => ({
   id: toId(dto.id),
+  doSistema: dto.doSistema,
   nome: dto.nome,
   modeloId: toId(dto.modelo?.id),
   modeloNome: dto.modelo?.nome ?? null,
@@ -57,6 +60,7 @@ export const geracaoToApi = (g) => ({
 
 export const tipoManutencaoFromApi = (dto) => ({
   id: toId(dto.id),
+  doSistema: dto.doSistema,
   nome: dto.nome,
   descricao: dto.descricao,
   componenteId: dto.componente,
@@ -68,9 +72,11 @@ export const tipoManutencaoToApi = (t) => ({
   componente: Number(t.componenteId),
 })
 
-// Na API, intervaloKmPrimeira = 0 é "igual ao intervalo" e intervaloMeses = 0 é "vence só por km" (null no front)
+// Na API, intervaloKmPrimeira = 0 é "igual ao intervalo" e intervaloMeses = 0 é "vence só por km" (null no front).
+// doSistema: intervalo de fábrica da geração; false = o da empresa, que vale antes dele
 export const intervaloFromApi = (dto) => ({
   id: toId(dto.id),
+  doSistema: dto.doSistema,
   geracaoId: toId(dto.geracao?.id),
   tipoId: toId(dto.tipoManutencao?.id),
   intervaloKm: dto.intervaloKm,
@@ -281,7 +287,7 @@ export const usuarioFromApi = (dto) => ({
   adminDoSistema: dto.adminDoSistema,
   ativo: dto.ativo,
 })
-// Quem está logado: o acesso e o nome da empresa (aparece no menu)
+// Quem está logado: o acesso e o nome da empresa (aparece no menu; null para o dono do sistema)
 export const usuarioLogadoFromApi = (dto) => ({ ...usuarioFromApi(dto), empresa: dto.empresa })
 export const usuarioToApi = (u) => ({
   nome: u.nome.trim(),

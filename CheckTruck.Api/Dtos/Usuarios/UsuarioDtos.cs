@@ -51,17 +51,17 @@ public class UsuarioResponseDto
     public bool Ativo { get; set; }
 }
 
-/// <summary>Quem está logado: os dados do acesso e o nome da empresa (aparece no menu).</summary>
+/// <summary>Quem está logado: os dados do acesso e o nome da empresa (aparece no menu; null para o dono do sistema).</summary>
 public class UsuarioLogadoResponseDto : UsuarioResponseDto
 {
-    public string Empresa { get; set; } = "";
+    public string? Empresa { get; set; }
 }
 
 public static class UsuarioDtoExtensions
 {
     public static UsuarioResponseDto ToResponseDto(this Usuario entidade) => Preencher(new UsuarioResponseDto(), entidade);
 
-    public static UsuarioLogadoResponseDto ToLogadoResponseDto(this Usuario entidade, string empresa) =>
+    public static UsuarioLogadoResponseDto ToLogadoResponseDto(this Usuario entidade, string? empresa) =>
         Preencher(new UsuarioLogadoResponseDto { Empresa = empresa }, entidade);
 
     private static T Preencher<T>(T dto, Usuario entidade) where T : UsuarioResponseDto

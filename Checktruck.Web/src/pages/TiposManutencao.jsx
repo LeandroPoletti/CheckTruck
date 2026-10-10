@@ -4,7 +4,7 @@ import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../c
 import { Button, CampoBusca } from '../components/ui/Form'
 import TipoManutencaoModal from '../components/modals/TipoManutencaoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
-import AcoesLinha from '../components/ui/AcoesLinha'
+import { AcoesDoCatalogo } from '../components/ui/AcoesLinha'
 import { tipoManutencaoService } from '../services'
 import { contemBusca } from '../data/domain'
 
@@ -80,7 +80,7 @@ export default function TiposManutencao() {
                   <td className="px-5 py-3.5 text-stone-500">{t.componente}</td>
                   <td className="px-5 py-3.5 text-stone-500">{t.descricao}</td>
                   <td className="px-5 py-3.5 text-right">
-                    <AcoesLinha onEditar={() => setModal({ registro: t })} onExcluir={() => setExcluindo(t)} />
+                    <AcoesDoCatalogo item={t} onEditar={() => setModal({ registro: t })} onExcluir={() => setExcluindo(t)} />
                   </td>
                 </tr>
               ))}

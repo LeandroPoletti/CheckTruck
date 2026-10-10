@@ -10,7 +10,8 @@ namespace CheckTruck.Dominio.Servicos;
 /// <summary>
 /// Calcula no servidor a situação de manutenção de cada veículo: para cada item, a próxima troca
 /// por km e por data, quanto falta e o status. Vence o que chegar primeiro (km ou data).
-/// O intervalo de cada item segue a prioridade caminhão → geração → padrão seguro.
+/// O intervalo de cada item segue a prioridade caminhão → empresa → fábrica → padrão seguro.
+/// A geração pode ter os dois: o de fábrica (do sistema) e o da empresa, que vale antes.
 /// </summary>
 public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<ServicoSituacaoVeiculo> logger)
 {
@@ -62,7 +63,7 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
     }
 
     /// <summary>
-    /// Intervalo que vale para um caminhão e um tipo de manutenção (caminhão → geração → padrão seguro).
+    /// Intervalo que vale para um caminhão e um tipo de manutenção (caminhão → empresa → fábrica → padrão seguro).
     /// null quando o veículo ou o tipo não existem, ou quando não há intervalo nem padrão para o item.
     /// </summary>
     public IntervaloResolvido? ResolverIntervalo(long veiculoId, long tipoManutencaoId)
@@ -81,15 +82,17 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
             .FirstOrDefault();
         var intervaloGeracao = repositorioCrud
             .Query<IntervaloRecomendado>(i => i.Geracao.Id == veiculo.GeracaoId && i.TipoManutencao.Id == tipoManutencaoId)
-            .Select(i => new { i.IntervaloKm, i.IntervaloMeses, i.IntervaloKmPrimeira })
+            .OrderByDescending(i => i.EmpresaId != null) // o da empresa vem antes do de fábrica
+            .Select(i => new { i.IntervaloKm, i.IntervaloMeses, i.IntervaloKmPrimeira, DaEmpresa = i.EmpresaId != null })
             .FirstOrDefault();
 
         (int km, int meses)? doVeiculo = intervaloVeiculo is null
             ? null
             : (intervaloVeiculo.IntervaloKm, intervaloVeiculo.IntervaloMeses);
-        (int km, int meses, int kmPrimeira)? daGeracao = intervaloGeracao is null
+        (int km, int meses, int kmPrimeira, bool daEmpresa)? daGeracao = intervaloGeracao is null
             ? null
-            : (intervaloGeracao.IntervaloKm, intervaloGeracao.IntervaloMeses, intervaloGeracao.IntervaloKmPrimeira);
+            : (intervaloGeracao.IntervaloKm, intervaloGeracao.IntervaloMeses, intervaloGeracao.IntervaloKmPrimeira,
+                intervaloGeracao.DaEmpresa);
 
         return IntervalosPadrao.Resolver(doVeiculo, daGeracao, componente.Value, veiculo.NormaEmissao);
     }
@@ -162,10 +165,11 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
                 i.IntervaloKm,
                 i.IntervaloMeses,
                 i.IntervaloKmPrimeira,
+                DaEmpresa = i.EmpresaId != null,
             })
             .ToList()
             .GroupBy(i => (i.GeracaoId, i.TipoId))
-            .ToDictionary(g => g.Key, g => g.First());
+            .ToDictionary(g => g.Key, g => g.OrderByDescending(i => i.DaEmpresa).First()); // o da empresa antes do de fábrica
 
         var intervalosVeiculo = repositorioCrud.Query<IntervaloVeiculo>(i => veiculoIds.Contains(i.Veiculo.Id))
             .Select(i => new
@@ -207,9 +211,9 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
                     intervalosVeiculo.TryGetValue((veiculo.VeiculoId, tipo.Id), out var iv)
                         ? (iv.IntervaloKm, iv.IntervaloMeses)
                         : null;
-                (int km, int meses, int kmPrimeira)? daGeracao =
+                (int km, int meses, int kmPrimeira, bool daEmpresa)? daGeracao =
                     intervalosGeracao.TryGetValue((veiculo.GeracaoId, tipo.Id), out var ig)
-                        ? (ig.IntervaloKm, ig.IntervaloMeses, ig.IntervaloKmPrimeira)
+                        ? (ig.IntervaloKm, ig.IntervaloMeses, ig.IntervaloKmPrimeira, ig.DaEmpresa)
                         : null;
 
                 var intervalo = IntervalosPadrao.Resolver(doVeiculo, daGeracao, tipo.Componente, veiculo.NormaEmissao);

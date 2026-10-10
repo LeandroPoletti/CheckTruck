@@ -8,9 +8,11 @@ namespace CheckTruck.Dominio.Entidades;
 /// Época de um modelo no Brasil (ex.: Volvo FH "Novo FH (FH 4)", ano-modelo 2015 a 2021, Euro 5, D13C).
 /// Os intervalos recomendados ficam na geração, e cada geração tem as potências em que foi vendida.
 /// </summary>
-public class Geracao : EntidadeBanco
+public class Geracao : ItemDoCatalogo
 {
     public long Id { get; set; }
+    /// <summary>null = do catálogo do sistema; senão, a empresa que cadastrou (só ela vê).</summary>
+    public long? EmpresaId { get; set; }
     [Required]
     public string Nome { get; set; }
     [Required]

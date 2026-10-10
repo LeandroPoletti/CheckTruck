@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
 import { Button, CampoBusca, Select } from '../components/ui/Form'
-import AcoesLinha from '../components/ui/AcoesLinha'
+import { AcoesDoCatalogo } from '../components/ui/AcoesLinha'
 import GeracaoModal from '../components/modals/GeracaoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { geracaoService } from '../services'
@@ -103,7 +103,7 @@ export default function Geracoes() {
                   </td>
                   <td className="px-5 py-3.5 text-stone-700">{g.potencias.map((p) => p.cv).join(' · ')}</td>
                   <td className="px-5 py-3.5 text-right">
-                    <AcoesLinha onEditar={() => setModal({ registro: g })} onExcluir={() => setExcluindo(g)} />
+                    <AcoesDoCatalogo item={g} onEditar={() => setModal({ registro: g })} onExcluir={() => setExcluindo(g)} />
                   </td>
                 </tr>
               ))}

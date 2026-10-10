@@ -64,19 +64,31 @@ npm run dev
 
 O front abre em `http://localhost:5173` e chama a API do endereço em `Checktruck.Web/.env.development`.
 
-**Primeiro acesso:** a API cria o admin do sistema, `admin@admin.com` com a senha `Admin@123`, na empresa
-Transportadora Almeida. Troque a senha fora do ambiente de desenvolvimento.
+**Primeiro acesso:** a API cria dois logins. Troque as senhas fora do ambiente de desenvolvimento.
+
+| Login | Senha | Quem é |
+|-------|-------|--------|
+| `admin@admin.com` | `Admin@123` | Admin da empresa Transportadora Almeida |
+| `dono@checktruck.com` | `Dono@123` | Dono do sistema: cuida do catálogo do sistema e não é de nenhuma empresa |
 
 ## Empresas
 
 Cada cliente do CheckTruck é uma **empresa**. Caminhões, ordens de serviço, chamados, mecânicos, intervalos por
-caminhão, histórico de km e acessos são da empresa: quem entra só vê e mexe nos da própria. O catálogo (países,
-fabricantes, modelos, gerações e potências), os intervalos da geração e os tipos de manutenção são de todas.
+caminhão, histórico de km e acessos são da empresa: quem entra só vê e mexe nos da própria.
+
+O catálogo (países, fabricantes, modelos, gerações com as potências, tipos de manutenção e intervalos da
+geração) tem dois tipos de item:
+
+- **Do sistema:** todas as empresas veem, e só o **dono do sistema** muda. Na tela aparece "Do sistema" no lugar
+  de Editar e Excluir.
+- **Da empresa:** o que a empresa cadastra (ex.: um fabricante que falta ou o plano de troca dela). Só ela vê e
+  muda, e aparece com a marca **DA EMPRESA**.
 
 Como funciona: essas tabelas têm a coluna `EmpresaId`, que o front nunca manda. O `Context` grava nela a
-empresa de quem está logado e filtra todas as consultas por ela (global query filter do EF Core); alterar ou
-excluir leva a empresa no WHERE, então um id de outra empresa não muda nada. Placa, chassi e CPF não repetem
-dentro da empresa, e o e-mail (login) não repete em nenhuma.
+empresa de quem está logado (no catálogo, o dono do sistema grava sem empresa) e filtra todas as consultas
+(global query filter do EF Core): nos dados da empresa, só os dela; no catálogo, os do sistema e os dela.
+Alterar ou excluir leva o dono do registro no WHERE, então um id de outro não muda nada. Placa, chassi e CPF
+não repetem dentro da empresa, e o e-mail (login) não repete em nenhuma.
 
 O banco começa com a empresa **Transportadora Almeida**, que fica com todos os dados de antes da separação.
 
@@ -87,6 +99,7 @@ Cada pessoa tem um **cargo** e as **permissões** que o Admin ou o Gestor marcar
 - **Cargos:** Admin, Gestor, Almoxarife, Mecânico, Chefe de Manutenção, Técnico de Logística, Auxiliar de Logística e Motorista.
 - **Admin e Gestor** têm todas as permissões e são os únicos que cadastram, editam e desativam acessos.
 - Acesso **desativado** não entra no sistema.
+- O **dono do sistema** é um login à parte, criado pelo sistema: só vê as telas do catálogo e os intervalos de fábrica.
 
 | Permissão | Libera |
 |-----------|--------|
@@ -104,8 +117,9 @@ Marcar Veículos, Atualizar km ou Ordem de serviço já liga o Ver frota.
 ## Regras principais
 
 - **Intervalo de troca:** vale o primeiro que existir: o do caminhão (ex.: plano da concessionária), o da
-  geração ou o padrão do sistema. Vence o que chegar primeiro: o km ou o prazo em meses. O padrão do óleo
-  do motor depende da norma da geração (Euro 6: 40.000 km; antes disso: 30.000 km).
+  empresa para a geração, o de fábrica da geração ou o padrão do sistema. Vence o que chegar primeiro: o km
+  ou o prazo em meses. O padrão do óleo do motor depende da norma da geração (Euro 6: 40.000 km; antes
+  disso: 30.000 km).
 - **Ordem de serviço:** o número é gerado em sequência. Se a OS não trouxer a próxima troca, o sistema
   calcula pelo intervalo (km da troca + intervalo). O km da OS atualiza o km do caminhão quando é maior.
   O motorista informado vira o motorista atual do caminhão, e quem lançou fica gravado com data e hora.
@@ -133,8 +147,9 @@ O caminhão é cadastrado em cascata: **fabricante → modelo → geração → 
 | Geração | Época do modelo no Brasil: anos (ano-modelo), norma de emissão, motor e câmbio | Novo FH (FH 4): 2015–2021, Euro 5, D13C |
 | Potência | Potências (cv) em que a geração foi vendida | 420, 460, 500, 540 |
 
-Os intervalos recomendados ficam na geração. Potência com caminhão cadastrado não pode sair da geração, e
-geração com caminhão ou intervalo não pode ser excluída.
+Os intervalos ficam na geração: o de fábrica (do sistema) e, se a empresa quiser, o dela, que vale antes.
+Potência com caminhão cadastrado não pode sair da geração, e geração com caminhão ou intervalo (de qualquer
+empresa) não pode ser excluída.
 
 ### Catálogo inicial
 

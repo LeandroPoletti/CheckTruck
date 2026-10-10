@@ -12,13 +12,17 @@ namespace CheckTruck.Api.Controllers;
 [Route("api/[controller]")]
 public class UsuarioController(ServicoUsuario servicoUsuario) : ControllerBase
 {
-    /// <summary>Quem está logado, com cargo, permissões e o nome da empresa (o front monta o menu com isso).</summary>
+    /// <summary>
+    /// Quem está logado, com cargo, permissões e o nome da empresa (o front monta o menu com isso).
+    /// O dono do sistema vem sem empresa.
+    /// </summary>
     [HttpGet("me")]
     [ExigePermissao]
     public ActionResult<UsuarioLogadoResponseDto> Me([FromServices] ServicoCrud<Empresa> servicoEmpresa)
     {
         var usuario = HttpContext.UsuarioLogado();
-        return usuario.ToLogadoResponseDto(servicoEmpresa.GetById(usuario.EmpresaId)!.Nome);
+        var empresa = usuario.EmpresaId is { } empresaId ? servicoEmpresa.GetById(empresaId)!.Nome : null;
+        return usuario.ToLogadoResponseDto(empresa);
     }
 
     /// <summary>Motoristas ativos, para escolher quem está com o caminhão.</summary>

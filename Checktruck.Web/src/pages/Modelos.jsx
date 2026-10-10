@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
 import { Button, CampoBusca, Select } from '../components/ui/Form'
-import AcoesLinha from '../components/ui/AcoesLinha'
+import { AcoesDoCatalogo } from '../components/ui/AcoesLinha'
 import ModeloModal from '../components/modals/ModeloModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { modeloService, fabricanteService, geracaoService } from '../services'
@@ -100,7 +100,7 @@ export default function Modelos() {
                       {doModelo.length > 0 && <span className="block text-xs text-stone-400">{doModelo.map((g) => g.nome).join(' · ')}</span>}
                     </td>
                     <td className="px-5 py-3.5 text-right">
-                      <AcoesLinha onEditar={() => setModal({ registro: m })} onExcluir={() => setExcluindo(m)} />
+                      <AcoesDoCatalogo item={m} onEditar={() => setModal({ registro: m })} onExcluir={() => setExcluindo(m)} />
                     </td>
                   </tr>
                 )

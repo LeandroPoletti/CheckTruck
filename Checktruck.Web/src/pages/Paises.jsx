@@ -4,7 +4,7 @@ import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../c
 import { Button, CampoBusca } from '../components/ui/Form'
 import PaisModal from '../components/modals/PaisModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
-import AcoesLinha from '../components/ui/AcoesLinha'
+import { AcoesDoCatalogo } from '../components/ui/AcoesLinha'
 import { paisService } from '../services'
 import { contemBusca } from '../data/domain'
 
@@ -75,7 +75,7 @@ export default function Paises() {
                 <tr key={p.id} className="border-b border-stone-100 last:border-0">
                   <td className="px-5 py-3.5 font-semibold text-stone-800">{p.nome}</td>
                   <td className="px-5 py-3.5 text-right">
-                    <AcoesLinha onEditar={() => setModal({ registro: p })} onExcluir={() => setExcluindo(p)} />
+                    <AcoesDoCatalogo item={p} onEditar={() => setModal({ registro: p })} onExcluir={() => setExcluindo(p)} />
                   </td>
                 </tr>
               ))}

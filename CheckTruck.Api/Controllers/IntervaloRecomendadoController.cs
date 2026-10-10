@@ -8,13 +8,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CheckTruck.Api.Controllers;
 
-// Intervalos recomendados de cada geração (ex.: manual do fabricante). Filtro útil: ?$filter=Geracao/Id eq 4
+// Intervalos de cada geração. Filtro útil: ?$filter=Geracao/Id eq 4
+// O de fábrica (do sistema, ex.: manual do fabricante) só o dono do sistema muda. A empresa pode ter o dela
+// para a mesma geração e item, que vale antes do de fábrica (doSistema diz qual é qual).
 // Ler: basta estar logado (a situação dos caminhões usa os intervalos). Criar, editar e apagar: Intervalos
 [ApiController]
 [Route("api/[controller]")]
 [ExigePermissao]
 public class IntervaloRecomendadoController(
-    ServicoCrud<IntervaloRecomendado> servicoCrud,
+    ServicoCatalogo<IntervaloRecomendado> servicoCrud,
     ServicoCrud<Geracao> servicoGeracao,
     ServicoCrud<TipoManutencao> servicoTipoManutencao,
     ServicoSituacaoVeiculo servicoSituacao,
@@ -79,12 +81,13 @@ public class IntervaloRecomendadoController(
         return PutCore(id, dto.ToEntity(geracao!, tipoManutencao!));
     }
 
-    /// <summary>Sem o intervalo da geração, os caminhões voltam ao intervalo próprio (se tiverem) ou ao padrão do sistema.</summary>
+    /// <summary>Sem esse intervalo, os caminhões da geração voltam ao próximo da fila (empresa → fábrica → padrão do sistema).</summary>
     [HttpDelete("{id:long}")]
     [ExigePermissao(Permissao.Intervalos)]
     public IActionResult Delete(long id) => DeleteCore(id);
 
-    // Geração e tipo existem, e a geração ainda não tem intervalo para esse tipo (um por geração e tipo)
+    // Geração e tipo existem, e quem está logado ainda não tem intervalo para esse tipo nessa geração
+    // (um de fábrica e um por empresa, para cada geração e tipo)
     private (Geracao? geracao, TipoManutencao? tipoManutencao, string? erro) ResolverRelacionados(
         IntervaloRecomendadoRequestDto dto, long? idIgnorar)
     {
@@ -100,12 +103,16 @@ public class IntervaloRecomendadoController(
             return (null, null, "Tipo de manutenção não encontrado.");
         }
 
+        var empresaId = HttpContext.UsuarioLogado().EmpresaId;
         var jaExiste = Servico
-            .Query(i => i.Id != idIgnorar && i.Geracao.Id == dto.GeracaoId && i.TipoManutencao.Id == dto.TipoManutencaoId)
+            .Query(i => i.Id != idIgnorar && i.EmpresaId == empresaId
+                && i.Geracao.Id == dto.GeracaoId && i.TipoManutencao.Id == dto.TipoManutencaoId)
             .Any();
         if (jaExiste)
         {
-            return (null, null, "Essa geração já tem intervalo para esse item. Altere o existente.");
+            return (null, null, empresaId is null
+                ? "Essa geração já tem intervalo de fábrica para esse item. Altere o existente."
+                : "Sua empresa já tem intervalo para esse item nessa geração. Altere o existente.");
         }
 
         return (geracao, tipoManutencao, null);

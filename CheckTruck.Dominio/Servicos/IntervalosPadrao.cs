@@ -29,11 +29,12 @@ public static class IntervalosPadrao
     }
 
     /// <summary>
-    /// Prioridade: intervalo do caminhão → intervalo da geração → padrão seguro.
+    /// Prioridade: intervalo do caminhão → da empresa → de fábrica → padrão seguro.
+    /// daGeracao é o da empresa, quando ela tem, ou o de fábrica (daEmpresa diz qual dos dois).
     /// </summary>
     public static IntervaloResolvido? Resolver(
         (int km, int meses)? doVeiculo,
-        (int km, int meses, int kmPrimeira)? daGeracao,
+        (int km, int meses, int kmPrimeira, bool daEmpresa)? daGeracao,
         Componente componente,
         NormaEmissao normaEmissao)
     {
@@ -44,7 +45,7 @@ public static class IntervalosPadrao
 
         if (daGeracao is { } g && g.km > 0)
         {
-            return new IntervaloResolvido(g.km, g.meses, g.kmPrimeira, OrigemIntervalo.Geracao);
+            return new IntervaloResolvido(g.km, g.meses, g.kmPrimeira, g.daEmpresa ? OrigemIntervalo.Empresa : OrigemIntervalo.Geracao);
         }
 
         return Obter(componente, normaEmissao);

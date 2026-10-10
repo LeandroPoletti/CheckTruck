@@ -15,6 +15,9 @@ public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usu
     /// <summary>Admin criado pelo sistema: não precisa de CPF, não troca de e-mail nem de cargo e não pode ser desativado.</summary>
     public const string EmailAdminDoSistema = "admin@admin.com";
 
+    /// <summary>Dono do sistema, criado pelo sistema: cuida do catálogo e não é de nenhuma empresa (não aparece nos acessos).</summary>
+    public const string EmailDonoDoSistema = "dono@checktruck.com";
+
     public List<string> Mensagens { get; } = new();
 
     public static bool EhAdminDoSistema(Usuario usuario) =>
@@ -157,7 +160,7 @@ public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usu
             Mensagens.Add("Informe o CPF.");
         }
 
-        if (!Enum.IsDefined(usuario.Cargo))
+        if (!Enum.IsDefined(usuario.Cargo) || usuario.Cargo == Cargo.DonoDoSistema)
         {
             Mensagens.Add("Escolha um cargo válido.");
         }
@@ -184,7 +187,7 @@ public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usu
     }
 
     // O login (e-mail) vale para o sistema todo, então os acessos não têm o filtro automático do Context
-    private long EmpresaAtual() => usuarioLogado.Usuario!.EmpresaId;
+    private long? EmpresaAtual() => usuarioLogado.Usuario!.EmpresaId;
 
     private IQueryable<Usuario> DaEmpresa()
     {

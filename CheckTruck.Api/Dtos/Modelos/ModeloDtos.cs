@@ -17,6 +17,10 @@ public class ModeloRequestDto
 public class ModeloResponseDto
 {
     public long Id { get; set; }
+
+    /// <summary>Do catálogo do sistema (só o dono do sistema muda). false = da empresa de quem está logado.</summary>
+    public bool DoSistema { get; set; }
+
     public string Nome { get; set; }
     public FabricanteResumoDto Fabricante { get; set; }
 }
@@ -26,6 +30,7 @@ public static class ModeloDtoExtensions
     public static ModeloResponseDto ToResponseDto(this Modelo entidade) => new()
     {
         Id = entidade.Id,
+        DoSistema = entidade.EmpresaId is null,
         Nome = entidade.Nome,
         Fabricante = entidade.Fabricante?.ToResumoDto()
     };

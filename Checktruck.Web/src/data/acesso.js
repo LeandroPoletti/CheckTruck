@@ -14,6 +14,14 @@ export const CARGOS = [
 // Admin e Gestor podem tudo e são os únicos que cuidam dos acessos
 export const CARGOS_GESTAO = ['Admin', 'Gestor']
 
+// Dono do sistema: cuida do catálogo do sistema e não é de nenhuma empresa. Fica fora de CARGOS
+// porque não se escolhe: o login dele é criado pelo sistema
+const DONO_DO_SISTEMA = { id: 'DonoDoSistema', nome: 'Dono do sistema' }
+export const ehDonoDoSistema = (usuario) => usuario?.cargo === DONO_DO_SISTEMA.id
+
+// Item do catálogo: o do sistema só o dono do sistema muda; o da empresa, só a empresa
+export const podeMexerNoItem = (usuario, item) => item.doSistema === ehDonoDoSistema(usuario)
+
 export const PERMISSOES = [
   { id: 'VerFrota', nome: 'Ver frota', descricao: 'Dashboard e veículos' },
   { id: 'Veiculos', nome: 'Veículos', descricao: 'Cadastrar e editar veículos' },
@@ -32,7 +40,7 @@ export const DEPENDEM_DA_BASE = ['Veiculos', 'AtualizarKm', 'OrdemServico']
 // Telas que só Admin e Gestor veem (Acesso)
 export const GESTAO = 'Gestao'
 
-export const nomeCargo = (id) => CARGOS.find((c) => c.id === id)?.nome ?? 'Sem cargo'
+export const nomeCargo = (id) => [...CARGOS, DONO_DO_SISTEMA].find((c) => c.id === id)?.nome ?? 'Sem cargo'
 
 // permissao: uma permissão, GESTAO ou uma lista (basta ter uma delas)
 export function pode(usuario, permissao) {
