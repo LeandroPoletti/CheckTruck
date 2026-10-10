@@ -50,7 +50,7 @@ public class VeiculoController(
         var situacao = servicoSituacao.ObterSituacaoPorPlaca(placa);
         if (situacao is null)
         {
-            return NotFound("Nenhum caminhão encontrado com essa placa.");
+            return Erro("Nenhum caminhão encontrado com essa placa.", StatusCodes.Status404NotFound);
         }
 
         return situacao.ToResponseDto(incluirItens: true);
@@ -82,13 +82,13 @@ public class VeiculoController(
         var potencia = servicoPotencia.GetById(dto.PotenciaId);
         if (potencia is null)
         {
-            return BadRequest("Potência não encontrada.");
+            return Erro("Potência não encontrada.");
         }
 
         var (motorista, erro) = await ResolverMotoristaAsync(dto.MotoristaAtualId);
         if (erro is not null)
         {
-            return BadRequest(erro);
+            return Erro(erro);
         }
 
         return PostCore(dto.ToEntity(potencia, motorista));
@@ -101,13 +101,13 @@ public class VeiculoController(
         var potencia = servicoPotencia.GetById(dto.PotenciaId);
         if (potencia is null)
         {
-            return BadRequest("Potência não encontrada.");
+            return Erro("Potência não encontrada.");
         }
 
         var (motorista, erro) = await ResolverMotoristaAsync(dto.MotoristaAtualId);
         if (erro is not null)
         {
-            return BadRequest(erro);
+            return Erro(erro);
         }
 
         return PutCore(id, dto.ToEntity(potencia, motorista));
@@ -118,7 +118,7 @@ public class VeiculoController(
     public IActionResult AtualizarKilometragem(long id, [FromBody] int distancia)
     {
         var res = servicoVeiculo.AtualizarKmVeiculo(id, distancia);
-        return res ? Ok() : BadRequest(servicoVeiculo.Mensagens);
+        return res ? Ok() : Erro(servicoVeiculo.Mensagens);
     }
 
     /// <summary>
@@ -148,7 +148,7 @@ public class VeiculoController(
 
         return servicoVeiculo.Mensagens.Count == 0
             ? NotFound()
-            : BadRequest(string.Join(" ", servicoVeiculo.Mensagens));
+            : Erro(servicoVeiculo.Mensagens);
     }
 
     // O motorista atual é opcional. Se ele precisa estar ativo, quem decide é o serviço

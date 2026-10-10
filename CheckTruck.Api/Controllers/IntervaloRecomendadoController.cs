@@ -42,7 +42,7 @@ public class IntervaloRecomendadoController(
         var padrao = servicoSituacao.ObterPadraoDaGeracao(geracaoId);
         if (padrao is null)
         {
-            return NotFound("Geração não encontrada.");
+            return Erro("Geração não encontrada.", StatusCodes.Status404NotFound);
         }
 
         return padrao
@@ -62,7 +62,7 @@ public class IntervaloRecomendadoController(
         var (geracao, tipoManutencao, erro) = ResolverRelacionados(dto);
         if (erro is not null)
         {
-            return BadRequest(erro);
+            return Erro(erro);
         }
 
         return PostCore(dto.ToEntity(geracao!, tipoManutencao!));
@@ -75,7 +75,7 @@ public class IntervaloRecomendadoController(
         var (geracao, tipoManutencao, erro) = ResolverRelacionados(dto);
         if (erro is not null)
         {
-            return BadRequest(erro);
+            return Erro(erro);
         }
 
         return PutCore(id, dto.ToEntity(geracao!, tipoManutencao!));

@@ -7,6 +7,7 @@ using CheckTruck.Repositorio.Seed;
 using CheckTruck.Dominio.Interfaces;
 using CheckTruck.Dominio.Servicos;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.ModelBuilder;
@@ -48,6 +49,15 @@ builder.Services.AddControllers()
     .AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
+
+// Os erros saem como ProblemDetails (ver CheckTruckController): a mensagem vai no detail e o título fica em português
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.ClientErrorMapping[StatusCodes.Status400BadRequest].Title = "Pedido inválido";
+    options.ClientErrorMapping[StatusCodes.Status401Unauthorized].Title = "Não autorizado";
+    options.ClientErrorMapping[StatusCodes.Status403Forbidden].Title = "Sem permissão";
+    options.ClientErrorMapping[StatusCodes.Status404NotFound].Title = "Não encontrado";
 });
 
 builder.Services.AddEndpointsApiExplorer();

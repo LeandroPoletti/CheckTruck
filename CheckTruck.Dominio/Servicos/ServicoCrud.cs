@@ -11,6 +11,11 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
 
     public List<string> Mensagens { get; set; } = new();
 
+    // O erro técnico fica no log. Para o usuário vai uma mensagem simples: a do banco vem em inglês
+    // e pode mostrar detalhes de dentro do sistema.
+    private const string ErroAoLer = "Não deu para buscar os dados agora. Tente de novo.";
+    private const string ErroAoGravar = "Não deu para gravar agora. Confira os dados e tente de novo; se continuar, avise o suporte.";
+
     /// <summary>
     /// Metódo para validação de entidade antes de operações de INSERT/UPDATE. Erros de validação devem ser adicionados a lista de mensagens.
     /// </summary>
@@ -35,7 +40,7 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
             catch (Exception e)
             {
                 _logger.LogError(e, "Erro ao consultar entidade do tipo {Tipo}", typeof(T).Name);
-                Mensagens.Add(e.Message);
+                Mensagens.Add(ErroAoLer);
                 return new List<T>().AsQueryable();
             }
         }
@@ -57,7 +62,7 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
             {
                 _logger.LogError(e, "Erro ao consultar entidade do tipo {Tipo}", typeof(T).Name);
                 _logger.LogDebug($"Mensagens: {string.Join(", ", Mensagens)}");
-                Mensagens.Add(e.Message);
+                Mensagens.Add(ErroAoLer);
                 return null;
             }
         }
@@ -83,7 +88,7 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
             catch (Exception e)
             {
                 _logger.LogError(e, "Erro ao inserir entidade do tipo {Tipo}", typeof(T).Name);
-                Mensagens.Add(e.Message);
+                Mensagens.Add(ErroAoGravar);
                 return null;
             }
         }
@@ -106,7 +111,7 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
             {
                 _logger.LogError(e, "Erro ao atualizar entidade do tipo {Tipo}", typeof(T).Name);
                 _logger.LogDebug($"Mensagens: {string.Join(", ", Mensagens)}");
-                Mensagens.Add(e.Message);
+                Mensagens.Add(ErroAoGravar);
                 return null;
             }
         }
@@ -129,7 +134,7 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
             {
                 _logger.LogError(e, "Erro ao deletar entidade do tipo {Tipo}", typeof(T).Name);
                 _logger.LogDebug($"Mensagens: {string.Join(", ", Mensagens)}");
-                Mensagens.Add(e.Message);
+                Mensagens.Add(ErroAoGravar);
                 return null;
             }
         }
@@ -152,7 +157,7 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
             {
                 _logger.LogError(e, "Erro ao executar transação");
                 _logger.LogDebug($"Mensagens: {string.Join(", ", Mensagens)}");
-                Mensagens.Add(e.Message);
+                Mensagens.Add(ErroAoGravar);
                 return false;
             }
         }

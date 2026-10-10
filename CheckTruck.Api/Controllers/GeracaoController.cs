@@ -37,7 +37,7 @@ public class GeracaoController(
         var modelo = servicoModelo.GetById(dto.ModeloId);
         if (modelo is null)
         {
-            return BadRequest("Modelo não encontrado.");
+            return Erro("Modelo não encontrado.");
         }
 
         return PostCore(dto.ToEntity(modelo));
@@ -51,7 +51,7 @@ public class GeracaoController(
         var modelo = servicoModelo.GetById(dto.ModeloId);
         if (modelo is null)
         {
-            return BadRequest("Modelo não encontrado.");
+            return Erro("Modelo não encontrado.");
         }
 
         return PutCore(id, dto.ToEntity(modelo));

@@ -35,7 +35,7 @@ public class FabricanteController(
         var paisOrigem = servicoPais.GetById(dto.PaisOrigemId);
         if (paisOrigem is null)
         {
-            return BadRequest("País de origem não encontrado.");
+            return Erro("País de origem não encontrado.");
         }
 
         return PostCore(dto.ToEntity(paisOrigem));
@@ -48,7 +48,7 @@ public class FabricanteController(
         var paisOrigem = servicoPais.GetById(dto.PaisOrigemId);
         if (paisOrigem is null)
         {
-            return BadRequest("País de origem não encontrado.");
+            return Erro("País de origem não encontrado.");
         }
 
         return PutCore(id, dto.ToEntity(paisOrigem));

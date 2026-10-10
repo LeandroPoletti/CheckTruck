@@ -9,7 +9,7 @@ namespace CheckTruck.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [SomenteGestao]
-public class EmpresaController(ServicoEmpresa servicoEmpresa) : ControllerBase
+public class EmpresaController(ServicoEmpresa servicoEmpresa) : CheckTruckController
 {
     [HttpGet("minha")]
     public ActionResult<EmpresaResponseDto> Minha()
@@ -30,7 +30,7 @@ public class EmpresaController(ServicoEmpresa servicoEmpresa) : ControllerBase
         var empresa = servicoEmpresa.VirarFrota();
         if (empresa is null)
         {
-            return BadRequest(string.Join(" ", servicoEmpresa.Mensagens));
+            return Erro(servicoEmpresa.Mensagens);
         }
 
         return empresa.ToResponseDto();

@@ -8,7 +8,7 @@ namespace CheckTruck.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(SignInManager<Usuario> signInManager, ServicoEmpresa servicoEmpresa) : ControllerBase
+public class AuthController(SignInManager<Usuario> signInManager, ServicoEmpresa servicoEmpresa) : CheckTruckController
 {
     /// <summary>
     /// Cria a conta de um cliente novo: a empresa (Frota ou Autônomo) e o primeiro acesso, que é Admin.
@@ -21,7 +21,7 @@ public class AuthController(SignInManager<Usuario> signInManager, ServicoEmpresa
             dto.TipoConta!.Value, dto.NomeEmpresa, dto.Cnpj, dto.Nome, dto.Cpf, dto.Email, dto.Senha);
         if (usuario is null)
         {
-            return BadRequest(string.Join(" ", servicoEmpresa.Mensagens));
+            return Erro(servicoEmpresa.Mensagens);
         }
 
         return NoContent();
@@ -46,14 +46,14 @@ public class AuthController(SignInManager<Usuario> signInManager, ServicoEmpresa
 
         if (resultado.IsNotAllowed)
         {
-            return Unauthorized("Seu acesso está desativado. Fale com o admin ou o gestor.");
+            return Erro("Seu acesso está desativado. Fale com o admin ou o gestor.", StatusCodes.Status401Unauthorized);
         }
 
         if (resultado.IsLockedOut)
         {
-            return Unauthorized("Muitas tentativas erradas. Espere alguns minutos e tente de novo.");
+            return Erro("Muitas tentativas erradas. Espere alguns minutos e tente de novo.", StatusCodes.Status401Unauthorized);
         }
 
-        return Unauthorized("E-mail ou senha inválidos.");
+        return Erro("E-mail ou senha inválidos.", StatusCodes.Status401Unauthorized);
     }
 }

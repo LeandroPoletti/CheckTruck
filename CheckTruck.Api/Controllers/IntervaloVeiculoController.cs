@@ -60,7 +60,7 @@ public class IntervaloVeiculoController(
         var (veiculo, tipoManutencao, erro) = ResolverRelacionados(dto);
         if (erro is not null)
         {
-            return BadRequest(erro);
+            return Erro(erro);
         }
 
         return PostCore(dto.ToEntity(veiculo!, tipoManutencao!));
@@ -73,7 +73,7 @@ public class IntervaloVeiculoController(
         var (veiculo, tipoManutencao, erro) = ResolverRelacionados(dto);
         if (erro is not null)
         {
-            return BadRequest(erro);
+            return Erro(erro);
         }
 
         return PutCore(id, dto.ToEntity(veiculo!, tipoManutencao!));

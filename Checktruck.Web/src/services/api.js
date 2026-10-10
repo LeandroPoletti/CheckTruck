@@ -37,17 +37,13 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+// Todo erro da API vem como ProblemDetails: a mensagem para o usuário está no detail.
+// Campo inválido (validação do .NET) vem com a lista em errors; sem nenhum dos dois, vale o título.
 function extrairMensagem(data, status) {
-  if (!data) return `Erro ${status} ao chamar a API.`
-  if (typeof data === 'string') return data
-  if (Array.isArray(data)) return data.join(' ')
-  if (data.errors) {
-    const erros = Object.values(data.errors).flat()
-    if (erros.length) return erros.join(' ')
-  }
-  if (data.detail) return data.title ? `${data.title}: ${data.detail}` : data.detail
-  if (data.title) return data.title
-  return `Erro ${status} ao chamar a API.`
+  if (data?.detail) return data.detail
+  const erros = Object.values(data?.errors ?? {}).flat()
+  if (erros.length) return erros.join(' ')
+  return data?.title ?? `Erro ${status} ao chamar a API.`
 }
 
 api.interceptors.response.use(

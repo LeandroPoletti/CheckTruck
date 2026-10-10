@@ -9,7 +9,7 @@ namespace CheckTruck.Api.Controllers;
 /// <summary>Acessos ao sistema: quem entra, o cargo e o que cada um pode fazer.</summary>
 [ApiController]
 [Route("api/[controller]")]
-public class UsuarioController(ServicoUsuario servicoUsuario) : ControllerBase
+public class UsuarioController(ServicoUsuario servicoUsuario) : CheckTruckController
 {
     /// <summary>
     /// Quem está logado, com cargo, permissões e a empresa (nome e tipo de conta): o front monta o menu com isso.
@@ -53,7 +53,7 @@ public class UsuarioController(ServicoUsuario servicoUsuario) : ControllerBase
         var usuario = await servicoUsuario.CriarAsync(dto.ToEntity(), dto.Senha);
         if (usuario is null)
         {
-            return Erro();
+            return Erro(servicoUsuario.Mensagens);
         }
 
         return CreatedAtAction(nameof(GetById), new { id = usuario.Id }, usuario.ToResponseDto());
@@ -67,7 +67,7 @@ public class UsuarioController(ServicoUsuario servicoUsuario) : ControllerBase
         var usuario = await servicoUsuario.AtualizarAsync(id, dto.ToEntity(), dto.Senha, HttpContext.UsuarioLogado().Id);
         if (usuario is null)
         {
-            return Erro();
+            return Erro(servicoUsuario.Mensagens);
         }
 
         return usuario.ToResponseDto();
@@ -81,11 +81,9 @@ public class UsuarioController(ServicoUsuario servicoUsuario) : ControllerBase
         var usuario = await servicoUsuario.AlterarAtivoAsync(id, ativo, HttpContext.UsuarioLogado().Id);
         if (usuario is null)
         {
-            return Erro();
+            return Erro(servicoUsuario.Mensagens);
         }
 
         return usuario.ToResponseDto();
     }
-
-    private BadRequestObjectResult Erro() => BadRequest(string.Join(" ", servicoUsuario.Mensagens));
 }

@@ -28,6 +28,7 @@ compose.yaml            PostgreSQL (e Adminer) em Docker
 
 Na API, o controller só traduz o pedido (acha pelo id o que veio, como o fabricante ou o caminhão) e devolve a
 resposta. As regras (nome repetido, item em uso, quem lançou a OS, motorista ativo...) ficam nos serviços do Dominio.
+Todo erro sai no mesmo formato (ProblemDetails), com a mensagem para o usuário no `detail`; o erro técnico fica só no log.
 
 ## Como rodar
 

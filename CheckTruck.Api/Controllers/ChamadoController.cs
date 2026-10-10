@@ -15,7 +15,7 @@ namespace CheckTruck.Api.Controllers;
 [Route("api/[controller]")]
 [SomenteFrota]
 [ExigeUmaDasPermissoes(Permissao.AbrirChamados | Permissao.AtenderChamados)]
-public class ChamadoController(ServicoChamado servicoChamado) : ControllerBase
+public class ChamadoController(ServicoChamado servicoChamado) : CheckTruckController
 {
     /// <summary>Pendentes e concluídos, do mais novo para o mais velho. Quem só abre vê os próprios.</summary>
     [HttpGet]
@@ -38,7 +38,7 @@ public class ChamadoController(ServicoChamado servicoChamado) : ControllerBase
         var chamado = servicoChamado.Abrir(HttpContext.UsuarioLogado(), dto.VeiculoId!.Value, dto.ToEntity());
         if (chamado is null)
         {
-            return Erro();
+            return Erro(servicoChamado.Mensagens);
         }
 
         return Buscar(chamado.Id);
@@ -50,7 +50,7 @@ public class ChamadoController(ServicoChamado servicoChamado) : ControllerBase
     {
         if (servicoChamado.Editar(HttpContext.UsuarioLogado(), id, dto.ToEntity()) is null)
         {
-            return Erro();
+            return Erro(servicoChamado.Mensagens);
         }
 
         return Buscar(id);
@@ -62,7 +62,7 @@ public class ChamadoController(ServicoChamado servicoChamado) : ControllerBase
     {
         if (!servicoChamado.Excluir(HttpContext.UsuarioLogado(), id))
         {
-            return Erro();
+            return Erro(servicoChamado.Mensagens);
         }
 
         return NoContent();
@@ -75,7 +75,7 @@ public class ChamadoController(ServicoChamado servicoChamado) : ControllerBase
     {
         if (servicoChamado.Atender(HttpContext.UsuarioLogado(), id) is null)
         {
-            return Erro();
+            return Erro(servicoChamado.Mensagens);
         }
 
         return Buscar(id);
@@ -88,7 +88,7 @@ public class ChamadoController(ServicoChamado servicoChamado) : ControllerBase
     {
         if (servicoChamado.Resolver(HttpContext.UsuarioLogado(), id, dto.Solucao) is null)
         {
-            return Erro();
+            return Erro(servicoChamado.Mensagens);
         }
 
         return Buscar(id);
@@ -97,6 +97,4 @@ public class ChamadoController(ServicoChamado servicoChamado) : ControllerBase
     // O chamado como a lista mostra (com placa e nomes)
     private ChamadoResponseDto Buscar(long id) =>
         servicoChamado.Query(c => c.Id == id).Select(ChamadoDtoExtensions.Projecao).First();
-
-    private BadRequestObjectResult Erro() => BadRequest(string.Join(" ", servicoChamado.Mensagens));
 }

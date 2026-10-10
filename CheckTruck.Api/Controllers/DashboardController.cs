@@ -10,7 +10,7 @@ namespace CheckTruck.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [ExigePermissao(Permissao.VerFrota)]
-public class DashboardController(ServicoDashboard servicoDashboard) : ControllerBase
+public class DashboardController(ServicoDashboard servicoDashboard) : CheckTruckController
 {
     /// <summary>
     /// Situação de manutenção da frota ativa: contagem por status, item mais urgente de cada

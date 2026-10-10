@@ -38,7 +38,7 @@ public class ModeloController(
         var fabricante = servicoFabricante.GetById(dto.FabricanteId);
         if (fabricante is null)
         {
-            return BadRequest("Fabricante não encontrado.");
+            return Erro("Fabricante não encontrado.");
         }
 
         return PostCore(dto.ToEntity(fabricante));
@@ -51,7 +51,7 @@ public class ModeloController(
         var fabricante = servicoFabricante.GetById(dto.FabricanteId);
         if (fabricante is null)
         {
-            return BadRequest("Fabricante não encontrado.");
+            return Erro("Fabricante não encontrado.");
         }
 
         return PutCore(id, dto.ToEntity(fabricante));

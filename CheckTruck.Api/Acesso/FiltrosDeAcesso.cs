@@ -3,6 +3,7 @@ using CheckTruck.Dominio.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace CheckTruck.Api.Acesso;
@@ -26,10 +27,10 @@ public abstract class FiltroDeAcessoAttribute : Attribute, IAsyncAuthorizationFi
 
         if (!Permite(usuario))
         {
-            context.Result = new ObjectResult(MensagemSemPermissao)
-            {
-                StatusCode = StatusCodes.Status403Forbidden
-            };
+            // No mesmo formato dos outros erros da API (ProblemDetails, com a mensagem no detail)
+            var problema = context.HttpContext.RequestServices.GetRequiredService<ProblemDetailsFactory>()
+                .CreateProblemDetails(context.HttpContext, StatusCodes.Status403Forbidden, detail: MensagemSemPermissao);
+            context.Result = new ObjectResult(problema) { StatusCode = StatusCodes.Status403Forbidden };
             return;
         }
 

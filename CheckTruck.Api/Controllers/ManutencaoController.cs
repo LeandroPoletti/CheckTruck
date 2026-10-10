@@ -48,7 +48,7 @@ public class ManutencaoController(
         var (relacionados, erro) = await ResolverRelacionadosAsync(dto);
         if (relacionados is null)
         {
-            return BadRequest(erro);
+            return Erro(erro!);
         }
 
         return PostCore(dto.ToEntity(relacionados.Veiculo, relacionados.TipoManutencao, relacionados.Mecanico, relacionados.Motorista));
@@ -65,7 +65,7 @@ public class ManutencaoController(
         var (relacionados, erro) = await ResolverRelacionadosAsync(dto);
         if (relacionados is null)
         {
-            return BadRequest(erro);
+            return Erro(erro!);
         }
 
         return PutCore(id, dto.ToEntity(relacionados.Veiculo, relacionados.TipoManutencao, relacionados.Mecanico, relacionados.Motorista));

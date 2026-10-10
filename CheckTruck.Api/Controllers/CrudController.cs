@@ -13,7 +13,7 @@ public abstract class CrudController<TEntity, TResponseDto>(
     string nomeEntidade,
     ILogger<TEntity> logger,
     Func<TEntity, TResponseDto> toResponseDto,
-    Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null) : ControllerBase
+    Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null) : CheckTruckController
     where TEntity : class, EntidadeBanco
 {
     private readonly ServicoCrud<TEntity> _servicoCrud = servicoCrud;
@@ -46,7 +46,7 @@ public abstract class CrudController<TEntity, TResponseDto>(
         }
         catch (ODataException e)
         {
-            return BadRequest(e.Message);
+            return Erro(e.Message); // consulta OData errada: a mensagem é para quem chama a API
         }
 
         var query = _servicoCrud.Query(_ => true, _include);
@@ -73,7 +73,7 @@ public abstract class CrudController<TEntity, TResponseDto>(
         var entidadeInserida = _servicoCrud.Inserir(entidade);
         if (entidadeInserida is null)
         {
-            return Erro($"Erro ao inserir {nomeEntidade}");
+            return Erro(_servicoCrud.Mensagens);
         }
 
         var entidadeCompleta = _servicoCrud.GetById(entidadeInserida.Id, _include) ?? entidadeInserida;
@@ -94,7 +94,7 @@ public abstract class CrudController<TEntity, TResponseDto>(
         var entidadeAtualizada = _servicoCrud.Atualizar(entidade);
         if (entidadeAtualizada is null)
         {
-            return Erro($"Erro ao atualizar {nomeEntidade}");
+            return Erro(_servicoCrud.Mensagens);
         }
 
         var entidadeCompleta = _servicoCrud.GetById(id, _include) ?? entidadeAtualizada;
@@ -111,12 +111,7 @@ public abstract class CrudController<TEntity, TResponseDto>(
         }
 
         return _servicoCrud.Mensagens.Count != 0
-            ? Erro($"Erro ao deletar {nomeEntidade}")
+            ? Erro(_servicoCrud.Mensagens)
             : NoContent();
     }
-
-    private ObjectResult Erro(string titulo) => Problem(
-        detail: string.Join(", ", _servicoCrud.Mensagens),
-        statusCode: StatusCodes.Status400BadRequest,
-        title: titulo);
 }
