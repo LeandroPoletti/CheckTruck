@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { Drawer } from '../ui/Overlay'
 import { Field, Input, Select, Toggle, Button } from '../ui/Form'
 import { TRACOES, ANO_MINIMO, ANO_MAXIMO, anoValido } from '../../data/domain'
+import { obterUsuario } from '../../services/sessao'
+import { ehAutonomo } from '../../data/acesso'
 import { veiculoService, fabricanteService, modeloService, geracaoService, usuarioService } from '../../services'
 
 const LISTAS_VAZIAS = { fabricantes: [], modelos: [], geracoes: [], motoristas: [] }
@@ -25,7 +27,9 @@ const formDoVeiculo = (v) => ({
 
 // Cadastrar ou editar um caminhão. Quem abre a tela só renderiza este modal quando ele está aberto.
 // O caminhão aponta para uma potência: fabricante → modelo → geração → potência, em cascata.
+// No Autônomo não tem motorista: é o próprio dono.
 export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }) {
+  const autonomo = ehAutonomo(obterUsuario())
   const [form, setForm] = useState(() => formDoVeiculo(veiculoParaEditar))
   const [errors, setErrors] = useState({})
   const [salvando, setSalvando] = useState(false)
@@ -208,18 +212,22 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
         </div>
 
         <div>
-          <p className="mb-3 text-xs font-bold tracking-wide text-brand-700">3 · VÍNCULOS</p>
-          <Field label="Motorista atual (opcional)" hint="Muda sozinho quando um motorista abre chamado deste caminhão.">
-            <div className="flex items-center gap-3">
-              <Select className="flex-1" value={form.motoristaId} onChange={(e) => set('motoristaId', e.target.value)}>
-                <option value="">Sem motorista</option>
-                {motoristas.map((m) => (
-                  <option key={m.id} value={m.id}>{m.nome}</option>
-                ))}
-              </Select>
-              <Toggle checked={form.ativo} onChange={(v) => set('ativo', v)} label="Ativo" />
-            </div>
-          </Field>
+          <p className="mb-3 text-xs font-bold tracking-wide text-brand-700">3 · {autonomo ? 'SITUAÇÃO' : 'VÍNCULOS'}</p>
+          {autonomo ? (
+            <Toggle checked={form.ativo} onChange={(v) => set('ativo', v)} label="Ativo" />
+          ) : (
+            <Field label="Motorista atual (opcional)" hint="Muda sozinho quando um motorista abre chamado deste caminhão.">
+              <div className="flex items-center gap-3">
+                <Select className="flex-1" value={form.motoristaId} onChange={(e) => set('motoristaId', e.target.value)}>
+                  <option value="">Sem motorista</option>
+                  {motoristas.map((m) => (
+                    <option key={m.id} value={m.id}>{m.nome}</option>
+                  ))}
+                </Select>
+                <Toggle checked={form.ativo} onChange={(v) => set('ativo', v)} label="Ativo" />
+              </div>
+            </Field>
+          )}
         </div>
 
         {errors.api && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{errors.api}</p>}

@@ -5,6 +5,8 @@ import { StatusBadge, PlacaBadge } from './ui/Badges'
 import {
   formatKm, formatData, formatDataHora, getHistoricoVeiculo, nomeDoCaminhao, TRACOES, ORIGENS_KM,
 } from '../data/domain'
+import { obterUsuario } from '../services/sessao'
+import { ehAutonomo } from '../data/acesso'
 
 export function VeiculoNaoEncontrado({ backTo }) {
   const navigate = useNavigate()
@@ -23,6 +25,7 @@ export function VeiculoNaoEncontrado({ backTo }) {
 // (do mais urgente para o menos urgente). historicoKm = toda mudança de km, da mais nova para a mais velha.
 export default function VeiculoDetalhePanel({ veiculo, situacao, registros, historicoKm, backTo, actions }) {
   const navigate = useNavigate()
+  const autonomo = ehAutonomo(obterUsuario())
 
   const historico = getHistoricoVeiculo(veiculo.id, registros)
   const detalhes = [
@@ -57,9 +60,10 @@ export default function VeiculoDetalhePanel({ veiculo, situacao, registros, hist
           {actions}
         </div>
 
-        <div className="mt-5 grid grid-cols-4 gap-4 border-t border-stone-100 pt-4">
+        {/* No Autônomo não tem motorista: é o próprio dono */}
+        <div className={`mt-5 grid gap-4 border-t border-stone-100 pt-4 ${autonomo ? 'grid-cols-3' : 'grid-cols-4'}`}>
           <Info label="Km atual" value={formatKm(veiculo.kmAtual)} />
-          <Info label="Motorista" value={veiculo.motoristaNome ?? 'Sem motorista'} />
+          {!autonomo && <Info label="Motorista" value={veiculo.motoristaNome ?? 'Sem motorista'} />}
           <Info label="Ano fabr./modelo" value={`${veiculo.anoFabricacao} / ${veiculo.anoModelo}`} />
           <Info label="Manutenções" value={`${historico.length} registro${historico.length === 1 ? '' : 's'}`} />
         </div>

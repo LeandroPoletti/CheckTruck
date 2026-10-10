@@ -18,6 +18,9 @@ public class Usuario : IdentityUser
     /// </summary>
     public long? EmpresaId { get; set; }
 
+    /// <summary>Só vem preenchida ao criar a conta: a empresa nova é gravada junto com o primeiro acesso.</summary>
+    public Empresa? Empresa { get; set; }
+
     /// <summary>Só números. Obrigatório para todos, menos o admin e o dono do sistema (criados pelo sistema).</summary>
     public string? Cpf { get; set; }
 

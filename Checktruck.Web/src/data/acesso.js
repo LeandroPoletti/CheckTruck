@@ -22,6 +22,11 @@ export const ehDonoDoSistema = (usuario) => usuario?.cargo === DONO_DO_SISTEMA.i
 // Item do catálogo: o do sistema só o dono do sistema muda; o da empresa, só a empresa
 export const podeMexerNoItem = (usuario, item) => item.doSistema === ehDonoDoSistema(usuario)
 
+// Tipo de conta da empresa (nomes do enum TipoConta da API). O Autônomo faz tudo sozinho: um acesso só,
+// sem chamados e sem motorista (é ele). Pode virar Frota em Minha empresa.
+export const TIPOS_CONTA = { Frota: 'Frota', Autonomo: 'Autônomo' }
+export const ehAutonomo = (usuario) => usuario?.tipoConta === 'Autonomo'
+
 export const PERMISSOES = [
   { id: 'VerFrota', nome: 'Ver frota', descricao: 'Dashboard e veículos' },
   { id: 'Veiculos', nome: 'Veículos', descricao: 'Cadastrar e editar veículos' },
@@ -53,4 +58,11 @@ export function pode(usuario, permissao) {
 export function formatCpf(cpf) {
   const d = String(cpf ?? '').replace(/\D/g, '')
   return d.length === 11 ? `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}` : '—'
+}
+
+// CNPJ (pode ter letras nas 12 primeiras posições) ou CPF, pelo tamanho
+export function formatDocumento(documento) {
+  const d = String(documento ?? '')
+  if (d.length !== 14) return formatCpf(d)
+  return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`
 }

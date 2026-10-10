@@ -1,5 +1,6 @@
 using CheckTruck.Api.Dtos.Auth;
 using CheckTruck.Dominio.Entidades;
+using CheckTruck.Dominio.Servicos;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,8 +8,25 @@ namespace CheckTruck.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(SignInManager<Usuario> signInManager) : ControllerBase
+public class AuthController(SignInManager<Usuario> signInManager, ServicoEmpresa servicoEmpresa) : ControllerBase
 {
+    /// <summary>
+    /// Cria a conta de um cliente novo: a empresa (Frota ou Autônomo) e o primeiro acesso, que é Admin.
+    /// Não precisa estar logado. Depois o front entra com o e-mail e a senha (POST api/Auth/login).
+    /// </summary>
+    [HttpPost("criar-conta")]
+    public async Task<IActionResult> CriarConta([FromBody] CriarContaRequestDto dto)
+    {
+        var usuario = await servicoEmpresa.CriarContaAsync(
+            dto.TipoConta!.Value, dto.NomeEmpresa, dto.Cnpj, dto.Nome, dto.Cpf, dto.Email, dto.Senha);
+        if (usuario is null)
+        {
+            return BadRequest(string.Join(" ", servicoEmpresa.Mensagens));
+        }
+
+        return NoContent();
+    }
+
     /// <summary>
     /// Entra com e-mail e senha. Devolve { tokenType, accessToken, expiresIn, refreshToken };
     /// o front manda o accessToken no cabeçalho Authorization: Bearer. Acesso inativo não entra.

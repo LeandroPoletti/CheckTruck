@@ -131,4 +131,21 @@ export const authService = {
     const { data } = await api.post('/api/Auth/login', { email: email.trim(), senha })
     return data
   },
+  // Empresa nova (Frota ou Autônomo) e o primeiro acesso, Admin. Depois é só entrar com o e-mail e a senha.
+  async criarConta(dados) {
+    await api.post('/api/Auth/criar-conta', m.contaToApi(dados))
+  },
+}
+
+// A empresa de quem está logado (tela Minha empresa). Só Admin e Gestor.
+export const empresaService = {
+  async obterMinha() {
+    const { data } = await api.get('/api/Empresa/minha')
+    return data
+  },
+  // O Autônomo vira Frota: volta a ter Acesso e Chamados
+  async virarFrota() {
+    const { data } = await api.put('/api/Empresa/minha/virar-frota')
+    return data
+  },
 }

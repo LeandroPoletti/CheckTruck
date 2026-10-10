@@ -9,14 +9,16 @@ import OrdemServicoModal from '../components/modals/OrdemServicoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { manutencaoService } from '../services'
 import { obterUsuario } from '../services/sessao'
-import { pode } from '../data/acesso'
+import { pode, ehAutonomo } from '../data/acesso'
 import { formatKm, formatData, formatDataHora, contemBusca } from '../data/domain'
 
 // Todas as ordens de serviço da frota, da mais nova para a mais velha.
 // Ver: Ver frota. Lançar, corrigir e excluir: Ordem de serviço.
 export default function OrdensServico() {
   const navigate = useNavigate()
-  const podeMexer = pode(obterUsuario(), 'OrdemServico')
+  const usuario = obterUsuario()
+  const podeMexer = pode(usuario, 'OrdemServico')
+  const autonomo = ehAutonomo(usuario) // sem motorista: é o próprio dono
 
   const [ordens, setOrdens] = useState([])
   const [carregando, setCarregando] = useState(true)
@@ -109,7 +111,7 @@ export default function OrdensServico() {
                     <button onClick={() => navigate(`/veiculos/${o.veiculoId}`)}>
                       <PlacaBadge placa={o.placa} size="sm" />
                     </button>
-                    <p className="mt-1 text-xs text-stone-400">{o.motoristaNome ?? 'Sem motorista'}</p>
+                    {!autonomo && <p className="mt-1 text-xs text-stone-400">{o.motoristaNome ?? 'Sem motorista'}</p>}
                   </td>
                   <td className="px-4 py-3">
                     <p className="font-medium text-stone-800">

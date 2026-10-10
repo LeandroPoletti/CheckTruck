@@ -71,10 +71,24 @@ O front abre em `http://localhost:5173` e chama a API do endereço em `Checktruc
 | `admin@admin.com` | `Admin@123` | Admin da empresa Transportadora Almeida |
 | `dono@checktruck.com` | `Dono@123` | Dono do sistema: cuida do catálogo do sistema e não é de nenhuma empresa |
 
+Um cliente novo cria a conta dele pelo link **Criar conta**, na tela de login.
+
 ## Empresas
 
 Cada cliente do CheckTruck é uma **empresa**. Caminhões, ordens de serviço, chamados, mecânicos, intervalos por
 caminhão, histórico de km e acessos são da empresa: quem entra só vê e mexe nos da própria.
+
+Na tela **Criar conta** o cliente escolhe o tipo de conta, e quem cria vira o Admin da empresa nova:
+
+| Tipo | Para quem | Pede |
+|------|-----------|------|
+| **Frota** | Empresa com equipe: gestor, motoristas, mecânicos | Nome da empresa, CNPJ, seu nome, seu CPF, e-mail e senha |
+| **Autônomo** | O dono de 1 ou 2 caminhões, que faz tudo sozinho | Seu nome, CPF, e-mail e senha |
+
+O **Autônomo** tem um acesso só: o menu fica sem Chamados e sem Acesso, não tem motorista (é ele), e o mecânico
+da OS aparece como "oficina ou mecânico". Em **Minha empresa** ele pode **virar Frota** a qualquer hora: ganha
+Acesso e Chamados, e nada do que já cadastrou muda (não dá para voltar a Autônomo). CNPJ e CPF não repetem entre
+as contas, e o CNPJ pode ter letras (o alfanumérico da Receita, desde julho de 2026).
 
 O catálogo (países, fabricantes, modelos, gerações com as potências, tipos de manutenção e intervalos da
 geração) tem dois tipos de item:

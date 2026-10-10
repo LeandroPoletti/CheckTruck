@@ -84,6 +84,7 @@ builder.Services.AddScoped<ServicoSituacaoVeiculo>();
 builder.Services.AddScoped<ServicoManutencao>();
 builder.Services.AddScoped<ServicoDashboard>();
 builder.Services.AddScoped<ServicoUsuario>();
+builder.Services.AddScoped<ServicoEmpresa>();
 builder.Services.AddScoped<ServicoChamado>();
 builder.Services.AddScoped<ServicoTipoManutencao>();
 builder.Services.AddScoped<ServicoGeracao>();

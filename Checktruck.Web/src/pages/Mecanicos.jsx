@@ -6,9 +6,13 @@ import MecanicoModal from '../components/modals/MecanicoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import AcoesLinha from '../components/ui/AcoesLinha'
 import { mecanicoService } from '../services'
+import { obterUsuario } from '../services/sessao'
+import { ehAutonomo } from '../data/acesso'
 import { contemBusca } from '../data/domain'
 
+// Quem faz as trocas nas OS. No Autônomo: as oficinas e os mecânicos onde ele leva o caminhão.
 export default function Mecanicos() {
+  const autonomo = ehAutonomo(obterUsuario())
   const [mecanicos, setMecanicos] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState(null)
@@ -52,17 +56,21 @@ export default function Mecanicos() {
   return (
     <>
       <PageHeader
-        title="Mecânicos"
-        subtitle={`${ativos} ativo${ativos === 1 ? '' : 's'} · quem faz as trocas nas OS`}
-        action={<Button onClick={() => setModal({ registro: null })}><Plus size={16} /> Novo mecânico</Button>}
+        title={autonomo ? 'Oficinas e mecânicos' : 'Mecânicos'}
+        subtitle={`${ativos} ativo${ativos === 1 ? '' : 's'} · ${autonomo ? 'onde e com quem você faz as trocas' : 'quem faz as trocas nas OS'}`}
+        action={<Button onClick={() => setModal({ registro: null })}><Plus size={16} /> {autonomo ? 'Cadastrar' : 'Novo mecânico'}</Button>}
       />
 
       <CampoBusca value={busca} onChange={setBusca} placeholder="Buscar por nome ou função" className="mb-5" />
 
       {filtrados.length === 0 ? (
         <EmptyState
-          title={mecanicos.length === 0 ? 'Nenhum mecânico cadastrado' : 'Nenhum mecânico encontrado'}
-          action={mecanicos.length === 0 && <Button onClick={() => setModal({ registro: null })}>Cadastrar mecânico</Button>}
+          title={mecanicos.length === 0
+            ? (autonomo ? 'Nenhuma oficina ou mecânico cadastrado' : 'Nenhum mecânico cadastrado')
+            : 'Nada encontrado'}
+          action={mecanicos.length === 0 && (
+            <Button onClick={() => setModal({ registro: null })}>{autonomo ? 'Cadastrar oficina ou mecânico' : 'Cadastrar mecânico'}</Button>
+          )}
         />
       ) : (
         <Card className="overflow-hidden">

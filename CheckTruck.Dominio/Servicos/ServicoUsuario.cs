@@ -9,8 +9,9 @@ namespace CheckTruck.Dominio.Servicos;
 /// <summary>
 /// Regras dos acessos: cadastrar, editar (inclusive e-mail e senha) e ativar/desativar.
 /// Quem chama é sempre Admin ou Gestor (a API confere antes), e só vê os acessos da própria empresa.
+/// A conta Autônomo tem um acesso só; o primeiro acesso de cada conta nasce na tela Criar conta.
 /// </summary>
-public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usuarioLogado)
+public class ServicoUsuario(UserManager<Usuario> userManager, ServicoCrud<Empresa> servicoEmpresa, IUsuarioLogado usuarioLogado)
 {
     /// <summary>Admin criado pelo sistema: não precisa de CPF, não troca de e-mail nem de cargo e não pode ser desativado.</summary>
     public const string EmailAdminDoSistema = "admin@admin.com";
@@ -43,6 +44,11 @@ public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usu
             Mensagens.Add("Informe a senha.");
         }
 
+        if (servicoEmpresa.GetById(EmpresaAtual()!.Value)?.TipoConta == TipoConta.Autonomo)
+        {
+            Mensagens.Add("A conta Autônomo tem um acesso só. Para cadastrar mais pessoas, vire Frota em Minha empresa.");
+        }
+
         Preparar(novo, adminDoSistema: false);
         ValidarCpfUnico(novo.Cpf, idIgnorar: null);
         if (Mensagens.Count > 0)
@@ -50,10 +56,24 @@ public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usu
             return null;
         }
 
-        novo.UserName = novo.Email;
-        novo.Ativo = true;
         novo.EmpresaId = EmpresaAtual();
-        return Concluir(await userManager.CreateAsync(novo, senha!)) ? novo : null;
+        return await GravarNovoAsync(novo, senha!);
+    }
+
+    /// <summary>
+    /// Primeiro acesso de uma conta nova (tela Criar conta, sem ninguém logado): Admin da empresa,
+    /// que é gravada junto com ele. Se o acesso não puder ser criado, a empresa também não fica.
+    /// </summary>
+    public async Task<Usuario?> CriarPrimeiroAcessoAsync(Empresa empresa, string nome, string? cpf, string email, string senha)
+    {
+        var novo = new Usuario { Nome = nome, Cpf = cpf, Email = email, Cargo = Cargo.Admin, Empresa = empresa };
+        Preparar(novo, adminDoSistema: false);
+        if (Mensagens.Count > 0)
+        {
+            return null;
+        }
+
+        return await GravarNovoAsync(novo, senha);
     }
 
     /// <param name="dados">Dados novos (nome, e-mail, CPF, cargo e permissões).</param>
@@ -193,6 +213,14 @@ public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usu
     {
         var empresaId = EmpresaAtual();
         return userManager.Users.Where(u => u.EmpresaId == empresaId);
+    }
+
+    // O login é o e-mail, e o acesso novo já entra ativo
+    private async Task<Usuario?> GravarNovoAsync(Usuario novo, string senha)
+    {
+        novo.UserName = novo.Email;
+        novo.Ativo = true;
+        return Concluir(await userManager.CreateAsync(novo, senha)) ? novo : null;
     }
 
     private async Task ValidarSenhaAsync(Usuario usuario, string senha)

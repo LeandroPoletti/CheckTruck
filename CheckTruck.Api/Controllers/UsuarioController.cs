@@ -1,7 +1,6 @@
 using CheckTruck.Api.Acesso;
 using CheckTruck.Api.Dtos.Comuns;
 using CheckTruck.Api.Dtos.Usuarios;
-using CheckTruck.Dominio.Entidades;
 using CheckTruck.Dominio.Servicos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,17 +12,13 @@ namespace CheckTruck.Api.Controllers;
 public class UsuarioController(ServicoUsuario servicoUsuario) : ControllerBase
 {
     /// <summary>
-    /// Quem está logado, com cargo, permissões e o nome da empresa (o front monta o menu com isso).
+    /// Quem está logado, com cargo, permissões e a empresa (nome e tipo de conta): o front monta o menu com isso.
     /// O dono do sistema vem sem empresa.
     /// </summary>
     [HttpGet("me")]
     [ExigePermissao]
-    public ActionResult<UsuarioLogadoResponseDto> Me([FromServices] ServicoCrud<Empresa> servicoEmpresa)
-    {
-        var usuario = HttpContext.UsuarioLogado();
-        var empresa = usuario.EmpresaId is { } empresaId ? servicoEmpresa.GetById(empresaId)!.Nome : null;
-        return usuario.ToLogadoResponseDto(empresa);
-    }
+    public ActionResult<UsuarioLogadoResponseDto> Me([FromServices] ServicoEmpresa servicoEmpresa) =>
+        HttpContext.UsuarioLogado().ToLogadoResponseDto(servicoEmpresa.ObterAtual());
 
     /// <summary>Motoristas ativos, para escolher quem está com o caminhão.</summary>
     [HttpGet("motoristas")]
