@@ -1,4 +1,5 @@
 using CheckTruck.Api.Acesso;
+using CheckTruck.Api.Dtos.Comuns;
 using CheckTruck.Api.Dtos.IntervalosVeiculo;
 using CheckTruck.Dominio.Entidades;
 using CheckTruck.Dominio.Enums;
@@ -20,6 +21,7 @@ public class IntervaloVeiculoController(
     ServicoIntervaloVeiculo servicoIntervalo,
     ServicoCrud<Veiculo> servicoVeiculo,
     ServicoCrud<TipoManutencao> servicoTipoManutencao,
+    ServicoSituacaoVeiculo servicoSituacao,
     ILogger<IntervaloVeiculo> logger)
     : CrudController<IntervaloVeiculo, IntervaloVeiculoResponseDto>(
         servicoIntervalo, "intervalo do veículo", logger,
@@ -52,6 +54,22 @@ public class IntervaloVeiculoController(
                 PotenciaCv = v.Potencia.Cv,
             })
             .ToList();
+
+    /// <summary>
+    /// Tela Intervalos, aba "Por caminhão": para cada item, os intervalos que existem na ordem em que valem
+    /// (do caminhão → da empresa → de fábrica → padrão do sistema). O primeiro é o que vale.
+    /// </summary>
+    [HttpGet("tabela/{veiculoId:long}")]
+    public ActionResult<IEnumerable<IntervalosDoItemResponseDto>> GetTabela(long veiculoId)
+    {
+        var tabela = servicoSituacao.TabelaDoVeiculo(veiculoId);
+        if (tabela is null)
+        {
+            return Erro("Caminhão não encontrado.", StatusCodes.Status404NotFound);
+        }
+
+        return tabela.Select(l => l.ToResponseDto()).ToList();
+    }
 
     [HttpPost]
     [ExigePermissao(Permissao.Intervalos)]

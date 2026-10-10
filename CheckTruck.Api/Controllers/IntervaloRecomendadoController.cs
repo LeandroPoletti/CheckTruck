@@ -1,4 +1,5 @@
 using CheckTruck.Api.Acesso;
+using CheckTruck.Api.Dtos.Comuns;
 using CheckTruck.Api.Dtos.IntervalosRecomendados;
 using CheckTruck.Dominio.Entidades;
 using CheckTruck.Dominio.Enums;
@@ -33,26 +34,19 @@ public class IntervaloRecomendadoController(
     public ActionResult<IntervaloRecomendadoResponseDto> GetById(long id) => GetByIdCore(id);
 
     /// <summary>
-    /// Padrão seguro do sistema para os caminhões desta geração, por tipo de manutenção. Vale quando
-    /// nem o caminhão nem a geração têm intervalo. Tipo sem padrão (ex.: embreagem) não vem na lista.
+    /// Tela Intervalos, aba "Por geração": para cada item, os intervalos que existem na ordem em que valem
+    /// (da empresa → de fábrica → padrão do sistema). O primeiro é o que vale.
     /// </summary>
-    [HttpGet("padrao/{geracaoId:long}")]
-    public ActionResult<IEnumerable<IntervaloPadraoResponseDto>> GetPadrao(long geracaoId)
+    [HttpGet("tabela/{geracaoId:long}")]
+    public ActionResult<IEnumerable<IntervalosDoItemResponseDto>> GetTabela(long geracaoId)
     {
-        var padrao = servicoSituacao.ObterPadraoDaGeracao(geracaoId);
-        if (padrao is null)
+        var tabela = servicoSituacao.TabelaDaGeracao(geracaoId);
+        if (tabela is null)
         {
             return Erro("Geração não encontrada.", StatusCodes.Status404NotFound);
         }
 
-        return padrao
-            .Select(p => new IntervaloPadraoResponseDto
-            {
-                TipoManutencaoId = p.Key,
-                IntervaloKm = p.Value.IntervaloKm,
-                IntervaloMeses = p.Value.IntervaloMeses
-            })
-            .ToList();
+        return tabela.Select(l => l.ToResponseDto()).ToList();
     }
 
     [HttpPost]

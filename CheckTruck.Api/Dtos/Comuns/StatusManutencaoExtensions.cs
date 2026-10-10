@@ -12,12 +12,12 @@ public static class StatusManutencaoExtensions
         _ => "ok"
     };
 
-    /// <summary>De onde veio o intervalo: "veiculo", "empresa", "geracao" (de fábrica) ou "padrao".</summary>
+    /// <summary>De onde veio o intervalo, com as palavras da tela: "caminhao", "empresa", "fabrica" ou "padrao".</summary>
     public static string ToApiString(this OrigemIntervalo origem) => origem switch
     {
-        OrigemIntervalo.Veiculo => "veiculo",
+        OrigemIntervalo.Veiculo => "caminhao",
         OrigemIntervalo.Empresa => "empresa",
-        OrigemIntervalo.Geracao => "geracao",
+        OrigemIntervalo.Fabrica => "fabrica",
         _ => "padrao"
     };
 }

@@ -3,11 +3,12 @@ import { Modal } from '../ui/Overlay'
 import { Field, Input, Select, Toggle, Button } from '../ui/Form'
 import { formatKm, getUltimoRegistro, hoje, ANO_MINIMO } from '../../data/domain'
 import {
-  manutencaoService, tipoManutencaoService, intervaloService, mecanicoService, usuarioService, veiculoService, filtro,
+  manutencaoService, tipoManutencaoService, intervaloVeiculoService, mecanicoService, usuarioService, veiculoService, filtro,
 } from '../../services'
 import MecanicoModal from './MecanicoModal'
 import { obterUsuario } from '../../services/sessao'
 import { pode, ehAutonomo } from '../../data/acesso'
+import { ORIGENS_INTERVALO } from '../../data/intervalos'
 
 const LISTAS_VAZIAS = { veiculos: [], tiposManutencao: [], mecanicos: [], motoristas: [] }
 
@@ -41,8 +42,6 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
   const [novoMecanicoOpen, setNovoMecanicoOpen] = useState(false)
   const [erro, setErro] = useState('')
   const [salvando, setSalvando] = useState(false)
-
-  const caminhao = veiculo ?? veiculos.find((v) => v.id === veiculoId)
 
   function set(campo, valor) {
     setForm((f) => ({ ...f, [campo]: valor }))
@@ -81,23 +80,23 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
     return () => { cancelado = true }
   }, [escolhePlaca, registro, veiculo])
 
-  // Intervalos da geração (dica do intervalo) e histórico do caminhão (sugere 1ª troca), só ao lançar
+  // Intervalos do caminhão (dica de qual intervalo vale) e histórico dele (sugere 1ª troca), só ao lançar
   const [doCaminhao, setDoCaminhao] = useState({ veiculoId: null, intervalos: [], registros: [] })
-  const geracaoId = caminhao?.geracaoId
   useEffect(() => {
-    if (corrigindo || !veiculoId || !geracaoId) return
+    if (corrigindo || !veiculoId) return
     let cancelado = false
     Promise.all([
-      intervaloService.listar(filtro.porId('Geracao', geracaoId)),
+      intervaloVeiculoService.tabela(veiculoId),
       manutencaoService.listar(filtro.porId('Veiculo', veiculoId)),
     ])
       .then(([intervalos, registros]) => { if (!cancelado) setDoCaminhao({ veiculoId, intervalos, registros }) })
       .catch((e) => { if (!cancelado) setErroCarga(e.message) })
     return () => { cancelado = true }
-  }, [corrigindo, veiculoId, geracaoId])
+  }, [corrigindo, veiculoId])
 
   const historicoPronto = doCaminhao.veiculoId === veiculoId
-  const intervaloDaGeracao = historicoPronto ? doCaminhao.intervalos.find((i) => i.tipoId === form.tipoId) : null
+  // O primeiro da lista é o intervalo que vale para esse item no caminhão
+  const intervaloQueVale = historicoPronto ? doCaminhao.intervalos.find((l) => l.tipoId === form.tipoId)?.emOrdem[0] : null
   const sugerePrimeira = !corrigindo && historicoPronto && !!form.tipoId
     && !getUltimoRegistro(veiculoId, form.tipoId, doCaminhao.registros)
   const primeiraTroca = form.isPrimeiraTroca ?? sugerePrimeira
@@ -142,7 +141,7 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
     setSalvando(true)
     setErro('')
     try {
-      // Próxima troca (km e data) em branco: a API calcula pelo intervalo do caminhão → geração → padrão.
+      // Próxima troca (km e data) em branco: a API calcula pelo intervalo que vale (caminhão → empresa → fábrica → padrão).
       // O km da OS atualiza o km do caminhão quando é maior que o atual. Ao lançar, o motorista
       // escolhido vira o motorista atual do caminhão (na correção, não).
       const dados = {
@@ -204,9 +203,9 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
             ))}
           </Select>
           <p className="mt-1.5 text-xs text-stone-400">
-            {intervaloDaGeracao
-              ? <>Intervalo da geração {formatKm(intervaloDaGeracao.intervaloKm)}</>
-              : 'A próxima troca é calculada pelo intervalo do caminhão, da geração ou pelo padrão.'}
+            {intervaloQueVale
+              ? <>Vale o intervalo {ORIGENS_INTERVALO[intervaloQueVale.origem]}: {formatKm(intervaloQueVale.intervaloKm)}</>
+              : 'A próxima troca é calculada pelo intervalo do caminhão, da empresa, de fábrica ou pelo padrão.'}
           </p>
         </Field>
 

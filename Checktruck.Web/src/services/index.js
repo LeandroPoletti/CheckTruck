@@ -11,10 +11,10 @@ export const geracaoService = criarCrud('Geracao', { fromApi: m.geracaoFromApi, 
 export const tipoManutencaoService = criarCrud('TipoManutencao', { fromApi: m.tipoManutencaoFromApi, toApi: m.tipoManutencaoToApi })
 export const intervaloService = {
   ...criarCrud('IntervaloRecomendado', { fromApi: m.intervaloFromApi, toApi: m.intervaloToApi }),
-  // Padrão seguro do sistema por tipo, para os caminhões da geração (tipo sem padrão não vem)
-  async listarPadrao(geracaoId) {
-    const { data } = await api.get(`/api/IntervaloRecomendado/padrao/${geracaoId}`)
-    return data.map(m.intervaloPadraoFromApi)
+  // Tela Intervalos, aba "Por geração": cada item com os intervalos na ordem em que valem (a API manda pronto)
+  async tabela(geracaoId) {
+    const { data } = await api.get(`/api/IntervaloRecomendado/tabela/${geracaoId}`)
+    return data.map(m.intervalosDoItemFromApi)
   },
 }
 export const intervaloVeiculoService = {
@@ -23,6 +23,11 @@ export const intervaloVeiculoService = {
   async listarVeiculos() {
     const { data } = await api.get('/api/IntervaloVeiculo/veiculos')
     return data.map(m.veiculoDoIntervaloFromApi)
+  },
+  // Aba "Por caminhão" (e a dica da OS): cada item com os intervalos na ordem em que valem para o caminhão
+  async tabela(veiculoId) {
+    const { data } = await api.get(`/api/IntervaloVeiculo/tabela/${veiculoId}`)
+    return data.map(m.intervalosDoItemFromApi)
   },
 }
 export const manutencaoService = criarCrud('Manutencao', { fromApi: m.registroFromApi, toApi: m.registroToApi })

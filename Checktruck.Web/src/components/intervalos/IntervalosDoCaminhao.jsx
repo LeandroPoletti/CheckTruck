@@ -5,51 +5,42 @@ import { OrigemIntervaloBadge } from '../ui/Badges'
 import AcoesLinha from '../ui/AcoesLinha'
 import IntervaloModal from '../modals/IntervaloModal'
 import ConfirmarExclusaoModal from '../modals/ConfirmarExclusaoModal'
-import { intervaloService, intervaloVeiculoService, filtro } from '../../services'
+import { intervaloVeiculoService } from '../../services'
 import { formatKm, nomeDoCaminhao } from '../../data/domain'
-import { montarLinhas, textoPrazo } from '../../data/intervalos'
+import { montarLinhas, daOrigem, oQueVoltaAValer, textoPrazo } from '../../data/intervalos'
 
 // Aba "Por caminhão": para cada item, o que vale para o caminhão escolhido (dele, da empresa, de fábrica ou o padrão).
 // O intervalo próprio do caminhão (ex.: plano da concessionária) passa na frente dos outros.
 // tipos já vêm filtrados pelo componente escolhido na página.
 export default function IntervalosDoCaminhao({ veiculos, tipos, veiculoId, onVeiculo }) {
   const veiculo = veiculos.find((v) => v.id === veiculoId)
-  const geracaoId = veiculo?.geracaoId
-  const [dados, setDados] = useState({ veiculoId: null, doCaminhao: [], daGeracao: [], padrao: [] })
+  const [dados, setDados] = useState({ veiculoId: null, tabela: [] })
   const [erro, setErro] = useState(null)
   const [versao, setVersao] = useState(0)
   const [modal, setModal] = useState(null) // linha da tabela enquanto o modal está aberto
   const [excluindo, setExcluindo] = useState(null)
 
+  // Tabela do caminhão (a API manda cada item com os intervalos na ordem em que valem), de novo depois de salvar
   useEffect(() => {
-    if (!veiculoId || !geracaoId) return
+    if (!veiculoId) return
     let cancelado = false
-    Promise.all([
-      intervaloVeiculoService.listar(filtro.porId('Veiculo', veiculoId)),
-      intervaloService.listar(filtro.porId('Geracao', geracaoId)),
-      intervaloService.listarPadrao(geracaoId),
-    ])
-      .then(([doCaminhao, daGeracao, padrao]) => {
+    intervaloVeiculoService.tabela(veiculoId)
+      .then((tabela) => {
         if (cancelado) return
         setErro(null)
-        setDados({ veiculoId, doCaminhao, daGeracao, padrao })
+        setDados({ veiculoId, tabela })
       })
       .catch((e) => { if (!cancelado) setErro(e.message) })
     return () => { cancelado = true }
-  }, [veiculoId, geracaoId, versao])
+  }, [veiculoId, versao])
 
   const recarregar = () => setVersao((v) => v + 1)
 
   if (veiculos.length === 0) return <EmptyState title="Nenhum caminhão ativo" />
 
   const carregado = dados.veiculoId === veiculoId
-  const linhas = carregado ? montarLinhas(tipos, dados) : []
-
-  // Se tirar o intervalo do caminhão, ele volta a usar...
-  const oQueVoltaAValer = (l) =>
-    l.empresa ? 'o intervalo da empresa'
-      : l.fabrica ? 'o intervalo de fábrica'
-        : l.padrao ? 'o padrão do sistema' : 'nada (o item deixa de ser acompanhado)'
+  const linhas = carregado ? montarLinhas(tipos, dados.tabela) : []
+  const doCaminhao = (l) => daOrigem(l, 'caminhao')
 
   return (
     <>
@@ -80,7 +71,7 @@ export default function IntervalosDoCaminhao({ veiculos, tipos, veiculoId, onVei
                 <tr key={l.tipo.id} className="border-b border-stone-100 last:border-0">
                   <td className="px-5 py-3.5">
                     <p className="font-semibold text-stone-800">{l.tipo.nome}</p>
-                    <p className="text-xs text-stone-400">{l.tipo.componente}{l.caminhao?.observacao && ` · ${l.caminhao.observacao}`}</p>
+                    <p className="text-xs text-stone-400">{l.tipo.componente}{doCaminhao(l)?.observacao && ` · ${doCaminhao(l).observacao}`}</p>
                   </td>
                   <td className={`px-5 py-3.5 ${proprio ? 'text-stone-700' : 'text-stone-400'}`}>{l.vale ? formatKm(l.vale.intervaloKm) : '—'}</td>
                   <td className={`px-5 py-3.5 ${proprio ? 'text-stone-700' : 'text-stone-400'}`}>{l.vale ? textoPrazo(l.vale.intervaloMeses) : '—'}</td>
@@ -105,7 +96,7 @@ export default function IntervalosDoCaminhao({ veiculos, tipos, veiculoId, onVei
         <IntervaloModal
           veiculo={veiculo}
           tipo={modal.tipo}
-          intervalo={modal.caminhao}
+          intervalo={doCaminhao(modal)}
           sugestao={modal.vale}
           onClose={() => setModal(null)}
           onSalvo={recarregar}
@@ -115,9 +106,9 @@ export default function IntervalosDoCaminhao({ veiculos, tipos, veiculoId, onVei
         open={!!excluindo}
         onClose={() => setExcluindo(null)}
         titulo="Excluir intervalo do caminhão"
-        descricao={excluindo && `Excluir o intervalo próprio de "${excluindo.tipo.nome}" do caminhão ${veiculo?.placa}? Ele volta a usar ${oQueVoltaAValer(excluindo)}.`}
+        descricao={excluindo && `Excluir o intervalo próprio de "${excluindo.tipo.nome}" do caminhão ${veiculo?.placa}? Ele volta a usar ${oQueVoltaAValer(excluindo, 'caminhao')}.`}
         onConfirmar={async () => {
-          await intervaloVeiculoService.remover(excluindo.caminhao.id)
+          await intervaloVeiculoService.remover(doCaminhao(excluindo).id)
           recarregar()
         }}
       />

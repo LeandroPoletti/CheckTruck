@@ -5,8 +5,9 @@ namespace CheckTruck.Dominio.Servicos;
 
 /// <summary>
 /// Padrão seguro usado quando o caminhão e a geração não têm intervalo cadastrado (ex.: dono de
-/// um caminhão só, sem plano de concessionária). Os valores ficam abaixo do que Volvo, Scania,
-/// Mercedes, Iveco e DAF permitem, usando o limite do óleo mineral, que é o mais curto.
+/// um caminhão só, sem plano de concessionária), e a ordem em que os intervalos valem.
+/// Os valores ficam abaixo do que Volvo, Scania, Mercedes, Iveco e DAF permitem, usando o limite do
+/// óleo mineral, que é o mais curto.
 /// Fonte: pesquisa em Intervalos_Volvo_FH_CheckTruck.docx e Intervalos_Scania_Mercedes_Iveco_DAF_CheckTruck.docx.
 /// </summary>
 public static class IntervalosPadrao
@@ -25,29 +26,21 @@ public static class IntervalosPadrao
 
         return padrao is null
             ? null
-            : new IntervaloResolvido(padrao.Value.km, padrao.Value.meses, 0, OrigemIntervalo.Padrao);
+            : new IntervaloResolvido(OrigemIntervalo.Padrao, padrao.Value.km, padrao.Value.meses);
     }
 
     /// <summary>
-    /// Prioridade: intervalo do caminhão → da empresa → de fábrica → padrão seguro.
-    /// daGeracao é o da empresa, quando ela tem, ou o de fábrica (daEmpresa diz qual dos dois).
+    /// Os intervalos que existem para um item, na ordem em que valem: do caminhão → da empresa → de fábrica →
+    /// padrão seguro. O primeiro é o que vale; sem ele, vale o seguinte. É o único lugar do sistema com essa ordem.
     /// </summary>
-    public static IntervaloResolvido? Resolver(
-        (int km, int meses)? doVeiculo,
-        (int km, int meses, int kmPrimeira, bool daEmpresa)? daGeracao,
+    public static IList<IntervaloResolvido> EmOrdem(
+        IntervaloResolvido? doVeiculo,
+        IntervaloResolvido? daEmpresa,
+        IntervaloResolvido? deFabrica,
         Componente componente,
-        NormaEmissao normaEmissao)
-    {
-        if (doVeiculo is { } v && v.km > 0)
-        {
-            return new IntervaloResolvido(v.km, v.meses, 0, OrigemIntervalo.Veiculo);
-        }
-
-        if (daGeracao is { } g && g.km > 0)
-        {
-            return new IntervaloResolvido(g.km, g.meses, g.kmPrimeira, g.daEmpresa ? OrigemIntervalo.Empresa : OrigemIntervalo.Geracao);
-        }
-
-        return Obter(componente, normaEmissao);
-    }
+        NormaEmissao normaEmissao) =>
+        new[] { doVeiculo, daEmpresa, deFabrica, Obter(componente, normaEmissao) }
+            .OfType<IntervaloResolvido>()
+            .Where(i => i.IntervaloKm > 0)
+            .ToList();
 }

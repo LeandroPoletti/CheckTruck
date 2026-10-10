@@ -5,11 +5,11 @@ import { OrigemIntervaloBadge } from '../ui/Badges'
 import AcoesLinha from '../ui/AcoesLinha'
 import IntervaloModal from '../modals/IntervaloModal'
 import ConfirmarExclusaoModal from '../modals/ConfirmarExclusaoModal'
-import { intervaloService, filtro } from '../../services'
+import { intervaloService } from '../../services'
 import { obterUsuario } from '../../services/sessao'
 import { ehDonoDoSistema } from '../../data/acesso'
 import { formatKm, nomeDoModelo, agruparPorModelo } from '../../data/domain'
-import { montarLinhas, textoPrazo } from '../../data/intervalos'
+import { montarLinhas, daOrigem, oQueVoltaAValer, textoPrazo } from '../../data/intervalos'
 
 // Aba "Por geração": todos os itens, com o intervalo que vale para a geração (da empresa, de fábrica ou o padrão).
 // O dono do sistema cadastra o de fábrica; a empresa cadastra o dela, que vale antes do de fábrica.
@@ -17,21 +17,21 @@ import { montarLinhas, textoPrazo } from '../../data/intervalos'
 export default function IntervalosDaGeracao({ geracoes, tipos, geracaoId, onGeracao }) {
   const dono = ehDonoDoSistema(obterUsuario())
   const geracao = geracoes.find((g) => g.id === geracaoId)
-  const [dados, setDados] = useState({ geracaoId: null, intervalos: [], padrao: [] })
+  const [dados, setDados] = useState({ geracaoId: null, tabela: [] })
   const [erro, setErro] = useState(null)
   const [versao, setVersao] = useState(0)
   const [modal, setModal] = useState(null) // linha da tabela enquanto o modal está aberto
   const [excluindo, setExcluindo] = useState(null)
 
-  // Intervalos da geração ($filter=Geracao/Id eq X) e o padrão do sistema para ela, de novo depois de salvar
+  // Tabela da geração (a API manda cada item com os intervalos na ordem em que valem), de novo depois de salvar
   useEffect(() => {
     if (!geracaoId) return
     let cancelado = false
-    Promise.all([intervaloService.listar(filtro.porId('Geracao', geracaoId)), intervaloService.listarPadrao(geracaoId)])
-      .then(([intervalos, padrao]) => {
+    intervaloService.tabela(geracaoId)
+      .then((tabela) => {
         if (cancelado) return
         setErro(null)
-        setDados({ geracaoId, intervalos, padrao })
+        setDados({ geracaoId, tabela })
       })
       .catch((e) => { if (!cancelado) setErro(e.message) })
     return () => { cancelado = true }
@@ -42,14 +42,11 @@ export default function IntervalosDaGeracao({ geracoes, tipos, geracaoId, onGera
   if (geracoes.length === 0) return <EmptyState title="Nenhuma geração cadastrada" subtitle="Cadastre as gerações em Cadastros → Gerações." />
 
   const carregado = dados.geracaoId === geracaoId
-  const linhas = carregado ? montarLinhas(tipos, { daGeracao: dados.intervalos, padrao: dados.padrao }) : []
+  const linhas = carregado ? montarLinhas(tipos, dados.tabela) : []
 
   // O intervalo que quem está logado cadastra e muda aqui: o de fábrica (dono do sistema) ou o da empresa
-  const meu = (l) => (dono ? l.fabrica : l.empresa)
-
-  // Se tirar esse intervalo, os caminhões da geração passam a usar...
-  const oQueVoltaAValer = (l) =>
-    !dono && l.fabrica ? 'o intervalo de fábrica' : l.padrao ? 'o padrão do sistema' : 'nada (o item deixa de ser acompanhado)'
+  const minhaOrigem = dono ? 'fabrica' : 'empresa'
+  const meu = (l) => daOrigem(l, minhaOrigem)
 
   return (
     <>
@@ -132,7 +129,7 @@ export default function IntervalosDaGeracao({ geracoes, tipos, geracaoId, onGera
         onClose={() => setExcluindo(null)}
         titulo={dono ? 'Excluir intervalo de fábrica' : 'Excluir intervalo da empresa'}
         descricao={excluindo && `Excluir o intervalo de "${excluindo.tipo.nome}" da geração ${geracao && `${nomeDoModelo(geracao)} · ${geracao.nome}`}? Os caminhões desta geração passam a usar ${
-          oQueVoltaAValer(excluindo)
+          oQueVoltaAValer(excluindo, minhaOrigem)
         }, menos os que têm intervalo ${dono ? 'da empresa ou ' : ''}do caminhão.`}
         onConfirmar={async () => {
           await intervaloService.remover(meu(excluindo).id)

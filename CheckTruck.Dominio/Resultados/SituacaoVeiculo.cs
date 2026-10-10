@@ -41,7 +41,7 @@ public class ItemManutencao
     public long TipoManutencaoId { get; set; }
     public string TipoManutencaoNome { get; set; } = "";
 
-    /// <summary>Intervalo usado no cálculo e de onde ele veio (caminhão, geração ou padrão).</summary>
+    /// <summary>Intervalo usado no cálculo e de onde ele veio (caminhão, empresa, fábrica ou padrão).</summary>
     public int IntervaloKm { get; set; }
     public int IntervaloMeses { get; set; }
     public OrigemIntervalo OrigemIntervalo { get; set; }

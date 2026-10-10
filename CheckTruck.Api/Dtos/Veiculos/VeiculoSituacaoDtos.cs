@@ -51,7 +51,7 @@ public class ItemManutencaoDto
     public int IntervaloKm { get; set; }
     public int IntervaloMeses { get; set; }
 
-    /// <summary>De onde veio o intervalo: "veiculo", "geracao" ou "padrao".</summary>
+    /// <summary>De onde veio o intervalo: "caminhao", "empresa", "fabrica" ou "padrao".</summary>
     public string OrigemIntervalo { get; set; }
 
     /// <summary>Última troca registrada; null quando não há histórico no sistema.</summary>

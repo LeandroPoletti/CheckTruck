@@ -11,8 +11,8 @@ namespace CheckTruck.Dominio.Servicos;
 /// <summary>
 /// Calcula no servidor a situação de manutenção de cada veículo: para cada item, a próxima troca
 /// por km e por data, quanto falta e o status. Vence o que chegar primeiro (km ou data).
-/// O intervalo de cada item segue a prioridade caminhão → empresa → fábrica → padrão seguro.
-/// A geração pode ter os dois: o de fábrica (do sistema) e o da empresa, que vale antes.
+/// O intervalo de cada item é o primeiro que existir na ordem de IntervalosPadrao.EmOrdem
+/// (caminhão → empresa → fábrica → padrão seguro). Também monta as tabelas da tela Intervalos.
 /// </summary>
 public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<ServicoSituacaoVeiculo> logger)
 {
@@ -44,57 +44,50 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
     }
 
     /// <summary>
-    /// Padrão seguro de cada tipo de manutenção para os caminhões de uma geração (depende da norma de emissão).
-    /// Tipo sem padrão (ex.: embreagem) fica de fora. null quando a geração não existe.
+    /// Tela Intervalos, aba "Por geração": para cada item, os intervalos que existem na ordem em que valem
+    /// (da empresa → de fábrica → padrão seguro). null quando a geração não existe.
     /// </summary>
-    public IDictionary<long, IntervaloResolvido>? ObterPadraoDaGeracao(long geracaoId)
+    public IList<IntervalosDoItem>? TabelaDaGeracao(long geracaoId)
     {
         var norma = repositorioCrud.Query<Geracao>(g => g.Id == geracaoId)
             .Select(g => (NormaEmissao?)g.NormaEmissao)
             .FirstOrDefault();
         if (norma is null) return null;
 
-        return repositorioCrud.Query<TipoManutencao>(_ => true)
-            .Select(t => new { t.Id, t.Componente })
-            .ToList()
-            .Select(t => (t.Id, Padrao: IntervalosPadrao.Obter(t.Componente, norma.Value)))
-            .Where(t => t.Padrao is not null)
-            .ToDictionary(t => t.Id, t => t.Padrao!);
+        var cadastrados = CarregarIntervalos([], [geracaoId]);
+        return CarregarTipos()
+            .Select(t => new IntervalosDoItem(t.Id, cadastrados.EmOrdem(null, geracaoId, t, norma.Value)))
+            .ToList();
     }
 
     /// <summary>
-    /// Intervalo que vale para um caminhão e um tipo de manutenção (caminhão → empresa → fábrica → padrão seguro).
+    /// Tela Intervalos, aba "Por caminhão": para cada item, os intervalos que existem na ordem em que valem
+    /// (do caminhão → da empresa → de fábrica → padrão seguro). null quando o caminhão não existe.
+    /// </summary>
+    public IList<IntervalosDoItem>? TabelaDoVeiculo(long veiculoId)
+    {
+        var veiculo = ObterGeracaoDoVeiculo(veiculoId);
+        if (veiculo is null) return null;
+
+        var cadastrados = CarregarIntervalos([veiculoId], [veiculo.GeracaoId]);
+        return CarregarTipos()
+            .Select(t => new IntervalosDoItem(t.Id, cadastrados.EmOrdem(veiculoId, veiculo.GeracaoId, t, veiculo.NormaEmissao)))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Intervalo que vale para um caminhão e um tipo de manutenção (o primeiro de <see cref="IntervalosPadrao.EmOrdem"/>).
     /// null quando o veículo ou o tipo não existem, ou quando não há intervalo nem padrão para o item.
     /// </summary>
     public IntervaloResolvido? ResolverIntervalo(long veiculoId, long tipoManutencaoId)
     {
-        var veiculo = repositorioCrud.Query<Veiculo>(v => v.Id == veiculoId)
-            .Select(v => new { GeracaoId = v.Potencia.Geracao.Id, v.Potencia.Geracao.NormaEmissao })
-            .FirstOrDefault();
-        var componente = repositorioCrud.Query<TipoManutencao>(t => t.Id == tipoManutencaoId)
-            .Select(t => (Componente?)t.Componente)
-            .FirstOrDefault();
-        if (veiculo is null || componente is null) return null;
+        var veiculo = ObterGeracaoDoVeiculo(veiculoId);
+        var tipo = CarregarTipos(t => t.Id == tipoManutencaoId).FirstOrDefault();
+        if (veiculo is null || tipo is null) return null;
 
-        var intervaloVeiculo = repositorioCrud
-            .Query<IntervaloVeiculo>(i => i.Veiculo.Id == veiculoId && i.TipoManutencao.Id == tipoManutencaoId)
-            .Select(i => new { i.IntervaloKm, i.IntervaloMeses })
+        return CarregarIntervalos([veiculoId], [veiculo.GeracaoId])
+            .EmOrdem(veiculoId, veiculo.GeracaoId, tipo, veiculo.NormaEmissao)
             .FirstOrDefault();
-        var intervaloGeracao = repositorioCrud
-            .Query<IntervaloRecomendado>(i => i.Geracao.Id == veiculo.GeracaoId && i.TipoManutencao.Id == tipoManutencaoId)
-            .OrderByDescending(i => i.EmpresaId != null) // o da empresa vem antes do de fábrica
-            .Select(i => new { i.IntervaloKm, i.IntervaloMeses, i.IntervaloKmPrimeira, DaEmpresa = i.EmpresaId != null })
-            .FirstOrDefault();
-
-        (int km, int meses)? doVeiculo = intervaloVeiculo is null
-            ? null
-            : (intervaloVeiculo.IntervaloKm, intervaloVeiculo.IntervaloMeses);
-        (int km, int meses, int kmPrimeira, bool daEmpresa)? daGeracao = intervaloGeracao is null
-            ? null
-            : (intervaloGeracao.IntervaloKm, intervaloGeracao.IntervaloMeses, intervaloGeracao.IntervaloKmPrimeira,
-                intervaloGeracao.DaEmpresa);
-
-        return IntervalosPadrao.Resolver(doVeiculo, daGeracao, componente.Value, veiculo.NormaEmissao);
     }
 
     public static StatusManutencao StatusPorKmRestante(int kmRestante)
@@ -149,36 +142,8 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
         var veiculoIds = veiculos.Select(v => v.VeiculoId).ToList();
         var geracaoIds = veiculos.Select(v => v.GeracaoId).Distinct().ToList();
 
-        var tipos = repositorioCrud.Query<TipoManutencao>(_ => true)
-            .OrderBy(t => t.Id)
-            .Select(t => new { t.Id, t.Nome, t.Componente })
-            .ToList();
-
-        var intervalosGeracao = repositorioCrud.Query<IntervaloRecomendado>(i => geracaoIds.Contains(i.Geracao.Id))
-            .Select(i => new
-            {
-                GeracaoId = i.Geracao.Id,
-                TipoId = i.TipoManutencao.Id,
-                i.IntervaloKm,
-                i.IntervaloMeses,
-                i.IntervaloKmPrimeira,
-                DaEmpresa = i.EmpresaId != null,
-            })
-            .ToList()
-            .GroupBy(i => (i.GeracaoId, i.TipoId))
-            .ToDictionary(g => g.Key, g => g.OrderByDescending(i => i.DaEmpresa).First()); // o da empresa antes do de fábrica
-
-        var intervalosVeiculo = repositorioCrud.Query<IntervaloVeiculo>(i => veiculoIds.Contains(i.Veiculo.Id))
-            .Select(i => new
-            {
-                VeiculoId = i.Veiculo.Id,
-                TipoId = i.TipoManutencao.Id,
-                i.IntervaloKm,
-                i.IntervaloMeses,
-            })
-            .ToList()
-            .GroupBy(i => (i.VeiculoId, i.TipoId))
-            .ToDictionary(g => g.Key, g => g.First());
+        var tipos = CarregarTipos();
+        var cadastrados = CarregarIntervalos(veiculoIds, geracaoIds);
 
         // Última troca de cada item em cada veículo (a próxima troca já foi gravada nela — RN-07)
         var ultimasTrocas = repositorioCrud.Query<Manutencao>(m => veiculoIds.Contains(m.Veiculo.Id))
@@ -204,16 +169,7 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
 
             foreach (var tipo in tipos)
             {
-                (int km, int meses)? doVeiculo =
-                    intervalosVeiculo.TryGetValue((veiculo.VeiculoId, tipo.Id), out var iv)
-                        ? (iv.IntervaloKm, iv.IntervaloMeses)
-                        : null;
-                (int km, int meses, int kmPrimeira, bool daEmpresa)? daGeracao =
-                    intervalosGeracao.TryGetValue((veiculo.GeracaoId, tipo.Id), out var ig)
-                        ? (ig.IntervaloKm, ig.IntervaloMeses, ig.IntervaloKmPrimeira, ig.DaEmpresa)
-                        : null;
-
-                var intervalo = IntervalosPadrao.Resolver(doVeiculo, daGeracao, tipo.Componente, veiculo.NormaEmissao);
+                var intervalo = cadastrados.EmOrdem(veiculo.VeiculoId, veiculo.GeracaoId, tipo, veiculo.NormaEmissao).FirstOrDefault();
                 if (intervalo is null) continue; // item sem intervalo cadastrado e sem padrão (ex.: embreagem)
 
                 var item = new ItemManutencao
@@ -270,6 +226,71 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
     }
 
     private static StatusManutencao Pior(StatusManutencao a, StatusManutencao b) => a >= b ? a : b;
+
+    private VeiculoDaGeracao? ObterGeracaoDoVeiculo(long veiculoId) =>
+        repositorioCrud.Query<Veiculo>(v => v.Id == veiculoId)
+            .Select(v => new VeiculoDaGeracao(v.Potencia.Geracao.Id, v.Potencia.Geracao.NormaEmissao))
+            .FirstOrDefault();
+
+    // Tipos de manutenção (itens que o sistema acompanha), sempre na mesma ordem
+    private List<TipoDoItem> CarregarTipos(Expression<Func<TipoManutencao, bool>>? filtro = null) =>
+        repositorioCrud.Query<TipoManutencao>(filtro ?? (_ => true))
+            .OrderBy(t => t.Id)
+            .Select(t => new TipoDoItem(t.Id, t.Nome, t.Componente))
+            .ToList();
+
+    // Intervalos cadastrados dos caminhões e das gerações, numa consulta para cada tabela
+    private IntervalosCadastrados CarregarIntervalos(List<long> veiculoIds, List<long> geracaoIds)
+    {
+        var doVeiculo = repositorioCrud.Query<IntervaloVeiculo>(i => veiculoIds.Contains(i.Veiculo.Id))
+            .Select(i => new { VeiculoId = i.Veiculo.Id, TipoId = i.TipoManutencao.Id, i.Id, i.IntervaloKm, i.IntervaloMeses, i.Observacao })
+            .ToList()
+            .ToDictionary(
+                i => (i.VeiculoId, i.TipoId),
+                i => new IntervaloResolvido(OrigemIntervalo.Veiculo, i.IntervaloKm, i.IntervaloMeses, Id: i.Id, Observacao: i.Observacao));
+
+        // A geração pode ter os dois: o de fábrica (sem empresa) e o da empresa de quem está logado
+        var daGeracao = repositorioCrud.Query<IntervaloRecomendado>(i => geracaoIds.Contains(i.Geracao.Id))
+            .Select(i => new
+            {
+                GeracaoId = i.Geracao.Id,
+                TipoId = i.TipoManutencao.Id,
+                i.Id,
+                i.EmpresaId,
+                i.IntervaloKm,
+                i.IntervaloMeses,
+                i.IntervaloKmPrimeira,
+                i.Fonte,
+                i.Observacao,
+            })
+            .ToList()
+            .ToLookup(i => i.EmpresaId is null ? OrigemIntervalo.Fabrica : OrigemIntervalo.Empresa);
+
+        Dictionary<(long, long), IntervaloResolvido> DaOrigem(OrigemIntervalo origem) => daGeracao[origem].ToDictionary(
+            i => (i.GeracaoId, i.TipoId),
+            i => new IntervaloResolvido(origem, i.IntervaloKm, i.IntervaloMeses, i.IntervaloKmPrimeira, i.Id, i.Fonte, i.Observacao));
+
+        return new IntervalosCadastrados(doVeiculo, DaOrigem(OrigemIntervalo.Empresa), DaOrigem(OrigemIntervalo.Fabrica));
+    }
+
+    private sealed record VeiculoDaGeracao(long GeracaoId, NormaEmissao NormaEmissao);
+
+    private sealed record TipoDoItem(long Id, string Nome, Componente Componente);
+
+    // Intervalos cadastrados por item: do caminhão (veículo, tipo) e da geração (geração, tipo)
+    private sealed record IntervalosCadastrados(
+        Dictionary<(long VeiculoId, long TipoId), IntervaloResolvido> DoVeiculo,
+        Dictionary<(long GeracaoId, long TipoId), IntervaloResolvido> DaEmpresa,
+        Dictionary<(long GeracaoId, long TipoId), IntervaloResolvido> DeFabrica)
+    {
+        public IList<IntervaloResolvido> EmOrdem(long? veiculoId, long geracaoId, TipoDoItem tipo, NormaEmissao norma) =>
+            IntervalosPadrao.EmOrdem(
+                veiculoId is { } id ? DoVeiculo.GetValueOrDefault((id, tipo.Id)) : null,
+                DaEmpresa.GetValueOrDefault((geracaoId, tipo.Id)),
+                DeFabrica.GetValueOrDefault((geracaoId, tipo.Id)),
+                tipo.Componente,
+                norma);
+    }
 
     // Quanto do ciclo já foi rodado, de 0 a 100: do km de início até o km da próxima troca
     private static int PercentualUsado(int kmAtual, int kmInicio, int kmProximaTroca)

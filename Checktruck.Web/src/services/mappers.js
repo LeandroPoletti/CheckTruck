@@ -95,10 +95,19 @@ export const intervaloToApi = (i) => ({
   observacao: i.observacao ?? '',
 })
 // Padrão seguro do sistema para um tipo, nos caminhões de uma geração
-export const intervaloPadraoFromApi = (dto) => ({
+// Uma linha da tela Intervalos: o item e os intervalos que existem para ele, na ordem em que valem (o primeiro vale).
+// origem: 'caminhao' | 'empresa' | 'fabrica' | 'padrao'; id null no padrão do sistema.
+export const intervalosDoItemFromApi = (dto) => ({
   tipoId: toId(dto.tipoManutencaoId),
-  intervaloKm: dto.intervaloKm,
-  intervaloMeses: dto.intervaloMeses || null,
+  emOrdem: dto.emOrdem.map((i) => ({
+    origem: i.origem,
+    id: toId(i.id),
+    intervaloKm: i.intervaloKm,
+    intervaloKmPrimeira: i.intervaloKmPrimeira || null,
+    intervaloMeses: i.intervaloMeses || null,
+    fonte: i.fonte ?? '',
+    observacao: i.observacao ?? '',
+  })),
 })
 // Intervalo próprio de um caminhão (ex.: plano da concessionária): passa na frente da geração e do padrão
 export const intervaloVeiculoFromApi = (dto) => ({
