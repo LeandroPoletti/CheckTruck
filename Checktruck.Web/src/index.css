@@ -4,12 +4,14 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  --color-brand-950: #142920;
   --color-brand-900: #1c3829;
   --color-brand-800: #234433;
   --color-brand-700: #2c5440;
   --color-brand-600: #386b52;
   --color-brand-500: #46825f;
+  --color-brand-400: #6b9c7f;
+  --color-brand-300: #90b69f;
+  --color-brand-200: #b6d0c0;
   --color-brand-100: #dbeae0;
   --color-brand-50: #eef5f0;
 

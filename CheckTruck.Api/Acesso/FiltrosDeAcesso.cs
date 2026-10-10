@@ -3,21 +3,20 @@ using CheckTruck.Dominio.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
 
 namespace CheckTruck.Api.Acesso;
 
 /// <summary>
-/// Base dos filtros de acesso: carrega quem está logado (pelo token) e barra quem não está logado
-/// ou está inativo (401). Cada filtro filho diz o que mais a rota exige (403 quando falta).
+/// Base dos filtros de acesso: carrega quem está logado (pelo token), com a empresa dele, e barra quem não
+/// está logado ou está inativo (401). Cada filtro filho diz o que mais a rota exige (403 quando falta).
 /// </summary>
 public abstract class FiltroDeAcessoAttribute : Attribute, IAsyncAuthorizationFilter
 {
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
         // O controller e a rota podem ter um filtro cada: o segundo reaproveita o usuário que o primeiro carregou
-        var usuario = context.HttpContext.Items[typeof(Usuario)] as Usuario
-            ?? await context.HttpContext.RequestServices.GetRequiredService<UserManager<Usuario>>()
-                .GetUserAsync(context.HttpContext.User);
+        var usuario = context.HttpContext.Items[typeof(Usuario)] as Usuario ?? await CarregarAsync(context.HttpContext);
 
         if (usuario is null || !usuario.Ativo)
         {
@@ -27,7 +26,7 @@ public abstract class FiltroDeAcessoAttribute : Attribute, IAsyncAuthorizationFi
 
         if (!Permite(usuario))
         {
-            context.Result = new ObjectResult("Você não tem permissão para fazer isso.")
+            context.Result = new ObjectResult(MensagemSemPermissao)
             {
                 StatusCode = StatusCodes.Status403Forbidden
             };
@@ -38,6 +37,15 @@ public abstract class FiltroDeAcessoAttribute : Attribute, IAsyncAuthorizationFi
     }
 
     protected abstract bool Permite(Usuario usuario);
+
+    protected virtual string MensagemSemPermissao => "Você não tem permissão para fazer isso.";
+
+    private static async Task<Usuario?> CarregarAsync(HttpContext httpContext)
+    {
+        var userManager = httpContext.RequestServices.GetRequiredService<UserManager<Usuario>>();
+        var id = userManager.GetUserId(httpContext.User);
+        return id is null ? null : await userManager.Users.Include(u => u.Empresa).FirstOrDefaultAsync(u => u.Id == id);
+    }
 }
 
 /// <summary>Exige estar logado, ativo e com a permissão informada. Sem permissão informada, basta estar logado.</summary>
@@ -59,6 +67,15 @@ public class ExigeUmaDasPermissoesAttribute(Permissao permissoes) : FiltroDeAces
 public class SomenteGestaoAttribute : FiltroDeAcessoAttribute
 {
     protected override bool Permite(Usuario usuario) => usuario.CuidaDosAcessos;
+}
+
+/// <summary>Só conta Frota (ex.: chamados). O Autônomo é uma pessoa só: dirige e cuida do caminhão.</summary>
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+public class SomenteFrotaAttribute : FiltroDeAcessoAttribute
+{
+    protected override bool Permite(Usuario usuario) => usuario.Empresa?.TipoConta == TipoConta.Frota;
+
+    protected override string MensagemSemPermissao => "Isso é só da conta Frota. Para usar, vire Frota em Minha empresa.";
 }
 
 public static class AcessoHttpContextExtensions

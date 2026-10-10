@@ -14,12 +14,11 @@ namespace CheckTruck.Api.Controllers;
 [Route("api/[controller]")]
 [ExigePermissao]
 public class FabricanteController(
-    ServicoCatalogo<Fabricante> servicoCrud,
+    ServicoFabricante servicoFabricante,
     ServicoCrud<Pais> servicoPais,
-    ServicoCrud<Modelo> servicoModelo,
     ILogger<Fabricante> logger)
     : CrudController<Fabricante, FabricanteResponseDto>(
-        servicoCrud, "fabricante", logger,
+        servicoFabricante, "fabricante", logger,
         f => f.ToResponseDto(),
         q => q.Include(f => f.PaisOrigem))
 {
@@ -57,14 +56,5 @@ public class FabricanteController(
 
     [HttpDelete("{id:long}")]
     [ExigePermissao(Permissao.Cadastros)]
-    public IActionResult Delete(long id)
-    {
-        var modelos = servicoModelo.QueryTodasAsEmpresas(m => m.Fabricante.Id == id).Count();
-        if (modelos > 0)
-        {
-            return BadRequest($"Não é possível excluir: o fabricante possui {modelos} modelo(s) cadastrado(s).");
-        }
-
-        return DeleteCore(id);
-    }
+    public IActionResult Delete(long id) => DeleteCore(id);
 }

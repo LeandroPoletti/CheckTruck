@@ -86,8 +86,11 @@ builder.Services.AddScoped<ServicoDashboard>();
 builder.Services.AddScoped<ServicoUsuario>();
 builder.Services.AddScoped<ServicoEmpresa>();
 builder.Services.AddScoped<ServicoChamado>();
-builder.Services.AddScoped<ServicoTipoManutencao>();
+builder.Services.AddScoped<ServicoPais>();
+builder.Services.AddScoped<ServicoFabricante>();
+builder.Services.AddScoped<ServicoModelo>();
 builder.Services.AddScoped<ServicoGeracao>();
+builder.Services.AddScoped<ServicoTipoManutencao>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy => policy.AllowAnyMethod().AllowAnyOrigin().AllowAnyHeader());

@@ -11,7 +11,7 @@ public static class CpfUtil
 
         var cpf = RemoverMascaraCpf(value);
 
-        if (cpf.Length != 11 || cpf.Distinct().Count() == 1)
+        if (cpf.Length != 11 || !cpf.All(char.IsAsciiDigit) || cpf.Distinct().Count() == 1)
         {
             return false;
         }

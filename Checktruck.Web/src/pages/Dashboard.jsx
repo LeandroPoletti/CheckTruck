@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Card, PageHeader, Carregando, ErroCarregamento } from '../components/Layout'
 import { StatusBadge, PlacaBadge } from '../components/ui/Badges'
 import { Button } from '../components/ui/Form'
-import { formatKm, nomeDoModelo } from '../data/domain'
+import { formatKm, nomeDoModelo, textoDias } from '../data/domain'
 import { dashboardService } from '../services'
 import { obterUsuario } from '../services/sessao'
 import { pode, ehAutonomo } from '../data/acesso'
@@ -91,10 +91,10 @@ export default function Dashboard() {
           ) : (
             <div className="space-y-4">
               {alertas.map((alerta) => {
-                const pct = Math.max(0, Math.min(100, (alerta.kmAtual / alerta.kmProximaTroca) * 100))
+                const pct = Math.max(2, alerta.percentualUsado)
                 return (
                   <button
-                    key={alerta.veiculoId + alerta.tipoId}
+                    key={alerta.veiculoId}
                     onClick={() => navigate(`/veiculos/${alerta.veiculoId}`)}
                     className="block w-full text-left"
                   >
@@ -120,9 +120,7 @@ export default function Dashboard() {
                       />
                     </div>
                     <p className={`mt-1 text-xs ${alerta.status === 'critico' ? 'text-red-600' : 'text-amber-600'}`}>
-                      {alerta.kmRestante <= 0
-                        ? `Vencido há ${formatKm(Math.abs(alerta.kmRestante))}`
-                        : `Faltam ${formatKm(alerta.kmRestante)} · dentro da margem de ${formatKm(margemAlertaKm)}`}
+                      {textoDoAlerta(alerta, margemAlertaKm)}
                     </p>
                   </button>
                 )
@@ -179,4 +177,13 @@ export default function Dashboard() {
       <MecanicoModal open={novoMecanicoOpen} onClose={() => setNovoMecanicoOpen(false)} />
     </>
   )
+}
+
+// O alerta pode ser por km ou por data (vence o que chegar primeiro): mostra os dois
+function textoDoAlerta(alerta, margemAlertaKm) {
+  const { kmRestante, diasRestantes } = alerta
+  const km = kmRestante <= 0
+    ? `Vencido há ${formatKm(-kmRestante)}`
+    : `Faltam ${formatKm(kmRestante)}${kmRestante <= margemAlertaKm ? ` · dentro da margem de ${formatKm(margemAlertaKm)}` : ''}`
+  return diasRestantes === null ? km : `${km} · ${textoDias(diasRestantes)}`
 }

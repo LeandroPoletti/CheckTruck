@@ -34,7 +34,7 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
     motoristaId: registro?.motoristaId ?? '',
     kmNaTroca: String(registro?.kmNaTroca ?? veiculo?.kmAtual ?? ''),
     dataRealizacao: registro?.dataRealizacao ?? hoje(),
-    isPrimeiraTroca: registro?.isPrimeiraTroca ?? false,
+    isPrimeiraTroca: registro?.isPrimeiraTroca ?? null, // null = segue a sugestão (sem histórico do item)
     concessionaria: registro?.concessionaria ?? '',
     observacoes: registro?.observacoes ?? '',
   }))
@@ -100,16 +100,23 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
   const intervaloDaGeracao = historicoPronto ? doCaminhao.intervalos.find((i) => i.tipoId === form.tipoId) : null
   const sugerePrimeira = !corrigindo && historicoPronto && !!form.tipoId
     && !getUltimoRegistro(veiculoId, form.tipoId, doCaminhao.registros)
+  const primeiraTroca = form.isPrimeiraTroca ?? sugerePrimeira
 
-  // Trocar a placa já traz o km e o motorista atuais daquele caminhão
+  // Trocar a placa já traz o km e o motorista atuais daquele caminhão (e volta a seguir a sugestão da 1ª troca)
   function escolherCaminhao(id) {
     const escolhido = veiculos.find((v) => v.id === id)
     setVeiculoId(id)
     setForm((f) => ({
       ...f,
+      isPrimeiraTroca: null,
       kmNaTroca: escolhido ? String(escolhido.kmAtual) : '',
       motoristaId: escolhido && motoristas.some((m) => m.id === escolhido.motoristaId) ? escolhido.motoristaId : '',
     }))
+  }
+
+  // Outro item: volta a seguir a sugestão da 1ª troca
+  function escolherTipo(id) {
+    setForm((f) => ({ ...f, tipoId: id, isPrimeiraTroca: null }))
   }
 
   // Mecânico cadastrado aqui mesmo: entra na lista e já fica selecionado
@@ -144,7 +151,7 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
         kmNaTroca: km,
         kmProximaTroca: 0,
         dataProximaTroca: null,
-        isPrimeiraTroca: form.isPrimeiraTroca || sugerePrimeira,
+        isPrimeiraTroca: primeiraTroca,
         concessionaria: form.concessionaria.trim() || null,
         observacoes: form.observacoes.trim() || null,
       }
@@ -190,7 +197,7 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
         )}
 
         <Field label="Tipo de manutenção" required>
-          <Select value={form.tipoId} onChange={(e) => set('tipoId', e.target.value)}>
+          <Select value={form.tipoId} onChange={(e) => escolherTipo(e.target.value)}>
             <option value="">Selecione</option>
             {tiposManutencao.map((t) => (
               <option key={t.id} value={t.id}>{t.nome}</option>
@@ -249,7 +256,7 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
         </div>
 
         <Toggle
-          checked={form.isPrimeiraTroca || sugerePrimeira}
+          checked={primeiraTroca}
           onChange={(v) => set('isPrimeiraTroca', v)}
           label={sugerePrimeira ? 'Primeira troca (sugerido — sem histórico anterior)' : 'Marcar como primeira troca (amaciamento)'}
         />

@@ -45,6 +45,14 @@ export const ORIGENS_KM = {
   Correcao: 'Correção',
 }
 
+// Placa como o sistema grava (a mesma regra da API, PlacaUtil): maiúscula e com hífen, ABC-1234 ou ABC-1D23.
+// Pode digitar de qualquer jeito (abc1d23, ABC 1D23...): o campo já vai arrumando.
+export function formatarPlaca(texto) {
+  const limpa = String(texto ?? '').replace(/[^a-z0-9]/gi, '').toUpperCase().slice(0, 7)
+  return limpa.length > 3 ? `${limpa.slice(0, 3)}-${limpa.slice(3)}` : limpa
+}
+export const placaValida = (placa) => /^[A-Z]{3}-\d[A-Z\d]\d{2}$/.test(placa)
+
 // "Volvo FH" — para listas e seletores ({ fabricanteNome, modeloNome } ou { fabricanteNome, nome })
 export const nomeDoModelo = ({ fabricanteNome, modeloNome, nome }) => `${fabricanteNome ?? ''} ${modeloNome ?? nome}`.trim()
 
@@ -87,6 +95,10 @@ export const contemBusca = (texto, busca) => normalizarBusca(texto).includes(nor
 export function formatKm(km) {
   return Math.round(km).toLocaleString('pt-BR') + ' km'
 }
+
+// Dias até a data da próxima troca (negativo = já venceu)
+export const textoDias = (dias) =>
+  dias > 0 ? `${dias} dia${dias === 1 ? '' : 's'}` : dias === 0 ? 'vence hoje' : `venceu há ${-dias} dia${dias === -1 ? '' : 's'}`
 
 export function formatData(iso) {
   if (!iso) return '—'

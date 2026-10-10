@@ -3,7 +3,7 @@ import { ChevronLeft } from 'lucide-react'
 import { Card } from './Layout'
 import { StatusBadge, PlacaBadge } from './ui/Badges'
 import {
-  formatKm, formatData, formatDataHora, getHistoricoVeiculo, nomeDoCaminhao, TRACOES, ORIGENS_KM,
+  formatKm, formatData, formatDataHora, getHistoricoVeiculo, nomeDoCaminhao, textoDias, TRACOES, ORIGENS_KM,
 } from '../data/domain'
 import { obterUsuario } from '../services/sessao'
 import { ehAutonomo } from '../data/acesso'
@@ -77,8 +77,8 @@ export default function VeiculoDetalhePanel({ veiculo, situacao, registros, hist
           ) : (
             <div className="space-y-4">
               {situacao.itens.map((s) => {
-                // Quanto do intervalo já foi usado (barra cheia = na hora de trocar)
-                const pct = Math.max(2, Math.min(100, ((s.intervaloKm - s.kmRestante) / s.intervaloKm) * 100))
+                // Quanto do ciclo já foi rodado (barra cheia = na hora de trocar)
+                const pct = Math.max(2, s.percentualUsado)
                 const barColor = s.status === 'critico' ? 'bg-red-500' : s.status === 'atencao' ? 'bg-amber-500' : 'bg-brand-600'
                 const textColor = s.status === 'critico' ? 'text-red-600' : s.status === 'atencao' ? 'text-amber-600' : 'text-stone-400'
                 return (
@@ -181,7 +181,6 @@ function textoOrigemKm(h) {
 
 // Negativo = já passou do ponto de troca
 const textoKm = (kmRestante) => (kmRestante > 0 ? `faltam ${formatKm(kmRestante)}` : `passou ${formatKm(-kmRestante)}`)
-const textoDias = (dias) => (dias >= 0 ? `${dias} dia${dias === 1 ? '' : 's'}` : `venceu há ${-dias} dia${dias === -1 ? '' : 's'}`)
 
 function Info({ label, value }) {
   return (

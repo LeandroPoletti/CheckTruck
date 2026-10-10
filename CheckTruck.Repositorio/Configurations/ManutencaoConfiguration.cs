@@ -9,7 +9,9 @@ public class ManutencaoConfiguration : IEntityTypeConfiguration<Manutencao>
     public void Configure(EntityTypeBuilder<Manutencao> builder)
     {
         builder.HasKey(m => m.Id);
-        builder.HasOne(m => m.Veiculo).WithMany(v => v.Manutencoes).IsRequired();
+        // Caminhão com OS não é apagado, nem direto no banco: o histórico de manutenção fica
+        builder.HasOne(m => m.Veiculo).WithMany(v => v.Manutencoes)
+            .IsRequired().OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(m => m.TipoManutencao).WithMany()
             .IsRequired().OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(m => m.Mecanico).WithMany()

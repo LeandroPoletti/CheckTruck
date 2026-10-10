@@ -105,17 +105,17 @@ public class ServicoGeracao(
         return salvou ? entidade : null;
     }
 
-    /// <summary>As potências saem junto com a geração (cascata no banco).</summary>
-    public override Geracao? Deletar(long id)
+    /// <summary>Geração com caminhão ou intervalo não sai. As potências saem junto com ela (cascata no banco).</summary>
+    protected override bool EmUso(long id)
     {
         var veiculos = servicoVeiculo.QueryTodasAsEmpresas(v => v.Potencia.Geracao.Id == id).Count();
         var intervalos = servicoIntervalo.QueryTodasAsEmpresas(i => i.Geracao.Id == id).Count();
-        if (veiculos > 0 || intervalos > 0)
+        if (veiculos == 0 && intervalos == 0)
         {
-            Mensagens.Add($"Não dá para excluir: a geração tem {veiculos} caminhão(ões) e {intervalos} intervalo(s) cadastrado(s).");
-            return null;
+            return false;
         }
 
-        return base.Deletar(id);
+        Mensagens.Add($"Não dá para excluir: a geração tem {veiculos} caminhão(ões) e {intervalos} intervalo(s) cadastrado(s).");
+        return true;
     }
 }

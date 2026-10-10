@@ -33,6 +33,9 @@ public class AlertaManutencaoDto
     public int KmProximaTroca { get; set; }
     public int KmRestante { get; set; }
 
+    /// <summary>Quanto do ciclo já foi rodado, de 0 a 100 (por km).</summary>
+    public int PercentualUsado { get; set; }
+
     /// <summary>Data limite da próxima troca; null quando não há histórico ou o intervalo não tem prazo.</summary>
     public DateTime? DataProximaTroca { get; set; }
 
@@ -79,6 +82,7 @@ public static class DashboardDtoExtensions
             TipoManutencaoNome = a.TipoManutencaoNome,
             KmProximaTroca = a.KmProximaTroca,
             KmRestante = a.KmRestante,
+            PercentualUsado = a.PercentualUsado,
             DataProximaTroca = a.DataProximaTroca,
             DiasRestantes = a.DiasRestantes,
             IsPrimeiraTroca = a.IsPrimeiraTroca,

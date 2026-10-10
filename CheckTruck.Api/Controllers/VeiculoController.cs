@@ -8,7 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CheckTruck.Api.Controllers;
 
-// Ver: Ver frota. Criar, editar e apagar: Veículos. Somar km: Atualizar km
+// Ver: Ver frota. Criar e editar: Veículos. Somar km: Atualizar km.
+// Caminhão não é excluído (as OS e o histórico de km dependem dele): quem não usa mais, desativa.
 [ApiController]
 [Route("api/[controller]")]
 [ExigePermissao(Permissao.VerFrota)]
@@ -111,10 +112,6 @@ public class VeiculoController(
 
         return PutCore(id, dto.ToEntity(potencia, motorista));
     }
-
-    [HttpDelete("{id:long}")]
-    [ExigePermissao(Permissao.Veiculos)]
-    public IActionResult Delete(long id) => DeleteCore(id);
 
     [HttpPut("{id:long}/kilometragem")]
     [ExigePermissao(Permissao.AtualizarKm)]

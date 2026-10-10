@@ -17,12 +17,11 @@ namespace CheckTruck.Api.Controllers;
 [Route("api/[controller]")]
 [ExigePermissao]
 public class ModeloController(
-    ServicoCatalogo<Modelo> servicoCrud,
+    ServicoModelo servicoModelo,
     ServicoCrud<Fabricante> servicoFabricante,
-    ServicoCrud<Geracao> servicoGeracao,
     ILogger<Modelo> logger)
     : CrudController<Modelo, ModeloResponseDto>(
-        servicoCrud, "modelo", logger,
+        servicoModelo, "modelo", logger,
         m => m.ToResponseDto(),
         q => q.Include(m => m.Fabricante))
 {
@@ -60,16 +59,7 @@ public class ModeloController(
 
     [HttpDelete("{id:long}")]
     [ExigePermissao(Permissao.Cadastros)]
-    public IActionResult Delete(long id)
-    {
-        var geracoes = servicoGeracao.QueryTodasAsEmpresas(g => g.Modelo.Id == id).Count();
-        if (geracoes > 0)
-        {
-            return BadRequest($"Não é possível excluir: o modelo possui {geracoes} geração(ões) cadastrada(s).");
-        }
-
-        return DeleteCore(id);
-    }
+    public IActionResult Delete(long id) => DeleteCore(id);
 
     // O fabricante existe e ainda não tem um modelo com esse nome
     private (Fabricante? fabricante, string? erro) ResolverFabricante(ModeloRequestDto dto, long? idIgnorar)

@@ -3,6 +3,7 @@ using CheckTruck.Dominio.Entidades;
 using CheckTruck.Dominio.Enums;
 using CheckTruck.Dominio.Interfaces;
 using CheckTruck.Dominio.Resultados;
+using CheckTruck.Dominio.Util;
 using Microsoft.Extensions.Logging;
 
 namespace CheckTruck.Dominio.Servicos;
@@ -35,12 +36,11 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
     /// <summary>Situação completa de um caminhão pela placa (com ou sem hífen, maiúscula ou minúscula).</summary>
     public SituacaoVeiculo? ObterSituacaoPorPlaca(string placa)
     {
-        var placaNormalizada = NormalizarPlaca(placa);
-        logger.LogDebug("Calculando situação do veículo de placa {Placa}", placaNormalizada);
-        if (placaNormalizada.Length == 0) return null;
+        var placaFormatada = PlacaUtil.Formatar(placa);
+        logger.LogDebug("Calculando situação do veículo de placa {Placa}", placaFormatada);
+        if (placaFormatada is null) return null;
 
-        return Calcular(v => v.Placa.ToUpper().Replace("-", "").Replace(" ", "") == placaNormalizada)
-            .FirstOrDefault();
+        return Calcular(v => v.Placa == placaFormatada).FirstOrDefault();
     }
 
     /// <summary>
@@ -96,9 +96,6 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
 
         return IntervalosPadrao.Resolver(doVeiculo, daGeracao, componente.Value, veiculo.NormaEmissao);
     }
-
-    public static string NormalizarPlaca(string? placa) =>
-        new string((placa ?? "").Where(char.IsLetterOrDigit).ToArray()).ToUpperInvariant();
 
     public static StatusManutencao StatusPorKmRestante(int kmRestante)
     {
@@ -228,8 +225,10 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
                     OrigemIntervalo = intervalo.Origem,
                 };
 
+                int kmInicio; // km em que o ciclo atual começou (a última troca, ou o início do ciclo sem histórico)
                 if (ultimasTrocas.TryGetValue((veiculo.VeiculoId, tipo.Id), out var ultima))
                 {
+                    kmInicio = ultima.KmAtual;
                     item.UltimaTrocaEm = ultima.RealizadoEm;
                     item.UltimaTrocaKm = ultima.KmAtual;
                     // Registros antigos podem não ter a próxima troca gravada: calcula pelo intervalo atual
@@ -246,9 +245,11 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
                         veiculo.KmAtual, intervalo.IntervaloKm, intervalo.IntervaloKmPrimeira);
                     item.KmProximaTroca = kmProximaTroca;
                     item.IsPrimeiraTroca = isPrimeira;
+                    kmInicio = isPrimeira ? 0 : kmProximaTroca - intervalo.IntervaloKm;
                 }
 
                 item.KmRestante = item.KmProximaTroca - veiculo.KmAtual;
+                item.PercentualUsado = PercentualUsado(veiculo.KmAtual, kmInicio, item.KmProximaTroca);
                 item.DiasRestantes = item.DataProximaTroca is { } data
                     ? (int)Math.Floor((data.Date - hoje).TotalDays)
                     : null;
@@ -269,6 +270,14 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
     }
 
     private static StatusManutencao Pior(StatusManutencao a, StatusManutencao b) => a >= b ? a : b;
+
+    // Quanto do ciclo já foi rodado, de 0 a 100: do km de início até o km da próxima troca
+    private static int PercentualUsado(int kmAtual, int kmInicio, int kmProximaTroca)
+    {
+        var ciclo = kmProximaTroca - kmInicio;
+        if (ciclo <= 0) return 100;
+        return Math.Clamp((int)Math.Round(100.0 * (kmAtual - kmInicio) / ciclo), 0, 100);
+    }
 
     // Sem histórico no sistema: usa o km de amaciamento (IntervaloKmPrimeira; 0 = igual ao padrão).
     // Se o veículo já passou dele, assume ciclos regulares desde então e aponta o próximo múltiplo.

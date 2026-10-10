@@ -26,8 +26,19 @@ public class ServicoVeiculo(
             Mensagens.Add("Escolha a tração do caminhão.");
         }
 
+        // A placa chega como foi digitada e é gravada no formato do sistema (ABC-1D23)
+        var placa = PlacaUtil.Formatar(entidade.Placa);
+        if (placa is null)
+        {
+            Mensagens.Add("Placa inválida. Use o padrão ABC-1234 ou ABC-1D23.");
+        }
+        else
+        {
+            entidade.Placa = placa;
+        }
+
         // A consulta só olha a empresa de quem está logado: em outra empresa a placa pode existir
-        if (Query(v => v.Id != entidade.Id && v.Placa == entidade.Placa).Any())
+        if (placa is not null && Query(v => v.Id != entidade.Id && v.Placa == placa).Any())
         {
             Mensagens.Add("Já existe um caminhão com essa placa.");
         }

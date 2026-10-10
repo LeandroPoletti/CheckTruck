@@ -27,6 +27,7 @@ public class AlertaManutencao
     public string TipoManutencaoNome { get; set; } = "";
     public int KmProximaTroca { get; set; }
     public int KmRestante { get; set; }
+    public int PercentualUsado { get; set; }
     public DateTime? DataProximaTroca { get; set; }
     public int? DiasRestantes { get; set; }
     public bool IsPrimeiraTroca { get; set; }

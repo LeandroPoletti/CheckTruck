@@ -97,7 +97,7 @@ export default function Veiculos() {
       <div className="grid grid-cols-3 gap-4">
         {filtrados.map((v) => {
           const { status, itemMaisUrgente: item } = v
-          const pct = item ? Math.max(2, Math.min(100, (v.kmAtual / item.kmProximaTroca) * 100)) : 0
+          const pct = item ? Math.max(2, item.percentualUsado) : 0
           const barColor = status === 'critico' ? 'bg-red-500' : status === 'atencao' ? 'bg-amber-500' : 'bg-brand-600'
 
           return (

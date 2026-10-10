@@ -53,6 +53,9 @@ public class ItemManutencao
     public int KmProximaTroca { get; set; }
     public int KmRestante { get; set; }
 
+    /// <summary>Quanto do ciclo já foi rodado, de 0 a 100 (da última troca até a próxima, por km). É a barra das telas.</summary>
+    public int PercentualUsado { get; set; }
+
     /// <summary>Data limite da próxima troca; null quando não há histórico ou o intervalo não tem prazo.</summary>
     public DateTime? DataProximaTroca { get; set; }
     public int? DiasRestantes { get; set; }

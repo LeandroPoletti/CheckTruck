@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Drawer } from '../ui/Overlay'
 import { Field, Input, Select, Toggle, Button } from '../ui/Form'
-import { TRACOES, ANO_MINIMO, ANO_MAXIMO, anoValido } from '../../data/domain'
+import { TRACOES, ANO_MINIMO, ANO_MAXIMO, anoValido, formatarPlaca, placaValida } from '../../data/domain'
 import { obterUsuario } from '../../services/sessao'
 import { ehAutonomo } from '../../data/acesso'
 import { veiculoService, fabricanteService, modeloService, geracaoService, usuarioService } from '../../services'
@@ -72,7 +72,8 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
     const e = {}
     if (!form.potenciaId) e.potenciaId = 'Escolha a potência.'
     if (!form.tracao) e.tracao = 'Escolha a tração.'
-    if (!form.placa.trim()) e.placa = 'Placa é obrigatória.'
+    if (!form.placa) e.placa = 'Placa é obrigatória.'
+    else if (!placaValida(form.placa)) e.placa = 'Placa inválida. Ex.: ABC-1234 ou ABC-1D23.'
     if (form.chassi.length !== 17) e.chassi = `${form.chassi.length} de 17 caracteres`
     // Ano modelo = ano de fabricação ou o seguinte (ex.: fabricado em 2019, modelo 2019 ou 2020)
     const anoFabricacao = Number(form.anoFabricacao)
@@ -94,7 +95,7 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
     const payload = {
       potenciaId: form.potenciaId,
       tracao: form.tracao,
-      placa: form.placa.trim().toUpperCase(),
+      placa: form.placa,
       chassi: form.chassi.trim(),
       renavam: form.renavam.trim() || null,
       anoFabricacao: Number(form.anoFabricacao),
@@ -191,7 +192,7 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
           <p className="mb-3 text-xs font-bold tracking-wide text-brand-700">2 · IDENTIFICAÇÃO</p>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Placa" required error={errors.placa}>
-              <Input value={form.placa} onChange={(e) => set('placa', e.target.value)} placeholder="ABC1D23" error={errors.placa} />
+              <Input value={form.placa} onChange={(e) => set('placa', formatarPlaca(e.target.value))} placeholder="ABC-1D23" error={errors.placa} />
             </Field>
             <Field label="Renavam">
               <Input value={form.renavam} onChange={(e) => set('renavam', e.target.value)} placeholder="00912345678" />

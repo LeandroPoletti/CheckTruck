@@ -85,8 +85,8 @@ Na tela **Criar conta** o cliente escolhe o tipo de conta, e quem cria vira o Ad
 | **Frota** | Empresa com equipe: gestor, motoristas, mecânicos | Nome da empresa, CNPJ, seu nome, seu CPF, e-mail e senha |
 | **Autônomo** | O dono de 1 ou 2 caminhões, que faz tudo sozinho | Seu nome, CPF, e-mail e senha |
 
-O **Autônomo** tem um acesso só: o menu fica sem Chamados e sem Acesso, não tem motorista (é ele), e o mecânico
-da OS aparece como "oficina ou mecânico". Em **Minha empresa** ele pode **virar Frota** a qualquer hora: ganha
+O **Autônomo** tem um acesso só: o menu fica sem Chamados e sem Acesso (a API também barra os chamados), não tem
+motorista (é ele), e o mecânico da OS aparece como "oficina ou mecânico". Em **Minha empresa** ele pode **virar Frota** a qualquer hora: ganha
 Acesso e Chamados, e nada do que já cadastrou muda (não dá para voltar a Autônomo). CNPJ e CPF não repetem entre
 as contas, e o CNPJ pode ter letras (o alfanumérico da Receita, desde julho de 2026).
 
@@ -134,6 +134,9 @@ Marcar Veículos, Atualizar km ou Ordem de serviço já liga o Ver frota.
   empresa para a geração, o de fábrica da geração ou o padrão do sistema. Vence o que chegar primeiro: o km
   ou o prazo em meses. O padrão do óleo do motor depende da norma da geração (Euro 6: 40.000 km; antes
   disso: 30.000 km).
+- **Caminhão:** a placa pode ser digitada de qualquer jeito (abc1d23, ABC 1D23...) e fica maiúscula e com hífen:
+  ABC-1234 ou ABC-1D23 (fora desse padrão não entra). Caminhão não é excluído, porque as OS e o histórico de km
+  dependem dele: quem não usa mais, desativa.
 - **Ordem de serviço:** o número é gerado em sequência. Se a OS não trouxer a próxima troca, o sistema
   calcula pelo intervalo (km da troca + intervalo). O km da OS atualiza o km do caminhão quando é maior.
   O motorista informado vira o motorista atual do caminhão, e quem lançou fica gravado com data e hora.

@@ -63,6 +63,9 @@ public class ItemManutencaoDto
     /// <summary>Km até a próxima troca (negativo = vencido).</summary>
     public int KmRestante { get; set; }
 
+    /// <summary>Quanto do ciclo já foi rodado, de 0 a 100 (da última troca até a próxima, por km).</summary>
+    public int PercentualUsado { get; set; }
+
     /// <summary>Data limite da próxima troca; null quando não há histórico ou o intervalo não tem prazo.</summary>
     public DateTime? DataProximaTroca { get; set; }
 
@@ -117,6 +120,7 @@ public static class VeiculoSituacaoDtoExtensions
         UltimaTrocaKm = item.UltimaTrocaKm,
         KmProximaTroca = item.KmProximaTroca,
         KmRestante = item.KmRestante,
+        PercentualUsado = item.PercentualUsado,
         DataProximaTroca = item.DataProximaTroca,
         DiasRestantes = item.DiasRestantes,
         IsPrimeiraTroca = item.IsPrimeiraTroca,

@@ -12,8 +12,8 @@ namespace CheckTruck.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [ExigePermissao]
-public class PaisController(ServicoCatalogo<Pais> servicoCrud, ServicoCrud<Fabricante> servicoFabricante, ILogger<Pais> logger)
-    : CrudController<Pais, PaisResponseDto>(servicoCrud, "país", logger, p => p.ToResponseDto())
+public class PaisController(ServicoPais servicoPais, ILogger<Pais> logger)
+    : CrudController<Pais, PaisResponseDto>(servicoPais, "país", logger, p => p.ToResponseDto())
 {
     [HttpGet]
     public ActionResult<IEnumerable<PaisResponseDto>> Get() => GetODataCore();
@@ -31,14 +31,5 @@ public class PaisController(ServicoCatalogo<Pais> servicoCrud, ServicoCrud<Fabri
 
     [HttpDelete("{id:long}")]
     [ExigePermissao(Permissao.Cadastros)]
-    public IActionResult Delete(long id)
-    {
-        var fabricantes = servicoFabricante.QueryTodasAsEmpresas(f => f.PaisOrigem.Id == id).Count();
-        if (fabricantes > 0)
-        {
-            return BadRequest($"Não é possível excluir: o país possui {fabricantes} fabricante(s) cadastrado(s).");
-        }
-
-        return DeleteCore(id);
-    }
+    public IActionResult Delete(long id) => DeleteCore(id);
 }

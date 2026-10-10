@@ -32,6 +32,7 @@ public class ServicoDashboard(ServicoSituacaoVeiculo servicoSituacao, ILogger<Se
                 TipoManutencaoNome = v.ItemMaisUrgente.TipoManutencaoNome,
                 KmProximaTroca = v.ItemMaisUrgente.KmProximaTroca,
                 KmRestante = v.ItemMaisUrgente.KmRestante,
+                PercentualUsado = v.ItemMaisUrgente.PercentualUsado,
                 DataProximaTroca = v.ItemMaisUrgente.DataProximaTroca,
                 DiasRestantes = v.ItemMaisUrgente.DiasRestantes,
                 IsPrimeiraTroca = v.ItemMaisUrgente.IsPrimeiraTroca,

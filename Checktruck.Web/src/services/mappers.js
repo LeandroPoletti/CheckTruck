@@ -150,9 +150,9 @@ export const veiculoFromApi = (dto) => ({
 const itemSituacaoFromApi = (item) => ({
   tipoId: toId(item.tipoManutencaoId),
   tipoNome: item.tipoManutencaoNome,
-  intervaloKm: item.intervaloKm,
   kmProximaTroca: item.kmProximaTroca,
   kmRestante: item.kmRestante,
+  percentualUsado: item.percentualUsado, // quanto do ciclo já foi rodado (0 a 100): a barra
   diasRestantes: item.diasRestantes,
   isPrimeiraTroca: item.isPrimeiraTroca,
   status: item.status,
@@ -261,6 +261,8 @@ export const dashboardFromApi = (dto) => ({
     tipoNome: a.tipoManutencaoNome,
     kmProximaTroca: a.kmProximaTroca,
     kmRestante: a.kmRestante,
+    percentualUsado: a.percentualUsado,
+    diasRestantes: a.diasRestantes, // null = vence só por km
     isPrimeiraTroca: a.isPrimeiraTroca,
     status: a.status, // 'ok' | 'atencao' | 'critico'
   })),
