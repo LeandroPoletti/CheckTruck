@@ -78,7 +78,6 @@ builder.Services.AddScoped<IRepositorioCrud, RepositorioCrud>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUsuarioLogado, UsuarioLogadoHttp>();
 builder.Services.AddScoped(typeof(ServicoCrud<>));
-builder.Services.AddScoped(typeof(ServicoCatalogo<>));
 builder.Services.AddScoped<ServicoVeiculo>();
 builder.Services.AddScoped<ServicoSituacaoVeiculo>();
 builder.Services.AddScoped<ServicoManutencao>();
@@ -86,11 +85,14 @@ builder.Services.AddScoped<ServicoDashboard>();
 builder.Services.AddScoped<ServicoUsuario>();
 builder.Services.AddScoped<ServicoEmpresa>();
 builder.Services.AddScoped<ServicoChamado>();
+builder.Services.AddScoped<ServicoMecanico>();
 builder.Services.AddScoped<ServicoPais>();
 builder.Services.AddScoped<ServicoFabricante>();
 builder.Services.AddScoped<ServicoModelo>();
 builder.Services.AddScoped<ServicoGeracao>();
 builder.Services.AddScoped<ServicoTipoManutencao>();
+builder.Services.AddScoped<ServicoIntervaloRecomendado>();
+builder.Services.AddScoped<ServicoIntervaloVeiculo>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy => policy.AllowAnyMethod().AllowAnyOrigin().AllowAnyHeader());

@@ -65,8 +65,8 @@ public class ServicoEmpresa(
         return usuario;
     }
 
-    /// <summary>Empresa de quem está logado (null para o dono do sistema).</summary>
-    public Empresa? ObterAtual() => usuarioLogado.Usuario?.EmpresaId is { } empresaId ? GetById(empresaId) : null;
+    /// <summary>Empresa de quem está logado (null para o dono do sistema). Vem junto com o usuário, nos filtros de acesso.</summary>
+    public Empresa? ObterAtual() => usuarioLogado.Usuario?.Empresa;
 
     /// <summary>O Autônomo vira Frota: passa a cadastrar acessos (motoristas, mecânicos, gestor) e a usar chamados.</summary>
     public Empresa? VirarFrota()

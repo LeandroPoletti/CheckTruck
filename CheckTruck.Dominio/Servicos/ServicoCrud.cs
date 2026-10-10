@@ -114,6 +114,11 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
         public virtual T? Deletar(long id)
         {
             _logger.LogDebug($"Deletando entidade do tipo {typeof(T).Name} ID: {id}");
+            if (EmUso(id))
+            {
+                return null;
+            }
+
             try
             {
                 var retorno = _repositorioCrud.Delete<T>(id);
@@ -128,6 +133,12 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
                 return null;
             }
         }
+
+        /// <summary>
+        /// Antes de excluir: o registro está em uso (ex.: mecânico com OS lançada)? Quando está, o serviço filho
+        /// deixa o motivo em Mensagens e a exclusão não acontece.
+        /// </summary>
+        protected virtual bool EmUso(long id) => false;
 
         public virtual bool MakeTransaction(Action<IRepositorioCrud> action)
         {

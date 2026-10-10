@@ -151,7 +151,7 @@ public class VeiculoController(
             : BadRequest(string.Join(" ", servicoVeiculo.Mensagens));
     }
 
-    // O motorista atual é opcional; quando vem, tem que ser um acesso ativo com cargo Motorista
+    // O motorista atual é opcional. Se ele precisa estar ativo, quem decide é o serviço
     private async Task<(Usuario? motorista, string? erro)> ResolverMotoristaAsync(string? motoristaId)
     {
         if (string.IsNullOrEmpty(motoristaId))
@@ -159,10 +159,10 @@ public class VeiculoController(
             return (null, null);
         }
 
-        var motorista = await servicoUsuario.ObterMotoristaAtivoAsync(motoristaId);
+        var motorista = await servicoUsuario.ObterAsync(motoristaId);
         if (motorista is null)
         {
-            return (null, "Motorista não encontrado ou inativo.");
+            return (null, "Motorista não encontrado.");
         }
 
         return (motorista, null);

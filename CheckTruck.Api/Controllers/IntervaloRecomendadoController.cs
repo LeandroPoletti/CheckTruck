@@ -16,13 +16,13 @@ namespace CheckTruck.Api.Controllers;
 [Route("api/[controller]")]
 [ExigePermissao]
 public class IntervaloRecomendadoController(
-    ServicoCatalogo<IntervaloRecomendado> servicoCrud,
+    ServicoIntervaloRecomendado servicoIntervalo,
     ServicoCrud<Geracao> servicoGeracao,
     ServicoCrud<TipoManutencao> servicoTipoManutencao,
     ServicoSituacaoVeiculo servicoSituacao,
     ILogger<IntervaloRecomendado> logger)
     : CrudController<IntervaloRecomendado, IntervaloRecomendadoResponseDto>(
-        servicoCrud, "intervalo recomendado", logger,
+        servicoIntervalo, "intervalo recomendado", logger,
         i => i.ToResponseDto(),
         q => q.Include(i => i.Geracao).Include(i => i.TipoManutencao))
 {
@@ -59,7 +59,7 @@ public class IntervaloRecomendadoController(
     [ExigePermissao(Permissao.Intervalos)]
     public ActionResult<IntervaloRecomendadoResponseDto> Post([FromBody] IntervaloRecomendadoRequestDto dto)
     {
-        var (geracao, tipoManutencao, erro) = ResolverRelacionados(dto, idIgnorar: null);
+        var (geracao, tipoManutencao, erro) = ResolverRelacionados(dto);
         if (erro is not null)
         {
             return BadRequest(erro);
@@ -72,7 +72,7 @@ public class IntervaloRecomendadoController(
     [ExigePermissao(Permissao.Intervalos)]
     public ActionResult<IntervaloRecomendadoResponseDto> Put(long id, [FromBody] IntervaloRecomendadoRequestDto dto)
     {
-        var (geracao, tipoManutencao, erro) = ResolverRelacionados(dto, idIgnorar: id);
+        var (geracao, tipoManutencao, erro) = ResolverRelacionados(dto);
         if (erro is not null)
         {
             return BadRequest(erro);
@@ -86,10 +86,7 @@ public class IntervaloRecomendadoController(
     [ExigePermissao(Permissao.Intervalos)]
     public IActionResult Delete(long id) => DeleteCore(id);
 
-    // Geração e tipo existem, e quem está logado ainda não tem intervalo para esse tipo nessa geração
-    // (um de fábrica e um por empresa, para cada geração e tipo)
-    private (Geracao? geracao, TipoManutencao? tipoManutencao, string? erro) ResolverRelacionados(
-        IntervaloRecomendadoRequestDto dto, long? idIgnorar)
+    private (Geracao? geracao, TipoManutencao? tipoManutencao, string? erro) ResolverRelacionados(IntervaloRecomendadoRequestDto dto)
     {
         var geracao = servicoGeracao.GetById(dto.GeracaoId);
         if (geracao is null)
@@ -101,18 +98,6 @@ public class IntervaloRecomendadoController(
         if (tipoManutencao is null)
         {
             return (null, null, "Tipo de manutenção não encontrado.");
-        }
-
-        var empresaId = HttpContext.UsuarioLogado().EmpresaId;
-        var jaExiste = Servico
-            .Query(i => i.Id != idIgnorar && i.EmpresaId == empresaId
-                && i.Geracao.Id == dto.GeracaoId && i.TipoManutencao.Id == dto.TipoManutencaoId)
-            .Any();
-        if (jaExiste)
-        {
-            return (null, null, empresaId is null
-                ? "Essa geração já tem intervalo de fábrica para esse item. Altere o existente."
-                : "Sua empresa já tem intervalo para esse item nessa geração. Altere o existente.");
         }
 
         return (geracao, tipoManutencao, null);

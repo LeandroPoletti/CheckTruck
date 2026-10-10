@@ -26,6 +26,9 @@ Checktruck.Web/         front (React)
 compose.yaml            PostgreSQL (e Adminer) em Docker
 ```
 
+Na API, o controller só traduz o pedido (acha pelo id o que veio, como o fabricante ou o caminhão) e devolve a
+resposta. As regras (nome repetido, item em uso, quem lançou a OS, motorista ativo...) ficam nos serviços do Dominio.
+
 ## Como rodar
 
 Precisa de: .NET 10 SDK, Node.js e PostgreSQL (ou Docker).

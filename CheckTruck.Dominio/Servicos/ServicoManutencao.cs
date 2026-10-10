@@ -44,20 +44,38 @@ public class ServicoManutencao(
         return base.Valida(entidade);
     }
 
+    /// <summary>Lança a OS: quem lançou e quando ficam gravados. O mecânico e o motorista precisam estar ativos.</summary>
     public override Manutencao? Inserir(Manutencao entidade)
     {
+        ConferirAtivos(entidade);
         if (!PreencherProximaTroca(entidade) || !Valida(entidade))
         {
             return null;
         }
 
+        entidade.LancadoPor = usuarioLogado.Usuario;
+        entidade.CriadoEm = DateTime.UtcNow;
         AtualizarKmDoVeiculo(entidade);
         AtualizarMotoristaDoVeiculo(entidade);
         return base.Inserir(entidade);
     }
 
+    /// <summary>
+    /// Corrige uma OS já lançada: quem lançou e quando continuam os originais, e a hora da correção fica gravada.
+    /// Mecânico e motorista podem estar inativos (a OS pode ser antiga), e o motorista do caminhão não muda.
+    /// </summary>
     public override Manutencao? Atualizar(Manutencao entidade)
     {
+        var original = Query(m => m.Id == entidade.Id).Select(m => new { m.LancadoPor, m.CriadoEm }).FirstOrDefault();
+        if (original is null)
+        {
+            Mensagens.Add("OS não encontrada.");
+            return null;
+        }
+
+        entidade.LancadoPor = original.LancadoPor;
+        entidade.CriadoEm = original.CriadoEm;
+        entidade.AtualizadoEm = DateTime.UtcNow;
         if (!PreencherProximaTroca(entidade) || !Valida(entidade))
         {
             return null;
@@ -102,6 +120,20 @@ public class ServicoManutencao(
 
         entidade.DataProximaTroca ??= ServicoSituacaoVeiculo.CalcularDataProximaTroca(entidade.RealizadoEm, intervalo.IntervaloMeses);
         return true;
+    }
+
+    // Ao lançar, o mecânico e o motorista precisam estar ativos
+    private void ConferirAtivos(Manutencao entidade)
+    {
+        if (!entidade.Mecanico.Ativo)
+        {
+            Mensagens.Add("Esse mecânico está inativo. Ative o cadastro ou escolha outro.");
+        }
+
+        if (entidade.Motorista is { } motorista && !ServicoUsuario.EhMotoristaAtivo(motorista))
+        {
+            Mensagens.Add("Esse motorista está inativo. Escolha outro ou deixe sem motorista.");
+        }
     }
 
     // A OS é uma leitura do painel: se o km dela for maior que o do cadastro, atualiza o caminhão

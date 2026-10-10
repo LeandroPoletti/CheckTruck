@@ -17,8 +17,7 @@ public class UsuarioController(ServicoUsuario servicoUsuario) : ControllerBase
     /// </summary>
     [HttpGet("me")]
     [ExigePermissao]
-    public ActionResult<UsuarioLogadoResponseDto> Me([FromServices] ServicoEmpresa servicoEmpresa) =>
-        HttpContext.UsuarioLogado().ToLogadoResponseDto(servicoEmpresa.ObterAtual());
+    public ActionResult<UsuarioLogadoResponseDto> Me() => HttpContext.UsuarioLogado().ToLogadoResponseDto();
 
     /// <summary>Motoristas ativos, para escolher quem está com o caminhão.</summary>
     [HttpGet("motoristas")]

@@ -45,17 +45,13 @@ public class ManutencaoController(
     [ExigePermissao(Permissao.OrdemServico)]
     public async Task<ActionResult<ManutencaoResponseDto>> Post([FromBody] ManutencaoRequestDto dto)
     {
-        var (relacionados, erro) = await ResolverRelacionadosAsync(dto, exigirAtivo: true);
+        var (relacionados, erro) = await ResolverRelacionadosAsync(dto);
         if (relacionados is null)
         {
             return BadRequest(erro);
         }
 
-        var entidade = dto.ToEntity(relacionados.Veiculo, relacionados.TipoManutencao, relacionados.Mecanico, relacionados.Motorista);
-        entidade.LancadoPor = HttpContext.UsuarioLogado();
-        entidade.CriadoEm = DateTime.UtcNow;
-
-        return PostCore(entidade);
+        return PostCore(dto.ToEntity(relacionados.Veiculo, relacionados.TipoManutencao, relacionados.Mecanico, relacionados.Motorista));
     }
 
     /// <summary>
@@ -66,35 +62,21 @@ public class ManutencaoController(
     [ExigePermissao(Permissao.OrdemServico)]
     public async Task<ActionResult<ManutencaoResponseDto>> Put(long id, [FromBody] ManutencaoRequestDto dto)
     {
-        var original = Servico.Query(m => m.Id == id)
-            .Select(m => new { m.LancadoPor, m.CriadoEm })
-            .FirstOrDefault();
-        if (original is null)
-        {
-            return NotFound();
-        }
-
-        // Na correção aceita mecânico e motorista inativos: a OS pode ser antiga
-        var (relacionados, erro) = await ResolverRelacionadosAsync(dto, exigirAtivo: false);
+        var (relacionados, erro) = await ResolverRelacionadosAsync(dto);
         if (relacionados is null)
         {
             return BadRequest(erro);
         }
 
-        var entidade = dto.ToEntity(relacionados.Veiculo, relacionados.TipoManutencao, relacionados.Mecanico, relacionados.Motorista);
-        entidade.LancadoPor = original.LancadoPor;
-        entidade.CriadoEm = original.CriadoEm;
-        entidade.AtualizadoEm = DateTime.UtcNow;
-
-        return PutCore(id, entidade);
+        return PutCore(id, dto.ToEntity(relacionados.Veiculo, relacionados.TipoManutencao, relacionados.Mecanico, relacionados.Motorista));
     }
 
     [HttpDelete("{id:long}")]
     [ExigePermissao(Permissao.OrdemServico)]
     public IActionResult Delete(long id) => DeleteCore(id);
 
-    private async Task<(Relacionados? relacionados, string? erro)> ResolverRelacionadosAsync(
-        ManutencaoRequestDto dto, bool exigirAtivo)
+    // Acha pelo id o que a OS aponta. Se o mecânico e o motorista precisam estar ativos, quem decide é o serviço
+    private async Task<(Relacionados? relacionados, string? erro)> ResolverRelacionadosAsync(ManutencaoRequestDto dto)
     {
         var veiculo = servicoVeiculo.GetById(dto.VeiculoId);
         if (veiculo is null)
@@ -114,20 +96,13 @@ public class ManutencaoController(
             return (null, "Mecânico não encontrado.");
         }
 
-        if (exigirAtivo && !mecanico.Ativo)
-        {
-            return (null, "Esse mecânico está inativo. Ative o cadastro ou escolha outro.");
-        }
-
         Usuario? motorista = null;
         if (!string.IsNullOrEmpty(dto.MotoristaId))
         {
-            motorista = exigirAtivo
-                ? await servicoUsuario.ObterMotoristaAtivoAsync(dto.MotoristaId)
-                : await servicoUsuario.ObterAsync(dto.MotoristaId);
+            motorista = await servicoUsuario.ObterAsync(dto.MotoristaId);
             if (motorista is null)
             {
-                return (null, "Motorista não encontrado ou inativo.");
+                return (null, "Motorista não encontrado.");
             }
         }
 

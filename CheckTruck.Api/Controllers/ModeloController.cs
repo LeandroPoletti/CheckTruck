@@ -35,50 +35,29 @@ public class ModeloController(
     [ExigePermissao(Permissao.Cadastros)]
     public ActionResult<ModeloResponseDto> Post([FromBody] ModeloRequestDto dto)
     {
-        var (fabricante, erro) = ResolverFabricante(dto, idIgnorar: null);
-        if (erro is not null)
+        var fabricante = servicoFabricante.GetById(dto.FabricanteId);
+        if (fabricante is null)
         {
-            return BadRequest(erro);
+            return BadRequest("Fabricante não encontrado.");
         }
 
-        return PostCore(dto.ToEntity(fabricante!));
+        return PostCore(dto.ToEntity(fabricante));
     }
 
     [HttpPut("{id:long}")]
     [ExigePermissao(Permissao.Cadastros)]
     public ActionResult<ModeloResponseDto> Put(long id, [FromBody] ModeloRequestDto dto)
     {
-        var (fabricante, erro) = ResolverFabricante(dto, idIgnorar: id);
-        if (erro is not null)
+        var fabricante = servicoFabricante.GetById(dto.FabricanteId);
+        if (fabricante is null)
         {
-            return BadRequest(erro);
+            return BadRequest("Fabricante não encontrado.");
         }
 
-        return PutCore(id, dto.ToEntity(fabricante!));
+        return PutCore(id, dto.ToEntity(fabricante));
     }
 
     [HttpDelete("{id:long}")]
     [ExigePermissao(Permissao.Cadastros)]
     public IActionResult Delete(long id) => DeleteCore(id);
-
-    // O fabricante existe e ainda não tem um modelo com esse nome
-    private (Fabricante? fabricante, string? erro) ResolverFabricante(ModeloRequestDto dto, long? idIgnorar)
-    {
-        var fabricante = servicoFabricante.GetById(dto.FabricanteId);
-        if (fabricante is null)
-        {
-            return (null, "Fabricante não encontrado.");
-        }
-
-        var nome = dto.Nome.Trim().ToLower();
-        var jaExiste = Servico
-            .Query(m => m.Id != idIgnorar && m.Fabricante.Id == dto.FabricanteId && m.Nome.ToLower() == nome)
-            .Any();
-        if (jaExiste)
-        {
-            return (null, "Esse fabricante já tem um modelo com esse nome.");
-        }
-
-        return (fabricante, null);
-    }
 }

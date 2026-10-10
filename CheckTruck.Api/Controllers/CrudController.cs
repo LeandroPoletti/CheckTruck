@@ -82,6 +82,12 @@ public abstract class CrudController<TEntity, TResponseDto>(
 
     protected virtual ActionResult<TResponseDto> PutCore(long id, TEntity entidade)
     {
+        // Id que não existe (ou é de outra empresa): 404 em todos os cadastros
+        if (!_servicoCrud.Query(e => e.Id == id).Any())
+        {
+            return NotFound();
+        }
+
         entidade.Id = id;
 
         _logger.LogDebug($"Atualizando {nomeEntidade} com ID: {id}");

@@ -53,6 +53,12 @@ public class ServicoVeiculo(
             Mensagens.Add("O km do caminhão não pode ser negativo.");
         }
 
+        // O motorista atual é opcional; quando vem, tem que ser um acesso ativo com cargo Motorista
+        if (entidade.MotoristaAtual is { } motorista && !ServicoUsuario.EhMotoristaAtivo(motorista))
+        {
+            Mensagens.Add("Esse motorista está inativo. Escolha outro ou deixe sem motorista.");
+        }
+
         // Ano modelo = ano de fabricação ou o seguinte (ex.: fabricado em 2019, modelo 2019 ou 2020)
         var anoFabricacao = entidade.AnoFabricacao.Year;
         var anoModelo = entidade.AnoModelo.Year;

@@ -15,11 +15,8 @@ namespace CheckTruck.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [ExigePermissao]
-public class MecanicoController(
-    ServicoCrud<Mecanico> servicoCrud,
-    ServicoCrud<Manutencao> servicoManutencao,
-    ILogger<Mecanico> logger)
-    : CrudController<Mecanico, MecanicoResponseDto>(servicoCrud, "mecânico", logger, m => m.ToResponseDto())
+public class MecanicoController(ServicoMecanico servicoMecanico, ILogger<Mecanico> logger)
+    : CrudController<Mecanico, MecanicoResponseDto>(servicoMecanico, "mecânico", logger, m => m.ToResponseDto())
 {
     [HttpGet]
     public ActionResult<IEnumerable<MecanicoResponseDto>> Get() => GetODataCore();
@@ -38,13 +35,5 @@ public class MecanicoController(
     /// <summary>Só exclui mecânico sem OS lançada; com histórico, o certo é desativar.</summary>
     [HttpDelete("{id:long}")]
     [ExigePermissao(Permissao.Cadastros)]
-    public IActionResult Delete(long id)
-    {
-        if (servicoManutencao.Query(m => m.Mecanico.Id == id).Any())
-        {
-            return BadRequest("Esse mecânico tem OS lançadas. Desative o cadastro em vez de excluir.");
-        }
-
-        return DeleteCore(id);
-    }
+    public IActionResult Delete(long id) => DeleteCore(id);
 }

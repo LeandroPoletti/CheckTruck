@@ -65,8 +65,8 @@ public static class UsuarioDtoExtensions
 {
     public static UsuarioResponseDto ToResponseDto(this Usuario entidade) => Preencher(new UsuarioResponseDto(), entidade);
 
-    public static UsuarioLogadoResponseDto ToLogadoResponseDto(this Usuario entidade, Empresa? empresa) =>
-        Preencher(new UsuarioLogadoResponseDto { Empresa = empresa?.Nome, TipoConta = empresa?.TipoConta }, entidade);
+    public static UsuarioLogadoResponseDto ToLogadoResponseDto(this Usuario entidade) =>
+        Preencher(new UsuarioLogadoResponseDto { Empresa = entidade.Empresa?.Nome, TipoConta = entidade.Empresa?.TipoConta }, entidade);
 
     private static T Preencher<T>(T dto, Usuario entidade) where T : UsuarioResponseDto
     {

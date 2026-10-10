@@ -11,7 +11,7 @@ namespace CheckTruck.Dominio.Servicos;
 /// Quem chama é sempre Admin ou Gestor (a API confere antes), e só vê os acessos da própria empresa.
 /// A conta Autônomo tem um acesso só; o primeiro acesso de cada conta nasce na tela Criar conta.
 /// </summary>
-public class ServicoUsuario(UserManager<Usuario> userManager, ServicoCrud<Empresa> servicoEmpresa, IUsuarioLogado usuarioLogado)
+public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usuarioLogado)
 {
     /// <summary>Admin criado pelo sistema: não precisa de CPF, não troca de e-mail nem de cargo e não pode ser desativado.</summary>
     public const string EmailAdminDoSistema = "admin@admin.com";
@@ -24,6 +24,9 @@ public class ServicoUsuario(UserManager<Usuario> userManager, ServicoCrud<Empres
     public static bool EhAdminDoSistema(Usuario usuario) =>
         string.Equals(usuario.Email, EmailAdminDoSistema, StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>Quem pode ficar com um caminhão (motorista atual, motorista da OS): acesso ativo com cargo Motorista.</summary>
+    public static bool EhMotoristaAtivo(Usuario usuario) => usuario is { Ativo: true, Cargo: Cargo.Motorista };
+
     public IQueryable<Usuario> Listar() => DaEmpresa().OrderBy(u => u.Nome);
 
     public IQueryable<Usuario> ListarMotoristasAtivos() =>
@@ -33,10 +36,6 @@ public class ServicoUsuario(UserManager<Usuario> userManager, ServicoCrud<Empres
     public async Task<Usuario?> ObterAsync(string id) =>
         await userManager.FindByIdAsync(id) is { } usuario && usuario.EmpresaId == EmpresaAtual() ? usuario : null;
 
-    /// <summary>Motorista escolhido numa tela: só vale um acesso ativo com cargo Motorista (senão, null).</summary>
-    public async Task<Usuario?> ObterMotoristaAtivoAsync(string id) =>
-        await ObterAsync(id) is { Ativo: true, Cargo: Cargo.Motorista } motorista ? motorista : null;
-
     public async Task<Usuario?> CriarAsync(Usuario novo, string? senha)
     {
         if (string.IsNullOrWhiteSpace(senha))
@@ -44,7 +43,7 @@ public class ServicoUsuario(UserManager<Usuario> userManager, ServicoCrud<Empres
             Mensagens.Add("Informe a senha.");
         }
 
-        if (servicoEmpresa.GetById(EmpresaAtual()!.Value)?.TipoConta == TipoConta.Autonomo)
+        if (usuarioLogado.Usuario!.Empresa?.TipoConta == TipoConta.Autonomo)
         {
             Mensagens.Add("A conta Autônomo tem um acesso só. Para cadastrar mais pessoas, vire Frota em Minha empresa.");
         }
