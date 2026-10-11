@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { X } from 'lucide-react'
 import { Modal } from '../ui/Overlay'
 import { Field, Input, Select, Button, MensagemErro } from '../ui/Form'
 import { geracaoService, modeloService } from '../../services'
+import { useCarga } from '../../hooks/useCarga'
 import { NORMAS, ANO_MINIMO, ANO_MAXIMO, anoValido } from '../../data/domain'
 
 const CV_MIN = 100
 const CV_MAX = 1000
 
 // Geração = época de um modelo (anos, norma, motor, câmbio) com as potências em que foi vendida.
-// Quem abre a tela só renderiza este modal quando ele está aberto.
 // registro: geração em edição · valoresIniciais: pré-seleção (ex.: { modeloId } vindo do Catálogo)
 export default function GeracaoModal({ registro, valoresIniciais, onClose, onSalvo }) {
   const [form, setForm] = useState(() => ({
@@ -23,22 +23,12 @@ export default function GeracaoModal({ registro, valoresIniciais, onClose, onSal
   }))
   const [potencias, setPotencias] = useState(() => registro?.potencias.map((p) => p.cv) ?? [])
   const [novaCv, setNovaCv] = useState('')
-  const [modelos, setModelos] = useState([])
-  const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [salvando, setSalvando] = useState(false)
 
   // Modelos para o select, agrupados por fabricante
-  useEffect(() => {
-    let cancelado = false
-    modeloService.listar()
-      .then((lista) => {
-        if (!cancelado) setModelos(lista.sort((a, b) => a.fabricanteNome.localeCompare(b.fabricanteNome) || a.nome.localeCompare(b.nome)))
-      })
-      .catch((e) => { if (!cancelado) setErro(`Não foi possível carregar os modelos: ${e.message}`) })
-      .finally(() => { if (!cancelado) setCarregando(false) })
-    return () => { cancelado = true }
-  }, [])
+  const { dados: modelos = [], carregando, erro: erroCarga } = useCarga(async () =>
+    (await modeloService.listar()).sort((a, b) => a.fabricanteNome.localeCompare(b.fabricanteNome) || a.nome.localeCompare(b.nome)))
   const fabricantes = [...new Set(modelos.map((m) => m.fabricanteNome))]
 
   function set(campo, valor) {
@@ -91,7 +81,6 @@ export default function GeracaoModal({ registro, valoresIniciais, onClose, onSal
 
   return (
     <Modal
-      open
       onClose={onClose}
       eyebrow={registro ? 'PUT /api/Geracao/{id}' : 'POST /api/Geracao'}
       title={registro ? 'Editar geração' : 'Nova geração'}
@@ -175,7 +164,7 @@ export default function GeracaoModal({ registro, valoresIniciais, onClose, onSal
             </div>
           )}
         </Field>
-        <MensagemErro>{erro}</MensagemErro>
+        <MensagemErro>{erro || (erroCarga && `Não foi possível carregar os modelos: ${erroCarga.message}`)}</MensagemErro>
       </form>
     </Modal>
   )

@@ -4,8 +4,7 @@ import { Field, Input, Select, Toggle, Button, MensagemErro } from '../ui/Form'
 import { usuarioService } from '../../services'
 import { CARGOS, CARGOS_GESTAO, PERMISSOES, PERMISSAO_BASE, DEPENDEM_DA_BASE } from '../../data/acesso'
 
-// Cadastro e edição de acesso. Quem abre só renderiza este modal quando ele está aberto,
-// então o formulário já nasce com os dados do acesso (ou vazio, no cadastro).
+// Cadastro e edição de acesso: o formulário nasce com os dados do acesso (ou vazio, no cadastro).
 export default function UsuarioModal({ usuario, onClose, onSalvo }) {
   const editando = !!usuario
   const adminDoSistema = !!usuario?.adminDoSistema
@@ -69,7 +68,6 @@ export default function UsuarioModal({ usuario, onClose, onSalvo }) {
 
   return (
     <Modal
-      open
       onClose={onClose}
       title={editando ? 'Editar acesso' : 'Novo acesso'}
       subtitle="Login, cargo e o que a pessoa pode fazer no sistema"

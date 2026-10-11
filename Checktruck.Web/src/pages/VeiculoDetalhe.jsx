@@ -66,7 +66,7 @@ export default function VeiculoDetalhe() {
           </div>
         }
       />
-      <AtualizarKmModal open={kmOpen} onClose={() => setKmOpen(false)} veiculo={veiculo} onSalvo={recarregar} />
+      {kmOpen && <AtualizarKmModal onClose={() => setKmOpen(false)} veiculo={veiculo} onSalvo={recarregar} />}
       {editarOpen && <NovoVeiculoModal veiculoParaEditar={veiculo} onClose={() => setEditarOpen(false)} onSalvo={recarregar} />}
       {lancarOsOpen && <OrdemServicoModal veiculo={veiculo} onClose={() => setLancarOsOpen(false)} onSalvo={recarregar} />}
       {corrigirKmOpen && (

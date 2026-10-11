@@ -73,16 +73,17 @@ export default function IntervalosDoCaminhao({ veiculos, tipos, veiculoId, onVei
           onSalvo={recarregar}
         />
       )}
-      <ConfirmarExclusaoModal
-        open={!!excluindo}
-        onClose={() => setExcluindo(null)}
-        titulo="Excluir intervalo do caminhão"
-        descricao={excluindo && `Excluir o intervalo próprio de "${excluindo.tipo.nome}" do caminhão ${veiculo?.placa}? Ele volta a usar ${oQueVoltaAValer(excluindo, 'caminhao')}.`}
-        onConfirmar={async () => {
-          await intervaloVeiculoService.remover(doCaminhao(excluindo).id)
-          recarregar()
-        }}
-      />
+      {excluindo && (
+        <ConfirmarExclusaoModal
+          onClose={() => setExcluindo(null)}
+          titulo="Excluir intervalo do caminhão"
+          descricao={`Excluir o intervalo próprio de "${excluindo.tipo.nome}" do caminhão ${veiculo?.placa}? Ele volta a usar ${oQueVoltaAValer(excluindo, 'caminhao')}.`}
+          onConfirmar={async () => {
+            await intervaloVeiculoService.remover(doCaminhao(excluindo).id)
+            recarregar()
+          }}
+        />
+      )}
     </>
   )
 }

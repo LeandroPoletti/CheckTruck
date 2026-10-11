@@ -66,17 +66,18 @@ export default function Mecanicos() {
         </Tabela>
       )}
 
-      <MecanicoModal open={!!modal} registro={modal?.registro} onClose={() => setModal(null)} onSalvo={recarregar} />
-      <ConfirmarExclusaoModal
-        open={!!excluindo}
-        onClose={() => setExcluindo(null)}
-        titulo="Excluir mecânico"
-        descricao={`Excluir "${excluindo?.nome}"? Se ele já tiver OS lançadas, desative o cadastro em vez de excluir.`}
-        onConfirmar={async () => {
-          await mecanicoService.remover(excluindo.id)
-          recarregar()
-        }}
-      />
+      {modal && <MecanicoModal registro={modal.registro} onClose={() => setModal(null)} onSalvo={recarregar} />}
+      {excluindo && (
+        <ConfirmarExclusaoModal
+          onClose={() => setExcluindo(null)}
+          titulo="Excluir mecânico"
+          descricao={`Excluir "${excluindo.nome}"? Se ele já tiver OS lançadas, desative o cadastro em vez de excluir.`}
+          onConfirmar={async () => {
+            await mecanicoService.remover(excluindo.id)
+            recarregar()
+          }}
+        />
+      )}
     </>
   )
 }

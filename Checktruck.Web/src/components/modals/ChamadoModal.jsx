@@ -1,15 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { chamadoService } from '../../services'
+import { useCarga } from '../../hooks/useCarga'
 import { Modal } from '../ui/Overlay'
 import { Field, Select, Textarea, Button, MensagemErro } from '../ui/Form'
 import { TIPOS_OCORRENCIA, URGENCIAS } from '../../data/chamados'
 
-// Abrir chamado (chamado = null) ou editar um pendente. Quem abre a tela só renderiza este modal
-// quando ele está aberto, então o formulário já nasce com os dados certos.
+// Abrir chamado (chamado = null) ou editar um pendente.
 // O caminhão só se escolhe ao abrir: caminhão errado = exclui e abre outro.
 export default function ChamadoModal({ chamado, onClose, onSalvo }) {
   const editando = !!chamado
-  const [veiculos, setVeiculos] = useState([])
   const [form, setForm] = useState(() => ({
     veiculoId: chamado?.veiculoId ?? '',
     tipo: chamado?.tipo ?? TIPOS_OCORRENCIA[0].id,
@@ -19,15 +18,8 @@ export default function ChamadoModal({ chamado, onClose, onSalvo }) {
   const [erro, setErro] = useState('')
   const [salvando, setSalvando] = useState(false)
 
-  // Placas para escolher (só ao abrir)
-  useEffect(() => {
-    if (editando) return
-    let cancelado = false
-    chamadoService.listarVeiculos()
-      .then((lista) => { if (!cancelado) setVeiculos(lista) })
-      .catch((e) => { if (!cancelado) setErro(`Não foi possível carregar os caminhões: ${e.message}`) })
-    return () => { cancelado = true }
-  }, [editando])
+  // Placas para escolher (só ao abrir; na edição o caminhão não muda)
+  const { dados: veiculos = [], erro: erroCarga } = useCarga(() => (editando ? Promise.resolve([]) : chamadoService.listarVeiculos()))
 
   function set(campo, valor) {
     setForm((f) => ({ ...f, [campo]: valor }))
@@ -57,7 +49,6 @@ export default function ChamadoModal({ chamado, onClose, onSalvo }) {
 
   return (
     <Modal
-      open
       onClose={onClose}
       title={editando ? 'Editar chamado' : 'Abrir chamado'}
       subtitle={editando ? `Caminhão ${chamado.placa}` : 'Conte o que está acontecendo com o caminhão'}
@@ -113,7 +104,7 @@ export default function ChamadoModal({ chamado, onClose, onSalvo }) {
           />
         </Field>
 
-        <MensagemErro>{erro}</MensagemErro>
+        <MensagemErro>{erro || (erroCarga && `Não foi possível carregar os caminhões: ${erroCarga.message}`)}</MensagemErro>
       </div>
     </Modal>
   )

@@ -77,16 +77,17 @@ export default function Geracoes() {
       )}
 
       {modal && <GeracaoModal registro={modal.registro} onClose={() => setModal(null)} onSalvo={recarregar} />}
-      <ConfirmarExclusaoModal
-        open={!!excluindo}
-        onClose={() => setExcluindo(null)}
-        titulo="Excluir geração"
-        descricao={`Excluir "${excluindo && nomeDoModelo(excluindo)} · ${excluindo?.nome}" e as potências dela? Não é possível excluir uma geração com caminhão ou intervalo cadastrado.`}
-        onConfirmar={async () => {
-          await geracaoService.remover(excluindo.id)
-          recarregar()
-        }}
-      />
+      {excluindo && (
+        <ConfirmarExclusaoModal
+          onClose={() => setExcluindo(null)}
+          titulo="Excluir geração"
+          descricao={`Excluir "${nomeDoModelo(excluindo)} · ${excluindo.nome}" e as potências dela? Não é possível excluir uma geração com caminhão ou intervalo cadastrado.`}
+          onConfirmar={async () => {
+            await geracaoService.remover(excluindo.id)
+            recarregar()
+          }}
+        />
+      )}
     </>
   )
 }

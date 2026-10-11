@@ -28,7 +28,6 @@ export default function ResolverChamadoModal({ chamado, onClose, onSalvo }) {
 
   return (
     <Modal
-      open
       onClose={onClose}
       title="Resolver chamado"
       subtitle={`Caminhão ${chamado.placa}`}

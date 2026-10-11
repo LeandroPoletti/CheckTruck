@@ -54,17 +54,18 @@ export default function Fabricantes() {
         </Tabela>
       )}
 
-      <FabricanteModal open={!!modal} registro={modal?.registro} onClose={() => setModal(null)} onSalvo={recarregar} />
-      <ConfirmarExclusaoModal
-        open={!!excluindo}
-        onClose={() => setExcluindo(null)}
-        titulo="Excluir fabricante"
-        descricao={`Excluir "${excluindo?.nome}"? Não é possível excluir um fabricante que tenha gerações.`}
-        onConfirmar={async () => {
-          await fabricanteService.remover(excluindo.id)
-          recarregar()
-        }}
-      />
+      {modal && <FabricanteModal registro={modal.registro} onClose={() => setModal(null)} onSalvo={recarregar} />}
+      {excluindo && (
+        <ConfirmarExclusaoModal
+          onClose={() => setExcluindo(null)}
+          titulo="Excluir fabricante"
+          descricao={`Excluir "${excluindo.nome}"? Não é possível excluir um fabricante que tenha gerações.`}
+          onConfirmar={async () => {
+            await fabricanteService.remover(excluindo.id)
+            recarregar()
+          }}
+        />
+      )}
     </>
   )
 }

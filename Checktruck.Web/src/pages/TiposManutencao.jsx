@@ -56,16 +56,17 @@ export default function TiposManutencao() {
       )}
 
       {modal && <TipoManutencaoModal registro={modal.registro} onClose={() => setModal(null)} onSalvo={recarregar} />}
-      <ConfirmarExclusaoModal
-        open={!!excluindo}
-        onClose={() => setExcluindo(null)}
-        titulo="Excluir tipo de manutenção"
-        descricao={`Excluir "${excluindo?.nome}"? Não dá para excluir um item que já tenha OS lançada ou intervalo cadastrado.`}
-        onConfirmar={async () => {
-          await tipoManutencaoService.remover(excluindo.id)
-          recarregar()
-        }}
-      />
+      {excluindo && (
+        <ConfirmarExclusaoModal
+          onClose={() => setExcluindo(null)}
+          titulo="Excluir tipo de manutenção"
+          descricao={`Excluir "${excluindo.nome}"? Não dá para excluir um item que já tenha OS lançada ou intervalo cadastrado.`}
+          onConfirmar={async () => {
+            await tipoManutencaoService.remover(excluindo.id)
+            recarregar()
+          }}
+        />
+      )}
     </>
   )
 }

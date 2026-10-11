@@ -5,7 +5,6 @@ import { Field, Input, Select, Button, MensagemErro } from '../ui/Form'
 import { COMPONENTES } from '../../data/domain'
 
 // Cadastrar (registro = null) ou editar um item que o sistema acompanha nos caminhões.
-// Quem abre a tela só renderiza este modal quando ele está aberto, então o formulário já nasce com os dados certos.
 export default function TipoManutencaoModal({ registro, onClose, onSalvo }) {
   const [form, setForm] = useState(() => ({
     nome: registro?.nome ?? '',
@@ -37,7 +36,6 @@ export default function TipoManutencaoModal({ registro, onClose, onSalvo }) {
 
   return (
     <Modal
-      open
       onClose={onClose}
       title={registro ? 'Editar tipo de manutenção' : 'Novo tipo de manutenção'}
       width="max-w-md"

@@ -138,11 +138,12 @@ export default function Catalogo() {
         </Card>
       </div>
 
-      <FabricanteModal
-        open={modal === 'fabricante'}
-        onClose={() => setModal(null)}
-        onSalvo={(f) => { escolherFabricante(f.id); recarregar() }}
-      />
+      {modal === 'fabricante' && (
+        <FabricanteModal
+          onClose={() => setModal(null)}
+          onSalvo={(f) => { escolherFabricante(f.id); recarregar() }}
+        />
+      )}
       {modal === 'modelo' && (
         <ModeloModal
           valoresIniciais={{ fabricanteId: fabricante?.id }}

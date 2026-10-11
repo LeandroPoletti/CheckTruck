@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Modal } from '../ui/Overlay'
 import { Field, Input, Toggle, Button, MensagemErro } from '../ui/Form'
 import { mecanicoService } from '../../services'
@@ -7,21 +7,13 @@ import { ehAutonomo } from '../../data/acesso'
 
 // Cadastro simples de mecânico: nome e função (ex.: Marco Rueda / Borracheiro). Sem login.
 // No Autônomo é a oficina ou o mecânico onde ele faz as trocas (ex.: Oficina do Zé / Oficina).
-export default function MecanicoModal({ open, onClose, registro, onSalvo }) {
+export default function MecanicoModal({ onClose, registro, onSalvo }) {
   const autonomo = ehAutonomo(obterUsuario())
-  const [nome, setNome] = useState('')
-  const [funcao, setFuncao] = useState('')
-  const [ativo, setAtivo] = useState(true)
+  const [nome, setNome] = useState(registro?.nome ?? '')
+  const [funcao, setFuncao] = useState(registro?.funcao ?? '')
+  const [ativo, setAtivo] = useState(registro?.ativo ?? true)
   const [erro, setErro] = useState('')
   const [salvando, setSalvando] = useState(false)
-
-  useEffect(() => {
-    if (!open) return
-    setNome(registro?.nome ?? '')
-    setFuncao(registro?.funcao ?? '')
-    setAtivo(registro?.ativo ?? true)
-    setErro('')
-  }, [open, registro])
 
   async function handleSubmit(e) {
     e?.preventDefault()
@@ -38,14 +30,12 @@ export default function MecanicoModal({ open, onClose, registro, onSalvo }) {
       onClose()
     } catch (err) {
       setErro(err.message)
-    } finally {
       setSalvando(false)
     }
   }
 
   return (
     <Modal
-      open={open}
       onClose={onClose}
       eyebrow={registro ? 'PUT /api/Mecanico/{id}' : 'POST /api/Mecanico'}
       title={autonomo

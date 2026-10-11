@@ -1,34 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Modal } from '../ui/Overlay'
 import { Field, Input, Select, Button, MensagemErro } from '../ui/Form'
 import { fabricanteService, paisService } from '../../services'
+import { useCarga } from '../../hooks/useCarga'
 
-export default function FabricanteModal({ open, onClose, registro, onSalvo }) {
-  const [nome, setNome] = useState('')
-  const [paisOrigemId, setPaisOrigemId] = useState('')
-  const [paises, setPaises] = useState([])
-  const [carregando, setCarregando] = useState(false)
+// Novo fabricante (registro = null) ou editar um.
+export default function FabricanteModal({ onClose, registro, onSalvo }) {
+  const [nome, setNome] = useState(registro?.nome ?? '')
+  const [paisOrigemId, setPaisOrigemId] = useState(registro?.paisOrigemId ?? '')
   const [erro, setErro] = useState('')
   const [salvando, setSalvando] = useState(false)
 
-  useEffect(() => {
-    if (!open) return
-    setNome(registro?.nome ?? '')
-    setPaisOrigemId(registro?.paisOrigemId ?? '')
-    setErro('')
-  }, [open, registro])
-
-  // Ao abrir: países para o select
-  useEffect(() => {
-    if (!open) return
-    let cancelado = false
-    setCarregando(true)
-    paisService.listar()
-      .then((lista) => { if (!cancelado) setPaises(lista) })
-      .catch((e) => { if (!cancelado) setErro(`Não foi possível carregar os países: ${e.message}`) })
-      .finally(() => { if (!cancelado) setCarregando(false) })
-    return () => { cancelado = true }
-  }, [open])
+  // Países para o select
+  const { dados: paises = [], carregando, erro: erroCarga } = useCarga(() => paisService.listar())
 
   async function handleSubmit(e) {
     e?.preventDefault()
@@ -45,14 +29,12 @@ export default function FabricanteModal({ open, onClose, registro, onSalvo }) {
       onClose()
     } catch (err) {
       setErro(err.message)
-    } finally {
       setSalvando(false)
     }
   }
 
   return (
     <Modal
-      open={open}
       onClose={onClose}
       eyebrow={registro ? 'PUT /api/Fabricante/{id}' : 'POST /api/Fabricante'}
       title={registro ? 'Editar fabricante' : 'Novo fabricante'}
@@ -76,7 +58,7 @@ export default function FabricanteModal({ open, onClose, registro, onSalvo }) {
             ))}
           </Select>
         </Field>
-        <MensagemErro>{erro}</MensagemErro>
+        <MensagemErro>{erro || (erroCarga && `Não foi possível carregar os países: ${erroCarga.message}`)}</MensagemErro>
       </form>
     </Modal>
   )

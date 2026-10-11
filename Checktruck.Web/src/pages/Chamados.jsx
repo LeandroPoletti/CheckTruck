@@ -128,16 +128,17 @@ export default function Chamados() {
 
       {editando && <ChamadoModal chamado={editando.chamado} onClose={() => setEditando(null)} onSalvo={recarregar} />}
       {resolvendo && <ResolverChamadoModal chamado={resolvendo} onClose={() => setResolvendo(null)} onSalvo={recarregar} />}
-      <ConfirmarExclusaoModal
-        open={!!excluindo}
-        onClose={() => setExcluindo(null)}
-        titulo="Excluir chamado"
-        descricao={`Excluir o chamado de ${nomeTipoOcorrencia(excluindo?.tipo)} do caminhão ${excluindo?.placa}? Não dá para desfazer.`}
-        onConfirmar={async () => {
-          await chamadoService.excluir(excluindo.id)
-          recarregar()
-        }}
-      />
+      {excluindo && (
+        <ConfirmarExclusaoModal
+          onClose={() => setExcluindo(null)}
+          titulo="Excluir chamado"
+          descricao={`Excluir o chamado de ${nomeTipoOcorrencia(excluindo.tipo)} do caminhão ${excluindo.placa}? Não dá para desfazer.`}
+          onConfirmar={async () => {
+            await chamadoService.excluir(excluindo.id)
+            recarregar()
+          }}
+        />
+      )}
     </>
   )
 }

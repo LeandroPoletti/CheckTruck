@@ -141,7 +141,7 @@ export default function Dashboard() {
 
       {novoVeiculoOpen && <NovoVeiculoModal onClose={() => setNovoVeiculoOpen(false)} onSalvo={recarregar} />}
       {novoAcessoOpen && <UsuarioModal onClose={() => setNovoAcessoOpen(false)} />}
-      <MecanicoModal open={novoMecanicoOpen} onClose={() => setNovoMecanicoOpen(false)} />
+      {novoMecanicoOpen && <MecanicoModal onClose={() => setNovoMecanicoOpen(false)} />}
     </>
   )
 }

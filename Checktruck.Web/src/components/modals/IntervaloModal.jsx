@@ -9,7 +9,7 @@ import { nomeDoModelo } from '../../data/domain'
 // Intervalo de um item para uma geração (geracao) ou para um caminhão só (veiculo). O item (tipo) é fixo.
 // Na geração, o dono do sistema define o de fábrica e a empresa define o dela.
 // intervalo = o que já existe (editar); sem ele, define um novo começando pela sugestão (o que vale hoje).
-// O da geração também tem km da 1ª troca (amaciamento) e fonte. Quem abre a tela só renderiza este modal quando ele está aberto.
+// O da geração também tem km da 1ª troca (amaciamento) e fonte.
 export default function IntervaloModal({ geracao, veiculo, tipo, intervalo, sugestao, onClose, onSalvo }) {
   const daGeracao = !!geracao
   const base = intervalo ?? sugestao
@@ -53,7 +53,6 @@ export default function IntervaloModal({ geracao, veiculo, tipo, intervalo, suge
 
   return (
     <Modal
-      open
       onClose={onClose}
       title={intervalo ? 'Editar intervalo'
         : !daGeracao ? 'Definir intervalo do caminhão'

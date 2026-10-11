@@ -1,26 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Modal } from '../ui/Overlay'
 import { Field, Input, Select, Button, MensagemErro } from '../ui/Form'
 import { modeloService, fabricanteService } from '../../services'
+import { useCarga } from '../../hooks/useCarga'
 
-// Modelo = linha do fabricante (FH, FM, R, Actros...). Quem abre a tela só renderiza este modal quando ele está aberto.
+// Modelo = linha do fabricante (FH, FM, R, Actros...).
 // registro: modelo em edição · valoresIniciais: pré-seleção (ex.: { fabricanteId } vindo do Catálogo)
 export default function ModeloModal({ registro, valoresIniciais, onClose, onSalvo }) {
   const [nome, setNome] = useState(registro?.nome ?? '')
   const [fabricanteId, setFabricanteId] = useState(registro?.fabricanteId ?? valoresIniciais?.fabricanteId ?? '')
-  const [fabricantes, setFabricantes] = useState([])
-  const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [salvando, setSalvando] = useState(false)
 
-  useEffect(() => {
-    let cancelado = false
-    fabricanteService.listar()
-      .then((lista) => { if (!cancelado) setFabricantes(lista.sort((a, b) => a.nome.localeCompare(b.nome))) })
-      .catch((e) => { if (!cancelado) setErro(`Não foi possível carregar os fabricantes: ${e.message}`) })
-      .finally(() => { if (!cancelado) setCarregando(false) })
-    return () => { cancelado = true }
-  }, [])
+  // Fabricantes para o select
+  const { dados: fabricantes = [], carregando, erro: erroCarga } = useCarga(async () =>
+    (await fabricanteService.listar()).sort((a, b) => a.nome.localeCompare(b.nome)))
 
   async function handleSubmit(e) {
     e?.preventDefault()
@@ -41,7 +35,6 @@ export default function ModeloModal({ registro, valoresIniciais, onClose, onSalv
 
   return (
     <Modal
-      open
       onClose={onClose}
       eyebrow={registro ? 'PUT /api/Modelo/{id}' : 'POST /api/Modelo'}
       title={registro ? 'Editar modelo' : 'Novo modelo'}
@@ -64,7 +57,7 @@ export default function ModeloModal({ registro, valoresIniciais, onClose, onSalv
         <Field label="Nome" required hint="Ex.: FH, FM, VM, R, Actros, Stralis">
           <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="FH" autoFocus />
         </Field>
-        <MensagemErro>{erro}</MensagemErro>
+        <MensagemErro>{erro || (erroCarga && `Não foi possível carregar os fabricantes: ${erroCarga.message}`)}</MensagemErro>
       </form>
     </Modal>
   )

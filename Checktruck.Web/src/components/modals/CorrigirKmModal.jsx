@@ -5,7 +5,7 @@ import { Field, Input, Button, MensagemErro } from '../ui/Form'
 import { formatKm } from '../../data/domain'
 
 // Só Admin e Gestor: corrige um km digitado errado (ex.: um zero a mais). Pode baixar o km, mas não
-// para menos que o km da maior OS do caminhão (kmMaiorOs). Quem abre a tela só renderiza este modal aberto.
+// para menos que o km da maior OS do caminhão (kmMaiorOs).
 export default function CorrigirKmModal({ veiculo, kmMaiorOs, onClose, onSalvo }) {
   const [km, setKm] = useState(String(veiculo.kmAtual))
   const [motivo, setMotivo] = useState('')
@@ -34,7 +34,6 @@ export default function CorrigirKmModal({ veiculo, kmMaiorOs, onClose, onSalvo }
 
   return (
     <Modal
-      open
       onClose={onClose}
       eyebrow={`PUT /api/Veiculo/${veiculo.id}/corrigir-km`}
       title="Corrigir km"

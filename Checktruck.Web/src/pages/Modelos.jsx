@@ -79,16 +79,17 @@ export default function Modelos() {
       )}
 
       {modal && <ModeloModal registro={modal.registro} onClose={() => setModal(null)} onSalvo={recarregar} />}
-      <ConfirmarExclusaoModal
-        open={!!excluindo}
-        onClose={() => setExcluindo(null)}
-        titulo="Excluir modelo"
-        descricao={`Excluir "${excluindo?.fabricanteNome} ${excluindo?.nome}"? Não é possível excluir um modelo que tenha gerações.`}
-        onConfirmar={async () => {
-          await modeloService.remover(excluindo.id)
-          recarregar()
-        }}
-      />
+      {excluindo && (
+        <ConfirmarExclusaoModal
+          onClose={() => setExcluindo(null)}
+          titulo="Excluir modelo"
+          descricao={`Excluir "${excluindo.fabricanteNome} ${excluindo.nome}"? Não é possível excluir um modelo que tenha gerações.`}
+          onConfirmar={async () => {
+            await modeloService.remover(excluindo.id)
+            recarregar()
+          }}
+        />
+      )}
     </>
   )
 }

@@ -1,7 +1,8 @@
 import { X } from 'lucide-react'
 
-export function Modal({ open, onClose, title, subtitle, eyebrow, width = 'max-w-2xl', children, footer }) {
-  if (!open) return null
+// Modal e Drawer não têm "aberto/fechado": quem usa só renderiza quando abre ({aberto && <XModal />}).
+// Assim o formulário nasce com os dados certos e some (com o estado dele) ao fechar.
+export function Modal({ onClose, title, subtitle, eyebrow, width = 'max-w-2xl', children, footer }) {
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto py-10 px-4">
       <div className="fixed inset-0 bg-stone-900/50" onClick={onClose} />
@@ -23,8 +24,7 @@ export function Modal({ open, onClose, title, subtitle, eyebrow, width = 'max-w-
   )
 }
 
-export function Drawer({ open, onClose, title, subtitle, eyebrow, children, footer }) {
-  if (!open) return null
+export function Drawer({ onClose, title, subtitle, eyebrow, children, footer }) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div className="fixed inset-0 bg-stone-900/50" onClick={onClose} />

@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Drawer } from '../ui/Overlay'
 import { Field, Input, Select, Toggle, Button, MensagemErro } from '../ui/Form'
 import { TRACOES, ANO_MINIMO, ANO_MAXIMO, anoValido, formatarPlaca, placaValida } from '../../data/domain'
 import { obterUsuario } from '../../services/sessao'
 import { ehAutonomo } from '../../data/acesso'
 import { veiculoService, fabricanteService, modeloService, geracaoService, usuarioService } from '../../services'
+import { useCarga } from '../../hooks/useCarga'
 
 const LISTAS_VAZIAS = { fabricantes: [], modelos: [], geracoes: [], motoristas: [] }
 const CATALOGO = ['fabricanteId', 'modeloId', 'geracaoId', 'potenciaId', 'tracao']
@@ -25,7 +26,7 @@ const formDoVeiculo = (v) => ({
   ativo: v?.ativo ?? true,
 })
 
-// Cadastrar ou editar um caminhão. Quem abre a tela só renderiza este modal quando ele está aberto.
+// Cadastrar ou editar um caminhão.
 // O caminhão aponta para uma potência: fabricante → modelo → geração → potência, em cascata.
 // No Autônomo não tem motorista: é o próprio dono.
 export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }) {
@@ -33,25 +34,18 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
   const [form, setForm] = useState(() => formDoVeiculo(veiculoParaEditar))
   const [errors, setErrors] = useState({})
   const [salvando, setSalvando] = useState(false)
-  const [listas, setListas] = useState(LISTAS_VAZIAS)
-  const [carregando, setCarregando] = useState(true)
-  const [erroCarga, setErroCarga] = useState(null)
+  // Catálogo (fabricante → modelo → geração) e motoristas para os selects
+  const { dados: listas = LISTAS_VAZIAS, carregando, erro } = useCarga(async () => {
+    const [fabricantes, modelos, geracoes, motoristas] = await Promise.all([
+      fabricanteService.listar(), modeloService.listar(), geracaoService.listar(), usuarioService.listarMotoristas(),
+    ])
+    fabricantes.sort((a, b) => a.nome.localeCompare(b.nome))
+    modelos.sort((a, b) => a.nome.localeCompare(b.nome))
+    geracoes.sort((a, b) => a.anoInicio - b.anoInicio || a.nome.localeCompare(b.nome))
+    return { fabricantes, modelos, geracoes, motoristas }
+  })
+  const erroCarga = erro?.message
   const { fabricantes, modelos, geracoes, motoristas } = listas
-
-  useEffect(() => {
-    let cancelado = false
-    Promise.all([fabricanteService.listar(), modeloService.listar(), geracaoService.listar(), usuarioService.listarMotoristas()])
-      .then(([fabricantes, modelos, geracoes, motoristas]) => {
-        if (cancelado) return
-        fabricantes.sort((a, b) => a.nome.localeCompare(b.nome))
-        modelos.sort((a, b) => a.nome.localeCompare(b.nome))
-        geracoes.sort((a, b) => a.anoInicio - b.anoInicio || a.nome.localeCompare(b.nome))
-        setListas({ fabricantes, modelos, geracoes, motoristas })
-      })
-      .catch((e) => { if (!cancelado) setErroCarga(e.message) })
-      .finally(() => { if (!cancelado) setCarregando(false) })
-    return () => { cancelado = true }
-  }, [])
 
   const modelosDoFabricante = useMemo(() => modelos.filter((m) => m.fabricanteId === form.fabricanteId), [modelos, form.fabricanteId])
   const geracoesDoModelo = useMemo(() => geracoes.filter((g) => g.modeloId === form.modeloId), [geracoes, form.modeloId])
@@ -128,7 +122,6 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
 
   return (
     <Drawer
-      open
       onClose={onClose}
       eyebrow={veiculoParaEditar ? 'PUT /api/Veiculo/{id}' : 'POST /api/Veiculo'}
       title={veiculoParaEditar ? 'Editar veículo' : 'Novo veículo'}

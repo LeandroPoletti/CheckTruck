@@ -52,17 +52,18 @@ export default function Paises() {
         </Tabela>
       )}
 
-      <PaisModal open={!!modal} registro={modal?.registro} onClose={() => setModal(null)} onSalvo={recarregar} />
-      <ConfirmarExclusaoModal
-        open={!!excluindo}
-        onClose={() => setExcluindo(null)}
-        titulo="Excluir país"
-        descricao={`Excluir "${excluindo?.nome}"? Não é possível excluir um país que tenha fabricantes.`}
-        onConfirmar={async () => {
-          await paisService.remover(excluindo.id)
-          recarregar()
-        }}
-      />
+      {modal && <PaisModal registro={modal.registro} onClose={() => setModal(null)} onSalvo={recarregar} />}
+      {excluindo && (
+        <ConfirmarExclusaoModal
+          onClose={() => setExcluindo(null)}
+          titulo="Excluir país"
+          descricao={`Excluir "${excluindo.nome}"? Não é possível excluir um país que tenha fabricantes.`}
+          onConfirmar={async () => {
+            await paisService.remover(excluindo.id)
+            recarregar()
+          }}
+        />
+      )}
     </>
   )
 }

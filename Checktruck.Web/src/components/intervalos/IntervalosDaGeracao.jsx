@@ -94,18 +94,19 @@ export default function IntervalosDaGeracao({ geracoes, tipos, geracaoId, onGera
           onSalvo={recarregar}
         />
       )}
-      <ConfirmarExclusaoModal
-        open={!!excluindo}
-        onClose={() => setExcluindo(null)}
-        titulo={dono ? 'Excluir intervalo de fábrica' : 'Excluir intervalo da empresa'}
-        descricao={excluindo && `Excluir o intervalo de "${excluindo.tipo.nome}" da geração ${geracao && `${nomeDoModelo(geracao)} · ${geracao.nome}`}? Os caminhões desta geração passam a usar ${
-          oQueVoltaAValer(excluindo, minhaOrigem)
-        }, menos os que têm intervalo ${dono ? 'da empresa ou ' : ''}do caminhão.`}
-        onConfirmar={async () => {
-          await intervaloService.remover(meu(excluindo).id)
-          recarregar()
-        }}
-      />
+      {excluindo && (
+        <ConfirmarExclusaoModal
+          onClose={() => setExcluindo(null)}
+          titulo={dono ? 'Excluir intervalo de fábrica' : 'Excluir intervalo da empresa'}
+          descricao={`Excluir o intervalo de "${excluindo.tipo.nome}" da geração ${geracao && `${nomeDoModelo(geracao)} · ${geracao.nome}`}? Os caminhões desta geração passam a usar ${
+            oQueVoltaAValer(excluindo, minhaOrigem)
+          }, menos os que têm intervalo ${dono ? 'da empresa ou ' : ''}do caminhão.`}
+          onConfirmar={async () => {
+            await intervaloService.remover(meu(excluindo).id)
+            recarregar()
+          }}
+        />
+      )}
     </>
   )
 }

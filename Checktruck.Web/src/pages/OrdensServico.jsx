@@ -105,16 +105,17 @@ export default function OrdensServico() {
       )}
 
       {modal && <OrdemServicoModal registro={modal.registro} onClose={() => setModal(null)} onSalvo={recarregar} />}
-      <ConfirmarExclusaoModal
-        open={!!excluindo}
-        onClose={() => setExcluindo(null)}
-        titulo="Excluir ordem de serviço"
-        descricao={`Excluir a OS nº ${excluindo?.id} (${excluindo?.itens.map((i) => i.tipoNome).join(', ')}) do caminhão ${excluindo?.placa}? Ela sai do histórico e a próxima troca desses itens volta a ser calculada pela OS anterior. Não dá para desfazer.`}
-        onConfirmar={async () => {
-          await ordemServicoService.remover(excluindo.id)
-          recarregar()
-        }}
-      />
+      {excluindo && (
+        <ConfirmarExclusaoModal
+          onClose={() => setExcluindo(null)}
+          titulo="Excluir ordem de serviço"
+          descricao={`Excluir a OS nº ${excluindo.id} (${excluindo.itens.map((i) => i.tipoNome).join(', ')}) do caminhão ${excluindo.placa}? Ela sai do histórico e a próxima troca desses itens volta a ser calculada pela OS anterior. Não dá para desfazer.`}
+          onConfirmar={async () => {
+            await ordemServicoService.remover(excluindo.id)
+            recarregar()
+          }}
+        />
+      )}
     </>
   )
 }

@@ -97,17 +97,18 @@ export default function Acesso() {
       {editando && (
         <UsuarioModal usuario={editando.usuario} onClose={() => setEditando(null)} onSalvo={recarregar} />
       )}
-      <ConfirmarExclusaoModal
-        open={!!desativando}
-        onClose={() => setDesativando(null)}
-        titulo="Desativar acesso"
-        rotulo="Desativar"
-        descricao={`${desativando?.nome} não vai mais conseguir entrar no sistema. Dá para ativar de novo depois.`}
-        onConfirmar={async () => {
-          await usuarioService.alterarAtivo(desativando.id, false)
-          recarregar()
-        }}
-      />
+      {desativando && (
+        <ConfirmarExclusaoModal
+          onClose={() => setDesativando(null)}
+          titulo="Desativar acesso"
+          rotulo="Desativar"
+          descricao={`${desativando.nome} não vai mais conseguir entrar no sistema. Dá para ativar de novo depois.`}
+          onConfirmar={async () => {
+            await usuarioService.alterarAtivo(desativando.id, false)
+            recarregar()
+          }}
+        />
+      )}
     </>
   )
 }

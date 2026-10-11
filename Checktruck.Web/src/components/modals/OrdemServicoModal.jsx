@@ -12,7 +12,6 @@ import { ORIGENS_INTERVALO } from '../../data/intervalos'
 const porNome = (a, b) => a.nome.localeCompare(b.nome)
 
 // Lançar ou corrigir uma ordem de serviço: um ou mais itens trocados e um ou mais mecânicos.
-// Quem abre a tela só renderiza este modal quando ele está aberto.
 // No Autônomo não tem motorista (é o dono) e o mecânico aparece como "oficina ou mecânico".
 //   veiculo  → lançar no caminhão já escolhido (atalho na tela do caminhão)
 //   registro → corrigir uma OS (o caminhão não muda; "lançada por" continua o original)
@@ -135,7 +134,6 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
 
   return (
     <Modal
-      open
       onClose={onClose}
       eyebrow={corrigindo ? `PUT /api/OrdemServico/${registro.id}` : 'POST /api/OrdemServico'}
       title={corrigindo ? `Corrigir OS nº ${registro.id}` : 'Lançar ordem de serviço'}

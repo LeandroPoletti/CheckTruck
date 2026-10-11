@@ -1,18 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Modal } from '../ui/Overlay'
 import { Field, Input, Button, MensagemErro } from '../ui/Form'
 import { paisService } from '../../services'
 
-export default function PaisModal({ open, onClose, registro, onSalvo }) {
-  const [nome, setNome] = useState('')
+// Novo país (registro = null) ou editar um.
+export default function PaisModal({ onClose, registro, onSalvo }) {
+  const [nome, setNome] = useState(registro?.nome ?? '')
   const [erro, setErro] = useState('')
   const [salvando, setSalvando] = useState(false)
-
-  useEffect(() => {
-    if (!open) return
-    setNome(registro?.nome ?? '')
-    setErro('')
-  }, [open, registro])
 
   async function handleSubmit(e) {
     e?.preventDefault()
@@ -26,14 +21,12 @@ export default function PaisModal({ open, onClose, registro, onSalvo }) {
       onClose()
     } catch (err) {
       setErro(err.message)
-    } finally {
       setSalvando(false)
     }
   }
 
   return (
     <Modal
-      open={open}
       onClose={onClose}
       eyebrow={registro ? 'PUT /api/Pais/{id}' : 'POST /api/Pais'}
       title={registro ? 'Editar país' : 'Novo país'}
