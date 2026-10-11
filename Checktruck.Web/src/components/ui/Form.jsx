@@ -1,8 +1,8 @@
 import { useRef } from 'react'
 import { Search } from 'lucide-react'
 
-// group: o campo tem vários controles dentro (ex.: uma lista de caixas de marcar). Aí ele não pode ser um
-// <label>, senão clicar no meio da lista marca a primeira caixa.
+// group: o campo tem vários controles dentro (ex.: etiquetas com ×). Aí ele não pode ser um <label>,
+// senão clicar no meio do campo aciona o primeiro botão de dentro.
 export function Field({ label, required, hint, error, group = false, children, className = '' }) {
   const Elemento = group ? 'div' : 'label'
   return (
@@ -95,21 +95,6 @@ export function Button({ variant = 'primary', size = 'md', className = '', child
     >
       {children}
     </button>
-  )
-}
-
-// Caixa de marcar com o texto ao lado (ex.: os itens trocados e os mecânicos da OS)
-export function Checkbox({ checked, onChange, label, className = '' }) {
-  return (
-    <label className={`flex cursor-pointer items-center gap-2 text-sm text-stone-700 ${className}`}>
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        className="h-4 w-4 shrink-0 accent-brand-700"
-      />
-      {label}
-    </label>
   )
 }
 

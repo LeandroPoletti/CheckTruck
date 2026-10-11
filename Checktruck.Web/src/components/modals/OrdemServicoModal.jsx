@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Modal } from '../ui/Overlay'
-import { Field, Input, Select, Toggle, Button, Checkbox, MensagemErro } from '../ui/Form'
+import { Field, Input, Select, Toggle, Button, MensagemErro } from '../ui/Form'
+import { SelecaoMultipla } from '../ui/SelecaoMultipla'
 import { formatKm, hoje, ANO_MINIMO } from '../../data/domain'
 import { ordemServicoService, tipoManutencaoService, mecanicoService, usuarioService, veiculoService, filtro } from '../../services'
 import { useCarga } from '../../hooks/useCarga'
@@ -56,8 +57,8 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
     concessionaria: registro?.concessionaria ?? '',
     observacoes: registro?.observacoes ?? '',
   }))
-  // Itens marcados: { tipoId: 1ª troca }. null = segue a sugestão do caminhão
-  const [itens, setItens] = useState(() => Object.fromEntries((registro?.itens ?? []).map((i) => [i.tipoId, i.isPrimeiraTroca])))
+  // Itens escolhidos, na ordem em que entraram. isPrimeiraTroca null = segue a sugestão do caminhão
+  const [itens, setItens] = useState(() => (registro?.itens ?? []).map((i) => ({ tipoId: i.tipoId, isPrimeiraTroca: i.isPrimeiraTroca })))
   const [novoMecanicoOpen, setNovoMecanicoOpen] = useState(false)
   const [erro, setErro] = useState('')
   const [salvando, setSalvando] = useState(false)
@@ -69,7 +70,7 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
   )
   const doCaminhao = (tipoId) => situacao.dados?.itens.find((i) => i.tipoId === tipoId)
   const sugerePrimeira = (tipoId) => !corrigindo && !!doCaminhao(tipoId)?.isPrimeiraTroca
-  const primeiraTroca = (tipoId) => itens[tipoId] ?? sugerePrimeira(tipoId)
+  const primeiraTroca = (item) => item.isPrimeiraTroca ?? sugerePrimeira(item.tipoId)
 
   // Motorista que não está na lista (ex.: o do caminhão foi desativado) fica "Sem motorista"
   const motoristaId = motoristas.some((m) => m.id === form.motoristaId) ? form.motoristaId : ''
@@ -85,33 +86,30 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
     const escolhido = veiculos.find((v) => v.id === id)
     setVeiculoId(id)
     setForm((f) => ({ ...f, kmNaTroca: escolhido ? String(escolhido.kmAtual) : '', motoristaId: escolhido?.motoristaId ?? '' }))
-    setItens((atuais) => Object.fromEntries(Object.keys(atuais).map((tipoId) => [tipoId, null])))
+    setItens((atuais) => atuais.map((i) => ({ ...i, isPrimeiraTroca: null })))
   }
 
-  function marcarItem(tipoId) {
-    setItens(({ [tipoId]: marcado, ...outros }) => (marcado === undefined ? { ...outros, [tipoId]: null } : outros))
+  // O item que já estava continua com a marca de 1ª troca dele; o novo segue a sugestão
+  function escolherItens(tipoIds) {
+    setItens((atuais) => tipoIds.map((tipoId) => atuais.find((i) => i.tipoId === tipoId) ?? { tipoId, isPrimeiraTroca: null }))
   }
 
-  function marcarMecanico(id) {
-    setForm((f) => ({
-      ...f,
-      mecanicoIds: f.mecanicoIds.includes(id) ? f.mecanicoIds.filter((m) => m !== id) : [...f.mecanicoIds, id],
-    }))
+  function marcarPrimeiraTroca(tipoId, isPrimeiraTroca) {
+    setItens((atuais) => atuais.map((i) => (i.tipoId === tipoId ? { ...i, isPrimeiraTroca } : i)))
   }
 
-  // Mecânico cadastrado aqui mesmo: entra na lista e já fica marcado
+  // Mecânico cadastrado aqui mesmo: entra na lista e já fica escolhido
   function handleMecanicoCriado(novo) {
     if (!novo) return
     setNovosMecanicos((n) => [...n, novo])
-    marcarMecanico(novo.id)
+    setForm((f) => ({ ...f, mecanicoIds: [...f.mecanicoIds, novo.id] }))
   }
 
   async function salvar() {
     const km = Number(form.kmNaTroca)
-    const tipoIds = tiposManutencao.map((t) => t.id).filter((id) => id in itens)
     if (!veiculoId) { setErro('Escolha o caminhão.'); return }
-    if (tipoIds.length === 0) { setErro('Marque pelo menos um item trocado.'); return }
-    if (form.mecanicoIds.length === 0) { setErro(autonomo ? 'Marque pelo menos uma oficina ou mecânico.' : 'Marque pelo menos um mecânico.'); return }
+    if (itens.length === 0) { setErro('Escolha pelo menos um item trocado.'); return }
+    if (form.mecanicoIds.length === 0) { setErro(autonomo ? 'Escolha pelo menos uma oficina ou mecânico.' : 'Escolha pelo menos um mecânico.'); return }
     // OS antiga pode ter km menor que o atual; só não aceita km inválido
     if (form.kmNaTroca === '' || !Number.isInteger(km) || km < 0) { setErro('Informe o km do caminhão na troca (sem negativo).'); return }
     // A troca já foi feita: a data vai de 1900 até hoje
@@ -131,7 +129,7 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
         veiculoId,
         motoristaId,
         kmNaTroca: km,
-        itens: tipoIds.map((tipoId) => ({ tipoId, isPrimeiraTroca: primeiraTroca(tipoId) })),
+        itens: itens.map((i) => ({ tipoId: i.tipoId, isPrimeiraTroca: primeiraTroca(i) })),
         concessionaria: form.concessionaria.trim() || null,
         observacoes: form.observacoes.trim() || null,
       }
@@ -182,53 +180,58 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
           group
           hint="A próxima troca de cada item é calculada pelo intervalo do caminhão, da empresa, de fábrica ou pelo padrão."
         >
-          <div className="divide-y divide-stone-100 rounded-lg border border-stone-200">
-            {tiposManutencao.map((t) => {
-              const intervalo = doCaminhao(t.id)
-              return (
-                <div key={t.id} className="px-3 py-2.5">
-                  <Checkbox checked={t.id in itens} onChange={() => marcarItem(t.id)} label={t.nome} />
-                  {t.id in itens && (
-                    <div className="mt-1.5 flex items-center justify-between gap-3 pl-6">
-                      <p className="text-xs text-stone-400">
-                        {intervalo && <>Vale o intervalo {ORIGENS_INTERVALO[intervalo.origemIntervalo]}: {formatKm(intervalo.intervaloKm)}</>}
-                      </p>
-                      <Toggle
-                        checked={primeiraTroca(t.id)}
-                        onChange={(v) => setItens((atuais) => ({ ...atuais, [t.id]: v }))}
-                        label={sugerePrimeira(t.id) ? '1ª troca (sugerido)' : '1ª troca'}
-                      />
+          <SelecaoMultipla
+            opcoes={tiposManutencao}
+            selecionados={itens.map((i) => i.tipoId)}
+            onChange={escolherItens}
+            placeholder="Escolha o que foi trocado"
+          />
+          {itens.length > 0 && (
+            <div className="mt-2 divide-y divide-stone-100 rounded-lg bg-stone-50 px-3">
+              {itens.map((item) => {
+                const intervalo = doCaminhao(item.tipoId)
+                return (
+                  <div key={item.tipoId} className="flex items-center justify-between gap-3 py-2">
+                    <div>
+                      <p className="text-sm font-medium text-stone-800">{tiposManutencao.find((t) => t.id === item.tipoId)?.nome}</p>
+                      {intervalo && (
+                        <p className="text-xs text-stone-400">
+                          Vale o intervalo {ORIGENS_INTERVALO[intervalo.origemIntervalo]}: {formatKm(intervalo.intervaloKm)}
+                        </p>
+                      )}
                     </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
+                    <Toggle
+                      checked={primeiraTroca(item)}
+                      onChange={(v) => marcarPrimeiraTroca(item.tipoId, v)}
+                      label={sugerePrimeira(item.tipoId) ? '1ª troca (sugerido)' : '1ª troca'}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </Field>
 
-        <Field label={autonomo ? 'Oficina ou mecânico' : 'Mecânicos'} required group hint="Pode marcar mais de um. Quem fez o quê, se precisar, vai nas observações.">
+        <Field label={autonomo ? 'Oficina ou mecânico' : 'Mecânicos'} required group hint="Pode escolher mais de um. Quem fez o quê, se precisar, vai nas observações.">
           <div className="flex items-start gap-2">
-            <div className="max-h-36 flex-1 overflow-y-auto rounded-lg border border-stone-200 px-3 py-1">
-              {mecanicos.map((m) => (
-                <Checkbox
-                  key={m.id}
-                  checked={form.mecanicoIds.includes(m.id)}
-                  onChange={() => marcarMecanico(m.id)}
-                  label={`${m.nome} — ${m.funcao}`}
-                  className="py-1.5"
-                />
-              ))}
-              {!listas.carregando && mecanicos.length === 0 && (
-                <p className="py-1.5 text-xs text-amber-600">
-                  {autonomo ? 'Nada cadastrado. Use “+ Novo” para cadastrar a oficina ou o mecânico.'
-                    : podeCadastrarMecanico ? 'Nenhum mecânico cadastrado. Use “+ Novo” para cadastrar.' : 'Nenhum mecânico cadastrado. Peça para quem cuida dos cadastros.'}
-                </p>
-              )}
+            <div className="flex-1">
+              <SelecaoMultipla
+                opcoes={mecanicos.map((m) => ({ id: m.id, nome: `${m.nome} (${m.funcao})` }))}
+                selecionados={form.mecanicoIds}
+                onChange={(ids) => set('mecanicoIds', ids)}
+                placeholder={autonomo ? 'Escolha onde ou com quem fez a troca' : 'Escolha quem fez a troca'}
+              />
             </div>
             {podeCadastrarMecanico && (
               <Button type="button" variant="secondary" onClick={() => setNovoMecanicoOpen(true)}>+ Novo</Button>
             )}
           </div>
+          {!listas.carregando && mecanicos.length === 0 && (
+            <p className="mt-1.5 text-xs text-amber-600">
+              {autonomo ? 'Nada cadastrado. Use “+ Novo” para cadastrar a oficina ou o mecânico.'
+                : podeCadastrarMecanico ? 'Nenhum mecânico cadastrado. Use “+ Novo” para cadastrar.' : 'Nenhum mecânico cadastrado. Peça para quem cuida dos cadastros.'}
+            </p>
+          )}
         </Field>
 
         {!autonomo && (
