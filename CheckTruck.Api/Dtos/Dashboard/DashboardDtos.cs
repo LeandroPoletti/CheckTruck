@@ -6,8 +6,6 @@ namespace CheckTruck.Api.Dtos.Dashboard;
 public class DashboardResponseDto
 {
     public int FrotaAtiva { get; set; }
-    public int MargemAlertaKm { get; set; }
-    public int MargemAlertaDias { get; set; }
     public ContagemStatusDto Contagem { get; set; }
     public IList<AlertaManutencaoDto> Alertas { get; set; }
     public IList<FrotaPorGeracaoDto> FrotaPorGeracao { get; set; }
@@ -36,6 +34,9 @@ public class AlertaManutencaoDto
     /// <summary>Quanto do ciclo já foi rodado, de 0 a 100 (por km).</summary>
     public int PercentualUsado { get; set; }
 
+    /// <summary>Com quantos km faltando o item entra em atenção (10% do ciclo, no mínimo 5.000 km).</summary>
+    public int MargemAlertaKm { get; set; }
+
     /// <summary>Data limite da próxima troca; null quando não há histórico ou o intervalo não tem prazo.</summary>
     public DateTime? DataProximaTroca { get; set; }
 
@@ -62,8 +63,6 @@ public static class DashboardDtoExtensions
     public static DashboardResponseDto ToResponseDto(this SituacaoFrota situacao) => new()
     {
         FrotaAtiva = situacao.FrotaAtiva,
-        MargemAlertaKm = situacao.MargemAlertaKm,
-        MargemAlertaDias = situacao.MargemAlertaDias,
         Contagem = new ContagemStatusDto
         {
             Ok = situacao.QuantidadeOk,
@@ -83,6 +82,7 @@ public static class DashboardDtoExtensions
             KmProximaTroca = a.KmProximaTroca,
             KmRestante = a.KmRestante,
             PercentualUsado = a.PercentualUsado,
+            MargemAlertaKm = a.MargemAlertaKm,
             DataProximaTroca = a.DataProximaTroca,
             DiasRestantes = a.DiasRestantes,
             IsPrimeiraTroca = a.IsPrimeiraTroca,

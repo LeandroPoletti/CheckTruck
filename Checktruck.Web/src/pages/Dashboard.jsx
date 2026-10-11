@@ -34,7 +34,7 @@ export default function Dashboard() {
   if (carregando) return <Carregando />
   if (erro) return <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />
 
-  const { frotaAtiva, contagem, alertas, frotaPorGeracao, margemAlertaKm } = dados
+  const { frotaAtiva, contagem, alertas, frotaPorGeracao } = dados
 
   return (
     <>
@@ -92,7 +92,7 @@ export default function Dashboard() {
                   </div>
                   <BarraDeUso percentual={alerta.percentualUsado} status={alerta.status} />
                   <p className={`mt-1 text-xs ${alerta.status === 'critico' ? 'text-red-600' : 'text-amber-600'}`}>
-                    {textoDoAlerta(alerta, margemAlertaKm)}
+                    {textoDoAlerta(alerta)}
                   </p>
                 </button>
               ))}
@@ -151,8 +151,8 @@ export default function Dashboard() {
 }
 
 // O alerta pode ser por km ou por data (vence o que chegar primeiro): mostra os dois
-function textoDoAlerta(alerta, margemAlertaKm) {
-  const { kmRestante, diasRestantes } = alerta
+function textoDoAlerta(alerta) {
+  const { kmRestante, diasRestantes, margemAlertaKm } = alerta
   const km = kmRestante <= 0
     ? `Vencido há ${formatKm(-kmRestante)}`
     : `Faltam ${formatKm(kmRestante)}${kmRestante <= margemAlertaKm ? ` · dentro da margem de ${formatKm(margemAlertaKm)}` : ''}`

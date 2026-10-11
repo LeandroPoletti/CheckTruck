@@ -257,7 +257,6 @@ export const registroToApi = (r) => ({
 // ---------------------------------------------------------------------------
 export const dashboardFromApi = (dto) => ({
   frotaAtiva: dto.frotaAtiva,
-  margemAlertaKm: dto.margemAlertaKm,
   contagem: dto.contagem, // { ok, atencao, critico }
   alertas: dto.alertas.map((a) => ({
     veiculoId: toId(a.veiculoId),
@@ -271,6 +270,7 @@ export const dashboardFromApi = (dto) => ({
     kmProximaTroca: a.kmProximaTroca,
     kmRestante: a.kmRestante,
     percentualUsado: a.percentualUsado,
+    margemAlertaKm: a.margemAlertaKm, // com quantos km faltando o item entra em atenção
     diasRestantes: a.diasRestantes, // null = vence só por km
     isPrimeiraTroca: a.isPrimeiraTroca,
     status: a.status, // 'ok' | 'atencao' | 'critico'

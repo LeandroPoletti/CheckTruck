@@ -5,8 +5,6 @@ namespace CheckTruck.Dominio.Resultados;
 public class SituacaoFrota
 {
     public int FrotaAtiva { get; set; }
-    public int MargemAlertaKm { get; set; }
-    public int MargemAlertaDias { get; set; }
     public int QuantidadeOk { get; set; }
     public int QuantidadeAtencao { get; set; }
     public int QuantidadeCritico { get; set; }
@@ -28,6 +26,7 @@ public class AlertaManutencao
     public int KmProximaTroca { get; set; }
     public int KmRestante { get; set; }
     public int PercentualUsado { get; set; }
+    public int MargemAlertaKm { get; set; }
     public DateTime? DataProximaTroca { get; set; }
     public int? DiasRestantes { get; set; }
     public bool IsPrimeiraTroca { get; set; }

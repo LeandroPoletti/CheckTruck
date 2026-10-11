@@ -33,6 +33,7 @@ public class ServicoDashboard(ServicoSituacaoVeiculo servicoSituacao, ILogger<Se
                 KmProximaTroca = v.ItemMaisUrgente.KmProximaTroca,
                 KmRestante = v.ItemMaisUrgente.KmRestante,
                 PercentualUsado = v.ItemMaisUrgente.PercentualUsado,
+                MargemAlertaKm = v.ItemMaisUrgente.MargemAlertaKm,
                 DataProximaTroca = v.ItemMaisUrgente.DataProximaTroca,
                 DiasRestantes = v.ItemMaisUrgente.DiasRestantes,
                 IsPrimeiraTroca = v.ItemMaisUrgente.IsPrimeiraTroca,
@@ -42,8 +43,6 @@ public class ServicoDashboard(ServicoSituacaoVeiculo servicoSituacao, ILogger<Se
         return new SituacaoFrota
         {
             FrotaAtiva = veiculos.Count,
-            MargemAlertaKm = ServicoSituacaoVeiculo.MargemAlertaKm,
-            MargemAlertaDias = ServicoSituacaoVeiculo.MargemAlertaDias,
             QuantidadeOk = veiculos.Count(v => v.Status == StatusManutencao.Ok),
             QuantidadeAtencao = veiculos.Count(v => v.Status == StatusManutencao.Atencao),
             QuantidadeCritico = veiculos.Count(v => v.Status == StatusManutencao.Critico),

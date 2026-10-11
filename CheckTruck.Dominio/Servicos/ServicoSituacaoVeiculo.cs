@@ -16,8 +16,9 @@ namespace CheckTruck.Dominio.Servicos;
 /// </summary>
 public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<ServicoSituacaoVeiculo> logger)
 {
-    // RN-08: alerta quando faltam 5.000 km ou 30 dias para a próxima troca
-    public const int MargemAlertaKm = 5000;
+    // RN-08: alerta quando falta 10% do ciclo (nunca menos de 5.000 km) ou 30 dias para a próxima troca
+    public const int MargemAlertaKmMinima = 5000;
+    public const int MargemAlertaPercentual = 10;
     public const int MargemAlertaDias = 30;
 
     public IList<SituacaoVeiculo> ObterSituacaoVeiculos(bool apenasAtivos)
@@ -90,10 +91,17 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
             .FirstOrDefault();
     }
 
-    public static StatusManutencao StatusPorKmRestante(int kmRestante)
+    /// <summary>
+    /// Margem de km do alerta: 10% do ciclo, mas nunca menos de 5.000 km. Assim um intervalo grande
+    /// (ex.: câmbio de 120.000 km) avisa nos últimos 12.000 km, e um pequeno continua avisando nos 5.000.
+    /// </summary>
+    public static int MargemAlertaKm(int kmDoCiclo) =>
+        Math.Max(MargemAlertaKmMinima, kmDoCiclo * MargemAlertaPercentual / 100);
+
+    public static StatusManutencao StatusPorKmRestante(int kmRestante, int margemAlertaKm)
     {
         if (kmRestante <= 0) return StatusManutencao.Critico;
-        if (kmRestante <= MargemAlertaKm) return StatusManutencao.Atencao;
+        if (kmRestante <= margemAlertaKm) return StatusManutencao.Atencao;
         return StatusManutencao.Ok;
     }
 
@@ -206,10 +214,11 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
 
                 item.KmRestante = item.KmProximaTroca - veiculo.KmAtual;
                 item.PercentualUsado = PercentualUsado(veiculo.KmAtual, kmInicio, item.KmProximaTroca);
+                item.MargemAlertaKm = MargemAlertaKm(item.KmProximaTroca - kmInicio);
                 item.DiasRestantes = item.DataProximaTroca is { } data
                     ? (int)Math.Floor((data.Date - hoje).TotalDays)
                     : null;
-                item.Status = Pior(StatusPorKmRestante(item.KmRestante), StatusPorDiasRestantes(item.DiasRestantes));
+                item.Status = Pior(StatusPorKmRestante(item.KmRestante, item.MargemAlertaKm), StatusPorDiasRestantes(item.DiasRestantes));
 
                 itens.Add(item);
             }
