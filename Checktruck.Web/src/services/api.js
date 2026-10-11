@@ -5,7 +5,7 @@ import axios from 'axios'
 const SESSION_KEY = 'checktruck.session'
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5202',
+  baseURL: import.meta.env.VITE_API_URL || 'https://localhost:7013',
   headers: { Accept: 'application/json' },
 })
 

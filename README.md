@@ -55,7 +55,7 @@ $env:ConnectionStrings__DefaultConnection="Host=localhost;Port=5432;Database=Che
 
 ```bash
 dotnet ef database update --project CheckTruck.Repositorio --startup-project CheckTruck.Api
-dotnet run --project CheckTruck.Api --launch-profile https
+dotnet run --project CheckTruck.Api
 ```
 
 A API sobe em `https://localhost:7013`, e a documentação dos endpoints fica em `https://localhost:7013/docs`.
