@@ -169,11 +169,20 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
             .GroupBy(m => (m.VeiculoId, m.TipoId))
             .ToDictionary(g => g.Key, g => g.OrderByDescending(m => m.RealizadoEm).ThenByDescending(m => m.Id).First());
 
+        // Km com que cada caminhão entrou no sistema: o menor km do histórico (o do cadastro, ou o corrigido
+        // se o do cadastro estava errado). Caminhão sem histórico de km: o km atual.
+        var kmsDeEntrada = repositorioCrud.Query<RegistroKm>(r => veiculoIds.Contains(r.Veiculo.Id))
+            .Select(r => new { VeiculoId = r.Veiculo.Id, r.KmAnterior, r.KmNovo })
+            .ToList()
+            .GroupBy(r => r.VeiculoId)
+            .ToDictionary(g => g.Key, g => g.Min(r => Math.Min(r.KmNovo, r.KmAnterior ?? r.KmNovo)));
+
         var hoje = DateTime.UtcNow.Date;
 
         foreach (var veiculo in veiculos)
         {
             var itens = new List<ItemManutencao>();
+            var kmDeEntrada = kmsDeEntrada.GetValueOrDefault(veiculo.VeiculoId, veiculo.KmAtual);
 
             foreach (var tipo in tipos)
             {
@@ -204,9 +213,9 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
                 }
                 else
                 {
-                    // Sem histórico no sistema não dá para saber a data da última troca: vence só por km
+                    // Sem OS desse item não dá para saber a data da última troca: vence só por km
                     var (kmProximaTroca, isPrimeira) = CalcularSemHistorico(
-                        veiculo.KmAtual, intervalo.IntervaloKm, intervalo.IntervaloKmPrimeira);
+                        kmDeEntrada, intervalo.IntervaloKm, intervalo.IntervaloKmPrimeira);
                     item.KmProximaTroca = kmProximaTroca;
                     item.IsPrimeiraTroca = isPrimeira;
                     kmInicio = isPrimeira ? 0 : kmProximaTroca - intervalo.IntervaloKm;
@@ -309,15 +318,17 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
         return Math.Clamp((int)Math.Round(100.0 * (kmAtual - kmInicio) / ciclo), 0, 100);
     }
 
-    // Sem histórico no sistema: usa o km de amaciamento (IntervaloKmPrimeira; 0 = igual ao padrão).
-    // Se o veículo já passou dele, assume ciclos regulares desde então e aponta o próximo múltiplo.
-    private static (int kmProximaTroca, bool isPrimeira) CalcularSemHistorico(int kmAtual, int intervaloKm, int intervaloKmPrimeira)
+    // Item sem nenhuma OS: conta a partir do km com que o caminhão entrou no sistema.
+    // O que veio antes disso o sistema não conhece (caminhão usado): supõe as trocas feitas e aponta a
+    // próxima depois do km de entrada (a 1ª troca usa o IntervaloKmPrimeira; 0 = igual ao padrão).
+    // Depois da entrada só a OS conta como troca: se o km passar da troca sem OS, o item vence.
+    private static (int kmProximaTroca, bool isPrimeira) CalcularSemHistorico(int kmDeEntrada, int intervaloKm, int intervaloKmPrimeira)
     {
         var limiarPrimeira = intervaloKmPrimeira > 0 ? intervaloKmPrimeira : intervaloKm;
-        if (kmAtual < limiarPrimeira) return (limiarPrimeira, true);
+        if (kmDeEntrada < limiarPrimeira) return (limiarPrimeira, true);
         if (intervaloKm <= 0) return (limiarPrimeira, false); // intervalo inválido: evita divisão por zero
 
-        var ciclos = (kmAtual - limiarPrimeira) / intervaloKm + 1;
+        var ciclos = (kmDeEntrada - limiarPrimeira) / intervaloKm + 1;
         return (limiarPrimeira + ciclos * intervaloKm, false);
     }
 }

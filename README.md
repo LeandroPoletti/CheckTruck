@@ -149,6 +149,7 @@ Marcar Veículos, Atualizar km ou Ordem de serviço já liga o Ver frota.
 - **Chamado:** quem abre conta o problema (tipo, urgência e descrição). Se for Motorista, ele vira o
   motorista atual do caminhão. Quem atende resolve contando o que foi feito, e o chamado vai para Concluídos.
 - **Alertas:** o item fica em atenção quando falta 10% do ciclo (no mínimo 5.000 km) ou 30 dias, e crítico quando vence.
+- **Item sem OS:** o sistema supõe feitas só as trocas de antes do cadastro do caminhão; depois do cadastro, só a OS conta como troca (passou do km sem OS, venceu).
 - **Valores aceitos:** nenhum número digitado pode ser negativo (km, intervalos, potência). Os anos vão de 1900
   (o primeiro caminhão é de 1896) até o ano que vem, e o ano modelo é o de fabricação ou o seguinte. A OS não
   pode ter data no futuro, e atualizar o km só aceita um valor maior que o atual. Os textos têm tamanho máximo
