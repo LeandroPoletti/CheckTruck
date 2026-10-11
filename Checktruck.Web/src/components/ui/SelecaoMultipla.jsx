@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, X } from 'lucide-react'
+import { Check, ChevronDown, X } from 'lucide-react'
 import { contemBusca } from '../../data/domain'
 
 // Escolher vários de uma lista: os escolhidos viram etiquetas com × para tirar. Clicar na caixa abre a lista,
 // e o que for digitado filtra as opções (Enter pega a primeira; Backspace com a busca vazia tira a última).
+// A lista fecha no ✓, no Esc ou clicando fora.
 // opcoes: [{ id, nome }]; selecionados: os ids, na ordem em que entraram.
 export function SelecaoMultipla({ opcoes, selecionados, onChange, placeholder = 'Escolher…' }) {
   const [aberto, setAberto] = useState(false)
@@ -53,7 +54,10 @@ export function SelecaoMultipla({ opcoes, selecionados, onChange, placeholder = 
   return (
     <div ref={caixa} className="relative">
       <div
-        onClick={() => campo.current?.focus()}
+        onClick={() => {
+          setAberto(true)
+          campo.current?.focus()
+        }}
         className="flex min-h-[42px] cursor-text flex-wrap items-center gap-1.5 rounded-lg border border-stone-300 bg-white px-2 py-1.5 transition focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-300"
       >
         {escolhidos.map((o) => (
@@ -84,7 +88,22 @@ export function SelecaoMultipla({ opcoes, selecionados, onChange, placeholder = 
           placeholder={escolhidos.length === 0 ? placeholder : ''}
           className="min-w-20 flex-1 border-0 bg-transparent px-1 py-0.5 text-sm text-stone-800 outline-none placeholder:text-stone-400"
         />
-        <ChevronDown size={16} className={`shrink-0 text-stone-400 transition ${aberto ? 'rotate-180' : ''}`} />
+        {aberto ? (
+          <button
+            type="button"
+            aria-label="Fechar a lista"
+            title="Pronto"
+            onClick={(e) => {
+              e.stopPropagation()
+              fechar()
+            }}
+            className="shrink-0 rounded-md bg-brand-700 p-1 text-white transition hover:bg-brand-800"
+          >
+            <Check size={14} />
+          </button>
+        ) : (
+          <ChevronDown size={16} className="shrink-0 text-stone-400" />
+        )}
       </div>
 
       {aberto && (

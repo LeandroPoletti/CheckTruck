@@ -5,7 +5,6 @@ import { SelecaoMultipla } from '../ui/SelecaoMultipla'
 import { formatKm, hoje, ANO_MINIMO } from '../../data/domain'
 import { ordemServicoService, tipoManutencaoService, mecanicoService, usuarioService, veiculoService, filtro } from '../../services'
 import { useCarga } from '../../hooks/useCarga'
-import MecanicoModal from './MecanicoModal'
 import { obterUsuario } from '../../services/sessao'
 import { pode, ehAutonomo } from '../../data/acesso'
 import { ORIGENS_INTERVALO } from '../../data/intervalos'
@@ -39,12 +38,11 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
     if (registro?.motoristaId && !motoristas.some((m) => m.id === registro.motoristaId)) {
       motoristas.push({ id: registro.motoristaId, nome: registro.motoristaNome })
     }
-    return { veiculos: veiculos.sort((a, b) => a.placa.localeCompare(b.placa)), tiposManutencao, mecanicos, motoristas }
+    return { veiculos: veiculos.sort((a, b) => a.placa.localeCompare(b.placa)), tiposManutencao, mecanicos: mecanicos.sort(porNome), motoristas }
   })
-  const [novosMecanicos, setNovosMecanicos] = useState([]) // cadastrados aqui mesmo, pelo "+ Novo"
   const veiculos = listas.dados?.veiculos ?? []
   const tiposManutencao = listas.dados?.tiposManutencao ?? []
-  const mecanicos = [...(listas.dados?.mecanicos ?? []), ...novosMecanicos].sort(porNome)
+  const mecanicos = listas.dados?.mecanicos ?? []
   const motoristas = listas.dados?.motoristas ?? []
 
   const [veiculoId, setVeiculoId] = useState(veiculo?.id ?? registro?.veiculoId ?? '')
@@ -59,7 +57,6 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
   }))
   // Itens escolhidos, na ordem em que entraram. isPrimeiraTroca null = segue a sugestão do caminhão
   const [itens, setItens] = useState(() => (registro?.itens ?? []).map((i) => ({ tipoId: i.tipoId, isPrimeiraTroca: i.isPrimeiraTroca })))
-  const [novoMecanicoOpen, setNovoMecanicoOpen] = useState(false)
   const [erro, setErro] = useState('')
   const [salvando, setSalvando] = useState(false)
 
@@ -96,13 +93,6 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
 
   function marcarPrimeiraTroca(tipoId, isPrimeiraTroca) {
     setItens((atuais) => atuais.map((i) => (i.tipoId === tipoId ? { ...i, isPrimeiraTroca } : i)))
-  }
-
-  // Mecânico cadastrado aqui mesmo: entra na lista e já fica escolhido
-  function handleMecanicoCriado(novo) {
-    if (!novo) return
-    setNovosMecanicos((n) => [...n, novo])
-    setForm((f) => ({ ...f, mecanicoIds: [...f.mecanicoIds, novo.id] }))
   }
 
   async function salvar() {
@@ -144,7 +134,6 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
   }
 
   return (
-    <>
     <Modal
       open
       onClose={onClose}
@@ -213,23 +202,16 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
         </Field>
 
         <Field label={autonomo ? 'Oficina ou mecânico' : 'Mecânicos'} required group hint="Pode escolher mais de um. Quem fez o quê, se precisar, vai nas observações.">
-          <div className="flex items-start gap-2">
-            <div className="flex-1">
-              <SelecaoMultipla
-                opcoes={mecanicos.map((m) => ({ id: m.id, nome: `${m.nome} (${m.funcao})` }))}
-                selecionados={form.mecanicoIds}
-                onChange={(ids) => set('mecanicoIds', ids)}
-                placeholder={autonomo ? 'Escolha onde ou com quem fez a troca' : 'Escolha quem fez a troca'}
-              />
-            </div>
-            {podeCadastrarMecanico && (
-              <Button type="button" variant="secondary" onClick={() => setNovoMecanicoOpen(true)}>+ Novo</Button>
-            )}
-          </div>
+          <SelecaoMultipla
+            opcoes={mecanicos.map((m) => ({ id: m.id, nome: `${m.nome} (${m.funcao})` }))}
+            selecionados={form.mecanicoIds}
+            onChange={(ids) => set('mecanicoIds', ids)}
+            placeholder={autonomo ? 'Escolha onde ou com quem fez a troca' : 'Escolha quem fez a troca'}
+          />
           {!listas.carregando && mecanicos.length === 0 && (
             <p className="mt-1.5 text-xs text-amber-600">
-              {autonomo ? 'Nada cadastrado. Use “+ Novo” para cadastrar a oficina ou o mecânico.'
-                : podeCadastrarMecanico ? 'Nenhum mecânico cadastrado. Use “+ Novo” para cadastrar.' : 'Nenhum mecânico cadastrado. Peça para quem cuida dos cadastros.'}
+              {autonomo ? 'Nada cadastrado. Cadastre a oficina ou o mecânico em Oficinas e mecânicos.'
+                : podeCadastrarMecanico ? 'Nenhum mecânico cadastrado. Cadastre em Cadastros → Mecânicos.' : 'Nenhum mecânico cadastrado. Peça para quem cuida dos cadastros.'}
             </p>
           )}
         </Field>
@@ -270,8 +252,5 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
         <MensagemErro>{erro}</MensagemErro>
       </div>
     </Modal>
-    {/* Fora do modal da OS para abrir por cima dele */}
-    <MecanicoModal open={novoMecanicoOpen} onClose={() => setNovoMecanicoOpen(false)} onSalvo={handleMecanicoCriado} />
-    </>
   )
 }
