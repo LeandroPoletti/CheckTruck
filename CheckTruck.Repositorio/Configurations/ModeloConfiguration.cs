@@ -13,4 +13,4 @@ public class ModeloConfiguration : IEntityTypeConfiguration<Modelo>
         builder.HasOne(m => m.Fabricante).WithMany(f => f.Modelos)
             .IsRequired().OnDelete(DeleteBehavior.Restrict);
     }
-}
+}

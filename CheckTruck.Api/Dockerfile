@@ -8,6 +8,8 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["CheckTruck.Api/CheckTruck.Api.csproj", "CheckTruck.Api/"]
+COPY ["CheckTruck.Repositorio/CheckTruck.Repositorio.csproj", "CheckTruck.Repositorio/"]
+COPY ["CheckTruck.Dominio/CheckTruck.Dominio.csproj", "CheckTruck.Dominio/"]
 RUN dotnet restore "CheckTruck.Api/CheckTruck.Api.csproj"
 COPY . .
 WORKDIR "/src/CheckTruck.Api"

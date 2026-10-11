@@ -14,4 +14,4 @@ public class Modelo : ItemDoCatalogo
     [Required]
     public Fabricante Fabricante { get; set; } = null!;
     public IList<Geracao> Geracoes { get; set; } = new List<Geracao>();
-}
+}

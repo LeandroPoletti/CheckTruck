@@ -13,4 +13,4 @@ public class TipoManutencao : ItemDoCatalogo
     public string Descricao { get; set; } = "";
     public Componente Componente { get; set; }
     public IList<IntervaloRecomendado> IntervaloRecomendados { get; set; } = new List<IntervaloRecomendado>();
-}
+}

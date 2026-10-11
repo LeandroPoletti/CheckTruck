@@ -1,0 +1,2 @@
+# Texto fica com LF no repositório; cada PC converte para o seu jeito ao baixar (core.autocrlf).
+* text=auto

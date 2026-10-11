@@ -11,13 +11,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.ModelBuilder;
-using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 var modelBuilder = new ODataConventionModelBuilder();
@@ -59,10 +56,6 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     options.ClientErrorMapping[StatusCodes.Status403Forbidden].Title = "Sem permissão";
     options.ClientErrorMapping[StatusCodes.Status404NotFound].Title = "Não encontrado";
 });
-
-builder.Services.AddEndpointsApiExplorer();
-
-builder.Logging.AddConsole();
 
 // Token Bearer em todas as rotas; quem pode o quê fica nos filtros da pasta Acesso
 builder.Services.AddAuthentication(IdentityConstants.BearerScheme).AddBearerToken(IdentityConstants.BearerScheme);
@@ -110,7 +103,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

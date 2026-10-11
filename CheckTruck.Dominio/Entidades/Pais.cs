@@ -11,4 +11,4 @@ public class Pais : ItemDoCatalogo
     [Required]
     public string Nome { get; set; } = "";
     public IList<Fabricante> Fabricantes { get; set; } = new List<Fabricante>();
-}
+}

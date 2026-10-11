@@ -15,4 +15,4 @@ public class GeracaoConfiguration : IEntityTypeConfiguration<Geracao>
         builder.HasOne(g => g.Modelo).WithMany(m => m.Geracoes)
             .IsRequired().OnDelete(DeleteBehavior.Restrict);
     }
-}
+}

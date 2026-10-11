@@ -163,4 +163,4 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
         }
     
     #endregion
-}
+}

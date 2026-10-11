@@ -13,4 +13,4 @@ public class Fabricante : ItemDoCatalogo
     [Required]
     public Pais PaisOrigem { get; set; } = null!;
     public IList<Modelo> Modelos { get; set; } = new List<Modelo>();
-}
+}

@@ -19,4 +19,4 @@ public class IntervaloRecomendado : ItemDoCatalogo
     public int IntervaloMeses { get; set; }
     public string Fonte { get; set; } = "";
     public string Observacao { get; set; } = "";
-}
+}

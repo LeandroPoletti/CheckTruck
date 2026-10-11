@@ -26,4 +26,4 @@ public class Geracao : ItemDoCatalogo
     public string? Caixa { get; set; }
     public IList<Potencia> Potencias { get; set; } = new List<Potencia>();
     public IList<IntervaloRecomendado> IntervalosRecomendados { get; set; } = new List<IntervaloRecomendado>();
-}
+}

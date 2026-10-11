@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Identity;
 namespace CheckTruck.Dominio.Servicos;
 
 /// <summary>
-/// Regras dos acessos: cadastrar, editar (inclusive e-mail e senha) e ativar/desativar.
-/// Quem chama é sempre Admin ou Gestor (a API confere antes), e só vê os acessos da própria empresa.
+/// Regras dos acessos: cadastrar, editar (inclusive e-mail e senha) e ativar/desativar, só para Admin ou Gestor
+/// (a API confere antes). Também lista e acha os motoristas para o caminhão e a OS, sempre da própria empresa.
 /// A conta Autônomo tem um acesso só; o primeiro acesso de cada conta nasce na tela Criar conta.
 /// </summary>
 public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usuarioLogado)
