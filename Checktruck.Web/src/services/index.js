@@ -63,7 +63,7 @@ export const veiculoService = {
 }
 
 export const dashboardService = {
-  // limiteAlertas: máximo de alertas (item mais urgente por veículo); sem valor, todos
+  // limiteAlertas: máximo de caminhões na lista de alertas; sem valor, todos
   async obter(limiteAlertas) {
     const { data } = await api.get('/api/Dashboard', { params: { limiteAlertas } })
     return m.dashboardFromApi(data)

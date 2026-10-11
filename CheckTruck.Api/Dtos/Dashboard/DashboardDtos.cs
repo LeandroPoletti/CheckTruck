@@ -1,4 +1,5 @@
 using CheckTruck.Api.Dtos.Comuns;
+using CheckTruck.Api.Dtos.Veiculos;
 using CheckTruck.Dominio.Resultados;
 
 namespace CheckTruck.Api.Dtos.Dashboard;
@@ -11,6 +12,7 @@ public class DashboardResponseDto
     public IList<FrotaPorGeracaoDto> FrotaPorGeracao { get; set; }
 }
 
+/// <summary>Quantos itens (trocas acompanhadas) de toda a frota ativa estão em cada status.</summary>
 public class ContagemStatusDto
 {
     public int Ok { get; set; }
@@ -26,27 +28,12 @@ public class AlertaManutencaoDto
     public string FabricanteNome { get; set; }
     public string ModeloNome { get; set; }
     public string GeracaoNome { get; set; }
-    public long TipoManutencaoId { get; set; }
-    public string TipoManutencaoNome { get; set; }
-    public int KmProximaTroca { get; set; }
-    public int KmRestante { get; set; }
 
-    /// <summary>Quanto do ciclo já foi rodado, de 0 a 100 (por km).</summary>
-    public int PercentualUsado { get; set; }
-
-    /// <summary>Com quantos km faltando o item entra em atenção (10% do ciclo, no mínimo 5.000 km).</summary>
-    public int MargemAlertaKm { get; set; }
-
-    /// <summary>Data limite da próxima troca; null quando não há histórico ou o intervalo não tem prazo.</summary>
-    public DateTime? DataProximaTroca { get; set; }
-
-    /// <summary>Dias até a data limite (negativo = vencido); null quando não há data.</summary>
-    public int? DiasRestantes { get; set; }
-
-    public bool IsPrimeiraTroca { get; set; }
-
-    /// <summary>"ok", "atencao" ou "critico"</summary>
+    /// <summary>"atencao" ou "critico": o pior entre os itens.</summary>
     public string Status { get; set; }
+
+    /// <summary>Itens em atenção ou crítico, do mais urgente para o menos urgente.</summary>
+    public IList<ItemManutencaoDto> Itens { get; set; }
 }
 
 public class FrotaPorGeracaoDto
@@ -77,16 +64,8 @@ public static class DashboardDtoExtensions
             FabricanteNome = a.FabricanteNome,
             ModeloNome = a.ModeloNome,
             GeracaoNome = a.GeracaoNome,
-            TipoManutencaoId = a.TipoManutencaoId,
-            TipoManutencaoNome = a.TipoManutencaoNome,
-            KmProximaTroca = a.KmProximaTroca,
-            KmRestante = a.KmRestante,
-            PercentualUsado = a.PercentualUsado,
-            MargemAlertaKm = a.MargemAlertaKm,
-            DataProximaTroca = a.DataProximaTroca,
-            DiasRestantes = a.DiasRestantes,
-            IsPrimeiraTroca = a.IsPrimeiraTroca,
-            Status = a.Status.ToApiString()
+            Status = a.Status.ToApiString(),
+            Itens = a.Itens.Select(i => i.ToDto()).ToList()
         }).ToList(),
         FrotaPorGeracao = situacao.FrotaPorGeracao.Select(g => new FrotaPorGeracaoDto
         {

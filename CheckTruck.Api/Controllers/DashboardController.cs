@@ -13,10 +13,10 @@ namespace CheckTruck.Api.Controllers;
 public class DashboardController(ServicoDashboard servicoDashboard) : CheckTruckController
 {
     /// <summary>
-    /// Situação de manutenção da frota ativa: contagem por status, item mais urgente de cada
-    /// veículo em atenção/crítico (ordenado pelo km restante) e quantidade de veículos por geração.
+    /// Situação de manutenção da frota ativa: quantos itens estão em cada status, caminhões em
+    /// atenção/crítico com os itens que precisam de cuidado (o mais urgente primeiro) e quantidade de veículos por geração.
     /// </summary>
-    /// <param name="limiteAlertas">Máximo de alertas retornados; sem valor, retorna todos.</param>
+    /// <param name="limiteAlertas">Máximo de caminhões na lista de alertas; sem valor, retorna todos.</param>
     [HttpGet]
     public ActionResult<DashboardResponseDto> Get([FromQuery] int? limiteAlertas = null)
     {

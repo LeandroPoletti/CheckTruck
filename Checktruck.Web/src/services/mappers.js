@@ -162,6 +162,7 @@ const itemSituacaoFromApi = (item) => ({
   kmProximaTroca: item.kmProximaTroca,
   kmRestante: item.kmRestante,
   percentualUsado: item.percentualUsado, // quanto do ciclo já foi rodado (0 a 100): a barra
+  margemAlertaKm: item.margemAlertaKm, // com quantos km faltando o item entra em atenção
   diasRestantes: item.diasRestantes,
   isPrimeiraTroca: item.isPrimeiraTroca,
   status: item.status,
@@ -257,7 +258,8 @@ export const registroToApi = (r) => ({
 // ---------------------------------------------------------------------------
 export const dashboardFromApi = (dto) => ({
   frotaAtiva: dto.frotaAtiva,
-  contagem: dto.contagem, // { ok, atencao, critico }
+  contagem: dto.contagem, // { ok, atencao, critico }: quantos itens da frota estão em cada status
+  // Caminhões em atenção ou crítico, cada um com os itens que precisam de cuidado (o mais urgente primeiro)
   alertas: dto.alertas.map((a) => ({
     veiculoId: toId(a.veiculoId),
     placa: a.placa,
@@ -265,15 +267,8 @@ export const dashboardFromApi = (dto) => ({
     fabricanteNome: a.fabricanteNome,
     modeloNome: a.modeloNome,
     geracaoNome: a.geracaoNome,
-    tipoId: toId(a.tipoManutencaoId),
-    tipoNome: a.tipoManutencaoNome,
-    kmProximaTroca: a.kmProximaTroca,
-    kmRestante: a.kmRestante,
-    percentualUsado: a.percentualUsado,
-    margemAlertaKm: a.margemAlertaKm, // com quantos km faltando o item entra em atenção
-    diasRestantes: a.diasRestantes, // null = vence só por km
-    isPrimeiraTroca: a.isPrimeiraTroca,
-    status: a.status, // 'ok' | 'atencao' | 'critico'
+    status: a.status, // 'atencao' | 'critico': o pior entre os itens
+    itens: a.itens.map(itemSituacaoFromApi),
   })),
   frotaPorGeracao: dto.frotaPorGeracao.map((g) => ({
     geracaoId: toId(g.geracaoId),

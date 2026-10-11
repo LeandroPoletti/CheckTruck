@@ -5,6 +5,8 @@ namespace CheckTruck.Dominio.Resultados;
 public class SituacaoFrota
 {
     public int FrotaAtiva { get; set; }
+
+    // Quantos itens (trocas acompanhadas) de toda a frota ativa estão em cada status
     public int QuantidadeOk { get; set; }
     public int QuantidadeAtencao { get; set; }
     public int QuantidadeCritico { get; set; }
@@ -12,7 +14,7 @@ public class SituacaoFrota
     public IList<QuantidadePorGeracao> FrotaPorGeracao { get; set; } = new List<QuantidadePorGeracao>();
 }
 
-// Item mais urgente de um veículo que está em atenção ou crítico (por km ou por data).
+// Caminhão em atenção ou crítico (por km ou por data) e os itens dele que precisam de cuidado.
 public class AlertaManutencao
 {
     public long VeiculoId { get; set; }
@@ -21,16 +23,12 @@ public class AlertaManutencao
     public string FabricanteNome { get; set; } = "";
     public string ModeloNome { get; set; } = "";
     public string GeracaoNome { get; set; } = "";
-    public long TipoManutencaoId { get; set; }
-    public string TipoManutencaoNome { get; set; } = "";
-    public int KmProximaTroca { get; set; }
-    public int KmRestante { get; set; }
-    public int PercentualUsado { get; set; }
-    public int MargemAlertaKm { get; set; }
-    public DateTime? DataProximaTroca { get; set; }
-    public int? DiasRestantes { get; set; }
-    public bool IsPrimeiraTroca { get; set; }
+
+    /// <summary>O pior status entre os itens.</summary>
     public StatusManutencao Status { get; set; }
+
+    /// <summary>Itens em atenção ou crítico, do mais urgente para o menos urgente.</summary>
+    public IList<ItemManutencao> Itens { get; set; } = new List<ItemManutencao>();
 }
 
 public class QuantidadePorGeracao

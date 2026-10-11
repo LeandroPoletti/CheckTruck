@@ -14,6 +14,7 @@ import UsuarioModal from '../components/modals/UsuarioModal'
 import MecanicoModal from '../components/modals/MecanicoModal'
 
 const LIMITE_ALERTAS = 5
+const ITENS = ['item', 'itens']
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -43,23 +44,12 @@ export default function Dashboard() {
         subtitle={`${frotaAtiva} veículos ativos · atualizado agora`}
       />
 
+      {/* A frota ativa conta caminhões; OK, Atenção e Crítico contam itens (as trocas acompanhadas) */}
       <div className="grid grid-cols-4 gap-4">
-        <Card className="px-5 py-4">
-          <p className="text-xs font-semibold tracking-wide text-stone-400">FROTA ATIVA</p>
-          <p className="mt-1 text-3xl font-bold text-stone-900">{frotaAtiva}</p>
-        </Card>
-        <Card className="px-5 py-4">
-          <p className="text-xs font-semibold tracking-wide text-stone-400">OK</p>
-          <p className="mt-1 text-3xl font-bold text-brand-700">{contagem.ok}</p>
-        </Card>
-        <Card className="px-5 py-4">
-          <p className="text-xs font-semibold tracking-wide text-stone-400">ATENÇÃO</p>
-          <p className="mt-1 text-3xl font-bold text-amber-600">{contagem.atencao}</p>
-        </Card>
-        <Card className="px-5 py-4">
-          <p className="text-xs font-semibold tracking-wide text-stone-400">CRÍTICO</p>
-          <p className="mt-1 text-3xl font-bold text-red-600">{contagem.critico}</p>
-        </Card>
+        <Contador titulo="FROTA ATIVA" valor={frotaAtiva} unidade={['caminhão', 'caminhões']} cor="text-stone-900" />
+        <Contador titulo="OK" valor={contagem.ok} unidade={ITENS} cor="text-brand-700" />
+        <Contador titulo="ATENÇÃO" valor={contagem.atencao} unidade={ITENS} cor="text-amber-600" />
+        <Contador titulo="CRÍTICO" valor={contagem.critico} unidade={ITENS} cor="text-red-600" />
       </div>
 
       <div className="mt-6 grid grid-cols-3 gap-6">
@@ -68,12 +58,12 @@ export default function Dashboard() {
           {alertas.length === 0 ? (
             <p className="py-8 text-center text-sm text-stone-400">Nenhum alerta ativo. Frota em dia.</p>
           ) : (
-            <div className="space-y-4">
+            <div className="divide-y divide-stone-100">
               {alertas.map((alerta) => (
                 <button
                   key={alerta.veiculoId}
                   onClick={() => navigate(`/veiculos/${alerta.veiculoId}`)}
-                  className="block w-full text-left"
+                  className="block w-full py-4 text-left first:pt-0 last:pb-0"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -84,16 +74,22 @@ export default function Dashboard() {
                     </div>
                     <StatusBadge status={alerta.status} />
                   </div>
-                  <div className="mt-2 flex items-center justify-between text-sm">
-                    <span className="font-medium text-stone-800">{alerta.tipoNome}</span>
-                    <span className="text-stone-500">
-                      {formatKm(alerta.kmAtual)} / {formatKm(alerta.kmProximaTroca)}
-                    </span>
+                  <div className="mt-2 space-y-3">
+                    {alerta.itens.map((item) => (
+                      <div key={item.tipoId}>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium text-stone-800">{item.tipoNome}</span>
+                          <span className="text-stone-500">
+                            {formatKm(alerta.kmAtual)} / {formatKm(item.kmProximaTroca)}
+                          </span>
+                        </div>
+                        <BarraDeUso percentual={item.percentualUsado} status={item.status} />
+                        <p className={`mt-1 text-xs ${item.status === 'critico' ? 'text-red-600' : 'text-amber-600'}`}>
+                          {textoDoAlerta(item)}
+                        </p>
+                      </div>
+                    ))}
                   </div>
-                  <BarraDeUso percentual={alerta.percentualUsado} status={alerta.status} />
-                  <p className={`mt-1 text-xs ${alerta.status === 'critico' ? 'text-red-600' : 'text-amber-600'}`}>
-                    {textoDoAlerta(alerta)}
-                  </p>
                 </button>
               ))}
             </div>
@@ -150,9 +146,20 @@ export default function Dashboard() {
   )
 }
 
-// O alerta pode ser por km ou por data (vence o que chegar primeiro): mostra os dois
-function textoDoAlerta(alerta) {
-  const { kmRestante, diasRestantes, margemAlertaKm } = alerta
+// Quadrinho do topo. unidade: [singular, plural], escrita embaixo do número
+function Contador({ titulo, valor, unidade, cor }) {
+  return (
+    <Card className="px-5 py-4">
+      <p className="text-xs font-semibold tracking-wide text-stone-400">{titulo}</p>
+      <p className={`mt-1 text-3xl font-bold ${cor}`}>{valor}</p>
+      <p className="text-xs text-stone-400">{valor === 1 ? unidade[0] : unidade[1]}</p>
+    </Card>
+  )
+}
+
+// O item pode estar em alerta por km ou por data (vence o que chegar primeiro): mostra os dois
+function textoDoAlerta(item) {
+  const { kmRestante, diasRestantes, margemAlertaKm } = item
   const km = kmRestante <= 0
     ? `Vencido há ${formatKm(-kmRestante)}`
     : `Faltam ${formatKm(kmRestante)}${kmRestante <= margemAlertaKm ? ` · dentro da margem de ${formatKm(margemAlertaKm)}` : ''}`
