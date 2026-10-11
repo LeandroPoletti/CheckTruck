@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
-import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
+import { PageHeader, Tabela, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
 import { Button, CampoBusca, Select } from '../components/ui/Form'
 import { PlacaBadge } from '../components/ui/Badges'
 import AcoesLinha from '../components/ui/AcoesLinha'
@@ -65,58 +65,43 @@ export default function OrdensServico() {
           action={ordens.length === 0 && podeMexer && <Button onClick={() => setModal({ registro: null })}>Lançar OS</Button>}
         />
       ) : (
-        <Card className="overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-stone-100 bg-stone-50/70 text-left text-xs font-semibold tracking-wide text-stone-400">
-                <th className="px-4 py-3">OS</th>
-                <th className="px-4 py-3">CAMINHÃO</th>
-                <th className="px-4 py-3">SERVIÇO</th>
-                <th className="px-4 py-3">KM</th>
-                <th className="px-4 py-3">MECÂNICO</th>
-                <th className="px-4 py-3">LANÇADA</th>
-                {podeMexer && <th className="px-4 py-3" />}
-              </tr>
-            </thead>
-            <tbody>
-              {filtradas.map((o) => (
-                <tr key={o.id} className="border-b border-stone-100 align-top last:border-0">
-                  <td className="px-4 py-3">
-                    <p className="font-semibold text-stone-800">nº {o.id}</p>
-                    <p className="text-xs text-stone-400">{formatData(o.dataRealizacao)}</p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <button onClick={() => navigate(`/veiculos/${o.veiculoId}`)}>
-                      <PlacaBadge placa={o.placa} size="sm" />
-                    </button>
-                    {!autonomo && <p className="mt-1 text-xs text-stone-400">{o.motoristaNome ?? 'Sem motorista'}</p>}
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="font-medium text-stone-800">
-                      {o.tipoNome}
-                      {o.isPrimeiraTroca && <span className="ml-2 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">1ª TROCA</span>}
-                    </p>
-                    {o.concessionaria && <p className="text-xs text-stone-400">{o.concessionaria}</p>}
-                  </td>
-                  <td className="px-4 py-3 text-stone-700">
-                    <p>{formatKm(o.kmNaTroca)}</p>
-                    <p className="text-xs text-stone-400">próx. {formatKm(o.kmProximaTroca)}</p>
-                  </td>
-                  <td className="px-4 py-3 text-stone-700">{o.mecanicoNome}</td>
-                  <td className="px-4 py-3">
-                    <p className="text-stone-700">{o.lancadoPorNome ?? '—'}</p>
-                    <p className="text-xs text-stone-400">{formatDataHora(o.lancadoEm)}</p>
-                  </td>
-                  {podeMexer && (
-                    <td className="px-4 py-3 text-right">
-                      <AcoesLinha onEditar={() => setModal({ registro: o })} onExcluir={() => setExcluindo(o)} />
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
+        <Tabela colunas={['OS', 'CAMINHÃO', 'SERVIÇO', 'KM', 'MECÂNICO', 'LANÇADA', podeMexer && '']}>
+          {filtradas.map((o) => (
+            <tr key={o.id} className="align-top">
+              <td className="px-5 py-3.5">
+                <p className="font-semibold text-stone-800">nº {o.id}</p>
+                <p className="text-xs text-stone-400">{formatData(o.dataRealizacao)}</p>
+              </td>
+              <td className="px-5 py-3.5">
+                <button onClick={() => navigate(`/veiculos/${o.veiculoId}`)}>
+                  <PlacaBadge placa={o.placa} size="sm" />
+                </button>
+                {!autonomo && <p className="mt-1 text-xs text-stone-400">{o.motoristaNome ?? 'Sem motorista'}</p>}
+              </td>
+              <td className="px-5 py-3.5">
+                <p className="font-medium text-stone-800">
+                  {o.tipoNome}
+                  {o.isPrimeiraTroca && <span className="ml-2 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">1ª TROCA</span>}
+                </p>
+                {o.concessionaria && <p className="text-xs text-stone-400">{o.concessionaria}</p>}
+              </td>
+              <td className="px-5 py-3.5 text-stone-700">
+                <p>{formatKm(o.kmNaTroca)}</p>
+                <p className="text-xs text-stone-400">próx. {formatKm(o.kmProximaTroca)}</p>
+              </td>
+              <td className="px-5 py-3.5 text-stone-700">{o.mecanicoNome}</td>
+              <td className="px-5 py-3.5">
+                <p className="text-stone-700">{o.lancadoPorNome ?? '—'}</p>
+                <p className="text-xs text-stone-400">{formatDataHora(o.lancadoEm)}</p>
+              </td>
+              {podeMexer && (
+                <td className="px-5 py-3.5 text-right">
+                  <AcoesLinha onEditar={() => setModal({ registro: o })} onExcluir={() => setExcluindo(o)} />
+                </td>
+              )}
+            </tr>
+          ))}
+        </Tabela>
       )}
 
       {modal && <OrdemServicoModal registro={modal.registro} onClose={() => setModal(null)} onSalvo={recarregar} />}

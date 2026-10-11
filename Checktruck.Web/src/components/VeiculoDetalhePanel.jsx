@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
 import { Card } from './Layout'
 import { StatusBadge, PlacaBadge } from './ui/Badges'
+import { BarraDeUso } from './ui/BarraDeUso'
 import {
   formatKm, formatData, formatDataHora, getHistoricoVeiculo, nomeDoCaminhao, textoDias, TRACOES, ORIGENS_KM,
 } from '../data/domain'
@@ -77,9 +78,6 @@ export default function VeiculoDetalhePanel({ veiculo, situacao, registros, hist
           ) : (
             <div className="space-y-4">
               {situacao.itens.map((s) => {
-                // Quanto do ciclo já foi rodado (barra cheia = na hora de trocar)
-                const pct = Math.max(2, s.percentualUsado)
-                const barColor = s.status === 'critico' ? 'bg-red-500' : s.status === 'atencao' ? 'bg-amber-500' : 'bg-brand-600'
                 const textColor = s.status === 'critico' ? 'text-red-600' : s.status === 'atencao' ? 'text-amber-600' : 'text-stone-400'
                 return (
                   <div key={s.tipoId}>
@@ -92,9 +90,7 @@ export default function VeiculoDetalhePanel({ veiculo, situacao, registros, hist
                         {s.diasRestantes !== null && <> · {textoDias(s.diasRestantes)}</>}
                       </span>
                     </div>
-                    <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-stone-100">
-                      <div className={`h-full rounded-full ${barColor}`} style={{ width: `${pct}%` }} />
-                    </div>
+                    <BarraDeUso percentual={s.percentualUsado} status={s.status} />
                   </div>
                 )
               })}

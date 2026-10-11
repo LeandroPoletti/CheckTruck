@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Modal } from '../ui/Overlay'
-import { Field, Input, Select, Button } from '../ui/Form'
+import { Field, Input, Select, Button, MensagemErro } from '../ui/Form'
 import { modeloService, fabricanteService } from '../../services'
 
 // Modelo = linha do fabricante (FH, FM, R, Actros...). Quem abre a tela só renderiza este modal quando ele está aberto.
@@ -64,7 +64,7 @@ export default function ModeloModal({ registro, valoresIniciais, onClose, onSalv
         <Field label="Nome" required hint="Ex.: FH, FM, VM, R, Actros, Stralis">
           <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="FH" autoFocus />
         </Field>
-        {erro && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</p>}
+        <MensagemErro>{erro}</MensagemErro>
       </form>
     </Modal>
   )

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { chamadoService } from '../../services'
 import { Modal } from '../ui/Overlay'
-import { Field, Select, Textarea, Button } from '../ui/Form'
+import { Field, Select, Textarea, Button, MensagemErro } from '../ui/Form'
 import { TIPOS_OCORRENCIA, URGENCIAS } from '../../data/chamados'
 
 // Abrir chamado (chamado = null) ou editar um pendente. Quem abre a tela só renderiza este modal
@@ -113,7 +113,7 @@ export default function ChamadoModal({ chamado, onClose, onSalvo }) {
           />
         </Field>
 
-        {erro && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</p>}
+        <MensagemErro>{erro}</MensagemErro>
       </div>
     </Modal>
   )

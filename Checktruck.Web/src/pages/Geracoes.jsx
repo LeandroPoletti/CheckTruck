@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
-import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
+import { PageHeader, Tabela, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
 import { Button, CampoBusca, Select } from '../components/ui/Form'
 import { AcoesDoCatalogo } from '../components/ui/AcoesLinha'
 import GeracaoModal from '../components/modals/GeracaoModal'
@@ -56,39 +56,24 @@ export default function Geracoes() {
           action={geracoes.length === 0 && <Button onClick={() => setModal({ registro: null })}>Cadastrar geração</Button>}
         />
       ) : (
-        <Card className="overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-stone-100 bg-stone-50/70 text-left text-xs font-semibold tracking-wide text-stone-400">
-                <th className="px-5 py-3">GERAÇÃO</th>
-                <th className="px-5 py-3">MODELO</th>
-                <th className="px-5 py-3">ANOS</th>
-                <th className="px-5 py-3">NORMA</th>
-                <th className="px-5 py-3">MOTOR · CÂMBIO</th>
-                <th className="px-5 py-3">POTÊNCIAS (CV)</th>
-                <th className="px-5 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {filtradas.map((g) => (
-                <tr key={g.id} className="border-b border-stone-100 align-top last:border-0">
-                  <td className="px-5 py-3.5 font-semibold text-stone-800">{g.nome}</td>
-                  <td className="px-5 py-3.5 text-stone-500">{nomeDoModelo(g)}</td>
-                  <td className="whitespace-nowrap px-5 py-3.5 text-stone-500">{g.periodo}</td>
-                  <td className="whitespace-nowrap px-5 py-3.5 text-stone-500">{g.normaNome}</td>
-                  <td className="px-5 py-3.5 text-stone-500">
-                    {g.motor || '—'}
-                    {g.cambio && <span className="block text-xs text-stone-400">{g.cambio}</span>}
-                  </td>
-                  <td className="px-5 py-3.5 text-stone-700">{g.potencias.map((p) => p.cv).join(' · ')}</td>
-                  <td className="px-5 py-3.5 text-right">
-                    <AcoesDoCatalogo item={g} onEditar={() => setModal({ registro: g })} onExcluir={() => setExcluindo(g)} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
+        <Tabela colunas={['GERAÇÃO', 'MODELO', 'ANOS', 'NORMA', 'MOTOR · CÂMBIO', 'POTÊNCIAS (CV)', '']}>
+          {filtradas.map((g) => (
+            <tr key={g.id} className="align-top">
+              <td className="px-5 py-3.5 font-semibold text-stone-800">{g.nome}</td>
+              <td className="px-5 py-3.5 text-stone-500">{nomeDoModelo(g)}</td>
+              <td className="whitespace-nowrap px-5 py-3.5 text-stone-500">{g.periodo}</td>
+              <td className="whitespace-nowrap px-5 py-3.5 text-stone-500">{g.normaNome}</td>
+              <td className="px-5 py-3.5 text-stone-500">
+                {g.motor || '—'}
+                {g.cambio && <span className="block text-xs text-stone-400">{g.cambio}</span>}
+              </td>
+              <td className="px-5 py-3.5 text-stone-700">{g.potencias.map((p) => p.cv).join(' · ')}</td>
+              <td className="px-5 py-3.5 text-right">
+                <AcoesDoCatalogo item={g} onEditar={() => setModal({ registro: g })} onExcluir={() => setExcluindo(g)} />
+              </td>
+            </tr>
+          ))}
+        </Tabela>
       )}
 
       {modal && <GeracaoModal registro={modal.registro} onClose={() => setModal(null)} onSalvo={recarregar} />}

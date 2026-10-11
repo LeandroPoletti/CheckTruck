@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
-import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
+import { PageHeader, Tabela, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
 import { useCarga } from '../hooks/useCarga'
 import { Button, CampoBusca } from '../components/ui/Form'
 import PaisModal from '../components/modals/PaisModal'
@@ -40,26 +40,16 @@ export default function Paises() {
           action={paises.length === 0 && <Button onClick={() => setModal({ registro: null })}>Cadastrar país</Button>}
         />
       ) : (
-        <Card className="overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-stone-100 bg-stone-50/70 text-left text-xs font-semibold tracking-wide text-stone-400">
-                <th className="px-5 py-3">NOME</th>
-                <th className="px-5 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {filtrados.map((p) => (
-                <tr key={p.id} className="border-b border-stone-100 last:border-0">
-                  <td className="px-5 py-3.5 font-semibold text-stone-800">{p.nome}</td>
-                  <td className="px-5 py-3.5 text-right">
-                    <AcoesDoCatalogo item={p} onEditar={() => setModal({ registro: p })} onExcluir={() => setExcluindo(p)} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
+        <Tabela colunas={['NOME', '']}>
+          {filtrados.map((p) => (
+            <tr key={p.id}>
+              <td className="px-5 py-3.5 font-semibold text-stone-800">{p.nome}</td>
+              <td className="px-5 py-3.5 text-right">
+                <AcoesDoCatalogo item={p} onEditar={() => setModal({ registro: p })} onExcluir={() => setExcluindo(p)} />
+              </td>
+            </tr>
+          ))}
+        </Tabela>
       )}
 
       <PaisModal open={!!modal} registro={modal?.registro} onClose={() => setModal(null)} onSalvo={recarregar} />

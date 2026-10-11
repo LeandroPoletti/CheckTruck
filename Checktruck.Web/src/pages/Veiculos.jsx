@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { PageHeader, Card, Carregando, ErroCarregamento } from '../components/Layout'
 import { useCarga } from '../hooks/useCarga'
 import { StatusBadge, PlacaBadge } from '../components/ui/Badges'
+import { BarraDeUso } from '../components/ui/BarraDeUso'
 import { Button, Select, CampoBusca } from '../components/ui/Form'
 import { Plus } from 'lucide-react'
 import { formatKm, contemBusca, nomeDoModelo, nomeDoCaminhao, TRACOES } from '../data/domain'
@@ -75,8 +76,6 @@ export default function Veiculos() {
       <div className="grid grid-cols-3 gap-4">
         {filtrados.map((v) => {
           const { status, itemMaisUrgente: item } = v
-          const pct = item ? Math.max(2, item.percentualUsado) : 0
-          const barColor = status === 'critico' ? 'bg-red-500' : status === 'atencao' ? 'bg-amber-500' : 'bg-brand-600'
 
           return (
             <Card
@@ -98,9 +97,7 @@ export default function Veiculos() {
                 <span className="font-semibold text-stone-800">{formatKm(v.kmAtual)}</span>
                 {item && <span className="text-stone-400">próx. {formatKm(item.kmProximaTroca)}</span>}
               </div>
-              <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-stone-100">
-                <div className={`h-full rounded-full ${barColor}`} style={{ width: `${pct}%` }} />
-              </div>
+              <BarraDeUso percentual={item?.percentualUsado} status={status} />
 
               <div className="mt-4 flex items-center justify-between border-t border-stone-100 pt-3 text-sm">
                 <span className="text-stone-600">{autonomo ? '' : v.motoristaNome ?? 'Sem motorista'}</span>

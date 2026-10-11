@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, PageHeader, Carregando, ErroCarregamento } from '../components/Layout'
 import { StatusBadge, PlacaBadge } from '../components/ui/Badges'
+import { BarraDeUso } from '../components/ui/BarraDeUso'
 import { Button } from '../components/ui/Form'
 import { formatKm, nomeDoModelo, textoDias } from '../data/domain'
 import { dashboardService } from '../services'
@@ -68,41 +69,33 @@ export default function Dashboard() {
             <p className="py-8 text-center text-sm text-stone-400">Nenhum alerta ativo. Frota em dia.</p>
           ) : (
             <div className="space-y-4">
-              {alertas.map((alerta) => {
-                const pct = Math.max(2, alerta.percentualUsado)
-                return (
-                  <button
-                    key={alerta.veiculoId}
-                    onClick={() => navigate(`/veiculos/${alerta.veiculoId}`)}
-                    className="block w-full text-left"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <PlacaBadge placa={alerta.placa} size="sm" />
-                        <span className="text-sm text-stone-500">
-                          {nomeDoModelo(alerta)} · {alerta.geracaoNome}
-                        </span>
-                      </div>
-                      <StatusBadge status={alerta.status} />
-                    </div>
-                    <div className="mt-2 flex items-center justify-between text-sm">
-                      <span className="font-medium text-stone-800">{alerta.tipoNome}</span>
-                      <span className="text-stone-500">
-                        {formatKm(alerta.kmAtual)} / {formatKm(alerta.kmProximaTroca)}
+              {alertas.map((alerta) => (
+                <button
+                  key={alerta.veiculoId}
+                  onClick={() => navigate(`/veiculos/${alerta.veiculoId}`)}
+                  className="block w-full text-left"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <PlacaBadge placa={alerta.placa} size="sm" />
+                      <span className="text-sm text-stone-500">
+                        {nomeDoModelo(alerta)} · {alerta.geracaoNome}
                       </span>
                     </div>
-                    <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-stone-100">
-                      <div
-                        className={`h-full rounded-full ${alerta.status === 'critico' ? 'bg-red-500' : 'bg-amber-500'}`}
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <p className={`mt-1 text-xs ${alerta.status === 'critico' ? 'text-red-600' : 'text-amber-600'}`}>
-                      {textoDoAlerta(alerta, margemAlertaKm)}
-                    </p>
-                  </button>
-                )
-              })}
+                    <StatusBadge status={alerta.status} />
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-sm">
+                    <span className="font-medium text-stone-800">{alerta.tipoNome}</span>
+                    <span className="text-stone-500">
+                      {formatKm(alerta.kmAtual)} / {formatKm(alerta.kmProximaTroca)}
+                    </span>
+                  </div>
+                  <BarraDeUso percentual={alerta.percentualUsado} status={alerta.status} />
+                  <p className={`mt-1 text-xs ${alerta.status === 'critico' ? 'text-red-600' : 'text-amber-600'}`}>
+                    {textoDoAlerta(alerta, margemAlertaKm)}
+                  </p>
+                </button>
+              ))}
             </div>
           )}
         </Card>

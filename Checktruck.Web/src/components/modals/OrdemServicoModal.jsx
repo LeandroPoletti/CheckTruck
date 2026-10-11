@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Modal } from '../ui/Overlay'
-import { Field, Input, Select, Toggle, Button } from '../ui/Form'
+import { Field, Input, Select, Toggle, Button, MensagemErro } from '../ui/Form'
 import { formatKm, getUltimoRegistro, hoje, ANO_MINIMO } from '../../data/domain'
 import {
   manutencaoService, tipoManutencaoService, intervaloVeiculoService, mecanicoService, usuarioService, veiculoService, filtro,
@@ -184,7 +184,7 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
     >
       <div className="space-y-4">
         {carregando && <p className="text-sm text-stone-400">Carregando tipos, mecânicos e motoristas…</p>}
-        {erroCarga && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erroCarga}</p>}
+        <MensagemErro>{erroCarga}</MensagemErro>
 
         {escolhePlaca && (
           <Field label="Caminhão" required>
@@ -268,7 +268,7 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
           <Input value={form.observacoes} onChange={(e) => set('observacoes', e.target.value)} placeholder="Opcional" />
         </Field>
 
-        {erro && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</p>}
+        <MensagemErro>{erro}</MensagemErro>
       </div>
     </Modal>
     {/* Fora do modal da OS para abrir por cima dele */}

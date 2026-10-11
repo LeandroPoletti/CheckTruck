@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Modal } from '../ui/Overlay'
-import { Field, Input, Button } from '../ui/Form'
+import { Field, Input, Button, MensagemErro } from '../ui/Form'
 import { paisService } from '../../services'
 
 export default function PaisModal({ open, onClose, registro, onSalvo }) {
@@ -49,7 +49,7 @@ export default function PaisModal({ open, onClose, registro, onSalvo }) {
         <Field label="Nome" required>
           <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Suécia" autoFocus />
         </Field>
-        {erro && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</p>}
+        <MensagemErro>{erro}</MensagemErro>
       </form>
     </Modal>
   )

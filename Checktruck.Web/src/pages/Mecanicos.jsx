@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
-import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
+import { PageHeader, Tabela, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
 import { useCarga } from '../hooks/useCarga'
 import { Button, CampoBusca } from '../components/ui/Form'
 import MecanicoModal from '../components/modals/MecanicoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import AcoesLinha from '../components/ui/AcoesLinha'
+import { AtivoBadge } from '../components/ui/Badges'
 import { mecanicoService } from '../services'
 import { obterUsuario } from '../services/sessao'
 import { ehAutonomo } from '../data/acesso'
@@ -51,38 +52,18 @@ export default function Mecanicos() {
           )}
         />
       ) : (
-        <Card className="overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-stone-100 bg-stone-50/70 text-left text-xs font-semibold tracking-wide text-stone-400">
-                <th className="px-5 py-3">NOME</th>
-                <th className="px-5 py-3">FUNÇÃO</th>
-                <th className="px-5 py-3">SITUAÇÃO</th>
-                <th className="px-5 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {filtrados.map((m) => (
-                <tr key={m.id} className="border-b border-stone-100 last:border-0">
-                  <td className={`px-5 py-3.5 font-semibold ${m.ativo ? 'text-stone-800' : 'text-stone-400'}`}>{m.nome}</td>
-                  <td className="px-5 py-3.5 text-stone-600">{m.funcao}</td>
-                  <td className="px-5 py-3.5">
-                    <span
-                      className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
-                        m.ativo ? 'border-brand-300 bg-brand-50 text-brand-700' : 'border-stone-300 bg-stone-50 text-stone-500'
-                      }`}
-                    >
-                      {m.ativo ? 'ATIVO' : 'INATIVO'}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3.5 text-right">
-                    <AcoesLinha onEditar={() => setModal({ registro: m })} onExcluir={() => setExcluindo(m)} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
+        <Tabela colunas={['NOME', 'FUNÇÃO', 'SITUAÇÃO', '']}>
+          {filtrados.map((m) => (
+            <tr key={m.id}>
+              <td className={`px-5 py-3.5 font-semibold ${m.ativo ? 'text-stone-800' : 'text-stone-400'}`}>{m.nome}</td>
+              <td className="px-5 py-3.5 text-stone-600">{m.funcao}</td>
+              <td className="px-5 py-3.5"><AtivoBadge ativo={m.ativo} /></td>
+              <td className="px-5 py-3.5 text-right">
+                <AcoesLinha onEditar={() => setModal({ registro: m })} onExcluir={() => setExcluindo(m)} />
+              </td>
+            </tr>
+          ))}
+        </Tabela>
       )}
 
       <MecanicoModal open={!!modal} registro={modal?.registro} onClose={() => setModal(null)} onSalvo={recarregar} />

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
-import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
+import { PageHeader, Tabela, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
 import { Button, CampoBusca, Select } from '../components/ui/Form'
 import { AcoesDoCatalogo } from '../components/ui/AcoesLinha'
 import ModeloModal from '../components/modals/ModeloModal'
@@ -58,36 +58,24 @@ export default function Modelos() {
           action={modelos.length === 0 && <Button onClick={() => setModal({ registro: null })}>Cadastrar modelo</Button>}
         />
       ) : (
-        <Card className="overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-stone-100 bg-stone-50/70 text-left text-xs font-semibold tracking-wide text-stone-400">
-                <th className="px-5 py-3">MODELO</th>
-                <th className="px-5 py-3">FABRICANTE</th>
-                <th className="px-5 py-3">GERAÇÕES</th>
-                <th className="px-5 py-3" />
+        <Tabela colunas={['MODELO', 'FABRICANTE', 'GERAÇÕES', '']}>
+          {filtrados.map((m) => {
+            const doModelo = geracoesDoModelo(m.id)
+            return (
+              <tr key={m.id}>
+                <td className="px-5 py-3.5 font-semibold text-stone-800">{m.nome}</td>
+                <td className="px-5 py-3.5 text-stone-500">{m.fabricanteNome}</td>
+                <td className="px-5 py-3.5 text-stone-700">
+                  {doModelo.length}
+                  {doModelo.length > 0 && <span className="block text-xs text-stone-400">{doModelo.map((g) => g.nome).join(' · ')}</span>}
+                </td>
+                <td className="px-5 py-3.5 text-right">
+                  <AcoesDoCatalogo item={m} onEditar={() => setModal({ registro: m })} onExcluir={() => setExcluindo(m)} />
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {filtrados.map((m) => {
-                const doModelo = geracoesDoModelo(m.id)
-                return (
-                  <tr key={m.id} className="border-b border-stone-100 last:border-0">
-                    <td className="px-5 py-3.5 font-semibold text-stone-800">{m.nome}</td>
-                    <td className="px-5 py-3.5 text-stone-500">{m.fabricanteNome}</td>
-                    <td className="px-5 py-3.5 text-stone-700">
-                      {doModelo.length}
-                      {doModelo.length > 0 && <span className="block text-xs text-stone-400">{doModelo.map((g) => g.nome).join(' · ')}</span>}
-                    </td>
-                    <td className="px-5 py-3.5 text-right">
-                      <AcoesDoCatalogo item={m} onEditar={() => setModal({ registro: m })} onExcluir={() => setExcluindo(m)} />
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </Card>
+            )
+          })}
+        </Tabela>
       )}
 
       {modal && <ModeloModal registro={modal.registro} onClose={() => setModal(null)} onSalvo={recarregar} />}

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { intervaloService, intervaloVeiculoService } from '../../services'
 import { Modal } from '../ui/Overlay'
-import { Field, Input, Button } from '../ui/Form'
+import { Field, Input, Button, MensagemErro } from '../ui/Form'
 import { obterUsuario } from '../../services/sessao'
 import { ehDonoDoSistema } from '../../data/acesso'
 import { nomeDoModelo } from '../../data/domain'
@@ -103,7 +103,7 @@ export default function IntervaloModal({ geracao, veiculo, tipo, intervalo, suge
           />
         </Field>
 
-        {erro && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</p>}
+        <MensagemErro>{erro}</MensagemErro>
       </div>
     </Modal>
   )

@@ -95,6 +95,12 @@ export function Button({ variant = 'primary', size = 'md', className = '', child
   )
 }
 
+// Erro do formulário ou da ação (ex.: o que a API respondeu). Sem mensagem, não mostra nada.
+export function MensagemErro({ className = '', children }) {
+  if (!children) return null
+  return <p className={`rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ${className}`}>{children}</p>
+}
+
 // Campo de busca das listas. Clicar na lupa põe o cursor no campo; onChange recebe o texto digitado.
 export function CampoBusca({ value, onChange, placeholder, className = '' }) {
   const campo = useRef(null)

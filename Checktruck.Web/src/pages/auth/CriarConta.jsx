@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { User, Users } from 'lucide-react'
 import { authService } from '../../services'
 import { entrar } from '../../services/sessao'
-import { Field, Input, Button } from '../../components/ui/Form'
+import { Field, Input, Button, MensagemErro } from '../../components/ui/Form'
 import TelaPublica from './TelaPublica'
 
 // A Frota tem equipe; o Autônomo é a própria pessoa (um acesso só, sem chamados e sem motoristas)
@@ -118,7 +118,7 @@ export default function CriarConta() {
           A senha precisa ter 6 caracteres ou mais, com letra maiúscula, minúscula, número e símbolo (ex.: @).
         </p>
 
-        {erro && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</p>}
+        <MensagemErro>{erro}</MensagemErro>
 
         <Button type="submit" className="w-full justify-center" size="lg" disabled={salvando}>
           {salvando ? 'Criando conta…' : 'Criar conta e entrar'}

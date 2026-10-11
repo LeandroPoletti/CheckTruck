@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader, Card, Carregando, ErroCarregamento } from '../components/Layout'
-import { Button } from '../components/ui/Form'
+import { Button, MensagemErro } from '../components/ui/Form'
 import { empresaService } from '../services'
 import { useCarga } from '../hooks/useCarga'
 import { recarregarUsuario } from '../services/sessao'
@@ -56,7 +56,7 @@ export default function MinhaEmpresa() {
             um com o que pode fazer, e os motoristas abrem chamados. Seus caminhões, OS e intervalos continuam iguais.
             Não dá para voltar a Autônomo.
           </p>
-          {erroAcao && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erroAcao}</p>}
+          <MensagemErro className="mt-3">{erroAcao}</MensagemErro>
           {confirmando ? (
             <div className="mt-4 flex gap-2">
               <Button onClick={virarFrota} disabled={salvando}>{salvando ? 'Mudando…' : 'Sim, virar Frota'}</Button>

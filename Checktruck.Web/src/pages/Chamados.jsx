@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
-import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
+import { PageHeader, Abas, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
 import { ChamadoStatusBadge, UrgenciaBadge, PlacaBadge } from '../components/ui/Badges'
 import { Button } from '../components/ui/Form'
 import ChamadoModal from '../components/modals/ChamadoModal'
@@ -64,19 +64,7 @@ export default function Chamados() {
         action={podeAbrir && <Button onClick={() => setEditando({ chamado: null })}><Plus size={16} /> Abrir chamado</Button>}
       />
 
-      <div className="mb-5 flex gap-6 border-b border-stone-200">
-        {ABAS.map((a) => (
-          <button
-            key={a.id}
-            onClick={() => setAba(a.id)}
-            className={`-mb-px border-b-2 pb-2.5 text-sm font-semibold transition ${
-              aba === a.id ? 'border-brand-700 text-brand-800' : 'border-transparent text-stone-400 hover:text-stone-600'
-            }`}
-          >
-            {a.label} · {contagem[a.id]}
-          </button>
-        ))}
-      </div>
+      <Abas abas={ABAS} atual={aba} onTrocar={setAba} contagem={contagem} />
 
       {erroAcao && <ErroCarregamento mensagem={erroAcao} />}
 

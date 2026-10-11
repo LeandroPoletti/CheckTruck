@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { chamadoService } from '../../services'
 import { Modal } from '../ui/Overlay'
-import { Field, Textarea, Button } from '../ui/Form'
+import { Field, Textarea, Button, MensagemErro } from '../ui/Form'
 
 // Concluir o chamado contando o que foi feito (obrigatório: fica no histórico do caminhão).
 export default function ResolverChamadoModal({ chamado, onClose, onSalvo }) {
@@ -48,7 +48,7 @@ export default function ResolverChamadoModal({ chamado, onClose, onSalvo }) {
           placeholder="Ex.: trocada a lona de freio traseira e regulado o tambor"
         />
       </Field>
-      {erro && <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</p>}
+      <MensagemErro className="mt-4">{erro}</MensagemErro>
     </Modal>
   )
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
-import { PageHeader, Card, Carregando, ErroCarregamento, EmptyState } from '../components/Layout'
+import { PageHeader, Abas, Tabela, Carregando, ErroCarregamento, EmptyState } from '../components/Layout'
 import { Button } from '../components/ui/Form'
 import UsuarioModal from '../components/modals/UsuarioModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
@@ -50,19 +50,7 @@ export default function Acesso() {
         action={<Button onClick={() => setEditando({ usuario: null })}><Plus size={16} /> Novo acesso</Button>}
       />
 
-      <div className="mb-5 flex gap-6 border-b border-stone-200">
-        {ABAS.map((a) => (
-          <button
-            key={a.id}
-            onClick={() => setAba(a.id)}
-            className={`-mb-px border-b-2 pb-2.5 text-sm font-semibold transition ${
-              aba === a.id ? 'border-brand-700 text-brand-800' : 'border-transparent text-stone-400 hover:text-stone-600'
-            }`}
-          >
-            {a.label} · {contagem[a.id]}
-          </button>
-        ))}
-      </div>
+      <Abas abas={ABAS} atual={aba} onTrocar={setAba} contagem={contagem} />
 
       {erroAcao && <ErroCarregamento mensagem={erroAcao} />}
 
@@ -72,51 +60,38 @@ export default function Acesso() {
           subtitle={aba === 'ativos' ? 'Cadastre quem vai entrar no sistema.' : 'Quem for desativado aparece aqui.'}
         />
       ) : (
-        <Card className="overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-stone-50 text-left text-[11px] font-semibold tracking-wide text-stone-400">
-              <tr>
-                <th className="px-4 py-2.5">NOME</th>
-                <th className="px-4 py-2.5">CPF</th>
-                <th className="px-4 py-2.5">CARGO</th>
-                <th className="px-4 py-2.5">PERMISSÕES</th>
-                <th className="px-4 py-2.5" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-100">
-              {lista.map((u) => (
-                <tr key={u.id}>
-                  <td className="px-4 py-3">
-                    <p className="font-semibold text-stone-900">{u.nome}</p>
-                    <p className="text-xs text-stone-500">{u.email}</p>
-                  </td>
-                  <td className="px-4 py-3 text-stone-600">{formatCpf(u.cpf)}</td>
-                  <td className="px-4 py-3 text-stone-700">{nomeCargo(u.cargo)}</td>
-                  <td className="px-4 py-3 text-stone-600" title={u.permissoes.map((id) => PERMISSOES.find((p) => p.id === id)?.nome).join(', ')}>
-                    {u.cuidaDosAcessos ? 'Todas' : `${u.permissoes.length} de ${PERMISSOES.length}`}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex justify-end gap-3 text-xs font-semibold">
-                      <button onClick={() => setEditando({ usuario: u })} className="text-brand-700 hover:underline">
-                        Editar
-                      </button>
-                      {u.ativo && !u.adminDoSistema && u.id !== eu.id && (
-                        <button onClick={() => setDesativando(u)} className="text-red-600 hover:underline">
-                          Desativar
-                        </button>
-                      )}
-                      {!u.ativo && (
-                        <button onClick={() => ativar(u)} className="text-brand-700 hover:underline">
-                          Ativar
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
+        <Tabela colunas={['NOME', 'CPF', 'CARGO', 'PERMISSÕES', '']}>
+          {lista.map((u) => (
+            <tr key={u.id}>
+              <td className="px-5 py-3.5">
+                <p className="font-semibold text-stone-900">{u.nome}</p>
+                <p className="text-xs text-stone-500">{u.email}</p>
+              </td>
+              <td className="px-5 py-3.5 text-stone-600">{formatCpf(u.cpf)}</td>
+              <td className="px-5 py-3.5 text-stone-700">{nomeCargo(u.cargo)}</td>
+              <td className="px-5 py-3.5 text-stone-600" title={u.permissoes.map((id) => PERMISSOES.find((p) => p.id === id)?.nome).join(', ')}>
+                {u.cuidaDosAcessos ? 'Todas' : `${u.permissoes.length} de ${PERMISSOES.length}`}
+              </td>
+              <td className="px-5 py-3.5">
+                <div className="flex justify-end gap-3 text-xs font-semibold">
+                  <button onClick={() => setEditando({ usuario: u })} className="text-brand-700 hover:underline">
+                    Editar
+                  </button>
+                  {u.ativo && !u.adminDoSistema && u.id !== eu.id && (
+                    <button onClick={() => setDesativando(u)} className="text-red-600 hover:underline">
+                      Desativar
+                    </button>
+                  )}
+                  {!u.ativo && (
+                    <button onClick={() => ativar(u)} className="text-brand-700 hover:underline">
+                      Ativar
+                    </button>
+                  )}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </Tabela>
       )}
 
       {editando && (

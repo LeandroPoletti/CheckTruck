@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { entrar } from '../../services/sessao'
-import { Field, Input, Button } from '../../components/ui/Form'
+import { Field, Input, Button, MensagemErro } from '../../components/ui/Form'
 import TelaPublica from './TelaPublica'
 
 // Logins criados pelo sistema (Program.cs da API)
@@ -57,9 +57,7 @@ export default function Login() {
           />
         </Field>
 
-        {error && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-        )}
+        <MensagemErro>{error}</MensagemErro>
 
         <Button type="submit" className="w-full justify-center" size="lg" disabled={entrando}>
           {entrando ? 'Entrando…' : 'Entrar'}

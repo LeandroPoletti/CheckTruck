@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Modal } from '../ui/Overlay'
-import { Field, Input, Toggle, Button } from '../ui/Form'
+import { Field, Input, Toggle, Button, MensagemErro } from '../ui/Form'
 import { mecanicoService } from '../../services'
 import { obterUsuario } from '../../services/sessao'
 import { ehAutonomo } from '../../data/acesso'
@@ -73,7 +73,7 @@ export default function MecanicoModal({ open, onClose, registro, onSalvo }) {
             label={ativo ? 'Ativo — aparece na lista da OS' : 'Inativo — não aparece na lista da OS'}
           />
         )}
-        {erro && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</p>}
+        <MensagemErro>{erro}</MensagemErro>
       </form>
     </Modal>
   )

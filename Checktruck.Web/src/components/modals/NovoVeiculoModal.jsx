@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Drawer } from '../ui/Overlay'
-import { Field, Input, Select, Toggle, Button } from '../ui/Form'
+import { Field, Input, Select, Toggle, Button, MensagemErro } from '../ui/Form'
 import { TRACOES, ANO_MINIMO, ANO_MAXIMO, anoValido, formatarPlaca, placaValida } from '../../data/domain'
 import { obterUsuario } from '../../services/sessao'
 import { ehAutonomo } from '../../data/acesso'
@@ -144,7 +144,7 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
     >
       <div className="space-y-6">
         {carregando && <p className="text-sm text-stone-400">Carregando catálogo e motoristas…</p>}
-        {erroCarga && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erroCarga}</p>}
+        <MensagemErro>{erroCarga}</MensagemErro>
         <div>
           <p className="mb-3 text-xs font-bold tracking-wide text-brand-700">1 · MODELO</p>
           <div className="grid grid-cols-2 gap-3">
@@ -232,7 +232,7 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
           )}
         </div>
 
-        {errors.api && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{errors.api}</p>}
+        <MensagemErro>{errors.api}</MensagemErro>
       </div>
     </Drawer>
   )

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { veiculoService } from '../../services'
 import { Modal } from '../ui/Overlay'
-import { Field, Input, Button } from '../ui/Form'
+import { Field, Input, Button, MensagemErro } from '../ui/Form'
 import { formatKm } from '../../data/domain'
 
 // Só Admin e Gestor: corrige um km digitado errado (ex.: um zero a mais). Pode baixar o km, mas não
@@ -57,7 +57,7 @@ export default function CorrigirKmModal({ veiculo, kmMaiorOs, onClose, onSalvo }
         <Field label="Motivo" required>
           <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} maxLength={200} placeholder="Ex.: zero a mais no Atualizar km" />
         </Field>
-        {erro && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</p>}
+        <MensagemErro>{erro}</MensagemErro>
       </div>
     </Modal>
   )

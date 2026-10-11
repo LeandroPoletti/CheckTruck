@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import { Modal } from '../ui/Overlay'
-import { Field, Input, Select, Button } from '../ui/Form'
+import { Field, Input, Select, Button, MensagemErro } from '../ui/Form'
 import { geracaoService, modeloService } from '../../services'
 import { NORMAS, ANO_MINIMO, ANO_MAXIMO, anoValido } from '../../data/domain'
 
@@ -175,7 +175,7 @@ export default function GeracaoModal({ registro, valoresIniciais, onClose, onSal
             </div>
           )}
         </Field>
-        {erro && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</p>}
+        <MensagemErro>{erro}</MensagemErro>
       </form>
     </Modal>
   )

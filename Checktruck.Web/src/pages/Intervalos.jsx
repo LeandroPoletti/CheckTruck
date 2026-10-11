@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { PageHeader, Carregando, ErroCarregamento } from '../components/Layout'
+import { PageHeader, Abas, Carregando, ErroCarregamento } from '../components/Layout'
 import { Select } from '../components/ui/Form'
 import IntervalosDaGeracao from '../components/intervalos/IntervalosDaGeracao'
 import IntervalosDoCaminhao from '../components/intervalos/IntervalosDoCaminhao'
@@ -48,25 +48,12 @@ export default function Intervalos() {
         subtitle="Vale o primeiro que existir: do caminhão → da empresa → de fábrica → padrão do sistema. Vence o que chegar primeiro: km ou prazo."
       />
 
-      <div className="mb-5 flex items-end justify-between gap-4 border-b border-stone-200">
-        <div className="flex gap-6">
-          {ABAS.filter((a) => !(a.daEmpresa && dono)).map((a) => (
-            <button
-              key={a.id}
-              onClick={() => setAba(a.id)}
-              className={`-mb-px border-b-2 pb-2.5 text-sm font-semibold transition ${
-                aba === a.id ? 'border-brand-700 text-brand-800' : 'border-transparent text-stone-400 hover:text-stone-600'
-              }`}
-            >
-              {a.label}
-            </button>
-          ))}
-        </div>
+      <Abas abas={ABAS.filter((a) => !(a.daEmpresa && dono))} atual={aba} onTrocar={setAba}>
         <Select value={componente} onChange={(e) => setComponente(e.target.value)} className="mb-2 w-52">
           <option value="todos">Componente: todos</option>
           {componentes.map((c) => <option key={c} value={c}>{c}</option>)}
         </Select>
-      </div>
+      </Abas>
 
       {aba === 'geracao' ? (
         <IntervalosDaGeracao

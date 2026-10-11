@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Modal } from '../ui/Overlay'
-import { Button } from '../ui/Form'
+import { Button, MensagemErro } from '../ui/Form'
 
 // Confirmação genérica de exclusão. onConfirmar faz o DELETE; se a API recusar
 // (ex.: registro em uso), a mensagem aparece aqui e o modal continua aberto.
@@ -41,7 +41,7 @@ export default function ConfirmarExclusaoModal({ open, onClose, titulo, descrica
       }
     >
       <p className="text-sm text-stone-600">{descricao}</p>
-      {erro && <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</p>}
+      <MensagemErro className="mt-4">{erro}</MensagemErro>
     </Modal>
   )
 }

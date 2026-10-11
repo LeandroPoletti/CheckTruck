@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Modal } from '../ui/Overlay'
-import { Field, Input, Select, Toggle, Button } from '../ui/Form'
+import { Field, Input, Select, Toggle, Button, MensagemErro } from '../ui/Form'
 import { usuarioService } from '../../services'
 import { CARGOS, CARGOS_GESTAO, PERMISSOES, PERMISSAO_BASE, DEPENDEM_DA_BASE } from '../../data/acesso'
 
@@ -145,7 +145,7 @@ export default function UsuarioModal({ usuario, onClose, onSalvo }) {
           )}
         </div>
 
-        {erro && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</p>}
+        <MensagemErro>{erro}</MensagemErro>
       </div>
     </Modal>
   )

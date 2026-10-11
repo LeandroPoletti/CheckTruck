@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { tipoManutencaoService } from '../../services'
 import { Modal } from '../ui/Overlay'
-import { Field, Input, Select, Button } from '../ui/Form'
+import { Field, Input, Select, Button, MensagemErro } from '../ui/Form'
 import { COMPONENTES } from '../../data/domain'
 
 // Cadastrar (registro = null) ou editar um item que o sistema acompanha nos caminhões.
@@ -63,7 +63,7 @@ export default function TipoManutencaoModal({ registro, onClose, onSalvo }) {
           <Input value={form.descricao} onChange={(e) => set('descricao', e.target.value)} placeholder="O que é trocado" />
         </Field>
 
-        {erro && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</p>}
+        <MensagemErro>{erro}</MensagemErro>
       </div>
     </Modal>
   )
