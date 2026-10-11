@@ -8,6 +8,7 @@ namespace CheckTruck.Dominio.Servicos;
 /// <summary>
 /// Regras dos chamados. Quem abriu edita e exclui enquanto está pendente; Admin e Gestor mexem em qualquer um.
 /// Atender grava quem está cuidando (continua pendente) e resolver conclui com o que foi feito.
+/// O motorista só abre chamado do caminhão que está com ele (quem põe o motorista no caminhão é o gestor ou a OS).
 /// </summary>
 public class ServicoChamado(
     IRepositorioCrud repositorioCrud,
@@ -29,9 +30,17 @@ public class ServicoChamado(
         return chamados.OrderByDescending(c => c.AbertoEm);
     }
 
-    /// <summary>Caminhões que podem receber chamado (os ativos), por placa.</summary>
-    public IQueryable<Veiculo> ListarVeiculosAtivos() =>
-        servicoVeiculo.Query(v => v.Ativo).OrderBy(v => v.Placa);
+    /// <summary>Caminhões que podem receber chamado (os ativos), por placa. O motorista só vê os que estão com ele.</summary>
+    public IQueryable<Veiculo> ListarVeiculosAtivos(Usuario quem)
+    {
+        var veiculos = servicoVeiculo.Query(v => v.Ativo);
+        if (quem.Cargo == Cargo.Motorista)
+        {
+            veiculos = veiculos.Where(v => v.MotoristaAtual != null && v.MotoristaAtual.Id == quem.Id);
+        }
+
+        return veiculos.OrderBy(v => v.Placa);
+    }
 
     public override bool Valida(Chamado entidade)
     {
@@ -63,17 +72,17 @@ public class ServicoChamado(
             return null;
         }
 
+        if (quem.Cargo == Cargo.Motorista
+            && !servicoVeiculo.Query(v => v.Id == veiculoId && v.MotoristaAtual != null && v.MotoristaAtual.Id == quem.Id).Any())
+        {
+            Mensagens.Add("Você só abre chamado do caminhão que está com você. Fale com o gestor.");
+            return null;
+        }
+
         novo.Veiculo = veiculo;
         novo.AbertoPor = quem;
         novo.AbertoEm = DateTime.UtcNow;
         novo.Status = StatusChamado.Pendente;
-
-        // O motorista que abre o chamado é quem está com o caminhão agora
-        if (quem.Cargo == Cargo.Motorista)
-        {
-            veiculo.MotoristaAtual = quem;
-        }
-
         return Inserir(novo);
     }
 

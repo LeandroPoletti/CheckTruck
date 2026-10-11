@@ -34,6 +34,16 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
         return Calcular(v => v.Id == veiculoId).FirstOrDefault();
     }
 
+    /// <summary>
+    /// Caminhões ativos em que o acesso é o motorista atual, com todos os itens ("Meus caminhões" do motorista).
+    /// Normalmente é um só; vazio quando ninguém pôs o motorista em nenhum caminhão.
+    /// </summary>
+    public IList<SituacaoVeiculo> ObterSituacaoDoMotorista(string usuarioId)
+    {
+        logger.LogDebug("Calculando situação dos caminhões do motorista {UsuarioId}", usuarioId);
+        return Calcular(v => v.Ativo && v.MotoristaAtual != null && v.MotoristaAtual.Id == usuarioId);
+    }
+
     /// <summary>Situação completa de um caminhão pela placa (com ou sem hífen, maiúscula ou minúscula).</summary>
     public SituacaoVeiculo? ObterSituacaoPorPlaca(string placa)
     {

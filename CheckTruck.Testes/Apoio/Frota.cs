@@ -109,6 +109,11 @@ public sealed class Frota
     public ServicoOrdemServico CriarServicoOrdemServico() =>
         new(Repositorio, CriarServicoSituacao(), new Logado(UsuarioLogado), NullLogger<ServicoOrdemServico>.Instance);
 
+    public ServicoChamado CriarServicoChamado() =>
+        new(Repositorio,
+            new ServicoCrud<Veiculo>(Repositorio, NullLogger<ServicoCrud<Veiculo>>.Instance),
+            NullLogger<ServicoChamado>.Instance);
+
     public ServicoVeiculo CriarServicoVeiculo() =>
         new(Repositorio,
             new ServicoCrud<OrdemServico>(Repositorio, NullLogger<ServicoCrud<OrdemServico>>.Instance),

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { chamadoService } from '../../services'
+import { obterUsuario } from '../../services/sessao'
 import { useCarga } from '../../hooks/useCarga'
 import { Modal } from '../ui/Overlay'
 import { Field, Select, Textarea, Button, MensagemErro } from '../ui/Form'
@@ -7,8 +8,10 @@ import { TIPOS_OCORRENCIA, URGENCIAS } from '../../data/chamados'
 
 // Abrir chamado (chamado = null) ou editar um pendente.
 // O caminhão só se escolhe ao abrir: caminhão errado = exclui e abre outro.
+// O motorista só recebe da API os caminhões que estão com ele; com um só, a placa já vem escolhida.
 export default function ChamadoModal({ chamado, onClose, onSalvo }) {
   const editando = !!chamado
+  const motorista = obterUsuario()?.cargo === 'Motorista'
   const [form, setForm] = useState(() => ({
     veiculoId: chamado?.veiculoId ?? '',
     tipo: chamado?.tipo ?? TIPOS_OCORRENCIA[0].id,
@@ -19,14 +22,15 @@ export default function ChamadoModal({ chamado, onClose, onSalvo }) {
   const [salvando, setSalvando] = useState(false)
 
   // Placas para escolher (só ao abrir; na edição o caminhão não muda)
-  const { dados: veiculos = [], erro: erroCarga } = useCarga(() => (editando ? Promise.resolve([]) : chamadoService.listarVeiculos()))
+  const { dados: veiculos = [], carregando, erro: erroCarga } = useCarga(() => (editando ? Promise.resolve([]) : chamadoService.listarVeiculos()))
+  const veiculoId = form.veiculoId || (motorista && veiculos.length === 1 ? veiculos[0].id : '')
 
   function set(campo, valor) {
     setForm((f) => ({ ...f, [campo]: valor }))
   }
 
   async function salvar() {
-    if (!editando && !form.veiculoId) {
+    if (!editando && !veiculoId) {
       setErro('Escolha o caminhão.')
       return
     }
@@ -38,7 +42,7 @@ export default function ChamadoModal({ chamado, onClose, onSalvo }) {
     setErro('')
     try {
       if (editando) await chamadoService.editar(chamado.id, form)
-      else await chamadoService.abrir(form)
+      else await chamadoService.abrir({ ...form, veiculoId })
       onSalvo()
       onClose()
     } catch (e) {
@@ -64,8 +68,14 @@ export default function ChamadoModal({ chamado, onClose, onSalvo }) {
     >
       <div className="space-y-4">
         {!editando && (
-          <Field label="Caminhão" required>
-            <Select value={form.veiculoId} onChange={(e) => set('veiculoId', e.target.value)}>
+          <Field
+            label="Caminhão"
+            required
+            hint={motorista && !carregando && !erroCarga && veiculos.length === 0
+              ? 'Nenhum caminhão está com você. Peça ao gestor para colocar seu nome no caminhão.'
+              : undefined}
+          >
+            <Select value={veiculoId} onChange={(e) => set('veiculoId', e.target.value)}>
               <option value="">Escolha a placa</option>
               {veiculos.map((v) => <option key={v.id} value={v.id}>{v.placa}</option>)}
             </Select>

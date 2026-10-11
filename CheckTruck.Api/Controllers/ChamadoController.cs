@@ -22,15 +22,15 @@ public class ChamadoController(ServicoChamado servicoChamado) : CheckTruckContro
     public ActionResult<IEnumerable<ChamadoResponseDto>> Get() =>
         servicoChamado.Listar(HttpContext.UsuarioLogado()).Select(ChamadoDtoExtensions.Projecao).ToList();
 
-    /// <summary>Caminhões ativos (id e placa), para escolher ao abrir o chamado.</summary>
+    /// <summary>Caminhões ativos (id e placa), para escolher ao abrir o chamado. O motorista só recebe os que estão com ele.</summary>
     [HttpGet("veiculos")]
     [ExigePermissao(Permissao.AbrirChamados)]
     public ActionResult<IEnumerable<VeiculoResumoDto>> Veiculos() =>
-        servicoChamado.ListarVeiculosAtivos()
+        servicoChamado.ListarVeiculosAtivos(HttpContext.UsuarioLogado())
             .Select(v => new VeiculoResumoDto { Id = v.Id, Placa = v.Placa })
             .ToList();
 
-    /// <summary>Se quem abre tem cargo Motorista, ele vira o motorista atual do caminhão.</summary>
+    /// <summary>O motorista só abre chamado do caminhão que está com ele.</summary>
     [HttpPost]
     [ExigePermissao(Permissao.AbrirChamados)]
     public ActionResult<ChamadoResponseDto> Post([FromBody] AbrirChamadoRequestDto dto)

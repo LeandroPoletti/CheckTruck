@@ -18,6 +18,7 @@ dos motoristas.
 CheckTruck.Api/         controllers, DTOs e filtros de acesso (quem pode o quê)
 CheckTruck.Dominio/     entidades, enums e as regras do negócio (serviços)
 CheckTruck.Repositorio/ Entity Framework: contexto, configuração das tabelas e migrations
+CheckTruck.Testes/      testes das regras do Dominio (xUnit), com um banco de mentira na memória
 Checktruck.Web/         front (React)
   src/paginas.jsx       todas as telas: rota, item do menu e permissão
   src/pages/            uma tela por arquivo
@@ -26,6 +27,7 @@ Checktruck.Web/         front (React)
   src/hooks/useCarga.js carregar dados da API numa tela (carregando, erro, tentar de novo e recarregar)
   src/services/         chamadas da API e conversão dos dados
 compose.yaml            PostgreSQL (e Adminer) em Docker
+.github/workflows/      CI: a cada push na main, compila a API, roda os testes e passa lint e build no front
 ```
 
 Na API, o controller só traduz o pedido (acha pelo id o que veio, como o fabricante ou o caminhão) e devolve a
@@ -69,6 +71,12 @@ npm run dev
 ```
 
 O front abre em `http://localhost:5173` e chama a API do endereço em `Checktruck.Web/.env.development`.
+
+**4. Testes** (na raiz do projeto; pare a API antes, senão o build não consegue gravar)
+
+```bash
+dotnet test CheckTruck.slnx
+```
 
 **Primeiro acesso:** a API cria dois logins. Troque as senhas fora do ambiente de desenvolvimento.
 
@@ -134,6 +142,10 @@ Cada pessoa tem um **cargo** e as **permissões** que o Admin ou o Gestor marcar
 
 Marcar Veículos, Atualizar km ou Ordem de serviço já liga o Ver frota.
 
+**Motorista e o caminhão dele:** o motorista atual de um caminhão é posto pelo gestor (no cadastro do caminhão) ou
+pela OS. Estar com o caminhão é a permissão para ver a situação dele e atualizar o km dele (rotas
+`api/MeusCaminhoes`, usadas pelo app), sem precisar de Ver frota nem de Atualizar km.
+
 ## Regras principais
 
 - **Intervalo de troca:** vale o primeiro que existir: o do caminhão (ex.: plano da concessionária), o da
@@ -147,8 +159,8 @@ Marcar Veículos, Atualizar km ou Ordem de serviço já liga o Ver frota.
   vez) e um ou mais mecânicos. Se a OS não trouxer a próxima troca de um item, o sistema calcula pelo
   intervalo (km da troca + intervalo). O km da OS atualiza o km do caminhão quando é maior.
   O motorista informado vira o motorista atual do caminhão, e quem lançou fica gravado com data e hora.
-- **Chamado:** quem abre conta o problema (tipo, urgência e descrição). Se for Motorista, ele vira o
-  motorista atual do caminhão. Quem atende resolve contando o que foi feito, e o chamado vai para Concluídos.
+- **Chamado:** quem abre conta o problema (tipo, urgência e descrição). O Motorista só abre chamado do
+  caminhão que está com ele. Quem atende resolve contando o que foi feito, e o chamado vai para Concluídos.
 - **Alertas:** o item fica em atenção quando falta 10% do ciclo (no mínimo 5.000 km) ou 30 dias, e crítico quando vence.
 - **Item sem OS:** o sistema supõe feitas só as trocas de antes do cadastro do caminhão; depois do cadastro, só a OS conta como troca (passou do km sem OS, venceu).
 - **Valores aceitos:** nenhum número digitado pode ser negativo (km, intervalos, potência). Os anos vão de 1900

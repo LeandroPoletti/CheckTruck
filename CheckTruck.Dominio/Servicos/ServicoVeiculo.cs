@@ -111,6 +111,21 @@ public class ServicoVeiculo(
     }
 
     /// <summary>
+    /// Atualizar km pelo motorista: só no caminhão ativo em que ele é o motorista atual. Estar com o caminhão
+    /// é a permissão (não precisa de Ver frota nem de Atualizar km). Quem põe o motorista no caminhão é o gestor ou a OS.
+    /// </summary>
+    public bool AtualizarKmDoMeuCaminhao(Usuario motorista, long veiculoId, int distancia)
+    {
+        if (!Query(v => v.Id == veiculoId && v.Ativo && v.MotoristaAtual != null && v.MotoristaAtual.Id == motorista.Id).Any())
+        {
+            Mensagens.Add("Esse caminhão não está com você. Fale com o gestor.");
+            return false;
+        }
+
+        return AtualizarKmVeiculo(veiculoId, distancia);
+    }
+
+    /// <summary>
     /// Corrige o km (ex.: alguém digitou um zero a mais). Só Admin e Gestor chegam aqui (a API confere).
     /// Pode baixar o km, mas não para menos que o km da maior OS do caminhão: se a OS também estava
     /// errada, corrige a OS antes. O motivo é obrigatório e fica no histórico.
