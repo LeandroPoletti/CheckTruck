@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
+import { useCarga } from '../hooks/useCarga'
 import { Button, CampoBusca } from '../components/ui/Form'
 import { AcoesDoCatalogo } from '../components/ui/AcoesLinha'
 import FabricanteModal from '../components/modals/FabricanteModal'
@@ -9,34 +10,11 @@ import { fabricanteService } from '../services'
 import { contemBusca } from '../data/domain'
 
 export default function Fabricantes() {
-  const [fabricantes, setFabricantes] = useState([])
-  const [carregando, setCarregando] = useState(true)
-  const [erro, setErro] = useState(null)
-  const [versao, setVersao] = useState(0)
+  // O DTO do fabricante já traz o país, então basta uma request
+  const { dados: fabricantes = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => fabricanteService.listar())
   const [busca, setBusca] = useState('')
   const [modal, setModal] = useState(null) // { registro } ao cadastrar/editar
   const [excluindo, setExcluindo] = useState(null)
-
-  // O DTO do fabricante já traz o país, então basta uma request
-  useEffect(() => {
-    let cancelado = false
-    fabricanteService.listar()
-      .then((lista) => { if (!cancelado) setFabricantes(lista) })
-      .catch((e) => { if (!cancelado) setErro(e.message) })
-      .finally(() => { if (!cancelado) setCarregando(false) })
-    return () => { cancelado = true }
-  }, [versao])
-
-  // Após salvar/excluir: atualiza em segundo plano, sem desmontar a tela
-  function recarregar() {
-    setErro(null)
-    setVersao((v) => v + 1)
-  }
-
-  function tentarNovamente() {
-    setCarregando(true)
-    recarregar()
-  }
 
   const filtrados = useMemo(() => {
     return fabricantes
@@ -45,7 +23,7 @@ export default function Fabricantes() {
   }, [fabricantes, busca])
 
   if (carregando) return <Carregando />
-  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
+  if (erro) return <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />
 
   return (
     <>

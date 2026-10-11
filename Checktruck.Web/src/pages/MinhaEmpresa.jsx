@@ -1,33 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader, Card, Carregando, ErroCarregamento } from '../components/Layout'
 import { Button } from '../components/ui/Form'
 import { empresaService } from '../services'
+import { useCarga } from '../hooks/useCarga'
 import { recarregarUsuario } from '../services/sessao'
 import { TIPOS_CONTA, formatDocumento } from '../data/acesso'
 
 // Dados da conta. No Autônomo, o botão Virar Frota (só Admin e Gestor chegam nesta tela).
 export default function MinhaEmpresa() {
   const navigate = useNavigate()
-  const [empresa, setEmpresa] = useState(null)
-  const [erro, setErro] = useState(null)
-  const [versao, setVersao] = useState(0)
+  const { dados: empresa, carregando, erro, tentarNovamente } = useCarga(() => empresaService.obterMinha())
   const [confirmando, setConfirmando] = useState(false)
   const [salvando, setSalvando] = useState(false)
   const [erroAcao, setErroAcao] = useState(null)
-
-  useEffect(() => {
-    let cancelado = false
-    empresaService.obterMinha()
-      .then((e) => { if (!cancelado) setEmpresa(e) })
-      .catch((e) => { if (!cancelado) setErro(e.message) })
-    return () => { cancelado = true }
-  }, [versao])
-
-  function tentarNovamente() {
-    setErro(null)
-    setVersao((v) => v + 1)
-  }
 
   async function virarFrota() {
     setSalvando(true)
@@ -43,8 +29,8 @@ export default function MinhaEmpresa() {
     }
   }
 
-  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
-  if (!empresa) return <Carregando />
+  if (carregando) return <Carregando />
+  if (erro) return <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />
 
   const autonomo = empresa.tipoConta === 'Autonomo'
   // O documento é o da criação da conta: quem virou Frota continua com o CPF

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
@@ -8,6 +8,7 @@ import AcoesLinha from '../components/ui/AcoesLinha'
 import OrdemServicoModal from '../components/modals/OrdemServicoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { manutencaoService } from '../services'
+import { useCarga } from '../hooks/useCarga'
 import { obterUsuario } from '../services/sessao'
 import { pode, ehAutonomo } from '../data/acesso'
 import { formatKm, formatData, formatDataHora, contemBusca } from '../data/domain'
@@ -20,34 +21,11 @@ export default function OrdensServico() {
   const podeMexer = pode(usuario, 'OrdemServico')
   const autonomo = ehAutonomo(usuario) // sem motorista: é o próprio dono
 
-  const [ordens, setOrdens] = useState([])
-  const [carregando, setCarregando] = useState(true)
-  const [erro, setErro] = useState(null)
-  const [versao, setVersao] = useState(0)
+  const { dados: ordens = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => manutencaoService.listar())
   const [busca, setBusca] = useState('')
   const [tipo, setTipo] = useState('')
   const [modal, setModal] = useState(null) // { registro } (null ao lançar) enquanto o modal está aberto
   const [excluindo, setExcluindo] = useState(null)
-
-  useEffect(() => {
-    let cancelado = false
-    manutencaoService.listar()
-      .then((lista) => { if (!cancelado) setOrdens(lista) })
-      .catch((e) => { if (!cancelado) setErro(e.message) })
-      .finally(() => { if (!cancelado) setCarregando(false) })
-    return () => { cancelado = true }
-  }, [versao])
-
-  // Após salvar/excluir: atualiza em segundo plano, sem desmontar a tela
-  function recarregar() {
-    setErro(null)
-    setVersao((v) => v + 1)
-  }
-
-  function tentarNovamente() {
-    setCarregando(true)
-    recarregar()
-  }
 
   // Tipos que aparecem nas OS, para o filtro
   const tipos = useMemo(
@@ -63,7 +41,7 @@ export default function OrdensServico() {
   }, [ordens, busca, tipo])
 
   if (carregando) return <Carregando />
-  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
+  if (erro) return <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />
 
   return (
     <>

@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Card, Carregando, ErroCarregamento, EmptyState } from '../components/Layout'
 import { Button } from '../components/ui/Form'
 import UsuarioModal from '../components/modals/UsuarioModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { usuarioService } from '../services'
+import { useCarga } from '../hooks/useCarga'
 import { obterUsuario } from '../services/sessao'
 import { PERMISSOES, nomeCargo, formatCpf } from '../data/acesso'
 
@@ -17,33 +18,10 @@ const ABAS = [
 export default function Acesso() {
   const eu = obterUsuario()
   const [aba, setAba] = useState('ativos')
-  const [usuarios, setUsuarios] = useState([])
-  const [carregando, setCarregando] = useState(true)
-  const [erro, setErro] = useState(null)
+  const { dados: usuarios = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => usuarioService.listar())
   const [erroAcao, setErroAcao] = useState(null)
-  const [versao, setVersao] = useState(0)
   const [editando, setEditando] = useState(null) // { usuario } (null no cadastro) enquanto o modal está aberto
   const [desativando, setDesativando] = useState(null)
-
-  useEffect(() => {
-    let cancelado = false
-    usuarioService.listar()
-      .then((lista) => { if (!cancelado) setUsuarios(lista) })
-      .catch((e) => { if (!cancelado) setErro(e.message) })
-      .finally(() => { if (!cancelado) setCarregando(false) })
-    return () => { cancelado = true }
-  }, [versao])
-
-  // Após salvar: atualiza em segundo plano, sem desmontar a tela
-  function recarregar() {
-    setErro(null)
-    setVersao((v) => v + 1)
-  }
-
-  function tentarNovamente() {
-    setCarregando(true)
-    recarregar()
-  }
 
   async function ativar(usuario) {
     setErroAcao(null)
@@ -56,7 +34,7 @@ export default function Acesso() {
   }
 
   if (carregando) return <Carregando />
-  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
+  if (erro) return <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />
 
   const contagem = {
     ativos: usuarios.filter((u) => u.ativo).length,

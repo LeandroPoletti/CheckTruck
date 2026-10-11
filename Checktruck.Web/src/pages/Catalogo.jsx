@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Card, Carregando, ErroCarregamento } from '../components/Layout'
 import { Button } from '../components/ui/Form'
 import { fabricanteService, modeloService, geracaoService, veiculoService, intervaloService } from '../services'
+import { useCarga } from '../hooks/useCarga'
 import FabricanteModal from '../components/modals/FabricanteModal'
 import ModeloModal from '../components/modals/ModeloModal'
 import GeracaoModal from '../components/modals/GeracaoModal'
@@ -21,43 +22,20 @@ export default function Catalogo() {
   const verFrota = pode(usuario, 'VerFrota')
   const [fabricanteSel, setFabricanteSel] = useState(null)
   const [modeloSel, setModeloSel] = useState(null)
-  const [dados, setDados] = useState(VAZIO)
-  const [carregando, setCarregando] = useState(true)
-  const [erro, setErro] = useState(null)
-  const [versao, setVersao] = useState(0)
-  const [modal, setModal] = useState(null) // 'fabricante' | 'modelo' | 'geracao' enquanto o modal está aberto
-
-  useEffect(() => {
-    let cancelado = false
+  const { dados = VAZIO, carregando, erro, recarregar, tentarNovamente } = useCarga(() =>
     Promise.all([
       fabricanteService.listar(),
       modeloService.listar(),
       geracaoService.listar(),
       verFrota ? veiculoService.listar() : [],
       intervaloService.listar(),
-    ])
-      .then(([fabricantes, modelos, geracoes, veiculos, intervalos]) => {
-        if (cancelado) return
-        fabricantes.sort(porNome)
-        modelos.sort(porNome)
-        geracoes.sort((a, b) => a.anoInicio - b.anoInicio || a.nome.localeCompare(b.nome))
-        setDados({ fabricantes, modelos, geracoes, veiculos, intervalos })
-      })
-      .catch((e) => { if (!cancelado) setErro(e.message) })
-      .finally(() => { if (!cancelado) setCarregando(false) })
-    return () => { cancelado = true }
-  }, [versao, verFrota])
-
-  // Após salvar: atualiza em segundo plano, sem desmontar a tela
-  function recarregar() {
-    setErro(null)
-    setVersao((v) => v + 1)
-  }
-
-  function tentarNovamente() {
-    setCarregando(true)
-    recarregar()
-  }
+    ]).then(([fabricantes, modelos, geracoes, veiculos, intervalos]) => {
+      fabricantes.sort(porNome)
+      modelos.sort(porNome)
+      geracoes.sort((a, b) => a.anoInicio - b.anoInicio || a.nome.localeCompare(b.nome))
+      return { fabricantes, modelos, geracoes, veiculos, intervalos }
+    }), [verFrota])
+  const [modal, setModal] = useState(null) // 'fabricante' | 'modelo' | 'geracao' enquanto o modal está aberto
 
   const { fabricantes, modelos, geracoes, veiculos, intervalos } = dados
   // Sem seleção, o primeiro fabricante e o primeiro modelo dele ficam ativos
@@ -74,7 +52,7 @@ export default function Catalogo() {
   }
 
   if (carregando) return <Carregando />
-  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
+  if (erro) return <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />
 
   return (
     <>

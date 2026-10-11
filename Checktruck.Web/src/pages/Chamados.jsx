@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
@@ -8,6 +8,7 @@ import ChamadoModal from '../components/modals/ChamadoModal'
 import ResolverChamadoModal from '../components/modals/ResolverChamadoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { chamadoService } from '../services'
+import { useCarga } from '../hooks/useCarga'
 import { obterUsuario } from '../services/sessao'
 import { pode } from '../data/acesso'
 import { nomeTipoOcorrencia } from '../data/chamados'
@@ -27,34 +28,11 @@ export default function Chamados() {
   const podeVerCaminhao = pode(eu, 'VerFrota')
 
   const [aba, setAba] = useState('Pendente')
-  const [chamados, setChamados] = useState([])
-  const [carregando, setCarregando] = useState(true)
-  const [erro, setErro] = useState(null)
+  const { dados: chamados = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => chamadoService.listar())
   const [erroAcao, setErroAcao] = useState(null)
-  const [versao, setVersao] = useState(0)
   const [editando, setEditando] = useState(null) // { chamado } (null ao abrir) enquanto o modal está aberto
   const [resolvendo, setResolvendo] = useState(null)
   const [excluindo, setExcluindo] = useState(null)
-
-  useEffect(() => {
-    let cancelado = false
-    chamadoService.listar()
-      .then((lista) => { if (!cancelado) setChamados(lista) })
-      .catch((e) => { if (!cancelado) setErro(e.message) })
-      .finally(() => { if (!cancelado) setCarregando(false) })
-    return () => { cancelado = true }
-  }, [versao])
-
-  // Após salvar: atualiza em segundo plano, sem desmontar a tela
-  function recarregar() {
-    setErro(null)
-    setVersao((v) => v + 1)
-  }
-
-  function tentarNovamente() {
-    setCarregando(true)
-    recarregar()
-  }
 
   async function atender(chamado) {
     setErroAcao(null)
@@ -70,7 +48,7 @@ export default function Chamados() {
   const podeAlterar = (c) => eu.cuidaDosAcessos || (c.abertoPorId === eu.id && c.status === 'Pendente')
 
   if (carregando) return <Carregando />
-  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
+  if (erro) return <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />
 
   const contagem = {
     Pendente: chamados.filter((c) => c.status === 'Pendente').length,

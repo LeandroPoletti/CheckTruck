@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
 import { Button, CampoBusca, Select } from '../components/ui/Form'
@@ -6,41 +6,21 @@ import { AcoesDoCatalogo } from '../components/ui/AcoesLinha'
 import ModeloModal from '../components/modals/ModeloModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { modeloService, fabricanteService, geracaoService } from '../services'
+import { useCarga } from '../hooks/useCarga'
 import { contemBusca } from '../data/domain'
 
 const VAZIO = { modelos: [], fabricantes: [], geracoes: [] }
 
 // Modelos = linhas de cada fabricante (FH, FM, R, Actros...). As épocas ficam em Gerações.
 export default function Modelos() {
-  const [dados, setDados] = useState(VAZIO)
-  const [carregando, setCarregando] = useState(true)
-  const [erro, setErro] = useState(null)
-  const [versao, setVersao] = useState(0)
+  // Modelos (já trazem o fabricante) + fabricantes para o filtro + gerações para a contagem
+  const { dados = VAZIO, carregando, erro, recarregar, tentarNovamente } = useCarga(() =>
+    Promise.all([modeloService.listar(), fabricanteService.listar(), geracaoService.listar()])
+      .then(([modelos, fabricantes, geracoes]) => ({ modelos, fabricantes, geracoes })))
   const [busca, setBusca] = useState('')
   const [fabricanteFiltro, setFabricanteFiltro] = useState('todos')
   const [modal, setModal] = useState(null) // { registro } (null ao cadastrar) enquanto o modal está aberto
   const [excluindo, setExcluindo] = useState(null)
-
-  // Modelos (já trazem o fabricante) + fabricantes para o filtro + gerações para a contagem
-  useEffect(() => {
-    let cancelado = false
-    Promise.all([modeloService.listar(), fabricanteService.listar(), geracaoService.listar()])
-      .then(([modelos, fabricantes, geracoes]) => { if (!cancelado) setDados({ modelos, fabricantes, geracoes }) })
-      .catch((e) => { if (!cancelado) setErro(e.message) })
-      .finally(() => { if (!cancelado) setCarregando(false) })
-    return () => { cancelado = true }
-  }, [versao])
-
-  // Após salvar/excluir: atualiza em segundo plano, sem desmontar a tela
-  function recarregar() {
-    setErro(null)
-    setVersao((v) => v + 1)
-  }
-
-  function tentarNovamente() {
-    setCarregando(true)
-    recarregar()
-  }
 
   const { modelos, fabricantes, geracoes } = dados
 
@@ -52,7 +32,7 @@ export default function Modelos() {
   }, [modelos, busca, fabricanteFiltro])
 
   if (carregando) return <Carregando />
-  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
+  if (erro) return <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />
 
   const geracoesDoModelo = (modeloId) => geracoes.filter((g) => g.modeloId === modeloId)
 

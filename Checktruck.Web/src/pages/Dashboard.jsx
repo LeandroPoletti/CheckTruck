@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, PageHeader, Carregando, ErroCarregamento } from '../components/Layout'
 import { StatusBadge, PlacaBadge } from '../components/ui/Badges'
 import { Button } from '../components/ui/Form'
 import { formatKm, nomeDoModelo, textoDias } from '../data/domain'
 import { dashboardService } from '../services'
+import { useCarga } from '../hooks/useCarga'
 import { obterUsuario } from '../services/sessao'
 import { pode, ehAutonomo } from '../data/acesso'
 import NovoVeiculoModal from '../components/modals/NovoVeiculoModal'
@@ -23,37 +24,14 @@ export default function Dashboard() {
     acesso: usuario.cuidaDosAcessos && !autonomo,
     mecanico: pode(usuario, 'Cadastros'),
   }
-  const [dados, setDados] = useState(null)
-  const [carregando, setCarregando] = useState(true)
-  const [erro, setErro] = useState(null)
-  const [versao, setVersao] = useState(0)
+  // A API já devolve a situação da frota calculada: contagens, alertas e frota por geração
+  const { dados, carregando, erro, recarregar, tentarNovamente } = useCarga(() => dashboardService.obter(LIMITE_ALERTAS))
   const [novoVeiculoOpen, setNovoVeiculoOpen] = useState(false)
   const [novoAcessoOpen, setNovoAcessoOpen] = useState(false)
   const [novoMecanicoOpen, setNovoMecanicoOpen] = useState(false)
 
-  // A API já devolve a situação da frota calculada: contagens, alertas e frota por geração
-  useEffect(() => {
-    let cancelado = false
-    dashboardService.obter(LIMITE_ALERTAS)
-      .then((d) => { if (!cancelado) setDados(d) })
-      .catch((e) => { if (!cancelado) setErro(e.message) })
-      .finally(() => { if (!cancelado) setCarregando(false) })
-    return () => { cancelado = true }
-  }, [versao])
-
-  // Após salvar: atualiza em segundo plano, sem desmontar a tela (e os modais abertos)
-  function recarregar() {
-    setErro(null)
-    setVersao((v) => v + 1)
-  }
-
-  function tentarNovamente() {
-    setCarregando(true)
-    recarregar()
-  }
-
   if (carregando) return <Carregando />
-  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
+  if (erro) return <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />
 
   const { frotaAtiva, contagem, alertas, frotaPorGeracao, margemAlertaKm } = dados
 

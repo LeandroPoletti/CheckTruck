@@ -22,6 +22,7 @@ Checktruck.Web/         front (React)
   src/paginas.jsx       todas as telas: rota, item do menu e permissão
   src/pages/            uma tela por arquivo
   src/components/       menu, modais e componentes de tela
+  src/hooks/useCarga.js carregar dados da API numa tela (carregando, erro, tentar de novo e recarregar)
   src/services/         chamadas da API e conversão dos dados
 compose.yaml            PostgreSQL (e Adminer) em Docker
 ```

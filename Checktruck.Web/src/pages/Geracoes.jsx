@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
 import { Button, CampoBusca, Select } from '../components/ui/Form'
@@ -6,39 +6,18 @@ import { AcoesDoCatalogo } from '../components/ui/AcoesLinha'
 import GeracaoModal from '../components/modals/GeracaoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { geracaoService } from '../services'
+import { useCarga } from '../hooks/useCarga'
 import { contemBusca, nomeDoModelo, ordemDasGeracoes, agruparPorModelo } from '../data/domain'
 
 // Gerações = épocas de cada modelo no Brasil (anos, norma, motor, câmbio) com as potências.
 export default function Geracoes() {
-  const [geracoes, setGeracoes] = useState([])
-  const [carregando, setCarregando] = useState(true)
-  const [erro, setErro] = useState(null)
-  const [versao, setVersao] = useState(0)
+  // As gerações já trazem fabricante, modelo e potências
+  const { dados: geracoes = [], carregando, erro, recarregar, tentarNovamente } =
+    useCarga(() => geracaoService.listar().then((lista) => lista.sort(ordemDasGeracoes)))
   const [busca, setBusca] = useState('')
   const [modeloFiltro, setModeloFiltro] = useState('todos')
   const [modal, setModal] = useState(null) // { registro } (null ao cadastrar) enquanto o modal está aberto
   const [excluindo, setExcluindo] = useState(null)
-
-  // As gerações já trazem fabricante, modelo e potências
-  useEffect(() => {
-    let cancelado = false
-    geracaoService.listar()
-      .then((lista) => { if (!cancelado) setGeracoes(lista.sort(ordemDasGeracoes)) })
-      .catch((e) => { if (!cancelado) setErro(e.message) })
-      .finally(() => { if (!cancelado) setCarregando(false) })
-    return () => { cancelado = true }
-  }, [versao])
-
-  // Após salvar/excluir: atualiza em segundo plano, sem desmontar a tela
-  function recarregar() {
-    setErro(null)
-    setVersao((v) => v + 1)
-  }
-
-  function tentarNovamente() {
-    setCarregando(true)
-    recarregar()
-  }
 
   // Filtro por modelo ("Volvo FH"), na ordem de fabricante e modelo
   const modelos = useMemo(() => agruparPorModelo(geracoes).map(([nome, lista]) => ({ id: lista[0].modeloId, nome })), [geracoes])
@@ -53,7 +32,7 @@ export default function Geracoes() {
   }, [geracoes, busca, modeloFiltro])
 
   if (carregando) return <Carregando />
-  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
+  if (erro) return <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />
 
   return (
     <>

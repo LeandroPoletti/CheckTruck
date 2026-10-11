@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { PageHeader, Carregando, ErroCarregamento } from '../components/Layout'
 import { Select } from '../components/ui/Form'
 import IntervalosDaGeracao from '../components/intervalos/IntervalosDaGeracao'
 import IntervalosDoCaminhao from '../components/intervalos/IntervalosDoCaminhao'
 import { geracaoService, tipoManutencaoService, intervaloVeiculoService } from '../services'
+import { useCarga } from '../hooks/useCarga'
 import { obterUsuario } from '../services/sessao'
 import { ehDonoDoSistema } from '../data/acesso'
 import { ordemDasGeracoes } from '../data/domain'
@@ -25,30 +26,16 @@ export default function Intervalos() {
   const [veiculoId, setVeiculoId] = useState(null)
 
   // Listas fixas da página: gerações (com fabricante e modelo), caminhões ativos e tipos de manutenção
-  const [dados, setDados] = useState(null)
-  const [erro, setErro] = useState(null)
-  const [versao, setVersao] = useState(0)
-
-  useEffect(() => {
-    let cancelado = false
+  const { dados, carregando, erro, tentarNovamente } = useCarga(() =>
     Promise.all([geracaoService.listar(), intervaloVeiculoService.listarVeiculos(), tipoManutencaoService.listar()])
       .then(([geracoes, veiculos, tipos]) => {
-        if (cancelado) return
         geracoes.sort(ordemDasGeracoes)
         tipos.sort((a, b) => a.componenteId - b.componenteId || a.nome.localeCompare(b.nome))
-        setDados({ geracoes, veiculos, tipos })
-      })
-      .catch((e) => { if (!cancelado) setErro(e.message) })
-    return () => { cancelado = true }
-  }, [versao])
+        return { geracoes, veiculos, tipos }
+      }))
 
-  function tentarNovamente() {
-    setErro(null)
-    setVersao((v) => v + 1)
-  }
-
-  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
-  if (!dados) return <Carregando />
+  if (carregando) return <Carregando />
+  if (erro) return <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />
 
   const { geracoes, veiculos, tipos } = dados
   const componentes = [...new Set(tipos.map((t) => t.componente))]

@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader, Card, Carregando, ErroCarregamento } from '../components/Layout'
+import { useCarga } from '../hooks/useCarga'
 import { StatusBadge, PlacaBadge } from '../components/ui/Badges'
 import { Button, Select, CampoBusca } from '../components/ui/Form'
 import { Plus } from 'lucide-react'
@@ -15,35 +16,12 @@ export default function Veiculos() {
   const usuario = obterUsuario()
   const podeCadastrar = pode(usuario, 'Veiculos')
   const autonomo = ehAutonomo(usuario) // sem motorista: é o próprio dono
-  const [veiculos, setVeiculos] = useState([])
-  const [carregando, setCarregando] = useState(true)
-  const [erro, setErro] = useState(null)
-  const [versao, setVersao] = useState(0)
+  // Uma request: a API devolve cada veículo com fabricante, modelo, geração, potência, motorista e situação já calculada
+  const { dados: veiculos = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => veiculoService.listarSituacao())
   const [busca, setBusca] = useState('')
   const [geracaoFiltro, setGeracaoFiltro] = useState('todas')
   const [statusFiltro, setStatusFiltro] = useState('ativos')
   const [novoOpen, setNovoOpen] = useState(false)
-
-  // Uma request: a API devolve cada veículo com fabricante, modelo, geração, potência, motorista e situação já calculada
-  useEffect(() => {
-    let cancelado = false
-    veiculoService.listarSituacao()
-      .then((lista) => { if (!cancelado) setVeiculos(lista) })
-      .catch((e) => { if (!cancelado) setErro(e.message) })
-      .finally(() => { if (!cancelado) setCarregando(false) })
-    return () => { cancelado = true }
-  }, [versao])
-
-  // Após salvar: atualiza em segundo plano, sem desmontar a tela (e os modais abertos)
-  function recarregar() {
-    setErro(null)
-    setVersao((v) => v + 1)
-  }
-
-  function tentarNovamente() {
-    setCarregando(true)
-    recarregar()
-  }
 
   const ativos = veiculos.filter((v) => v.ativo).length
   const inativos = veiculos.length - ativos
@@ -65,7 +43,7 @@ export default function Veiculos() {
   }, [veiculos, busca, geracaoFiltro, statusFiltro])
 
   if (carregando) return <Carregando />
-  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
+  if (erro) return <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />
 
   return (
     <>

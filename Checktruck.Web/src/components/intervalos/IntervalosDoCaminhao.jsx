@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Card, EmptyState, ErroCarregamento } from '../Layout'
 import { Select } from '../ui/Form'
 import { OrigemIntervaloBadge } from '../ui/Badges'
@@ -6,6 +6,7 @@ import AcoesLinha from '../ui/AcoesLinha'
 import IntervaloModal from '../modals/IntervaloModal'
 import ConfirmarExclusaoModal from '../modals/ConfirmarExclusaoModal'
 import { intervaloVeiculoService } from '../../services'
+import { useCarga } from '../../hooks/useCarga'
 import { formatKm, nomeDoCaminhao } from '../../data/domain'
 import { montarLinhas, daOrigem, oQueVoltaAValer, textoPrazo } from '../../data/intervalos'
 
@@ -14,32 +15,15 @@ import { montarLinhas, daOrigem, oQueVoltaAValer, textoPrazo } from '../../data/
 // tipos já vêm filtrados pelo componente escolhido na página.
 export default function IntervalosDoCaminhao({ veiculos, tipos, veiculoId, onVeiculo }) {
   const veiculo = veiculos.find((v) => v.id === veiculoId)
-  const [dados, setDados] = useState({ veiculoId: null, tabela: [] })
-  const [erro, setErro] = useState(null)
-  const [versao, setVersao] = useState(0)
+  // Tabela do caminhão (a API manda cada item com os intervalos na ordem em que valem), de novo depois de salvar
+  const { dados: tabela = [], carregando, erro, recarregar, tentarNovamente } =
+    useCarga(() => (veiculoId ? intervaloVeiculoService.tabela(veiculoId) : Promise.resolve([])), [veiculoId])
   const [modal, setModal] = useState(null) // linha da tabela enquanto o modal está aberto
   const [excluindo, setExcluindo] = useState(null)
 
-  // Tabela do caminhão (a API manda cada item com os intervalos na ordem em que valem), de novo depois de salvar
-  useEffect(() => {
-    if (!veiculoId) return
-    let cancelado = false
-    intervaloVeiculoService.tabela(veiculoId)
-      .then((tabela) => {
-        if (cancelado) return
-        setErro(null)
-        setDados({ veiculoId, tabela })
-      })
-      .catch((e) => { if (!cancelado) setErro(e.message) })
-    return () => { cancelado = true }
-  }, [veiculoId, versao])
-
-  const recarregar = () => setVersao((v) => v + 1)
-
   if (veiculos.length === 0) return <EmptyState title="Nenhum caminhão ativo" />
 
-  const carregado = dados.veiculoId === veiculoId
-  const linhas = carregado ? montarLinhas(tipos, dados.tabela) : []
+  const linhas = carregando ? [] : montarLinhas(tipos, tabela)
   const doCaminhao = (l) => daOrigem(l, 'caminhao')
 
   return (
@@ -48,7 +32,7 @@ export default function IntervalosDoCaminhao({ veiculos, tipos, veiculoId, onVei
         {veiculos.map((v) => <option key={v.id} value={v.id}>{v.placa} · {nomeDoCaminhao(v)} · {v.geracaoNome}</option>)}
       </Select>
 
-      {erro && <ErroCarregamento mensagem={erro} onTentarNovamente={recarregar} />}
+      {erro && <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />}
 
       <Card className="overflow-hidden">
         <table className="w-full text-sm">
@@ -62,7 +46,7 @@ export default function IntervalosDoCaminhao({ veiculos, tipos, veiculoId, onVei
             </tr>
           </thead>
           <tbody>
-            {!carregado && !erro && (
+            {carregando && (
               <tr><td colSpan={5} className="px-5 py-8 text-center text-sm text-stone-400">Carregando intervalos do caminhão…</td></tr>
             )}
             {linhas.map((l) => {

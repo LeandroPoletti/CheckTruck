@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
+import { useCarga } from '../hooks/useCarga'
 import { Button, CampoBusca } from '../components/ui/Form'
 import TipoManutencaoModal from '../components/modals/TipoManutencaoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
@@ -10,33 +11,10 @@ import { contemBusca } from '../data/domain'
 
 // Itens que o sistema acompanha nos caminhões (óleo do motor, filtro de ar...)
 export default function TiposManutencao() {
-  const [tipos, setTipos] = useState([])
-  const [carregando, setCarregando] = useState(true)
-  const [erro, setErro] = useState(null)
-  const [versao, setVersao] = useState(0)
+  const { dados: tipos = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => tipoManutencaoService.listar())
   const [busca, setBusca] = useState('')
   const [modal, setModal] = useState(null) // { registro } (null ao cadastrar) enquanto o modal está aberto
   const [excluindo, setExcluindo] = useState(null)
-
-  useEffect(() => {
-    let cancelado = false
-    tipoManutencaoService.listar()
-      .then((lista) => { if (!cancelado) setTipos(lista) })
-      .catch((e) => { if (!cancelado) setErro(e.message) })
-      .finally(() => { if (!cancelado) setCarregando(false) })
-    return () => { cancelado = true }
-  }, [versao])
-
-  // Após salvar/excluir: atualiza em segundo plano, sem desmontar a tela
-  function recarregar() {
-    setErro(null)
-    setVersao((v) => v + 1)
-  }
-
-  function tentarNovamente() {
-    setCarregando(true)
-    recarregar()
-  }
 
   const filtrados = useMemo(() => {
     return tipos
@@ -45,7 +23,7 @@ export default function TiposManutencao() {
   }, [tipos, busca])
 
   if (carregando) return <Carregando />
-  if (erro) return <ErroCarregamento mensagem={erro} onTentarNovamente={tentarNovamente} />
+  if (erro) return <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />
 
   return (
     <>

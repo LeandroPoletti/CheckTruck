@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Card, EmptyState, ErroCarregamento } from '../Layout'
 import { Select } from '../ui/Form'
 import { OrigemIntervaloBadge } from '../ui/Badges'
@@ -6,6 +6,7 @@ import AcoesLinha from '../ui/AcoesLinha'
 import IntervaloModal from '../modals/IntervaloModal'
 import ConfirmarExclusaoModal from '../modals/ConfirmarExclusaoModal'
 import { intervaloService } from '../../services'
+import { useCarga } from '../../hooks/useCarga'
 import { obterUsuario } from '../../services/sessao'
 import { ehDonoDoSistema } from '../../data/acesso'
 import { formatKm, nomeDoModelo, agruparPorModelo } from '../../data/domain'
@@ -17,32 +18,15 @@ import { montarLinhas, daOrigem, oQueVoltaAValer, textoPrazo } from '../../data/
 export default function IntervalosDaGeracao({ geracoes, tipos, geracaoId, onGeracao }) {
   const dono = ehDonoDoSistema(obterUsuario())
   const geracao = geracoes.find((g) => g.id === geracaoId)
-  const [dados, setDados] = useState({ geracaoId: null, tabela: [] })
-  const [erro, setErro] = useState(null)
-  const [versao, setVersao] = useState(0)
+  // Tabela da geração (a API manda cada item com os intervalos na ordem em que valem), de novo depois de salvar
+  const { dados: tabela = [], carregando, erro, recarregar, tentarNovamente } =
+    useCarga(() => (geracaoId ? intervaloService.tabela(geracaoId) : Promise.resolve([])), [geracaoId])
   const [modal, setModal] = useState(null) // linha da tabela enquanto o modal está aberto
   const [excluindo, setExcluindo] = useState(null)
 
-  // Tabela da geração (a API manda cada item com os intervalos na ordem em que valem), de novo depois de salvar
-  useEffect(() => {
-    if (!geracaoId) return
-    let cancelado = false
-    intervaloService.tabela(geracaoId)
-      .then((tabela) => {
-        if (cancelado) return
-        setErro(null)
-        setDados({ geracaoId, tabela })
-      })
-      .catch((e) => { if (!cancelado) setErro(e.message) })
-    return () => { cancelado = true }
-  }, [geracaoId, versao])
-
-  const recarregar = () => setVersao((v) => v + 1)
-
   if (geracoes.length === 0) return <EmptyState title="Nenhuma geração cadastrada" subtitle="Cadastre as gerações em Cadastros → Gerações." />
 
-  const carregado = dados.geracaoId === geracaoId
-  const linhas = carregado ? montarLinhas(tipos, dados.tabela) : []
+  const linhas = carregando ? [] : montarLinhas(tipos, tabela)
 
   // O intervalo que quem está logado cadastra e muda aqui: o de fábrica (dono do sistema) ou o da empresa
   const minhaOrigem = dono ? 'fabrica' : 'empresa'
@@ -58,7 +42,7 @@ export default function IntervalosDaGeracao({ geracoes, tipos, geracaoId, onGera
         ))}
       </Select>
 
-      {erro && <ErroCarregamento mensagem={erro} onTentarNovamente={recarregar} />}
+      {erro && <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />}
 
       <Card className="overflow-hidden">
         <table className="w-full text-sm">
@@ -73,7 +57,7 @@ export default function IntervalosDaGeracao({ geracoes, tipos, geracaoId, onGera
             </tr>
           </thead>
           <tbody>
-            {!carregado && !erro && (
+            {carregando && (
               <tr><td colSpan={6} className="px-5 py-8 text-center text-sm text-stone-400">Carregando intervalos da geração…</td></tr>
             )}
             {linhas.map((l) => {
