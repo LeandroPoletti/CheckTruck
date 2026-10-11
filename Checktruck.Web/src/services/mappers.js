@@ -196,7 +196,7 @@ export const veiculoToApi = (v) => ({
   potenciaId: toApiId(v.potenciaId),
   tracao: v.tracao,
   chassi: v.chassi,
-  renavam: v.renavam ?? '',
+  renavam: v.renavam || null, // opcional
   anoFabricacao: anoParaApi(v.anoFabricacao),
   anoModelo: anoParaApi(v.anoModelo),
   kmAtual: Number(v.kmAtual) || 0,

@@ -17,6 +17,7 @@ public class IntervaloVeiculoConfiguration : IEntityTypeConfiguration<IntervaloV
             .IsRequired().OnDelete(DeleteBehavior.Restrict);
         builder.Property(i => i.IntervaloKm).IsRequired();
         builder.Property(i => i.IntervaloMeses).IsRequired();
+        builder.Property(i => i.Observacao).HasMaxLength(500);
 
         // Um intervalo próprio por item em cada caminhão
         builder.HasIndex("VeiculoId", "TipoManutencaoId").IsUnique();

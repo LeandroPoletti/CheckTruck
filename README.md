@@ -149,8 +149,9 @@ Marcar Veículos, Atualizar km ou Ordem de serviço já liga o Ver frota.
 - **Alertas:** o item fica em atenção quando faltam 5.000 km ou 30 dias, e crítico quando vence.
 - **Valores aceitos:** nenhum número digitado pode ser negativo (km, intervalos, potência). Os anos vão de 1900
   (o primeiro caminhão é de 1896) até o ano que vem, e o ano modelo é o de fabricação ou o seguinte. A OS não
-  pode ter data no futuro, e atualizar o km só aceita um valor maior que o atual. A API valida tudo isso e a
-  tela avisa antes de enviar.
+  pode ter data no futuro, e atualizar o km só aceita um valor maior que o atual. Os textos têm tamanho máximo
+  (nomes até 100 ou 150 caracteres, observações até 500), nomes de país, fabricante e modelo não repetem, e o
+  Renavam é opcional (quando vem, tem 11 números). A API valida tudo isso e a tela avisa antes de enviar.
 - **Km do caminhão:** só sobe (cadastro, Atualizar km, OS e Editar veículo). Se alguém digitar errado (ex.: um
   zero a mais), Admin ou Gestor usam **Corrigir km** na tela do caminhão: pode baixar, mas não para menos que o
   km da maior OS, e o motivo é obrigatório. Toda mudança de km fica no **histórico de km** (quem, quando, de

@@ -22,7 +22,7 @@ public class ManutencaoConfiguration : IEntityTypeConfiguration<Manutencao>
         builder.HasOne(m => m.LancadoPor).WithMany()
             .HasForeignKey("LancadoPorId")
             .IsRequired(false).OnDelete(DeleteBehavior.Restrict);
-        builder.Property(m => m.Concessionaria).IsRequired(false);
-        builder.Property(m => m.Observacao).IsRequired(false);
+        builder.Property(m => m.Concessionaria).IsRequired(false).HasMaxLength(150);
+        builder.Property(m => m.Observacao).IsRequired(false).HasMaxLength(500);
     }
 }

@@ -9,8 +9,9 @@ public class VeiculoConfiguration : IEntityTypeConfiguration<Veiculo>
     public void Configure(EntityTypeBuilder<Veiculo> builder)
     {
         builder.HasKey(v => v.Id);
-        builder.Property(v => v.Placa).IsRequired();
+        builder.Property(v => v.Placa).IsRequired().HasMaxLength(8); // ABC-1D23
         builder.Property(v => v.Chassi).IsRequired().HasMaxLength(17);
+        builder.Property(v => v.Renavam).IsRequired(false).HasMaxLength(11);
 
         // Placa e chassi não repetem dentro da empresa (o caminhão vendido pode estar nas duas)
         builder.HasIndex(Context.ColunaEmpresa, nameof(Veiculo.Placa)).IsUnique();

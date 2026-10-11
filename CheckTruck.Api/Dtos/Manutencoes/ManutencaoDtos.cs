@@ -32,8 +32,10 @@ public class ManutencaoRequestDto
     /// <summary>Motorista que estava com o caminhão (id do acesso). Opcional; ao lançar, vira o motorista atual do caminhão.</summary>
     public string? MotoristaId { get; set; }
 
+    [MaxLength(500, ErrorMessage = "As observações podem ter até 500 caracteres.")]
     public string? Observacao { get; set; }
 
+    [MaxLength(150, ErrorMessage = "A concessionária ou oficina pode ter até 150 caracteres.")]
     public string? Concessionaria { get; set; }
 }
 

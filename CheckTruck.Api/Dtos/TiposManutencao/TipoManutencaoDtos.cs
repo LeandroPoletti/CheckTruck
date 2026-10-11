@@ -10,6 +10,7 @@ public class TipoManutencaoRequestDto
     [MaxLength(100, ErrorMessage = "O nome pode ter até 100 caracteres.")]
     public string Nome { get; set; }
 
+    [MaxLength(500, ErrorMessage = "A descrição pode ter até 500 caracteres.")]
     public string? Descricao { get; set; }
 
     /// <summary>Componente do caminhão: define o padrão seguro quando não há intervalo cadastrado.</summary>

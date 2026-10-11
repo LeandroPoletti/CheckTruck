@@ -16,7 +16,7 @@ public class ChamadoRequestDto
     public UrgenciaChamado? Urgencia { get; set; }
 
     [Required(ErrorMessage = "Conte o que aconteceu.")]
-    [StringLength(1000)]
+    [MaxLength(1000, ErrorMessage = "A descrição pode ter até 1000 caracteres.")]
     public string Descricao { get; set; } = "";
 }
 
@@ -30,7 +30,7 @@ public class AbrirChamadoRequestDto : ChamadoRequestDto
 public class ResolverChamadoRequestDto
 {
     [Required(ErrorMessage = "Conte o que foi feito.")]
-    [StringLength(1000)]
+    [MaxLength(1000, ErrorMessage = "O texto pode ter até 1000 caracteres.")]
     public string Solucao { get; set; } = "";
 }
 

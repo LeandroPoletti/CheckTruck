@@ -75,6 +75,7 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
     if (!form.placa) e.placa = 'Placa é obrigatória.'
     else if (!placaValida(form.placa)) e.placa = 'Placa inválida. Ex.: ABC-1234 ou ABC-1D23.'
     if (form.chassi.length !== 17) e.chassi = `${form.chassi.length} de 17 caracteres`
+    if (form.renavam && form.renavam.length !== 11) e.renavam = 'O Renavam tem 11 números.'
     // Ano modelo = ano de fabricação ou o seguinte (ex.: fabricado em 2019, modelo 2019 ou 2020)
     const anoFabricacao = Number(form.anoFabricacao)
     const anoModelo = Number(form.anoModelo)
@@ -97,7 +98,7 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
       tracao: form.tracao,
       placa: form.placa,
       chassi: form.chassi.trim(),
-      renavam: form.renavam.trim() || null,
+      renavam: form.renavam || null,
       anoFabricacao: Number(form.anoFabricacao),
       anoModelo: Number(form.anoModelo),
       kmAtual: Number(form.kmAtual || 0),
@@ -194,8 +195,8 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
             <Field label="Placa" required error={errors.placa}>
               <Input value={form.placa} onChange={(e) => set('placa', formatarPlaca(e.target.value))} placeholder="ABC-1D23" error={errors.placa} />
             </Field>
-            <Field label="Renavam">
-              <Input value={form.renavam} onChange={(e) => set('renavam', e.target.value)} placeholder="00912345678" />
+            <Field label="Renavam" error={errors.renavam}>
+              <Input value={form.renavam} onChange={(e) => set('renavam', e.target.value.replace(/\D/g, '').slice(0, 11))} placeholder="00912345678" error={errors.renavam} />
             </Field>
             <Field label="Chassi (17 caracteres)" required className="col-span-2" error={errors.chassi}>
               <Input value={form.chassi} onChange={(e) => set('chassi', e.target.value.toUpperCase())} placeholder="9BVR4X20DJE882301" error={errors.chassi} maxLength={17} />

@@ -37,6 +37,13 @@ public class ServicoVeiculo(
             entidade.Placa = placa;
         }
 
+        // Renavam é opcional; quando vem, são 11 números
+        entidade.Renavam = string.IsNullOrWhiteSpace(entidade.Renavam) ? null : entidade.Renavam.Trim();
+        if (entidade.Renavam is not null && (entidade.Renavam.Length != 11 || !entidade.Renavam.All(char.IsAsciiDigit)))
+        {
+            Mensagens.Add("O Renavam tem 11 números.");
+        }
+
         // A consulta só olha a empresa de quem está logado: em outra empresa a placa pode existir
         if (placa is not null && Query(v => v.Id != entidade.Id && v.Placa == placa).Any())
         {

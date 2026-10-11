@@ -5,7 +5,8 @@ namespace CheckTruck.Api.Dtos.Paises;
 
 public class PaisRequestDto
 {
-    [Required]
+    [Required(ErrorMessage = "Informe o nome do país.")]
+    [MaxLength(100, ErrorMessage = "O nome pode ter até 100 caracteres.")]
     public string Nome { get; set; }
 }
 
@@ -30,6 +31,6 @@ public static class PaisDtoExtensions
 
     public static Pais ToEntity(this PaisRequestDto dto) => new()
     {
-        Nome = dto.Nome
+        Nome = dto.Nome.Trim()
     };
 }

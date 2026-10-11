@@ -13,7 +13,8 @@ public class Veiculo : EntidadeDaEmpresa
     public Tracao Tracao { get; set; }
     [StringLength(17, MinimumLength = 17), Required]
     public string Chassi { get; set; }
-    public string Renavam { get; set; }
+    /// <summary>Opcional; quando tem, são 11 números.</summary>
+    public string? Renavam { get; set; }
     public DateTime AnoModelo { get; set; }
     public DateTime AnoFabricacao { get; set; }
     public int KmAtual { get; set; }

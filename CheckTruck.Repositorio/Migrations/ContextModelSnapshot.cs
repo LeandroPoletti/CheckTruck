@@ -206,7 +206,8 @@ namespace CheckTruck.Repositorio.Migrations
 
                     b.Property<string>("Fonte")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<long>("GeracaoId")
                         .HasColumnType("bigint");
@@ -222,7 +223,8 @@ namespace CheckTruck.Repositorio.Migrations
 
                     b.Property<string>("Observacao")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<long>("TipoManutencaoId")
                         .HasColumnType("bigint");
@@ -263,7 +265,8 @@ namespace CheckTruck.Repositorio.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Observacao")
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<long>("TipoManutencaoId")
                         .HasColumnType("bigint");
@@ -295,7 +298,8 @@ namespace CheckTruck.Repositorio.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Concessionaria")
-                        .HasColumnType("text");
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.Property<DateTime>("CriadoEm")
                         .HasColumnType("timestamp with time zone");
@@ -326,7 +330,8 @@ namespace CheckTruck.Repositorio.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Observacao")
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("RealizadoEm")
                         .HasColumnType("timestamp with time zone");
@@ -530,7 +535,8 @@ namespace CheckTruck.Repositorio.Migrations
 
                     b.Property<string>("Descricao")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<long?>("EmpresaId")
                         .IsConcurrencyToken()
@@ -670,14 +676,15 @@ namespace CheckTruck.Repositorio.Migrations
 
                     b.Property<string>("Placa")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
 
                     b.Property<long>("PotenciaId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Renavam")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(11)
+                        .HasColumnType("character varying(11)");
 
                     b.Property<int>("Tracao")
                         .HasColumnType("integer");

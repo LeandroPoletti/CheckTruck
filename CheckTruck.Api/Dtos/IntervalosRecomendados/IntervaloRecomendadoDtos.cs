@@ -23,7 +23,10 @@ public class IntervaloRecomendadoRequestDto
     [Range(0, 120, ErrorMessage = "O prazo vai de 0 a 120 meses (0 = só por km).")]
     public int IntervaloMeses { get; set; }
 
+    [MaxLength(200, ErrorMessage = "A fonte pode ter até 200 caracteres.")]
     public string? Fonte { get; set; }
+
+    [MaxLength(500, ErrorMessage = "A observação pode ter até 500 caracteres.")]
     public string? Observacao { get; set; }
 }
 

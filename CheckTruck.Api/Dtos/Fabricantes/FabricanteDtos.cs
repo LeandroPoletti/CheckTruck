@@ -6,7 +6,8 @@ namespace CheckTruck.Api.Dtos.Fabricantes;
 
 public class FabricanteRequestDto
 {
-    [Required]
+    [Required(ErrorMessage = "Informe o nome do fabricante.")]
+    [MaxLength(100, ErrorMessage = "O nome pode ter até 100 caracteres.")]
     public string Nome { get; set; }
 
     [Required]
@@ -36,7 +37,7 @@ public static class FabricanteDtoExtensions
 
     public static Fabricante ToEntity(this FabricanteRequestDto dto, Pais paisOrigem) => new()
     {
-        Nome = dto.Nome,
+        Nome = dto.Nome.Trim(),
         PaisOrigem = paisOrigem
     };
 }

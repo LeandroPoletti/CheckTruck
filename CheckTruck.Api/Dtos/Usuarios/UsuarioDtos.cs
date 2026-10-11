@@ -10,7 +10,7 @@ namespace CheckTruck.Api.Dtos.Usuarios;
 public class UsuarioRequestDto
 {
     [Required(ErrorMessage = "Informe o nome.")]
-    [StringLength(150)]
+    [MaxLength(150, ErrorMessage = "O nome pode ter até 150 caracteres.")]
     public string Nome { get; set; } = "";
 
     [Required(ErrorMessage = "Informe o e-mail.")]

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 namespace CheckTruck.Dominio.Servicos;
 
 /// <summary>
-/// Países de origem dos fabricantes. País com fabricante não pode ser excluído.
+/// Países de origem dos fabricantes. O nome não repete, e país com fabricante não pode ser excluído.
 /// O país do sistema só o dono do sistema muda (ver <see cref="ServicoCatalogo{T}"/>).
 /// </summary>
 public class ServicoPais(
@@ -14,6 +14,18 @@ public class ServicoPais(
     IUsuarioLogado usuarioLogado,
     ILogger<ServicoPais> logger) : ServicoCatalogo<Pais>(repositorioCrud, usuarioLogado, logger)
 {
+    /// <summary>Não repete o nome (contam o país do sistema e os da empresa).</summary>
+    public override bool Valida(Pais entidade)
+    {
+        var nome = entidade.Nome.ToLower();
+        if (Query(p => p.Id != entidade.Id && p.Nome.ToLower() == nome).Any())
+        {
+            Mensagens.Add("Já existe um país com esse nome.");
+        }
+
+        return base.Valida(entidade);
+    }
+
     protected override bool EmUso(long id)
     {
         var fabricantes = servicoFabricante.QueryTodasAsEmpresas(f => f.PaisOrigem.Id == id).Count();

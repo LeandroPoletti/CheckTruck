@@ -10,14 +10,14 @@ public class CriarContaRequestDto
     public TipoConta? TipoConta { get; set; }
 
     /// <summary>Só na Frota.</summary>
-    [StringLength(150)]
+    [MaxLength(150, ErrorMessage = "O nome da empresa pode ter até 150 caracteres.")]
     public string? NomeEmpresa { get; set; }
 
     /// <summary>Só na Frota. Com ou sem máscara; aceita o CNPJ com letras.</summary>
     public string? Cnpj { get; set; }
 
     [Required(ErrorMessage = "Informe o seu nome.")]
-    [StringLength(150)]
+    [MaxLength(150, ErrorMessage = "O nome pode ter até 150 caracteres.")]
     public string Nome { get; set; } = "";
 
     /// <summary>Com ou sem máscara.</summary>

@@ -16,6 +16,8 @@ public class IntervaloRecomendadoConfiguration : IEntityTypeConfiguration<Interv
         builder.Property(i => i.IntervaloKm).IsRequired();
         builder.Property(i => i.IntervaloKmPrimeira).IsRequired();
         builder.Property(i => i.IntervaloMeses).IsRequired();
+        builder.Property(i => i.Fonte).HasMaxLength(200);
+        builder.Property(i => i.Observacao).HasMaxLength(500);
 
         // Para cada geração e item: um de fábrica (do sistema, sem empresa) e um por empresa
         builder.HasIndex("GeracaoId", "TipoManutencaoId").IsUnique()
