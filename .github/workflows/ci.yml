@@ -1,0 +1,38 @@
+# A cada push na main e em todo pull request: compila a API, roda os testes e confere e compila o front.
+# Se algo quebrar, o GitHub marca o commit com um X vermelho.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  api:
+    name: API (build e testes)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet restore CheckTruck.slnx
+      - run: dotnet build CheckTruck.slnx --no-restore
+      - run: dotnet test CheckTruck.slnx --no-build
+
+  web:
+    name: Front (lint e build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Checktruck.Web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Checktruck.Web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
