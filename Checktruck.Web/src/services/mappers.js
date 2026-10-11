@@ -162,6 +162,8 @@ const itemSituacaoFromApi = (item) => ({
   kmProximaTroca: item.kmProximaTroca,
   kmRestante: item.kmRestante,
   percentualUsado: item.percentualUsado, // quanto do ciclo já foi rodado (0 a 100): a barra
+  intervaloKm: item.intervaloKm, // intervalo que vale para o item no caminhão
+  origemIntervalo: item.origemIntervalo, // de onde ele vem (ORIGENS_INTERVALO)
   margemAlertaKm: item.margemAlertaKm, // com quantos km faltando o item entra em atenção
   diasRestantes: item.diasRestantes,
   isPrimeiraTroca: item.isPrimeiraTroca,
@@ -217,40 +219,44 @@ export const registroKmFromApi = (dto) => ({
   registradoEm: dto.registradoEm,
 })
 
-// Ordem de serviço (o id é o número da OS)
-export const registroFromApi = (dto) => ({
+// Ordem de serviço (o id é o número da OS): o caminhão, o km e a data da troca, quem fez (um ou mais
+// mecânicos) e o que foi trocado (itens, cada um com a próxima troca dele)
+export const ordemServicoFromApi = (dto) => ({
   id: toId(dto.id),
   veiculoId: toId(dto.veiculo?.id),
   placa: dto.veiculo?.placa ?? null,
-  tipoId: toId(dto.tipoManutencao?.id),
-  tipoNome: dto.tipoManutencao?.nome ?? null,
-  mecanicoId: toId(dto.mecanico?.id),
-  mecanicoNome: dto.mecanico?.nome ?? null,
-  mecanicoFuncao: dto.mecanico?.funcao ?? null,
+  kmNaTroca: dto.kmAtual,
+  dataRealizacao: dataDaApi(dto.realizadoEm),
+  itens: dto.itens.map((i) => ({
+    tipoId: toId(i.tipoManutencao?.id),
+    tipoNome: i.tipoManutencao?.nome ?? null,
+    kmProximaTroca: i.kmProximaTroca,
+    dataProximaTroca: dataDaApi(i.dataProximaTroca),
+    isPrimeiraTroca: i.isPrimeiraTroca,
+  })),
+  mecanicos: dto.mecanicos.map((mc) => ({ id: toId(mc.id), nome: mc.nome, funcao: mc.funcao })),
   motoristaId: dto.motorista?.id ?? null,
   motoristaNome: dto.motorista?.nome ?? null,
-  kmNaTroca: dto.kmAtual,
-  kmProximaTroca: dto.kmProximaTroca,
-  dataRealizacao: dataDaApi(dto.realizadoEm),
-  dataProximaTroca: dataDaApi(dto.dataProximaTroca),
-  isPrimeiraTroca: dto.isPrimeiraTroca,
   concessionaria: dto.concessionaria,
   observacoes: dto.observacao,
   lancadoPorNome: dto.lancadoPor?.nome ?? null, // quem lançou a OS (OS antigas podem estar sem)
   lancadoEm: dto.lancadoEm, // data e hora do lançamento
 })
-export const registroToApi = (r) => ({
-  veiculoId: toApiId(r.veiculoId),
-  tipoManutencaoId: toApiId(r.tipoId),
-  mecanicoId: toApiId(r.mecanicoId),
-  motoristaId: r.motoristaId || null, // id do acesso (texto)
-  realizadoEm: dataParaApi(r.dataRealizacao),
-  dataProximaTroca: dataParaApi(r.dataProximaTroca),
-  kmAtual: Number(r.kmNaTroca) || 0,
-  kmProximaTroca: Number(r.kmProximaTroca) || 0,
-  isPrimeiraTroca: !!r.isPrimeiraTroca,
-  concessionaria: r.concessionaria ?? null,
-  observacao: r.observacoes ?? null,
+// Próxima troca de cada item (km 0 e data null): a API calcula pelo intervalo que vale
+export const ordemServicoToApi = (o) => ({
+  veiculoId: toApiId(o.veiculoId),
+  realizadoEm: dataParaApi(o.dataRealizacao),
+  kmAtual: Number(o.kmNaTroca) || 0,
+  itens: o.itens.map((i) => ({
+    tipoManutencaoId: toApiId(i.tipoId),
+    kmProximaTroca: 0,
+    dataProximaTroca: null,
+    isPrimeiraTroca: !!i.isPrimeiraTroca,
+  })),
+  mecanicoIds: o.mecanicoIds.map(toApiId),
+  motoristaId: o.motoristaId || null, // id do acesso (texto)
+  concessionaria: o.concessionaria ?? null,
+  observacao: o.observacoes ?? null,
 })
 
 // ---------------------------------------------------------------------------

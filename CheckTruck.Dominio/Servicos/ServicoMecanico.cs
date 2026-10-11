@@ -10,12 +10,12 @@ namespace CheckTruck.Dominio.Servicos;
 /// </summary>
 public class ServicoMecanico(
     IRepositorioCrud repositorioCrud,
-    ServicoCrud<Manutencao> servicoManutencao,
+    ServicoCrud<OrdemServico> servicoOrdemServico,
     ILogger<ServicoMecanico> logger) : ServicoCrud<Mecanico>(repositorioCrud, logger)
 {
     protected override bool EmUso(long id)
     {
-        var temOs = servicoManutencao.Query(m => m.Mecanico.Id == id).Any();
+        var temOs = servicoOrdemServico.Query(o => o.Mecanicos.Any(m => m.Id == id)).Any();
         if (temOs)
         {
             Mensagens.Add("Esse mecânico tem OS lançadas. Desative o cadastro em vez de excluir.");

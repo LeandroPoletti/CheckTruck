@@ -24,7 +24,8 @@ public class Context : IdentityUserContext<Usuario>
     public DbSet<Pais> Paises { get; set; }
     public DbSet<TipoManutencao> TiposManutencao { get; set; }
     public DbSet<Veiculo> Veiculos { get; set; }
-    public DbSet<Manutencao> Manutencoes { get; set; }
+    public DbSet<OrdemServico> OrdensServico { get; set; }
+    public DbSet<ItemOrdemServico> ItensOrdemServico { get; set; }
     public DbSet<IntervaloRecomendado> IntervalosRecomendados { get; set; }
     public DbSet<IntervaloVeiculo> IntervalosVeiculo { get; set; }
     public DbSet<RegistroKm> RegistrosKm { get; set; }
@@ -46,7 +47,8 @@ public class Context : IdentityUserContext<Usuario>
     {
         // Antes das configurações das tabelas: os índices de placa e chassi usam a coluna da empresa
         DaEmpresa<Veiculo>(builder);
-        DaEmpresa<Manutencao>(builder);
+        DaEmpresa<OrdemServico>(builder);
+        DaEmpresa<ItemOrdemServico>(builder);
         DaEmpresa<Chamado>(builder);
         DaEmpresa<Mecanico>(builder);
         DaEmpresa<IntervaloVeiculo>(builder);

@@ -12,7 +12,7 @@ namespace CheckTruck.Dominio.Servicos;
 /// </summary>
 public class ServicoTipoManutencao(
     IRepositorioCrud repositorioCrud,
-    ServicoCrud<Manutencao> servicoManutencao,
+    ServicoCrud<ItemOrdemServico> servicoItemOrdemServico,
     ServicoCrud<IntervaloRecomendado> servicoIntervaloGeracao,
     ServicoCrud<IntervaloVeiculo> servicoIntervaloVeiculo,
     IUsuarioLogado usuarioLogado,
@@ -43,7 +43,7 @@ public class ServicoTipoManutencao(
     /// <summary>O tipo do sistema é de todas as empresas: OS e intervalo de qualquer uma seguram a exclusão.</summary>
     protected override bool EmUso(long id)
     {
-        var emUso = servicoManutencao.QueryTodasAsEmpresas(m => m.TipoManutencao.Id == id).Any()
+        var emUso = servicoItemOrdemServico.QueryTodasAsEmpresas(i => i.TipoManutencao.Id == id).Any()
             || servicoIntervaloGeracao.QueryTodasAsEmpresas(i => i.TipoManutencao.Id == id).Any()
             || servicoIntervaloVeiculo.QueryTodasAsEmpresas(i => i.TipoManutencao.Id == id).Any();
         if (emUso)

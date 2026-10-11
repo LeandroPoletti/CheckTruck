@@ -153,21 +153,21 @@ public class ServicoSituacaoVeiculo(IRepositorioCrud repositorioCrud, ILogger<Se
         var tipos = CarregarTipos();
         var cadastrados = CarregarIntervalos(veiculoIds, geracaoIds);
 
-        // Última troca de cada item em cada veículo (a próxima troca já foi gravada nela — RN-07)
-        var ultimasTrocas = repositorioCrud.Query<Manutencao>(m => veiculoIds.Contains(m.Veiculo.Id))
-            .Select(m => new
+        // Última troca de cada item em cada veículo: o item da OS mais nova (a próxima troca já foi gravada nele — RN-07)
+        var ultimasTrocas = repositorioCrud.Query<ItemOrdemServico>(i => veiculoIds.Contains(i.OrdemServico.Veiculo.Id))
+            .Select(i => new
             {
-                m.Id,
-                VeiculoId = m.Veiculo.Id,
-                TipoId = m.TipoManutencao.Id,
-                m.RealizadoEm,
-                m.KmAtual,
-                m.KmProximaTroca,
-                m.DataProximaTroca,
+                OrdemServicoId = i.OrdemServico.Id,
+                VeiculoId = i.OrdemServico.Veiculo.Id,
+                TipoId = i.TipoManutencao.Id,
+                i.OrdemServico.RealizadoEm,
+                i.OrdemServico.KmAtual,
+                i.KmProximaTroca,
+                i.DataProximaTroca,
             })
             .ToList()
-            .GroupBy(m => (m.VeiculoId, m.TipoId))
-            .ToDictionary(g => g.Key, g => g.OrderByDescending(m => m.RealizadoEm).ThenByDescending(m => m.Id).First());
+            .GroupBy(i => (i.VeiculoId, i.TipoId))
+            .ToDictionary(g => g.Key, g => g.OrderByDescending(i => i.RealizadoEm).ThenByDescending(i => i.OrdemServicoId).First());
 
         // Km com que cada caminhão entrou no sistema: o menor km do histórico (o do cadastro, ou o corrigido
         // se o do cadastro estava errado). Caminhão sem histórico de km: o km atual.

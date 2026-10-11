@@ -27,7 +27,7 @@ modelBuilder.EntitySet<Modelo>("Modelo");
 modelBuilder.EntitySet<Geracao>("Geracao");
 modelBuilder.EntitySet<Pais>("Pais");
 modelBuilder.EntitySet<TipoManutencao>("TiposManutencao");
-modelBuilder.EntitySet<Manutencao>("Manutencao");
+modelBuilder.EntitySet<OrdemServico>("OrdemServico");
 modelBuilder.EntitySet<IntervaloRecomendado>("IntervaloRecomendado");
 modelBuilder.EntitySet<IntervaloVeiculo>("IntervaloVeiculo");
 modelBuilder.EntitySet<Mecanico>("Mecanico");
@@ -36,8 +36,8 @@ modelBuilder.EntitySet<Mecanico>("Mecanico");
 modelBuilder.EntityType<Veiculo>().Ignore(v => v.MotoristaAtual);
 // O histórico de km tem quem mudou (acesso) e sai por rota própria (GET api/Veiculo/{id}/historico-km)
 modelBuilder.EntityType<Veiculo>().Ignore(v => v.RegistrosKm);
-modelBuilder.EntityType<Manutencao>().Ignore(m => m.Motorista);
-modelBuilder.EntityType<Manutencao>().Ignore(m => m.LancadoPor);
+modelBuilder.EntityType<OrdemServico>().Ignore(o => o.Motorista);
+modelBuilder.EntityType<OrdemServico>().Ignore(o => o.LancadoPor);
 
 builder.Services.AddSingleton(modelBuilder.GetEdmModel());
 
@@ -90,7 +90,7 @@ builder.Services.AddScoped<IUsuarioLogado, UsuarioLogadoHttp>();
 builder.Services.AddScoped(typeof(ServicoCrud<>));
 builder.Services.AddScoped<ServicoVeiculo>();
 builder.Services.AddScoped<ServicoSituacaoVeiculo>();
-builder.Services.AddScoped<ServicoManutencao>();
+builder.Services.AddScoped<ServicoOrdemServico>();
 builder.Services.AddScoped<ServicoDashboard>();
 builder.Services.AddScoped<ServicoUsuario>();
 builder.Services.AddScoped<ServicoEmpresa>();

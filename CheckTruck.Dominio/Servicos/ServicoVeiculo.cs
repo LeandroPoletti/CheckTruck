@@ -13,7 +13,7 @@ namespace CheckTruck.Dominio.Servicos;
 /// </summary>
 public class ServicoVeiculo(
     IRepositorioCrud repositorioCrud,
-    ServicoCrud<Manutencao> servicoManutencao,
+    ServicoCrud<OrdemServico> servicoOrdemServico,
     IUsuarioLogado usuarioLogado,
     ILogger<ServicoVeiculo> logger) : ServicoCrud<Veiculo>(repositorioCrud, logger)
 {
@@ -142,9 +142,9 @@ public class ServicoVeiculo(
             return null;
         }
 
-        var maiorOs = servicoManutencao.Query(m => m.Veiculo.Id == veiculoId)
-            .OrderByDescending(m => m.KmAtual)
-            .Select(m => new { m.Id, m.KmAtual })
+        var maiorOs = servicoOrdemServico.Query(o => o.Veiculo.Id == veiculoId)
+            .OrderByDescending(o => o.KmAtual)
+            .Select(o => new { o.Id, o.KmAtual })
             .FirstOrDefault();
         if (maiorOs is not null && kmNovo < maiorOs.KmAtual)
         {
@@ -159,7 +159,7 @@ public class ServicoVeiculo(
 
     /// <summary>Registro do histórico de km. A OS (quando é ela que muda o km) liga o registro ao número da OS.</summary>
     public static RegistroKm NovoRegistroKm(int? kmAnterior, int kmNovo, OrigemKm origem, Usuario? registradoPor,
-        string? motivo = null, Manutencao? ordemServico = null) => new()
+        string? motivo = null, OrdemServico? ordemServico = null) => new()
     {
         KmAnterior = kmAnterior,
         KmNovo = kmNovo,

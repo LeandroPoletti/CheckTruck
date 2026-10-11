@@ -74,16 +74,9 @@ export function agruparPorModelo(geracoes) {
   return [...grupos]
 }
 
-export function getUltimoRegistro(veiculoId, tipoId, registros) {
-  const doTipo = registros
-    .filter((r) => r.veiculoId === veiculoId && r.tipoId === tipoId)
-    .sort((a, b) => new Date(b.dataRealizacao) - new Date(a.dataRealizacao))
-  return doTipo[0] || null
-}
-
-export function getHistoricoVeiculo(veiculoId, registros) {
-  return registros
-    .filter((r) => r.veiculoId === veiculoId)
+export function getHistoricoVeiculo(veiculoId, ordens) {
+  return ordens
+    .filter((os) => os.veiculoId === veiculoId)
     .sort((a, b) => new Date(b.dataRealizacao) - new Date(a.dataRealizacao))
 }
 

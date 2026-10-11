@@ -24,13 +24,13 @@ export const intervaloVeiculoService = {
     const { data } = await api.get('/api/IntervaloVeiculo/veiculos')
     return data.map(m.veiculoDoIntervaloFromApi)
   },
-  // Aba "Por caminhão" (e a dica da OS): cada item com os intervalos na ordem em que valem para o caminhão
+  // Aba "Por caminhão": cada item com os intervalos na ordem em que valem para o caminhão
   async tabela(veiculoId) {
     const { data } = await api.get(`/api/IntervaloVeiculo/tabela/${veiculoId}`)
     return data.map(m.intervalosDoItemFromApi)
   },
 }
-export const manutencaoService = criarCrud('Manutencao', { fromApi: m.registroFromApi, toApi: m.registroToApi })
+export const ordemServicoService = criarCrud('OrdemServico', { fromApi: m.ordemServicoFromApi, toApi: m.ordemServicoToApi })
 export const mecanicoService = criarCrud('Mecanico', { fromApi: m.mecanicoFromApi, toApi: m.mecanicoToApi })
 
 export const veiculoService = {

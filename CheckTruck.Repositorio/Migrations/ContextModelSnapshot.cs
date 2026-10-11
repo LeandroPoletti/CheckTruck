@@ -286,23 +286,13 @@ namespace CheckTruck.Repositorio.Migrations
                     b.ToTable("IntervalosVeiculo");
                 });
 
-            modelBuilder.Entity("CheckTruck.Dominio.Entidades.Manutencao", b =>
+            modelBuilder.Entity("CheckTruck.Dominio.Entidades.ItemOrdemServico", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime?>("AtualizadoEm")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Concessionaria")
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
-
-                    b.Property<DateTime>("CriadoEm")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("DataProximaTroca")
                         .HasColumnType("timestamp with time zone");
@@ -314,49 +304,25 @@ namespace CheckTruck.Repositorio.Migrations
                     b.Property<bool>("IsPrimeiraTroca")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("KmAtual")
-                        .HasColumnType("integer");
-
                     b.Property<int>("KmProximaTroca")
                         .HasColumnType("integer");
 
-                    b.Property<string>("LancadoPorId")
-                        .HasColumnType("text");
-
-                    b.Property<long>("MecanicoId")
+                    b.Property<long>("OrdemServicoId")
                         .HasColumnType("bigint");
-
-                    b.Property<string>("MotoristaId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Observacao")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<DateTime>("RealizadoEm")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<long>("TipoManutencaoId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("VeiculoId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
                     b.HasIndex("EmpresaId");
 
-                    b.HasIndex("LancadoPorId");
-
-                    b.HasIndex("MecanicoId");
-
-                    b.HasIndex("MotoristaId");
-
                     b.HasIndex("TipoManutencaoId");
 
-                    b.HasIndex("VeiculoId");
+                    b.HasIndex("OrdemServicoId", "TipoManutencaoId")
+                        .IsUnique();
 
-                    b.ToTable("Manutencoes");
+                    b.ToTable("ItensOrdemServico");
                 });
 
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.Mecanico", b =>
@@ -418,6 +384,60 @@ namespace CheckTruck.Repositorio.Migrations
                     b.HasIndex("FabricanteId");
 
                     b.ToTable("Modelos");
+                });
+
+            modelBuilder.Entity("CheckTruck.Dominio.Entidades.OrdemServico", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime?>("AtualizadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Concessionaria")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("EmpresaId")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("KmAtual")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("LancadoPorId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MotoristaId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Observacao")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("RealizadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("VeiculoId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmpresaId");
+
+                    b.HasIndex("LancadoPorId");
+
+                    b.HasIndex("MotoristaId");
+
+                    b.HasIndex("VeiculoId");
+
+                    b.ToTable("OrdensServico");
                 });
 
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.Pais", b =>
@@ -770,6 +790,21 @@ namespace CheckTruck.Repositorio.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("OrdemServicoMecanico", b =>
+                {
+                    b.Property<long>("MecanicoId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("OrdemServicoId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("MecanicoId", "OrdemServicoId");
+
+                    b.HasIndex("OrdemServicoId");
+
+                    b.ToTable("OrdemServicoMecanico");
+                });
+
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.Chamado", b =>
                 {
                     b.HasOne("CheckTruck.Dominio.Entidades.Usuario", "AbertoPor")
@@ -883,7 +918,7 @@ namespace CheckTruck.Repositorio.Migrations
                     b.Navigation("Veiculo");
                 });
 
-            modelBuilder.Entity("CheckTruck.Dominio.Entidades.Manutencao", b =>
+            modelBuilder.Entity("CheckTruck.Dominio.Entidades.ItemOrdemServico", b =>
                 {
                     b.HasOne("CheckTruck.Dominio.Entidades.Empresa", null)
                         .WithMany()
@@ -891,21 +926,11 @@ namespace CheckTruck.Repositorio.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("CheckTruck.Dominio.Entidades.Usuario", "LancadoPor")
-                        .WithMany()
-                        .HasForeignKey("LancadoPorId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("CheckTruck.Dominio.Entidades.Mecanico", "Mecanico")
-                        .WithMany()
-                        .HasForeignKey("MecanicoId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.HasOne("CheckTruck.Dominio.Entidades.OrdemServico", "OrdemServico")
+                        .WithMany("Itens")
+                        .HasForeignKey("OrdemServicoId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("CheckTruck.Dominio.Entidades.Usuario", "Motorista")
-                        .WithMany()
-                        .HasForeignKey("MotoristaId")
-                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("CheckTruck.Dominio.Entidades.TipoManutencao", "TipoManutencao")
                         .WithMany()
@@ -913,21 +938,9 @@ namespace CheckTruck.Repositorio.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("CheckTruck.Dominio.Entidades.Veiculo", "Veiculo")
-                        .WithMany("Manutencoes")
-                        .HasForeignKey("VeiculoId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("LancadoPor");
-
-                    b.Navigation("Mecanico");
-
-                    b.Navigation("Motorista");
+                    b.Navigation("OrdemServico");
 
                     b.Navigation("TipoManutencao");
-
-                    b.Navigation("Veiculo");
                 });
 
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.Mecanico", b =>
@@ -953,6 +966,37 @@ namespace CheckTruck.Repositorio.Migrations
                         .IsRequired();
 
                     b.Navigation("Fabricante");
+                });
+
+            modelBuilder.Entity("CheckTruck.Dominio.Entidades.OrdemServico", b =>
+                {
+                    b.HasOne("CheckTruck.Dominio.Entidades.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CheckTruck.Dominio.Entidades.Usuario", "LancadoPor")
+                        .WithMany()
+                        .HasForeignKey("LancadoPorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CheckTruck.Dominio.Entidades.Usuario", "Motorista")
+                        .WithMany()
+                        .HasForeignKey("MotoristaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CheckTruck.Dominio.Entidades.Veiculo", "Veiculo")
+                        .WithMany("OrdensServico")
+                        .HasForeignKey("VeiculoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("LancadoPor");
+
+                    b.Navigation("Motorista");
+
+                    b.Navigation("Veiculo");
                 });
 
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.Pais", b =>
@@ -987,7 +1031,7 @@ namespace CheckTruck.Repositorio.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("CheckTruck.Dominio.Entidades.Manutencao", "OrdemServico")
+                    b.HasOne("CheckTruck.Dominio.Entidades.OrdemServico", "OrdemServico")
                         .WithMany()
                         .HasForeignKey("OrdemServicoId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -1079,6 +1123,21 @@ namespace CheckTruck.Repositorio.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("OrdemServicoMecanico", b =>
+                {
+                    b.HasOne("CheckTruck.Dominio.Entidades.Mecanico", null)
+                        .WithMany()
+                        .HasForeignKey("MecanicoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CheckTruck.Dominio.Entidades.OrdemServico", null)
+                        .WithMany()
+                        .HasForeignKey("OrdemServicoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.Fabricante", b =>
                 {
                     b.Navigation("Modelos");
@@ -1094,6 +1153,11 @@ namespace CheckTruck.Repositorio.Migrations
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.Modelo", b =>
                 {
                     b.Navigation("Geracoes");
+                });
+
+            modelBuilder.Entity("CheckTruck.Dominio.Entidades.OrdemServico", b =>
+                {
+                    b.Navigation("Itens");
                 });
 
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.Pais", b =>
@@ -1113,7 +1177,7 @@ namespace CheckTruck.Repositorio.Migrations
 
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.Veiculo", b =>
                 {
-                    b.Navigation("Manutencoes");
+                    b.Navigation("OrdensServico");
 
                     b.Navigation("RegistrosKm");
                 });

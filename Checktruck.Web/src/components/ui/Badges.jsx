@@ -41,6 +41,11 @@ export function PlacaBadge({ placa, size = 'md' }) {
   )
 }
 
+// "1ª TROCA" ao lado do item trocado na OS (a troca de amaciamento)
+export function SeloPrimeiraTroca() {
+  return <span className="ml-2 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">1ª TROCA</span>
+}
+
 // urgencia e status: nomes dos enums UrgenciaChamado e StatusChamado da API
 const URGENCIA = {
   Alta: { label: 'URGENTE', cls: 'bg-red-50 text-red-700 border-red-300' },

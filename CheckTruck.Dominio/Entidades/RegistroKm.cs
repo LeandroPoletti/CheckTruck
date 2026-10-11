@@ -20,7 +20,7 @@ public class RegistroKm : EntidadeDaEmpresa
     /// <summary>Por que mudou. Obrigatório na correção.</summary>
     public string? Motivo { get; set; }
     /// <summary>OS que subiu o km. Fica null se a OS for excluída.</summary>
-    public Manutencao? OrdemServico { get; set; }
+    public OrdemServico? OrdemServico { get; set; }
     /// <summary>Quem estava logado quando o km mudou.</summary>
     public Usuario? RegistradoPor { get; set; }
     public DateTime RegistradoEm { get; set; } = DateTime.UtcNow;

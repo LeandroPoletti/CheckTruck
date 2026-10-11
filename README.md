@@ -143,8 +143,9 @@ Marcar Veículos, Atualizar km ou Ordem de serviço já liga o Ver frota.
 - **Caminhão:** a placa pode ser digitada de qualquer jeito (abc1d23, ABC 1D23...) e fica maiúscula e com hífen:
   ABC-1234 ou ABC-1D23 (fora desse padrão não entra). Caminhão não é excluído, porque as OS e o histórico de km
   dependem dele: quem não usa mais, desativa.
-- **Ordem de serviço:** o número é gerado em sequência. Se a OS não trouxer a próxima troca, o sistema
-  calcula pelo intervalo (km da troca + intervalo). O km da OS atualiza o km do caminhão quando é maior.
+- **Ordem de serviço:** o número é gerado em sequência. Uma OS tem um ou mais itens trocados (cada tipo uma
+  vez) e um ou mais mecânicos. Se a OS não trouxer a próxima troca de um item, o sistema calcula pelo
+  intervalo (km da troca + intervalo). O km da OS atualiza o km do caminhão quando é maior.
   O motorista informado vira o motorista atual do caminhão, e quem lançou fica gravado com data e hora.
 - **Chamado:** quem abre conta o problema (tipo, urgência e descrição). Se for Motorista, ele vira o
   motorista atual do caminhão. Quem atende resolve contando o que foi feito, e o chamado vai para Concluídos.

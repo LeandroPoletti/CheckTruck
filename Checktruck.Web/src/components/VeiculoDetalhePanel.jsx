@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
 import { Card } from './Layout'
-import { StatusBadge, PlacaBadge } from './ui/Badges'
+import { StatusBadge, PlacaBadge, SeloPrimeiraTroca } from './ui/Badges'
 import { BarraDeUso } from './ui/BarraDeUso'
 import {
   formatKm, formatData, formatDataHora, getHistoricoVeiculo, nomeDoCaminhao, textoDias, TRACOES, ORIGENS_KM,
@@ -23,12 +23,13 @@ export function VeiculoNaoEncontrado({ backTo }) {
 
 // Apresentacional: a página de detalhe carrega os dados e passa por props.
 // situacao = fabricante, modelo, geração e potência, mais o status geral e os itens já calculados pela API
-// (do mais urgente para o menos urgente). historicoKm = toda mudança de km, da mais nova para a mais velha.
-export default function VeiculoDetalhePanel({ veiculo, situacao, registros, historicoKm, backTo, actions }) {
+// (do mais urgente para o menos urgente). ordens = as OS do caminhão. historicoKm = toda mudança de km,
+// da mais nova para a mais velha.
+export default function VeiculoDetalhePanel({ veiculo, situacao, ordens, historicoKm, backTo, actions }) {
   const navigate = useNavigate()
   const autonomo = ehAutonomo(obterUsuario())
 
-  const historico = getHistoricoVeiculo(veiculo.id, registros)
+  const historico = getHistoricoVeiculo(veiculo.id, ordens)
   const detalhes = [
     situacao.geracaoNome,
     situacao.normaNome,
@@ -104,25 +105,28 @@ export default function VeiculoDetalhePanel({ veiculo, situacao, registros, hist
             <p className="py-6 text-center text-sm text-stone-400">Nenhuma manutenção registrada ainda.</p>
           ) : (
             <div className="max-h-[360px] space-y-4 overflow-y-auto pr-1">
-              {historico.map((r) => (
-                <div key={r.id} className="flex gap-3 border-b border-stone-100 pb-3 last:border-0">
+              {historico.map((os) => (
+                <div key={os.id} className="flex gap-3 border-b border-stone-100 pb-3 last:border-0">
                   <div className="w-14 shrink-0 text-xs leading-tight text-stone-400">
-                    {formatData(r.dataRealizacao)}
+                    {formatData(os.dataRealizacao)}
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-stone-800">
-                      {r.tipoNome}
-                      {r.isPrimeiraTroca && <span className="ml-2 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">1ª TROCA</span>}
-                    </p>
+                    {os.itens.map((i) => (
+                      <p key={i.tipoId} className="text-sm font-semibold text-stone-800">
+                        {i.tipoNome}
+                        {i.isPrimeiraTroca && <SeloPrimeiraTroca />}
+                        <span className="ml-2 text-xs font-normal text-stone-500">próx. {formatKm(i.kmProximaTroca)}</span>
+                      </p>
+                    ))}
                     <p className="text-xs text-stone-500">
-                      {formatKm(r.kmNaTroca)} → próx. {formatKm(r.kmProximaTroca)}
-                      {r.mecanicoNome && <> · {r.mecanicoNome}{r.mecanicoFuncao && ` (${r.mecanicoFuncao})`}</>}
-                      {r.concessionaria && <> · {r.concessionaria}</>}
+                      {formatKm(os.kmNaTroca)}
+                      {os.mecanicos.length > 0 && <> · {os.mecanicos.map((m) => `${m.nome}${m.funcao ? ` (${m.funcao})` : ''}`).join(', ')}</>}
+                      {os.concessionaria && <> · {os.concessionaria}</>}
                     </p>
                     <p className="text-xs text-stone-400">
-                      OS nº {r.id}
-                      {r.motoristaNome && <> · Motorista {r.motoristaNome}</>}
-                      {' · '}Lançada{r.lancadoPorNome && ` por ${r.lancadoPorNome}`} em {formatDataHora(r.lancadoEm)}
+                      OS nº {os.id}
+                      {os.motoristaNome && <> · Motorista {os.motoristaNome}</>}
+                      {' · '}Lançada{os.lancadoPorNome && ` por ${os.lancadoPorNome}`} em {formatDataHora(os.lancadoEm)}
                     </p>
                   </div>
                 </div>

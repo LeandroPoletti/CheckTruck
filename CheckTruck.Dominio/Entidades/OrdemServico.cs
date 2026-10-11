@@ -1,25 +1,23 @@
-﻿using System.ComponentModel.DataAnnotations;
-using CheckTruck.Dominio.Interfaces;
+﻿using CheckTruck.Dominio.Interfaces;
 
 namespace CheckTruck.Dominio.Entidades;
 
 /// <summary>
-/// Ordem de serviço lançada no sistema: o que foi trocado, por qual mecânico, com qual motorista e quem lançou.
+/// Ordem de serviço lançada no sistema: num dia e num km do caminhão, um ou mais mecânicos trocaram
+/// um ou mais itens. Cada item trocado, com a próxima troca dele, fica em <see cref="ItemOrdemServico"/>.
 /// </summary>
-public class Manutencao : EntidadeDaEmpresa
+public class OrdemServico : EntidadeDaEmpresa
 {
     /// <summary>Número da OS: o banco gera em sequência.</summary>
     public long Id { get; set; }
-    public Veiculo Veiculo { get; set; }
-    public TipoManutencao TipoManutencao { get; set; }
+    public Veiculo Veiculo { get; set; } = null!;
     public DateTime RealizadoEm { get; set; } = DateTime.UtcNow;
-    public DateTime? DataProximaTroca { get; set; }
+    /// <summary>Km do caminhão na troca.</summary>
     public int KmAtual { get; set; }
-    public int KmProximaTroca { get; set; }
-    public bool IsPrimeiraTroca { get; set; }
-    /// <summary>Mecânico que fez a troca (escolhido no cadastro de mecânicos).</summary>
-    [Required]
-    public Mecanico Mecanico { get; set; } = null!;
+    /// <summary>O que foi trocado: um item por tipo de manutenção.</summary>
+    public IList<ItemOrdemServico> Itens { get; set; } = new List<ItemOrdemServico>();
+    /// <summary>Quem fez as trocas (pelo menos um). Quem fez o quê, se precisar, vai na observação.</summary>
+    public IList<Mecanico> Mecanicos { get; set; } = new List<Mecanico>();
     /// <summary>Motorista que estava com o caminhão (opcional). Ao lançar a OS, ele vira o motorista atual do caminhão.</summary>
     public Usuario? Motorista { get; set; }
     public string? Observacao { get; set; }

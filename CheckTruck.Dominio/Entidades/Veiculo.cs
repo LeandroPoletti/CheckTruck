@@ -21,7 +21,7 @@ public class Veiculo : EntidadeDaEmpresa
     public bool Ativo { get; set; }
     /// <summary>Motorista que está com o caminhão agora (acesso com cargo Motorista). Opcional.</summary>
     public Usuario? MotoristaAtual { get; set; }
-    public IList<Manutencao> Manutencoes { get; set; } = new List<Manutencao>();
+    public IList<OrdemServico> OrdensServico { get; set; } = new List<OrdemServico>();
     /// <summary>Toda mudança de km: quem, quando, de quanto pra quanto e por quê.</summary>
     public IList<RegistroKm> RegistrosKm { get; set; } = new List<RegistroKm>();
 }

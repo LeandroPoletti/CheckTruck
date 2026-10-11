@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { PageHeader, Tabela, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
 import { Button, CampoBusca, Select } from '../components/ui/Form'
-import { PlacaBadge } from '../components/ui/Badges'
+import { PlacaBadge, SeloPrimeiraTroca } from '../components/ui/Badges'
 import AcoesLinha from '../components/ui/AcoesLinha'
 import OrdemServicoModal from '../components/modals/OrdemServicoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
-import { manutencaoService } from '../services'
+import { ordemServicoService } from '../services'
 import { useCarga } from '../hooks/useCarga'
 import { obterUsuario } from '../services/sessao'
 import { pode, ehAutonomo } from '../data/acesso'
@@ -21,7 +21,7 @@ export default function OrdensServico() {
   const podeMexer = pode(usuario, 'OrdemServico')
   const autonomo = ehAutonomo(usuario) // sem motorista: é o próprio dono
 
-  const { dados: ordens = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => manutencaoService.listar())
+  const { dados: ordens = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => ordemServicoService.listar())
   const [busca, setBusca] = useState('')
   const [tipo, setTipo] = useState('')
   const [modal, setModal] = useState(null) // { registro } (null ao lançar) enquanto o modal está aberto
@@ -29,13 +29,13 @@ export default function OrdensServico() {
 
   // Tipos que aparecem nas OS, para o filtro
   const tipos = useMemo(
-    () => [...new Map(ordens.map((o) => [o.tipoId, o.tipoNome])).entries()].sort((a, b) => a[1].localeCompare(b[1])),
+    () => [...new Map(ordens.flatMap((o) => o.itens).map((i) => [i.tipoId, i.tipoNome])).entries()].sort((a, b) => a[1].localeCompare(b[1])),
     [ordens],
   )
 
   const filtradas = useMemo(() => {
     return ordens
-      .filter((o) => !tipo || o.tipoId === tipo)
+      .filter((o) => !tipo || o.itens.some((i) => i.tipoId === tipo))
       .filter((o) => contemBusca(o.placa, busca) || o.id === busca.trim())
       .sort((a, b) => b.dataRealizacao.localeCompare(a.dataRealizacao) || Number(b.id) - Number(a.id))
   }, [ordens, busca, tipo])
@@ -65,7 +65,7 @@ export default function OrdensServico() {
           action={ordens.length === 0 && podeMexer && <Button onClick={() => setModal({ registro: null })}>Lançar OS</Button>}
         />
       ) : (
-        <Tabela colunas={['OS', 'CAMINHÃO', 'SERVIÇO', 'KM', 'MECÂNICO', 'LANÇADA', podeMexer && '']}>
+        <Tabela colunas={['OS', 'CAMINHÃO', 'SERVIÇO', 'KM', 'MECÂNICOS', 'LANÇADA', podeMexer && '']}>
           {filtradas.map((o) => (
             <tr key={o.id} className="align-top">
               <td className="px-5 py-3.5">
@@ -79,17 +79,17 @@ export default function OrdensServico() {
                 {!autonomo && <p className="mt-1 text-xs text-stone-400">{o.motoristaNome ?? 'Sem motorista'}</p>}
               </td>
               <td className="px-5 py-3.5">
-                <p className="font-medium text-stone-800">
-                  {o.tipoNome}
-                  {o.isPrimeiraTroca && <span className="ml-2 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">1ª TROCA</span>}
-                </p>
+                {o.itens.map((i) => (
+                  <p key={i.tipoId} className="font-medium text-stone-800">
+                    {i.tipoNome}
+                    {i.isPrimeiraTroca && <SeloPrimeiraTroca />}
+                    <span className="ml-2 text-xs font-normal text-stone-400">próx. {formatKm(i.kmProximaTroca)}</span>
+                  </p>
+                ))}
                 {o.concessionaria && <p className="text-xs text-stone-400">{o.concessionaria}</p>}
               </td>
-              <td className="px-5 py-3.5 text-stone-700">
-                <p>{formatKm(o.kmNaTroca)}</p>
-                <p className="text-xs text-stone-400">próx. {formatKm(o.kmProximaTroca)}</p>
-              </td>
-              <td className="px-5 py-3.5 text-stone-700">{o.mecanicoNome}</td>
+              <td className="px-5 py-3.5 text-stone-700">{formatKm(o.kmNaTroca)}</td>
+              <td className="px-5 py-3.5 text-stone-700">{o.mecanicos.map((m) => m.nome).join(', ')}</td>
               <td className="px-5 py-3.5">
                 <p className="text-stone-700">{o.lancadoPorNome ?? '—'}</p>
                 <p className="text-xs text-stone-400">{formatDataHora(o.lancadoEm)}</p>
@@ -109,9 +109,9 @@ export default function OrdensServico() {
         open={!!excluindo}
         onClose={() => setExcluindo(null)}
         titulo="Excluir ordem de serviço"
-        descricao={`Excluir a OS nº ${excluindo?.id} (${excluindo?.tipoNome}) do caminhão ${excluindo?.placa}? Ela sai do histórico e a próxima troca desse item volta a ser calculada pela OS anterior. Não dá para desfazer.`}
+        descricao={`Excluir a OS nº ${excluindo?.id} (${excluindo?.itens.map((i) => i.tipoNome).join(', ')}) do caminhão ${excluindo?.placa}? Ela sai do histórico e a próxima troca desses itens volta a ser calculada pela OS anterior. Não dá para desfazer.`}
         onConfirmar={async () => {
-          await manutencaoService.remover(excluindo.id)
+          await ordemServicoService.remover(excluindo.id)
           recarregar()
         }}
       />

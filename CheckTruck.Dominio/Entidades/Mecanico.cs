@@ -5,7 +5,7 @@ namespace CheckTruck.Dominio.Entidades;
 
 /// <summary>
 /// Mecânico que faz as trocas (ex.: "Marco Rueda" / "Borracheiro"). Cadastro simples, sem login:
-/// não tem ligação com os usuários que entram no sistema. Na OS, o mecânico é escolhido desta lista.
+/// não tem ligação com os usuários que entram no sistema. Na OS, os mecânicos são escolhidos desta lista.
 /// </summary>
 public class Mecanico : EntidadeDaEmpresa
 {
