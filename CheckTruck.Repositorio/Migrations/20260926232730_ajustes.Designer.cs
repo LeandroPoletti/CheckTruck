@@ -13,7 +13,7 @@ namespace CheckTruck.Repositorio.Migrations
 {
     [DbContext(typeof(Context))]
     [Migration("20260926232730_ajustes")]
-    partial class ajustes
+    partial class Ajustes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

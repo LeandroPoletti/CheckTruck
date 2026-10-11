@@ -5,25 +5,25 @@ namespace CheckTruck.Api.Dtos.Comuns;
 public class PaisResumoDto
 {
     public long Id { get; set; }
-    public string Nome { get; set; }
+    public string Nome { get; set; } = "";
 }
 
 public class FabricanteResumoDto
 {
     public long Id { get; set; }
-    public string Nome { get; set; }
+    public string Nome { get; set; } = "";
 }
 
 public class ModeloResumoDto
 {
     public long Id { get; set; }
-    public string Nome { get; set; }
+    public string Nome { get; set; } = "";
 }
 
 public class GeracaoResumoDto
 {
     public long Id { get; set; }
-    public string Nome { get; set; }
+    public string Nome { get; set; } = "";
 }
 
 public class PotenciaResumoDto
@@ -35,26 +35,26 @@ public class PotenciaResumoDto
 public class VeiculoResumoDto
 {
     public long Id { get; set; }
-    public string Placa { get; set; }
+    public string Placa { get; set; } = "";
 }
 
 public class UsuarioResumoDto
 {
-    public string Id { get; set; }
-    public string Nome { get; set; }
+    public string Id { get; set; } = "";
+    public string Nome { get; set; } = "";
 }
 
 public class MecanicoResumoDto
 {
     public long Id { get; set; }
-    public string Nome { get; set; }
-    public string Funcao { get; set; }
+    public string Nome { get; set; } = "";
+    public string Funcao { get; set; } = "";
 }
 
 public class TipoManutencaoResumoDto
 {
     public long Id { get; set; }
-    public string Nome { get; set; }
+    public string Nome { get; set; } = "";
 }
 
 public static class ResumoDtoExtensions

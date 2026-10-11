@@ -5,7 +5,7 @@
 namespace CheckTruck.Repositorio.Migrations
 {
     /// <inheritdoc />
-    public partial class ajustes : Migration
+    public partial class Ajustes : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

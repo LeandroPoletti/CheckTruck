@@ -14,9 +14,9 @@ public class Geracao : ItemDoCatalogo
     /// <summary>null = do catálogo do sistema; senão, a empresa que cadastrou (só ela vê).</summary>
     public long? EmpresaId { get; set; }
     [Required]
-    public string Nome { get; set; }
+    public string Nome { get; set; } = "";
     [Required]
-    public Modelo Modelo { get; set; }
+    public Modelo Modelo { get; set; } = null!;
     /// <summary>Primeiro ano-modelo vendido no Brasil.</summary>
     public int AnoInicio { get; set; }
     /// <summary>Último ano-modelo; null = ainda é vendida.</summary>

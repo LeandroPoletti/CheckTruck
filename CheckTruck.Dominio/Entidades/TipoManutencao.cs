@@ -9,8 +9,8 @@ public class TipoManutencao : ItemDoCatalogo
     /// <summary>null = do catálogo do sistema; senão, a empresa que cadastrou (só ela vê).</summary>
     public long? EmpresaId { get; set; }
     
-    public string Nome { get; set; }
-    public string Descricao { get; set; }
+    public string Nome { get; set; } = "";
+    public string Descricao { get; set; } = "";
     public Componente Componente { get; set; }
     public IList<IntervaloRecomendado> IntervaloRecomendados { get; set; } = new List<IntervaloRecomendado>();
 }

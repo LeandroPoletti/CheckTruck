@@ -37,13 +37,13 @@ public class IntervaloRecomendadoResponseDto
     /// <summary>Do catálogo do sistema (só o dono do sistema muda). false = da empresa de quem está logado.</summary>
     public bool DoSistema { get; set; }
 
-    public GeracaoResumoDto Geracao { get; set; }
-    public TipoManutencaoResumoDto TipoManutencao { get; set; }
+    public GeracaoResumoDto? Geracao { get; set; }
+    public TipoManutencaoResumoDto? TipoManutencao { get; set; }
     public int IntervaloKm { get; set; }
     public int IntervaloKmPrimeira { get; set; }
     public int IntervaloMeses { get; set; }
-    public string Fonte { get; set; }
-    public string Observacao { get; set; }
+    public string Fonte { get; set; } = "";
+    public string Observacao { get; set; } = "";
 }
 
 public static class IntervaloRecomendadoDtoExtensions

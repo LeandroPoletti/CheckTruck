@@ -10,8 +10,8 @@ public class Modelo : ItemDoCatalogo
     /// <summary>null = do catálogo do sistema; senão, a empresa que cadastrou (só ela vê).</summary>
     public long? EmpresaId { get; set; }
     [Required]
-    public string Nome { get; set; }
+    public string Nome { get; set; } = "";
     [Required]
-    public Fabricante Fabricante { get; set; }
+    public Fabricante Fabricante { get; set; } = null!;
     public IList<Geracao> Geracoes { get; set; } = new List<Geracao>();
 }

@@ -48,15 +48,15 @@ public class OrdemServicoResponseDto
 {
     /// <summary>Número da OS.</summary>
     public long Id { get; set; }
-    public VeiculoResumoDto Veiculo { get; set; }
+    public VeiculoResumoDto? Veiculo { get; set; }
     public DateTime RealizadoEm { get; set; }
     public int KmAtual { get; set; }
 
     /// <summary>O que foi trocado, cada item com a próxima troca dele.</summary>
-    public IList<ItemOrdemServicoResponseDto> Itens { get; set; }
+    public IList<ItemOrdemServicoResponseDto> Itens { get; set; } = [];
 
     /// <summary>Quem fez as trocas.</summary>
-    public IList<MecanicoResumoDto> Mecanicos { get; set; }
+    public IList<MecanicoResumoDto> Mecanicos { get; set; } = [];
 
     /// <summary>Motorista que estava com o caminhão.</summary>
     public UsuarioResumoDto? Motorista { get; set; }
@@ -76,7 +76,7 @@ public class OrdemServicoResponseDto
 public class ItemOrdemServicoResponseDto
 {
     public long Id { get; set; }
-    public TipoManutencaoResumoDto TipoManutencao { get; set; }
+    public TipoManutencaoResumoDto? TipoManutencao { get; set; }
     public int KmProximaTroca { get; set; }
     public DateTime? DataProximaTroca { get; set; }
     public bool IsPrimeiraTroca { get; set; }

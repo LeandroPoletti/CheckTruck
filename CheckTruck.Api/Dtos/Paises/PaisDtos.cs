@@ -7,7 +7,7 @@ public class PaisRequestDto
 {
     [Required(ErrorMessage = "Informe o nome do país.")]
     [MaxLength(100, ErrorMessage = "O nome pode ter até 100 caracteres.")]
-    public string Nome { get; set; }
+    public string Nome { get; set; } = "";
 }
 
 public class PaisResponseDto
@@ -17,7 +17,7 @@ public class PaisResponseDto
     /// <summary>Do catálogo do sistema (só o dono do sistema muda). false = da empresa de quem está logado.</summary>
     public bool DoSistema { get; set; }
 
-    public string Nome { get; set; }
+    public string Nome { get; set; } = "";
 }
 
 public static class PaisDtoExtensions

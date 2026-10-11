@@ -8,7 +8,7 @@ public class FabricanteRequestDto
 {
     [Required(ErrorMessage = "Informe o nome do fabricante.")]
     [MaxLength(100, ErrorMessage = "O nome pode ter até 100 caracteres.")]
-    public string Nome { get; set; }
+    public string Nome { get; set; } = "";
 
     [Required]
     public long PaisOrigemId { get; set; }
@@ -21,8 +21,8 @@ public class FabricanteResponseDto
     /// <summary>Do catálogo do sistema (só o dono do sistema muda). false = da empresa de quem está logado.</summary>
     public bool DoSistema { get; set; }
 
-    public string Nome { get; set; }
-    public PaisResumoDto PaisOrigem { get; set; }
+    public string Nome { get; set; } = "";
+    public PaisResumoDto? PaisOrigem { get; set; }
 }
 
 public static class FabricanteDtoExtensions

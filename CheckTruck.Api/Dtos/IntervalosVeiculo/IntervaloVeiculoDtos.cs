@@ -26,8 +26,8 @@ public class IntervaloVeiculoRequestDto
 public class IntervaloVeiculoResponseDto
 {
     public long Id { get; set; }
-    public VeiculoResumoDto Veiculo { get; set; }
-    public TipoManutencaoResumoDto TipoManutencao { get; set; }
+    public VeiculoResumoDto? Veiculo { get; set; }
+    public TipoManutencaoResumoDto? TipoManutencao { get; set; }
     public int IntervaloKm { get; set; }
     public int IntervaloMeses { get; set; }
     public string? Observacao { get; set; }

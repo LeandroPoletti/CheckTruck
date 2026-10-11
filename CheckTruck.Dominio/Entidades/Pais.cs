@@ -9,6 +9,6 @@ public class Pais : ItemDoCatalogo
     /// <summary>null = do catálogo do sistema; senão, a empresa que cadastrou (só ela vê).</summary>
     public long? EmpresaId { get; set; }
     [Required]
-    public string Nome { get; set; }
+    public string Nome { get; set; } = "";
     public IList<Fabricante> Fabricantes { get; set; } = new List<Fabricante>();
 }

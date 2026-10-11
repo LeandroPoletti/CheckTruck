@@ -7,21 +7,21 @@ namespace CheckTruck.Api.Dtos.Veiculos;
 public class VeiculoSituacaoResponseDto
 {
     public long Id { get; set; }
-    public string Placa { get; set; }
-    public string Chassi { get; set; }
+    public string Placa { get; set; } = "";
+    public string Chassi { get; set; } = "";
     public int KmAtual { get; set; }
     public bool Ativo { get; set; }
     public DateTime AnoFabricacao { get; set; }
     public DateTime AnoModelo { get; set; }
-    public string Fabricante { get; set; }
-    public ModeloResumoDto Modelo { get; set; }
-    public GeracaoSituacaoDto Geracao { get; set; }
+    public string Fabricante { get; set; } = "";
+    public ModeloResumoDto Modelo { get; set; } = null!;
+    public GeracaoSituacaoDto Geracao { get; set; } = null!;
     public int PotenciaCv { get; set; }
     public Tracao Tracao { get; set; }
     public UsuarioResumoDto? MotoristaAtual { get; set; }
 
     /// <summary>"ok", "atencao" ou "critico"</summary>
-    public string Status { get; set; }
+    public string Status { get; set; } = "";
 
     /// <summary>Item de manutenção mais urgente; null quando o veículo não tem itens.</summary>
     public ItemManutencaoDto? ItemMaisUrgente { get; set; }
@@ -36,7 +36,7 @@ public class VeiculoSituacaoResponseDto
 public class GeracaoSituacaoDto
 {
     public long Id { get; set; }
-    public string Nome { get; set; }
+    public string Nome { get; set; } = "";
     public NormaEmissao NormaEmissao { get; set; }
     public string? Motor { get; set; }
     public string? Caixa { get; set; }
@@ -45,14 +45,14 @@ public class GeracaoSituacaoDto
 public class ItemManutencaoDto
 {
     public long TipoManutencaoId { get; set; }
-    public string TipoManutencaoNome { get; set; }
+    public string TipoManutencaoNome { get; set; } = "";
 
     /// <summary>Intervalo usado no cálculo.</summary>
     public int IntervaloKm { get; set; }
     public int IntervaloMeses { get; set; }
 
     /// <summary>De onde veio o intervalo: "caminhao", "empresa", "fabrica" ou "padrao".</summary>
-    public string OrigemIntervalo { get; set; }
+    public string OrigemIntervalo { get; set; } = "";
 
     /// <summary>Última troca registrada; null quando não há histórico no sistema.</summary>
     public DateTime? UltimaTrocaEm { get; set; }
@@ -78,7 +78,7 @@ public class ItemManutencaoDto
     public bool IsPrimeiraTroca { get; set; }
 
     /// <summary>"ok", "atencao" ou "critico" — o pior entre km e data.</summary>
-    public string Status { get; set; }
+    public string Status { get; set; } = "";
 }
 
 public static class VeiculoSituacaoDtoExtensions

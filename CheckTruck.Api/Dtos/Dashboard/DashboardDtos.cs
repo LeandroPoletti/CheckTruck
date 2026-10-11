@@ -7,9 +7,9 @@ namespace CheckTruck.Api.Dtos.Dashboard;
 public class DashboardResponseDto
 {
     public int FrotaAtiva { get; set; }
-    public ContagemStatusDto Contagem { get; set; }
-    public IList<AlertaManutencaoDto> Alertas { get; set; }
-    public IList<FrotaPorGeracaoDto> FrotaPorGeracao { get; set; }
+    public ContagemStatusDto Contagem { get; set; } = null!;
+    public IList<AlertaManutencaoDto> Alertas { get; set; } = [];
+    public IList<FrotaPorGeracaoDto> FrotaPorGeracao { get; set; } = [];
 }
 
 /// <summary>Quantos itens (trocas acompanhadas) de toda a frota ativa estão em cada status.</summary>
@@ -23,25 +23,25 @@ public class ContagemStatusDto
 public class AlertaManutencaoDto
 {
     public long VeiculoId { get; set; }
-    public string Placa { get; set; }
+    public string Placa { get; set; } = "";
     public int KmAtual { get; set; }
-    public string FabricanteNome { get; set; }
-    public string ModeloNome { get; set; }
-    public string GeracaoNome { get; set; }
+    public string FabricanteNome { get; set; } = "";
+    public string ModeloNome { get; set; } = "";
+    public string GeracaoNome { get; set; } = "";
 
     /// <summary>"atencao" ou "critico": o pior entre os itens.</summary>
-    public string Status { get; set; }
+    public string Status { get; set; } = "";
 
     /// <summary>Itens em atenção ou crítico, do mais urgente para o menos urgente.</summary>
-    public IList<ItemManutencaoDto> Itens { get; set; }
+    public IList<ItemManutencaoDto> Itens { get; set; } = [];
 }
 
 public class FrotaPorGeracaoDto
 {
     public long GeracaoId { get; set; }
-    public string GeracaoNome { get; set; }
-    public string ModeloNome { get; set; }
-    public string FabricanteNome { get; set; }
+    public string GeracaoNome { get; set; } = "";
+    public string ModeloNome { get; set; } = "";
+    public string FabricanteNome { get; set; } = "";
     public int Quantidade { get; set; }
 }
 

@@ -9,7 +9,7 @@ public class VeiculoRequestDto
 {
     /// <summary>Pode vir de qualquer jeito (abc1d23, ABC-1D23): a API grava no formato ABC-1D23.</summary>
     [Required(ErrorMessage = "Informe a placa.")]
-    public string Placa { get; set; }
+    public string Placa { get; set; } = "";
 
     /// <summary>Potência do caminhão (da geração escolhida). Dela vêm a geração, o modelo e o fabricante.</summary>
     [Required]
@@ -19,7 +19,7 @@ public class VeiculoRequestDto
 
     [Required(ErrorMessage = "Informe o chassi.")]
     [StringLength(17, MinimumLength = 17, ErrorMessage = "O chassi tem 17 caracteres.")]
-    public string Chassi { get; set; }
+    public string Chassi { get; set; } = "";
 
     /// <summary>Opcional. Quando vem, tem 11 números.</summary>
     public string? Renavam { get; set; }
@@ -36,13 +36,13 @@ public class VeiculoRequestDto
 public class VeiculoResponseDto
 {
     public long Id { get; set; }
-    public string Placa { get; set; }
+    public string Placa { get; set; } = "";
     public FabricanteResumoDto? Fabricante { get; set; }
     public ModeloResumoDto? Modelo { get; set; }
     public GeracaoResumoDto? Geracao { get; set; }
     public PotenciaResumoDto? Potencia { get; set; }
     public Tracao Tracao { get; set; }
-    public string Chassi { get; set; }
+    public string Chassi { get; set; } = "";
     public string? Renavam { get; set; }
     public DateTime AnoModelo { get; set; }
     public DateTime AnoFabricacao { get; set; }

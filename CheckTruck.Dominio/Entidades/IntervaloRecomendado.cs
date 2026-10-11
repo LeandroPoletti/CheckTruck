@@ -10,13 +10,13 @@ public class IntervaloRecomendado : ItemDoCatalogo
     /// <summary>null = do catálogo do sistema; senão, a empresa que cadastrou (só ela vê).</summary>
     public long? EmpresaId { get; set; }
     [Required]
-    public Geracao Geracao { get; set; }
+    public Geracao Geracao { get; set; } = null!;
     [Required]
-    public TipoManutencao TipoManutencao { get; set; }
+    public TipoManutencao TipoManutencao { get; set; } = null!;
     public int IntervaloKm { get; set; }
     public int IntervaloKmPrimeira { get; set; }
     /// <summary>Prazo máximo entre trocas, em meses. 0 = vence só por km.</summary>
     public int IntervaloMeses { get; set; }
-    public string Fonte { get; set; }
-    public string Observacao { get; set; }
+    public string Fonte { get; set; } = "";
+    public string Observacao { get; set; } = "";
 }

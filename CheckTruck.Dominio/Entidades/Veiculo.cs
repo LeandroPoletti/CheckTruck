@@ -7,12 +7,12 @@ namespace CheckTruck.Dominio.Entidades;
 public class Veiculo : EntidadeDaEmpresa
 {
     public long Id { get; set; }
-    public string Placa { get; set; }
+    public string Placa { get; set; } = "";
     /// <summary>Potência do caminhão. Por ela se chega à geração, ao modelo e ao fabricante.</summary>
-    public Potencia Potencia { get; set; }
+    public Potencia Potencia { get; set; } = null!;
     public Tracao Tracao { get; set; }
     [StringLength(17, MinimumLength = 17), Required]
-    public string Chassi { get; set; }
+    public string Chassi { get; set; } = "";
     /// <summary>Opcional; quando tem, são 11 números.</summary>
     public string? Renavam { get; set; }
     public DateTime AnoModelo { get; set; }
