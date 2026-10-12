@@ -1,6 +1,6 @@
 import { StyleSheet, Text } from 'react-native'
 import { coresDoStatus, fontes } from '@/tema'
-import type { Status } from '@/servicos/motorista'
+import type { Status } from '@/servicos/caminhoes'
 
 // OK, Atenção ou Crítico, com a cor do status
 export default function EtiquetaStatus({ status }: { status: Status }) {

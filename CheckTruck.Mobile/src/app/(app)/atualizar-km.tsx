@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } fr
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useSessao } from '@/servicos/sessao'
-import { atualizarKm } from '@/servicos/motorista'
+import { atualizarKm } from '@/servicos/caminhoes'
 import { formatKm } from '@/dados/formato'
 import Botao from '@/componentes/Botao'
 import CabecalhoDoModal from '@/componentes/CabecalhoDoModal'
@@ -11,10 +11,11 @@ import Campo from '@/componentes/Campo'
 import MensagemErro from '@/componentes/MensagemErro'
 import { cores, fontes } from '@/tema'
 
-// O motorista digita o km do painel. O km só sobe; se o registrado está errado, quem corrige é o gestor no web.
+// Quem está com o caminhão (ou tem Atualizar km) digita o km do painel. O km só sobe; se o registrado está errado,
+// quem corrige é o gestor no web.
 export default function AtualizarKm() {
   const { id, placa, km } = useLocalSearchParams<{ id: string; placa: string; km: string }>()
-  const { chamar } = useSessao()
+  const { chamar, usuario } = useSessao()
   const kmAtual = Number(km)
   const [digitado, setDigitado] = useState('')
   const [erro, setErro] = useState('')
@@ -31,7 +32,7 @@ export default function AtualizarKm() {
     setSalvando(true)
     setErro('')
     try {
-      await atualizarKm(chamar, Number(id), kmNovo, kmAtual)
+      await atualizarKm(chamar, Number(id), kmNovo, kmAtual, usuario?.cargo === 'Motorista')
       router.back()
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Não foi possível salvar o km.')

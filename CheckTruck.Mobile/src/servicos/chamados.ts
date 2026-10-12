@@ -1,0 +1,31 @@
+import type { Chamar } from './sessao'
+
+// Chamados (só na conta Frota): quem está com o caminhão abre, quem tem Atender chamados atende e resolve.
+
+export type Chamado = {
+  id: number
+  veiculo: { id: number; placa: string }
+  tipo: string
+  urgencia: 'Baixa' | 'Media' | 'Alta'
+  descricao: string
+  status: 'Pendente' | 'Concluido'
+  abertoPor: { id: string; nome: string }
+  abertoEm: string
+  atendidoPor: { id: string; nome: string } | null
+  solucao: string | null
+  concluidoEm: string | null
+}
+
+/** Do mais novo para o mais velho. Quem só abre recebe os próprios; quem atende recebe todos. */
+export const listarChamados = (chamar: Chamar) => chamar<Chamado[]>('/api/Chamado')
+
+export const abrirChamado = (
+  chamar: Chamar,
+  dados: { veiculoId: number; tipo: string; urgencia: Chamado['urgencia']; descricao: string },
+) => chamar<Chamado>('/api/Chamado', { metodo: 'POST', corpo: { ...dados, descricao: dados.descricao.trim() } })
+
+/** Grava quem está cuidando. O chamado continua pendente. */
+export const atenderChamado = (chamar: Chamar, id: number) => chamar<Chamado>(`/api/Chamado/${id}/atender`, { metodo: 'POST' })
+
+export const resolverChamado = (chamar: Chamar, id: number, solucao: string) =>
+  chamar<Chamado>(`/api/Chamado/${id}/resolver`, { metodo: 'POST', corpo: { solucao: solucao.trim() } })

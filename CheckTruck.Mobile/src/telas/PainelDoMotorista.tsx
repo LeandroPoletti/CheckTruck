@@ -4,16 +4,16 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { router, useFocusEffect } from 'expo-router'
 import { Feather } from '@expo/vector-icons'
 import { useSessao, type Usuario } from '@/servicos/sessao'
-import { meusCaminhoes, meusChamados, type Caminhao, type Chamado, type ItemDeTroca } from '@/servicos/motorista'
-import { formatData, formatDataHora, formatKm, textoDias, textoKmRestante } from '@/dados/formato'
-import { nomeTipoOcorrencia, nomeUrgencia } from '@/dados/chamados'
-import BarraDeUso from '@/componentes/BarraDeUso'
+import { meusCaminhoes, type Caminhao } from '@/servicos/caminhoes'
+import { listarChamados, type Chamado } from '@/servicos/chamados'
 import Botao from '@/componentes/Botao'
-import EtiquetaStatus from '@/componentes/EtiquetaStatus'
+import CartaoDoCaminhao from '@/componentes/CartaoDoCaminhao'
+import CartaoDoChamado from '@/componentes/CartaoDoChamado'
+import ListaDeTrocas from '@/componentes/ListaDeTrocas'
 import MensagemErro from '@/componentes/MensagemErro'
-import Placa from '@/componentes/Placa'
+import ResumoDoStatus from '@/componentes/ResumoDoStatus'
 import Saudacao from '@/componentes/Saudacao'
-import { cores, coresDoStatus, fontes } from '@/tema'
+import { cores, fontes } from '@/tema'
 
 // Tela do motorista: o caminhão que está com ele (próximas trocas em km e data), atualizar o km e os chamados.
 // Recarrega sempre que a tela volta a aparecer (ex.: depois de atualizar o km) e ao puxar para baixo.
@@ -30,7 +30,7 @@ export default function PainelDoMotorista({ usuario }: { usuario: Usuario }) {
     try {
       const [lista, abertos] = await Promise.all([
         meusCaminhoes(chamar),
-        podeAbrirChamado ? meusChamados(chamar) : Promise.resolve([]),
+        podeAbrirChamado ? listarChamados(chamar) : Promise.resolve([]),
       ])
       setCaminhoes(lista)
       setChamados(abertos)
@@ -88,15 +88,11 @@ export default function PainelDoMotorista({ usuario }: { usuario: Usuario }) {
 
           {caminhao && (
             <>
-              <CartaoDoCaminhao caminhao={caminhao} />
-              <ResumoDoStatus caminhao={caminhao} />
+              <CartaoDoCaminhao caminhao={caminhao} podeAtualizarKm />
+              <ResumoDoStatus itens={caminhao.itens} doMotorista />
 
               <Text style={estilos.secao}>Próximas trocas</Text>
-              <View style={estilos.lista}>
-                {caminhao.itens.map((item, i) => (
-                  <LinhaDaTroca key={item.tipoManutencaoId} item={item} primeira={i === 0} />
-                ))}
-              </View>
+              <ListaDeTrocas itens={caminhao.itens} />
             </>
           )}
 
@@ -116,101 +112,6 @@ export default function PainelDoMotorista({ usuario }: { usuario: Usuario }) {
         </ScrollView>
       </View>
     </SafeAreaView>
-  )
-}
-
-function CartaoDoCaminhao({ caminhao }: { caminhao: Caminhao }) {
-  return (
-    <View style={estilos.cartao}>
-      <Placa placa={caminhao.placa} />
-      <View>
-        <Text style={estilos.modelo}>{caminhao.fabricante} {caminhao.modelo.nome}</Text>
-        <Text style={estilos.detalhe}>{caminhao.geracao.nome}, {caminhao.potenciaCv} cv</Text>
-      </View>
-      <View style={estilos.divisoria} />
-      <View>
-        <Text style={estilos.rotulo}>Km atual</Text>
-        <Text style={estilos.km}>{formatKm(caminhao.kmAtual)}</Text>
-      </View>
-      <Botao
-        titulo="Atualizar km"
-        icone="navigation"
-        onPress={() => router.push({
-          pathname: '/atualizar-km',
-          params: { id: caminhao.id, placa: caminhao.placa, km: caminhao.kmAtual },
-        })}
-      />
-    </View>
-  )
-}
-
-// Faixa com o resumo: quantas trocas venceram ou estão chegando
-function ResumoDoStatus({ caminhao }: { caminhao: Caminhao }) {
-  const vencidas = caminhao.itens.filter((i) => i.status === 'critico').length
-  const chegando = caminhao.itens.filter((i) => i.status === 'atencao').length
-  const status = vencidas > 0 ? 'critico' : chegando > 0 ? 'atencao' : 'ok'
-  const cor = coresDoStatus[status]
-  const [icone, titulo, texto] =
-    vencidas > 0
-      ? (['alert-octagon', `${vencidas} ${vencidas === 1 ? 'troca vencida' : 'trocas vencidas'}`, 'Fale com a oficina para fazer a troca.'] as const)
-      : chegando > 0
-        ? (['alert-triangle', `${chegando} ${chegando === 1 ? 'troca chegando' : 'trocas chegando'}`, 'Já dá para combinar com a oficina.'] as const)
-        : (['check-circle', 'Tudo em dia', 'Nenhuma troca perto de vencer.'] as const)
-
-  return (
-    <View style={[estilos.resumo, { backgroundColor: cor.fundo }]}>
-      <Feather name={icone} size={22} color={cor.texto} />
-      <View style={estilos.resumoTextos}>
-        <Text style={[estilos.resumoTitulo, { color: cor.texto }]}>{titulo}</Text>
-        <Text style={[estilos.resumoTexto, { color: cor.texto }]}>{texto}</Text>
-      </View>
-    </View>
-  )
-}
-
-function LinhaDaTroca({ item, primeira }: { item: ItemDeTroca; primeira: boolean }) {
-  const quando = [
-    `Próxima troca com ${formatKm(item.kmProximaTroca)}`,
-    item.dataProximaTroca && item.diasRestantes !== null
-      ? ` ou em ${formatData(item.dataProximaTroca)} (${textoDias(item.diasRestantes)})`
-      : '',
-    item.isPrimeiraTroca ? '. É a 1ª troca.' : '',
-  ].join('')
-
-  return (
-    <View style={[estilos.troca, !primeira && estilos.trocaComLinha]}>
-      <View style={estilos.trocaTopo}>
-        <Text style={estilos.trocaNome}>{item.tipoManutencaoNome}</Text>
-        <EtiquetaStatus status={item.status} />
-      </View>
-      <Text style={[estilos.trocaKm, item.status !== 'ok' && { color: coresDoStatus[item.status].texto }]}>
-        {textoKmRestante(item.kmRestante)}
-      </Text>
-      <BarraDeUso percentual={item.percentualUsado} status={item.status} />
-      <Text style={estilos.trocaQuando}>{quando}</Text>
-    </View>
-  )
-}
-
-function CartaoDoChamado({ chamado }: { chamado: Chamado }) {
-  const concluido = chamado.status === 'Concluido'
-  return (
-    <View style={estilos.chamado}>
-      <View style={estilos.trocaTopo}>
-        <Text style={estilos.trocaNome}>{nomeTipoOcorrencia(chamado.tipo)}</Text>
-        <Text style={[estilos.chamadoStatus, concluido ? estilos.chamadoConcluido : estilos.chamadoPendente]}>
-          {concluido ? 'Concluído' : 'Pendente'}
-        </Text>
-      </View>
-      <Text style={estilos.chamadoMeta}>
-        Aberto em {formatDataHora(chamado.abertoEm)}, urgência {nomeUrgencia(chamado.urgencia).toLowerCase()}
-      </Text>
-      <Text style={estilos.chamadoDescricao} numberOfLines={3}>{chamado.descricao}</Text>
-      {!concluido && chamado.atendidoPor && (
-        <Text style={estilos.chamadoNota}>{chamado.atendidoPor.nome} está cuidando.</Text>
-      )}
-      {concluido && chamado.solucao && <Text style={estilos.chamadoNota}>O que foi feito: {chamado.solucao}</Text>}
-    </View>
   )
 }
 
@@ -240,31 +141,8 @@ const estilos = StyleSheet.create({
   placaOpcaoTexto: { fontFamily: fontes.subtitulo, fontSize: 16, color: cores.texto, letterSpacing: 0.5 },
   placaOpcaoTextoEscolhida: { color: cores.branco },
   cartao: { backgroundColor: cores.branco, borderRadius: 20, padding: 20, gap: 14 },
-  modelo: { fontFamily: fontes.textoForte, fontSize: 17, color: cores.texto },
-  detalhe: { fontFamily: fontes.texto, fontSize: 14, color: cores.textoFraco, marginTop: 2 },
-  divisoria: { height: 1, backgroundColor: cores.borda },
-  rotulo: { fontFamily: fontes.textoMedio, fontSize: 13, color: cores.textoMedio },
-  km: { fontFamily: fontes.titulo, fontSize: 34, lineHeight: 38, color: cores.texto, marginTop: 2 },
-  resumo: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 16, padding: 16 },
-  resumoTextos: { flex: 1, gap: 2 },
-  resumoTitulo: { fontFamily: fontes.textoForte, fontSize: 15 },
-  resumoTexto: { fontFamily: fontes.texto, fontSize: 13 },
   secao: { fontFamily: fontes.subtitulo, fontSize: 22, color: cores.texto, marginTop: 6 },
-  lista: { backgroundColor: cores.branco, borderRadius: 20, paddingHorizontal: 16 },
-  troca: { paddingVertical: 16, gap: 8 },
-  trocaComLinha: { borderTopWidth: 1, borderTopColor: cores.borda },
-  trocaTopo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
-  trocaNome: { flex: 1, fontFamily: fontes.textoForte, fontSize: 15, color: cores.texto },
-  trocaKm: { fontFamily: fontes.textoMedio, fontSize: 14, color: cores.texto },
-  trocaQuando: { fontFamily: fontes.texto, fontSize: 13, lineHeight: 18, color: cores.textoFraco },
   vazio: { fontFamily: fontes.texto, fontSize: 14, color: cores.textoFraco, textAlign: 'center', paddingVertical: 8 },
-  chamado: { backgroundColor: cores.branco, borderRadius: 16, padding: 16, gap: 6 },
-  chamadoStatus: { fontFamily: fontes.textoForte, fontSize: 12, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 999, overflow: 'hidden' },
-  chamadoPendente: { color: coresDoStatus.atencao.texto, backgroundColor: coresDoStatus.atencao.fundo },
-  chamadoConcluido: { color: coresDoStatus.ok.texto, backgroundColor: coresDoStatus.ok.fundo },
-  chamadoMeta: { fontFamily: fontes.texto, fontSize: 12, color: cores.textoFraco },
-  chamadoDescricao: { fontFamily: fontes.texto, fontSize: 14, lineHeight: 20, color: cores.texto },
-  chamadoNota: { fontFamily: fontes.textoMedio, fontSize: 13, lineHeight: 18, color: cores.marca700 },
   iconeVazio: { width: 48, height: 48, borderRadius: 14, backgroundColor: cores.fundo, alignItems: 'center', justifyContent: 'center' },
   vazioTitulo: { fontFamily: fontes.subtitulo, fontSize: 22, color: cores.texto },
   vazioTexto: { fontFamily: fontes.texto, fontSize: 14, lineHeight: 20, color: cores.textoFraco },

@@ -8,7 +8,14 @@ import { cores, fontes } from '@/tema'
 
 type Recurso = { icone: keyof typeof Feather.glyphMap; titulo: string; descricao: string }
 
-// Tela inicial de quem ainda não tem as telas no app (mecânico, autônomo, gestão): mostra o que vem por aí.
+const DO_AUTONOMO: Recurso[] = [
+  { icone: 'truck', titulo: 'Seu caminhão', descricao: 'As próximas trocas, em km e em data' },
+  { icone: 'tool', titulo: 'Ordens de serviço', descricao: 'Lançar as trocas feitas na oficina' },
+  { icone: 'navigation', titulo: 'Atualizar o km', descricao: 'Sempre que rodar, sem precisar do computador' },
+]
+
+// Tela inicial de quem ainda não tem telas no app: o Autônomo vê o que vem por aí; na Frota, quem não tem
+// Ver frota nem Atender chamados é avisado de que o acesso dele é pelo site.
 export default function InicioProvisorio({ usuario }: { usuario: Usuario }) {
   const { sair } = useSessao()
 
@@ -17,52 +24,51 @@ export default function InicioProvisorio({ usuario }: { usuario: Usuario }) {
       <Saudacao usuario={usuario} />
 
       <ScrollView style={estilos.corpo} contentContainerStyle={estilos.conteudo}>
-        <Text style={estilos.secao}>No app você vai poder</Text>
-        <View style={estilos.lista}>
-          {recursos(usuario).map((r, i) => (
-            <View key={r.titulo} style={[estilos.item, i > 0 && estilos.itemComLinha]}>
-              <View style={estilos.iconeItem}>
-                <Feather name={r.icone} size={20} color={cores.marca700} />
-              </View>
-              <View style={estilos.textosItem}>
-                <Text style={estilos.tituloItem}>{r.titulo}</Text>
-                <Text style={estilos.descricaoItem}>{r.descricao}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-
-        <View style={estilos.aviso}>
-          <Feather name="clock" size={16} color={cores.textoFraco} />
-          <Text style={estilos.avisoTexto}>Essas telas chegam nas próximas versões do app.</Text>
-        </View>
-
+        {usuario.tipoConta === 'Autonomo' ? <OQueVemPorAi /> : <SoPeloSite />}
         <Botao titulo="Sair" tipo="discreto" icone="log-out" onPress={sair} />
       </ScrollView>
     </SafeAreaView>
   )
 }
 
-function recursos(usuario: Usuario): Recurso[] {
-  if (usuario.tipoConta === 'Autonomo') {
-    return [
-      { icone: 'truck', titulo: 'Seu caminhão', descricao: 'As próximas trocas, em km e em data' },
-      { icone: 'tool', titulo: 'Ordens de serviço', descricao: 'Lançar as trocas feitas na oficina' },
-      { icone: 'navigation', titulo: 'Atualizar o km', descricao: 'Sempre que rodar, sem precisar do computador' },
-    ]
-  }
-  if (usuario.cargo === 'Mecanico') {
-    return [
-      { icone: 'truck', titulo: 'Situação dos caminhões', descricao: 'O que vence primeiro em cada um' },
-      { icone: 'message-square', titulo: 'Chamados', descricao: 'Ver, atender e resolver' },
-      { icone: 'navigation', titulo: 'Atualizar o km', descricao: 'Direto do pátio' },
-    ]
-  }
-  return [
-    { icone: 'truck', titulo: 'Situação da frota', descricao: 'O que vence primeiro em cada caminhão' },
-    { icone: 'message-square', titulo: 'Chamados', descricao: 'Acompanhar o que os motoristas abriram' },
-    { icone: 'navigation', titulo: 'Atualizar o km', descricao: 'De qualquer lugar' },
-  ]
+function OQueVemPorAi() {
+  return (
+    <>
+      <Text style={estilos.secao}>No app você vai poder</Text>
+      <View style={estilos.lista}>
+        {DO_AUTONOMO.map((r, i) => (
+          <View key={r.titulo} style={[estilos.item, i > 0 && estilos.itemComLinha]}>
+            <View style={estilos.iconeItem}>
+              <Feather name={r.icone} size={20} color={cores.marca700} />
+            </View>
+            <View style={estilos.textosItem}>
+              <Text style={estilos.tituloItem}>{r.titulo}</Text>
+              <Text style={estilos.descricaoItem}>{r.descricao}</Text>
+            </View>
+          </View>
+        ))}
+      </View>
+
+      <View style={estilos.aviso}>
+        <Feather name="clock" size={16} color={cores.textoFraco} />
+        <Text style={estilos.avisoTexto}>Essas telas chegam nas próximas versões do app.</Text>
+      </View>
+    </>
+  )
+}
+
+function SoPeloSite() {
+  return (
+    <View style={estilos.cartao}>
+      <View style={estilos.iconeItem}>
+        <Feather name="monitor" size={20} color={cores.marca700} />
+      </View>
+      <Text style={estilos.secao}>Seu acesso é só pelo site</Text>
+      <Text style={estilos.descricaoItem}>
+        No app dá para ver a frota e atender chamados. Se você precisa disso, peça ao gestor para liberar em Acesso.
+      </Text>
+    </View>
+  )
 }
 
 const estilos = StyleSheet.create({
@@ -71,6 +77,7 @@ const estilos = StyleSheet.create({
   conteudo: { padding: 24, gap: 16 },
   secao: { fontFamily: fontes.subtitulo, fontSize: 22, color: cores.texto },
   lista: { backgroundColor: cores.branco, borderRadius: 20, paddingHorizontal: 16 },
+  cartao: { backgroundColor: cores.branco, borderRadius: 20, padding: 20, gap: 10 },
   item: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 16 },
   itemComLinha: { borderTopWidth: 1, borderTopColor: cores.borda },
   iconeItem: {

@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native'
 import { cores, coresDoStatus } from '@/tema'
-import type { Status } from '@/servicos/motorista'
+import type { Status } from '@/servicos/caminhoes'
 
 // Quanto do ciclo de troca já foi rodado (barra cheia = na hora de trocar), na cor do status. Igual à do web.
 export default function BarraDeUso({ percentual, status }: { percentual: number; status: Status }) {

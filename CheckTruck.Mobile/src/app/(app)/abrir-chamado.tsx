@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useSessao } from '@/servicos/sessao'
-import { abrirChamado, type Chamado } from '@/servicos/motorista'
+import { abrirChamado, type Chamado } from '@/servicos/chamados'
 import { TIPOS_OCORRENCIA, URGENCIAS } from '@/dados/chamados'
 import Botao from '@/componentes/Botao'
 import CabecalhoDoModal from '@/componentes/CabecalhoDoModal'
