@@ -108,8 +108,12 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference("/docs");
 }
-
-app.UseHttpsRedirection();
+else
+{
+    // Em desenvolvimento o app do celular fala com a API por http na rede (perfil "celular"), porque o
+    // certificado https de desenvolvimento só vale no PC. Fora do desenvolvimento, todo pedido vai para o https.
+    app.UseHttpsRedirection();
+}
 app.UseCors();
 
 app.UseAuthentication();

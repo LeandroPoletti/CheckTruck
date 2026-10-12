@@ -11,6 +11,7 @@ dos motoristas.
 | API | .NET 10 · ASP.NET Core · Entity Framework Core · ASP.NET Identity (token Bearer) · OData |
 | Banco | PostgreSQL |
 | Front | React 19 · Vite · Tailwind CSS 4 · React Router · axios |
+| App | React Native · Expo · TypeScript · Expo Router |
 
 ## Estrutura
 
@@ -19,6 +20,9 @@ CheckTruck.Api/         controllers, DTOs e filtros de acesso (quem pode o quê)
 CheckTruck.Dominio/     entidades, enums e as regras do negócio (serviços)
 CheckTruck.Repositorio/ Entity Framework: contexto, configuração das tabelas e migrations
 CheckTruck.Testes/      testes das regras do Dominio (xUnit), com um banco de mentira na memória
+CheckTruck.Mobile/      app do celular (Expo + TypeScript): mesma API e mesma conta do web
+  src/app/              telas (cada arquivo é uma rota do Expo Router)
+  src/servicos/         chamadas da API, sessão e onde o token fica guardado
 Checktruck.Web/         front (React)
   src/paginas.jsx       todas as telas: rota, item do menu e permissão
   src/pages/            uma tela por arquivo
@@ -27,7 +31,7 @@ Checktruck.Web/         front (React)
   src/hooks/useCarga.js carregar dados da API numa tela (carregando, erro, tentar de novo e recarregar)
   src/services/         chamadas da API e conversão dos dados
 compose.yaml            PostgreSQL (e Adminer) em Docker
-.github/workflows/      CI: a cada push na main, compila a API, roda os testes e passa lint e build no front
+.github/workflows/      CI: a cada push na main, compila a API, roda os testes, passa lint e build no front e confere o app
 ```
 
 Na API, o controller só traduz o pedido (acha pelo id o que veio, como o fabricante ou o caminhão) e devolve a
@@ -77,6 +81,30 @@ O front abre em `http://localhost:5173` e chama a API do endereço em `Checktruc
 ```bash
 dotnet test CheckTruck.slnx
 ```
+
+**5. App do celular** (pasta `CheckTruck.Mobile`)
+
+1. Instale o **Expo Go** no celular (Play Store ou App Store). O celular e o PC precisam estar na mesma rede.
+2. Rode a API com o perfil `celular`: ela atende o web em `https://localhost:7013` e o celular em
+   `http://IP-do-PC:5202`, ao mesmo tempo. Na primeira vez, o Windows pergunta se pode usar a rede: permita na
+   rede **privada**.
+
+   ```bash
+   dotnet run --project CheckTruck.Api --launch-profile celular
+   ```
+
+3. Na pasta `CheckTruck.Mobile`:
+
+   ```bash
+   npm install
+   npx expo start
+   ```
+
+4. Leia o QR code: no iPhone, com a câmera; no Android, pelo Expo Go.
+
+O app procura a API no mesmo PC que roda o `expo start`, na porta 5202 (o endereço aparece embaixo da tela de
+login). Para outro endereço (túnel ou servidor), crie `CheckTruck.Mobile/.env` com `EXPO_PUBLIC_API_URL=https://...`
+e rode `npx expo start --clear` (sem o `--clear`, o app continua com o endereço antigo).
 
 **Primeiro acesso:** a API cria dois logins. Troque as senhas fora do ambiente de desenvolvimento.
 
