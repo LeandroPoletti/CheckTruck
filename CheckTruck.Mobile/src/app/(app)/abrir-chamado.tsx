@@ -8,6 +8,7 @@ import { TIPOS_OCORRENCIA, URGENCIAS } from '@/dados/chamados'
 import Botao from '@/componentes/Botao'
 import CabecalhoDoModal from '@/componentes/CabecalhoDoModal'
 import Campo from '@/componentes/Campo'
+import Escolha from '@/componentes/Escolha'
 import MensagemErro from '@/componentes/MensagemErro'
 import { cores, fontes } from '@/tema'
 
@@ -49,19 +50,7 @@ export default function AbrirChamado() {
 
           <View style={estilos.grupo}>
             <Text style={estilos.rotulo}>O que está acontecendo?</Text>
-            <View style={estilos.opcoes}>
-              {TIPOS_OCORRENCIA.map((t) => (
-                <Pressable
-                  key={t.id}
-                  onPress={() => setTipo(t.id)}
-                  style={[estilos.opcao, tipo === t.id && estilos.opcaoEscolhida]}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected: tipo === t.id }}
-                >
-                  <Text style={[estilos.opcaoTexto, tipo === t.id && estilos.opcaoTextoEscolhida]}>{t.nome}</Text>
-                </Pressable>
-              ))}
-            </View>
+            <Escolha opcoes={TIPOS_OCORRENCIA} escolhidos={tipo ? [tipo] : []} aoTocar={setTipo} />
           </View>
 
           <View style={estilos.grupo}>
@@ -103,8 +92,6 @@ const estilos = StyleSheet.create({
   conteudo: { padding: 24, gap: 22 },
   grupo: { gap: 10 },
   rotulo: { fontFamily: fontes.textoMedio, fontSize: 13, color: cores.textoMedio },
-  opcoes: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  opcao: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 999, backgroundColor: cores.fundo },
   opcaoEscolhida: { backgroundColor: cores.marca700 },
   opcaoTexto: { fontFamily: fontes.textoMedio, fontSize: 14, color: cores.texto },
   opcaoTextoEscolhida: { color: cores.branco },

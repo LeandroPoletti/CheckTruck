@@ -9,6 +9,8 @@ export type ItemDeTroca = {
   tipoManutencaoId: number
   tipoManutencaoNome: string
   intervaloKm: number
+  /** De onde veio o intervalo usado no cálculo. */
+  origemIntervalo: 'caminhao' | 'empresa' | 'fabrica' | 'padrao'
   kmProximaTroca: number
   /** Negativo = já passou do km da troca. */
   kmRestante: number

@@ -12,13 +12,19 @@ type Props = {
   mostrarMotorista: boolean
   /** Quem leva o caminhão na oficina (motorista, autônomo) recebe "Fale com a oficina". */
   falarComOficina: boolean
+  podeLancarOS?: boolean
 }
 
 // Situação completa de um caminhão: o cartão com o km, o resumo das trocas e a lista das próximas trocas
-export default function SituacaoDoCaminhao({ caminhao, podeAtualizarKm, mostrarMotorista, falarComOficina }: Props) {
+export default function SituacaoDoCaminhao({ caminhao, podeAtualizarKm, mostrarMotorista, falarComOficina, podeLancarOS }: Props) {
   return (
     <>
-      <CartaoDoCaminhao caminhao={caminhao} podeAtualizarKm={podeAtualizarKm} mostrarMotorista={mostrarMotorista} />
+      <CartaoDoCaminhao
+        caminhao={caminhao}
+        podeAtualizarKm={podeAtualizarKm}
+        mostrarMotorista={mostrarMotorista}
+        podeLancarOS={podeLancarOS}
+      />
       <ResumoDoStatus itens={caminhao.itens} falarComOficina={falarComOficina} />
 
       <Text style={estilos.secao}>Próximas trocas</Text>

@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { router } from 'expo-router'
 import { Feather } from '@expo/vector-icons'
 import type { CaminhaoNaLista, ItemDeTroca, Status } from '@/servicos/caminhoes'
 import { formatKm, textoDias, textoKmRestante } from '@/dados/formato'
+import CampoDeBusca from '@/componentes/CampoDeBusca'
 import EtiquetaStatus from '@/componentes/EtiquetaStatus'
 import Placa from '@/componentes/Placa'
 import { cores, coresDoStatus, fontes } from '@/tema'
@@ -67,24 +68,11 @@ export default function CaminhoesDaFrota({ caminhoes, mostrarMotorista }: Props)
 
   return (
     <>
-      <View style={estilos.busca}>
-        <Feather name="search" size={18} color={cores.textoFraco} />
-        <TextInput
-          value={busca}
-          onChangeText={setBusca}
-          placeholder={mostrarMotorista ? 'Buscar por placa, modelo ou motorista' : 'Buscar por placa ou modelo'}
-          placeholderTextColor={cores.textoFraco}
-          autoCapitalize="characters"
-          autoCorrect={false}
-          returnKeyType="search"
-          style={estilos.buscaEntrada}
-        />
-        {busca !== '' && (
-          <Pressable onPress={() => setBusca('')} hitSlop={12} accessibilityRole="button" accessibilityLabel="Limpar busca">
-            <Feather name="x-circle" size={18} color={cores.textoFraco} />
-          </Pressable>
-        )}
-      </View>
+      <CampoDeBusca
+        valor={busca}
+        aoMudar={setBusca}
+        placeholder={mostrarMotorista ? 'Buscar por placa, modelo ou motorista' : 'Buscar por placa ou modelo'}
+      />
 
       <View style={estilos.filtros}>
         {FILTROS.map((f) => (
@@ -148,16 +136,6 @@ function CartaoNaLista({ caminhao, mostrarMotorista }: { caminhao: CaminhaoNaLis
 }
 
 const estilos = StyleSheet.create({
-  busca: {
-    minHeight: 50,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    borderRadius: 14,
-    backgroundColor: cores.branco,
-    paddingHorizontal: 14,
-  },
-  buscaEntrada: { flex: 1, minHeight: 48, fontFamily: fontes.texto, fontSize: 15, color: cores.texto },
   filtros: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   filtro: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: cores.branco, borderWidth: 1, borderColor: cores.borda },
   filtroEscolhido: { backgroundColor: cores.marca700, borderColor: cores.marca700 },

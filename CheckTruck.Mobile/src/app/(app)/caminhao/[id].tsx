@@ -11,7 +11,7 @@ import MensagemErro from '@/componentes/MensagemErro'
 import SituacaoDoCaminhao from '@/componentes/SituacaoDoCaminhao'
 import { cores, fontes } from '@/tema'
 
-// Situação completa de um caminhão (a mesma do detalhe no web), com Atualizar km para quem tem a permissão.
+// Situação completa de um caminhão (a mesma do detalhe no web), com Atualizar km e Lançar OS para quem tem a permissão.
 // O Autônomo não tem motorista: para ele, o cartão não fala de motorista e o resumo manda falar com a oficina.
 // Recarrega ao voltar para a tela (ex.: depois de atualizar o km) e ao puxar para baixo.
 export default function DetalheDoCaminhao() {
@@ -69,6 +69,7 @@ export default function DetalheDoCaminhao() {
               podeAtualizarKm={!!usuario?.permissoes.includes('AtualizarKm')}
               mostrarMotorista={!autonomo}
               falarComOficina={autonomo}
+              podeLancarOS={!!usuario?.permissoes.includes('OrdemServico')}
             />
           )}
         </ScrollView>

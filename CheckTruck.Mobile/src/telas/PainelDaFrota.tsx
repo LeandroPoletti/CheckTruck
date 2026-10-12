@@ -5,19 +5,21 @@ import { useFocusEffect } from 'expo-router'
 import { useSessao, type Usuario } from '@/servicos/sessao'
 import { caminhoesDaFrota, situacaoDoCaminhao, type Caminhao, type CaminhaoNaLista } from '@/servicos/caminhoes'
 import { listarChamados, type Chamado } from '@/servicos/chamados'
+import { listarOrdens, type OrdemDeServico } from '@/servicos/ordens'
 import Botao from '@/componentes/Botao'
 import MensagemErro from '@/componentes/MensagemErro'
 import Saudacao from '@/componentes/Saudacao'
 import SituacaoDoCaminhao from '@/componentes/SituacaoDoCaminhao'
 import CaminhoesDaFrota from './CaminhoesDaFrota'
 import ChamadosDaFrota from './ChamadosDaFrota'
+import OrdensDaFrota from './OrdensDaFrota'
 import { cores, coresDoStatus, fontes } from '@/tema'
 
-type Aba = 'caminhoes' | 'chamados'
+type Aba = 'caminhoes' | 'chamados' | 'ordens'
 
 // Tela de quem cuida da frota (mecânico, chefe de manutenção, gestor...) e do Autônomo. Mostra o que o acesso libera,
-// igual ao web: Ver frota mostra os caminhões e Atender chamados (só na Frota) mostra os chamados. Com os dois, troca
-// nas abas de cima. O Autônomo com um caminhão só já vê a situação dele, sem a lista.
+// igual ao web: Ver frota mostra os caminhões e as ordens de serviço, e Atender chamados (só na Frota) mostra os
+// chamados. Com mais de uma, troca nas abas de cima. O Autônomo com um caminhão só já vê a situação dele, sem a lista.
 // Recarrega sempre que a tela volta a aparecer (ex.: depois de resolver um chamado) e ao puxar para baixo.
 export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
   const { chamar, sair } = useSessao()
@@ -28,19 +30,22 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
   const [caminhoes, setCaminhoes] = useState<CaminhaoNaLista[] | null>(null)
   const [unico, setUnico] = useState<Caminhao | null>(null)
   const [chamados, setChamados] = useState<Chamado[] | null>(null)
+  const [ordens, setOrdens] = useState<OrdemDeServico[] | null>(null)
   const [erro, setErro] = useState('')
   const [puxando, setPuxando] = useState(false)
 
   const carregar = useCallback(async () => {
     try {
-      const [frota, lista] = await Promise.all([
+      const [frota, lista, os] = await Promise.all([
         verFrota ? caminhoesDaFrota(chamar) : Promise.resolve([]),
         atender ? listarChamados(chamar) : Promise.resolve([]),
+        verFrota ? listarOrdens(chamar) : Promise.resolve([]),
       ])
       const so = autonomo && frota.length === 1 ? await situacaoDoCaminhao(chamar, frota[0].id) : null
       setCaminhoes(frota)
       setUnico(so)
       setChamados(lista)
+      setOrdens(os)
       setErro('')
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Não foi possível carregar.')
@@ -56,6 +61,11 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
   }
 
   const pendentes = chamados?.filter((c) => c.status === 'Pendente').length ?? 0
+  const abas: PropsDaAba[] = [
+    ...(verFrota ? [{ id: 'caminhoes' as const, titulo: unico ? 'Caminhão' : 'Caminhões' }] : []),
+    ...(atender ? [{ id: 'chamados' as const, titulo: 'Chamados', contador: pendentes }] : []),
+    ...(verFrota ? [{ id: 'ordens' as const, titulo: 'OS' }] : []),
+  ]
 
   return (
     <SafeAreaView edges={['top']} style={estilos.tela}>
@@ -67,10 +77,9 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
           keyboardShouldPersistTaps="handled"
           refreshControl={<RefreshControl refreshing={puxando} onRefresh={puxarParaAtualizar} tintColor={cores.marca700} />}
         >
-          {verFrota && atender && (
+          {abas.length > 1 && (
             <View style={estilos.abas} accessibilityRole="tablist">
-              <BotaoDaAba titulo="Caminhões" escolhida={aba === 'caminhoes'} onPress={() => setAba('caminhoes')} />
-              <BotaoDaAba titulo="Chamados" contador={pendentes} escolhida={aba === 'chamados'} onPress={() => setAba('chamados')} />
+              {abas.map((a) => <BotaoDaAba key={a.id} {...a} escolhida={aba === a.id} aoEscolher={setAba} />)}
             </View>
           )}
 
@@ -81,7 +90,7 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
             </View>
           )}
 
-          {(caminhoes === null || chamados === null) && erro === '' && (
+          {(caminhoes === null || chamados === null || ordens === null) && erro === '' && (
             <ActivityIndicator style={estilos.carregando} color={cores.marca700} />
           )}
 
@@ -91,6 +100,7 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
               podeAtualizarKm={usuario.permissoes.includes('AtualizarKm')}
               mostrarMotorista={false}
               falarComOficina
+              podeLancarOS={usuario.permissoes.includes('OrdemServico')}
             />
           ) : (
             <CaminhoesDaFrota caminhoes={caminhoes} mostrarMotorista={!autonomo} />
@@ -98,18 +108,19 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
           {aba === 'chamados' && chamados && (
             <ChamadosDaFrota chamados={chamados} usuario={usuario} aoMudar={carregar} />
           )}
+          {aba === 'ordens' && ordens && <OrdensDaFrota ordens={ordens} usuario={usuario} />}
         </ScrollView>
       </View>
     </SafeAreaView>
   )
 }
 
-type PropsDaAba = { titulo: string; contador?: number; escolhida: boolean; onPress(): void }
+type PropsDaAba = { id: Aba; titulo: string; contador?: number }
 
-function BotaoDaAba({ titulo, contador = 0, escolhida, onPress }: PropsDaAba) {
+function BotaoDaAba({ id, titulo, contador = 0, escolhida, aoEscolher }: PropsDaAba & { escolhida: boolean; aoEscolher(id: Aba): void }) {
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => aoEscolher(id)}
       style={[estilos.aba, escolhida && estilos.abaEscolhida]}
       accessibilityRole="tab"
       accessibilityState={{ selected: escolhida }}
