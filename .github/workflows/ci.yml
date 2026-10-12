@@ -1,4 +1,4 @@
-# A cada push na main e em todo pull request: compila a API, roda os testes e confere e compila o front.
+# A cada push na main e em todo pull request: compila a API, roda os testes, confere e compila o front e confere o app.
 # Se algo quebrar, o GitHub marca o commit com um X vermelho.
 name: CI
 
@@ -36,3 +36,19 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+
+  mobile:
+    name: App (typecheck)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: CheckTruck.Mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: CheckTruck.Mobile/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
