@@ -6,10 +6,12 @@ type Props = TextInputProps & {
   rotulo: string
   /** Algo dentro do campo, à direita (ex.: o olho de mostrar a senha). */
   acessorio?: ReactNode
+  /** Texto de várias linhas (ex.: a descrição do chamado), com essa altura inicial. */
+  linhas?: number
 }
 
 // Campo de texto com o nome em cima. Fica com a borda verde enquanto a pessoa digita nele.
-export default function Campo({ rotulo, acessorio, onFocus, onBlur, ...props }: Props) {
+export default function Campo({ rotulo, acessorio, linhas, onFocus, onBlur, ...props }: Props) {
   const [focado, setFocado] = useState(false)
   return (
     <View style={estilos.campo}>
@@ -17,7 +19,8 @@ export default function Campo({ rotulo, acessorio, onFocus, onBlur, ...props }: 
       <View style={[estilos.caixa, focado && estilos.caixaFocada]}>
         <TextInput
           placeholderTextColor={cores.textoFraco}
-          style={estilos.entrada}
+          multiline={!!linhas}
+          style={[estilos.entrada, linhas ? { minHeight: linhas * 22 + 24, paddingVertical: 12, textAlignVertical: 'top' } : null]}
           onFocus={(e) => { setFocado(true); onFocus?.(e) }}
           onBlur={(e) => { setFocado(false); onBlur?.(e) }}
           {...props}

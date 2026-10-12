@@ -19,7 +19,7 @@ export class ErroDaApi extends Error {
   }
 }
 
-type Opcoes = { metodo?: 'GET' | 'POST' | 'PUT' | 'DELETE'; corpo?: unknown; token?: string | null }
+export type Opcoes = { metodo?: 'GET' | 'POST' | 'PUT' | 'DELETE'; corpo?: unknown; token?: string | null }
 
 export async function chamarApi<T>(caminho: string, { metodo = 'GET', corpo, token }: Opcoes = {}): Promise<T> {
   const headers: Record<string, string> = { Accept: 'application/json' }

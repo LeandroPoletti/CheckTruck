@@ -18,6 +18,13 @@ export const cores = {
   erroFundo: '#fef2f2',
 }
 
+// Status de cada troca, com as mesmas cores do web: OK (verde), Atenção (âmbar), Crítico (vermelho)
+export const coresDoStatus = {
+  ok: { nome: 'OK', texto: cores.marca700, fundo: cores.marca50, barra: cores.marca500 },
+  atencao: { nome: 'Atenção', texto: '#b45309', fundo: '#fffbeb', barra: '#f59e0b' },
+  critico: { nome: 'Crítico', texto: '#b91c1c', fundo: '#fef2f2', barra: '#ef4444' },
+}
+
 // Barlow Semi Condensed (desenhada a partir das placas de estrada) nos títulos; Inter (a do web) no resto
 export const fontes = {
   titulo: 'BarlowSemiCondensed_700Bold',

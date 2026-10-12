@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { chamarApi, ErroDaApi } from './api'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { chamarApi, ErroDaApi, type Opcoes } from './api'
 import { lerToken, salvarToken } from './armazenamento'
 
 /** Quem está logado: o mesmo GET /api/Usuario/me que o web usa. */
@@ -13,12 +13,16 @@ export type Usuario = {
   tipoConta: 'Frota' | 'Autonomo' | null
 }
 
+/** Chama a API com o token de quem está logado. */
+export type Chamar = <T>(caminho: string, opcoes?: Omit<Opcoes, 'token'>) => Promise<T>
+
 type Sessao = {
   /** Lendo a sessão guardada, logo que o app abre. */
   carregando: boolean
   usuario: Usuario | null
   entrar(email: string, senha: string): Promise<void>
   sair(): Promise<void>
+  chamar: Chamar
 }
 
 const SessaoContext = createContext<Sessao | null>(null)
@@ -26,15 +30,18 @@ const SessaoContext = createContext<Sessao | null>(null)
 // A sessão é a mesma conta do web: o login devolve o token e o /me diz quem é, o cargo e a empresa.
 export function SessaoProvider({ children }: { children: ReactNode }) {
   const [carregando, setCarregando] = useState(true)
+  const [token, setToken] = useState<string | null>(null)
   const [usuario, setUsuario] = useState<Usuario | null>(null)
 
   // Ao abrir o app: se tem token guardado, confere com a API. Token vencido (401) é apagado.
   useEffect(() => {
     async function restaurar() {
-      const token = await lerToken()
-      if (token) {
+      const guardado = await lerToken()
+      if (guardado) {
         try {
-          setUsuario(await chamarApi<Usuario>('/api/Usuario/me', { token }))
+          const eu = await chamarApi<Usuario>('/api/Usuario/me', { token: guardado })
+          setToken(guardado)
+          setUsuario(eu)
         } catch (erro) {
           if (erro instanceof ErroDaApi && erro.status === 401) await salvarToken(null)
         }
@@ -44,22 +51,43 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
     restaurar()
   }, [])
 
-  async function entrar(email: string, senha: string) {
+  const entrar = useCallback(async (email: string, senha: string) => {
     const { accessToken } = await chamarApi<{ accessToken: string }>('/api/Auth/login', {
       metodo: 'POST',
       corpo: { email: email.trim(), senha },
     })
     const eu = await chamarApi<Usuario>('/api/Usuario/me', { token: accessToken })
     await salvarToken(accessToken)
+    setToken(accessToken)
     setUsuario(eu)
-  }
+  }, [])
 
-  async function sair() {
+  const sair = useCallback(async () => {
     await salvarToken(null)
+    setToken(null)
     setUsuario(null)
-  }
+  }, [])
 
-  return <SessaoContext.Provider value={{ carregando, usuario, entrar, sair }}>{children}</SessaoContext.Provider>
+  // Token vencido no meio do uso (401): sai e o app volta para o login
+  const chamar = useCallback(async <T,>(caminho: string, opcoes: Omit<Opcoes, 'token'> = {}): Promise<T> => {
+    try {
+      return await chamarApi<T>(caminho, { ...opcoes, token })
+    } catch (erro) {
+      if (erro instanceof ErroDaApi && erro.status === 401) {
+        await sair()
+        throw new ErroDaApi('Sua sessão acabou. Entre de novo.', 401)
+      }
+      throw erro
+    }
+  }, [token, sair])
+
+  // As funções só mudam quando o token muda: as telas podem usá-las para recarregar sem repetir à toa
+  const sessao = useMemo(
+    () => ({ carregando, usuario, entrar, sair, chamar }),
+    [carregando, usuario, entrar, sair, chamar],
+  )
+
+  return <SessaoContext.Provider value={sessao}>{children}</SessaoContext.Provider>
 }
 
 export function useSessao(): Sessao {
