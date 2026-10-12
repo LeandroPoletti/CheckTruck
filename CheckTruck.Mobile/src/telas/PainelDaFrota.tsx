@@ -1,12 +1,13 @@
 import { useCallback, useState } from 'react'
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router, useFocusEffect } from 'expo-router'
-import { Feather } from '@expo/vector-icons'
 import { useSessao, type Usuario } from '@/servicos/sessao'
 import { caminhoesDaFrota, situacaoDoCaminhao, type Caminhao, type CaminhaoNaLista } from '@/servicos/caminhoes'
 import { listarChamados, type Chamado } from '@/servicos/chamados'
 import { kmDaMaiorOs, listarOrdens, type OrdemDeServico } from '@/servicos/ordens'
+import Abas, { type DadosDaAba } from '@/componentes/Abas'
+import Atalho from '@/componentes/Atalho'
 import Botao from '@/componentes/Botao'
 import MensagemErro from '@/componentes/MensagemErro'
 import Saudacao from '@/componentes/Saudacao'
@@ -14,7 +15,7 @@ import SituacaoDoCaminhao from '@/componentes/SituacaoDoCaminhao'
 import CaminhoesDaFrota from './CaminhoesDaFrota'
 import ChamadosDaFrota from './ChamadosDaFrota'
 import OrdensDaFrota from './OrdensDaFrota'
-import { cores, coresDoStatus, fontes } from '@/tema'
+import { cores } from '@/tema'
 
 type Aba = 'caminhoes' | 'chamados' | 'ordens'
 
@@ -62,7 +63,7 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
   }
 
   const pendentes = chamados?.filter((c) => c.status === 'Pendente').length ?? 0
-  const abas: PropsDaAba[] = [
+  const abas: DadosDaAba<Aba>[] = [
     ...(verFrota ? [{ id: 'caminhoes' as const, titulo: unico ? 'Caminhão' : 'Caminhões' }] : []),
     ...(atender ? [{ id: 'chamados' as const, titulo: 'Chamados', contador: pendentes }] : []),
     ...(verFrota ? [{ id: 'ordens' as const, titulo: 'OS' }] : []),
@@ -78,11 +79,7 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
           keyboardShouldPersistTaps="handled"
           refreshControl={<RefreshControl refreshing={puxando} onRefresh={puxarParaAtualizar} tintColor={cores.marca700} />}
         >
-          {abas.length > 1 && (
-            <View style={estilos.abas} accessibilityRole="tablist">
-              {abas.map((a) => <BotaoDaAba key={a.id} {...a} escolhida={aba === a.id} aoEscolher={setAba} />)}
-            </View>
-          )}
+          {abas.length > 1 && <Abas abas={abas} escolhida={aba} aoEscolher={setAba} />}
 
           {erro !== '' && (
             <View style={estilos.bloco}>
@@ -107,6 +104,13 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
                   usuario.cuidaDosAcessos ? kmDaMaiorOs((ordens ?? []).filter((os) => os.veiculo?.id === unico.id)) : undefined
                 }
               />
+              {usuario.permissoes.includes('Intervalos') && (
+                <Atalho
+                  icone="sliders"
+                  titulo="Intervalos de troca"
+                  onPress={() => router.push({ pathname: '/intervalos', params: { id: unico.id } })}
+                />
+              )}
               <Atalho
                 icone="clock"
                 titulo="Histórico e dados do caminhão"
@@ -133,60 +137,10 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
   )
 }
 
-// Linha que leva para outra tela (ex.: o histórico do caminhão, no Autônomo com um caminhão só)
-function Atalho({ icone, titulo, onPress }: { icone: keyof typeof Feather.glyphMap; titulo: string; onPress(): void }) {
-  return (
-    <Pressable onPress={onPress} style={({ pressed }) => [estilos.atalho, pressed && estilos.atalhoApertado]} accessibilityRole="button">
-      <Feather name={icone} size={18} color={cores.marca700} />
-      <Text style={estilos.atalhoTexto}>{titulo}</Text>
-      <Feather name="chevron-right" size={20} color={cores.textoFraco} />
-    </Pressable>
-  )
-}
-
-type PropsDaAba = { id: Aba; titulo: string; contador?: number }
-
-function BotaoDaAba({ id, titulo, contador = 0, escolhida, aoEscolher }: PropsDaAba & { escolhida: boolean; aoEscolher(id: Aba): void }) {
-  return (
-    <Pressable
-      onPress={() => aoEscolher(id)}
-      style={[estilos.aba, escolhida && estilos.abaEscolhida]}
-      accessibilityRole="tab"
-      accessibilityState={{ selected: escolhida }}
-    >
-      <Text style={[estilos.abaTexto, escolhida && estilos.abaTextoEscolhida]}>{titulo}</Text>
-      {contador > 0 && (
-        <Text style={[estilos.contador, escolhida && estilos.contadorEscolhido]}>{contador}</Text>
-      )}
-    </Pressable>
-  )
-}
-
 const estilos = StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.marca900 },
   corpo: { flex: 1, backgroundColor: cores.fundo, borderTopLeftRadius: 28, borderTopRightRadius: 28, marginTop: -20, overflow: 'hidden' },
   conteudo: { padding: 20, paddingBottom: 40, gap: 14 },
   bloco: { gap: 10 },
   carregando: { marginTop: 40 },
-  atalho: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: cores.branco, borderRadius: 16, padding: 16 },
-  atalhoApertado: { backgroundColor: cores.marca50 },
-  atalhoTexto: { flex: 1, fontFamily: fontes.textoForte, fontSize: 15, color: cores.texto },
-  abas: { flexDirection: 'row', backgroundColor: cores.branco, borderRadius: 16, padding: 4, gap: 4 },
-  aba: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 11, borderRadius: 12 },
-  abaEscolhida: { backgroundColor: cores.marca700 },
-  abaTexto: { fontFamily: fontes.textoForte, fontSize: 15, color: cores.textoMedio },
-  abaTextoEscolhida: { color: cores.branco },
-  contador: {
-    minWidth: 22,
-    textAlign: 'center',
-    fontFamily: fontes.textoForte,
-    fontSize: 12,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 999,
-    overflow: 'hidden',
-    color: coresDoStatus.atencao.texto,
-    backgroundColor: coresDoStatus.atencao.fundo,
-  },
-  contadorEscolhido: { color: cores.marca700, backgroundColor: cores.branco },
 })

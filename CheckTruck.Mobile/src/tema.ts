@@ -15,6 +15,7 @@ export const cores = {
   fundo: '#f5f5f4',
   branco: '#ffffff',
   erroTexto: '#b91c1c',
+  erroEscuro: '#991b1b',
   erroFundo: '#fef2f2',
 }
 

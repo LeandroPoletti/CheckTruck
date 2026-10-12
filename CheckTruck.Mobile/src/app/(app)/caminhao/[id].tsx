@@ -8,6 +8,7 @@ import { historicoDeKm, situacaoDoCaminhao, type Caminhao, type RegistroDeKm } f
 import { kmDaMaiorOs, maisNovaPrimeiro, ordensDoCaminhao, type OrdemDeServico } from '@/servicos/ordens'
 import { formatDataHora, formatKm } from '@/dados/formato'
 import { ORIGENS_KM } from '@/dados/caminhoes'
+import Atalho from '@/componentes/Atalho'
 import Botao from '@/componentes/Botao'
 import CartaoDaOrdem from '@/componentes/CartaoDaOrdem'
 import FaixaDaEstrada from '@/componentes/FaixaDaEstrada'
@@ -18,7 +19,7 @@ import { cores, coresDoStatus, fontes } from '@/tema'
 type Dados = { caminhao: Caminhao; ordens: OrdemDeServico[]; historico: RegistroDeKm[] }
 
 // Tudo de um caminhão, igual ao detalhe no web: a situação (com Atualizar km e Lançar OS), o histórico de manutenções
-// e o histórico de km. Editar (permissão Veículos) e Corrigir km (Admin e Gestor) para quem pode.
+// e o histórico de km. Editar (permissão Veículos), Corrigir km (Admin e Gestor) e Intervalos de troca para quem pode.
 // O Autônomo não tem motorista: para ele, nada fala de motorista e o resumo manda falar com a oficina.
 // Recarrega ao voltar para a tela (ex.: depois de atualizar o km) e ao puxar para baixo.
 export default function DetalheDoCaminhao() {
@@ -108,6 +109,13 @@ export default function DetalheDoCaminhao() {
                 podeLancarOS={pode('OrdemServico') && dados.caminhao.ativo}
                 kmMinimoParaCorrigir={usuario?.cuidaDosAcessos ? kmDaMaiorOs(dados.ordens) : undefined}
               />
+              {pode('Intervalos') && dados.caminhao.ativo && (
+                <Atalho
+                  icone="sliders"
+                  titulo="Intervalos de troca"
+                  onPress={() => router.push({ pathname: '/intervalos', params: { id: dados.caminhao.id } })}
+                />
+              )}
 
               <Text style={estilos.secao}>Histórico de manutenções</Text>
               {dados.ordens.length === 0

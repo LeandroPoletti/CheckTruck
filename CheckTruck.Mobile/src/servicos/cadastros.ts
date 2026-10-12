@@ -1,9 +1,10 @@
 import type { Chamar } from './sessao'
 
-// Cadastros que a OS e o caminhão usam: tipos de manutenção, mecânicos (no Autônomo, "oficinas e mecânicos"),
-// motoristas e o catálogo (fabricante → modelo → geração, com as potências).
+// Cadastros que a OS, o caminhão e os intervalos usam: tipos de manutenção, mecânicos (no Autônomo, "oficinas e
+// mecânicos"), motoristas e o catálogo (fabricante → modelo → geração, com as potências).
 
-export type TipoDeManutencao = { id: number; nome: string }
+/** componente: o número do enum Componente da API (nomes em dados/intervalos). */
+export type TipoDeManutencao = { id: number; nome: string; componente: number }
 export type Mecanico = { id: number; nome: string; funcao: string }
 export type Motorista = { id: string; nome: string }
 

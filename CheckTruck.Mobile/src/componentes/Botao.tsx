@@ -5,15 +5,14 @@ import { cores, fontes } from '@/tema'
 type Props = {
   titulo: string
   onPress(): void
-  /** "principal" (verde cheio) ou "discreto" (só a borda, para ações como Sair). */
-  tipo?: 'principal' | 'discreto'
+  /** "principal" (verde cheio), "discreto" (só a borda, para ações como Sair) ou "perigo" (vermelho, para excluir). */
+  tipo?: 'principal' | 'discreto' | 'perigo'
   icone?: keyof typeof Feather.glyphMap
   ocupado?: boolean
 }
 
 export default function Botao({ titulo, onPress, tipo = 'principal', icone, ocupado = false }: Props) {
-  const principal = tipo === 'principal'
-  const corDoTexto = principal ? cores.branco : cores.textoMedio
+  const corDoTexto = tipo === 'discreto' ? cores.textoMedio : cores.branco
   return (
     <Pressable
       accessibilityRole="button"
@@ -22,8 +21,8 @@ export default function Botao({ titulo, onPress, tipo = 'principal', icone, ocup
       disabled={ocupado}
       style={({ pressed }) => [
         estilos.botao,
-        principal ? estilos.principal : estilos.discreto,
-        pressed && (principal ? estilos.principalApertado : estilos.discretoApertado),
+        estilos[tipo],
+        pressed && estilos[`${tipo}Apertado`],
       ]}
     >
       {ocupado ? (
@@ -44,6 +43,8 @@ const estilos = StyleSheet.create({
   principalApertado: { backgroundColor: cores.marca800 },
   discreto: { borderWidth: 1, borderColor: cores.borda, backgroundColor: cores.branco },
   discretoApertado: { backgroundColor: cores.fundo },
+  perigo: { backgroundColor: cores.erroTexto },
+  perigoApertado: { backgroundColor: cores.erroEscuro },
   conteudo: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   texto: { fontFamily: fontes.textoForte, fontSize: 16 },
 })

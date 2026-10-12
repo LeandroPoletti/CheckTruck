@@ -2,8 +2,8 @@ import { Redirect, Stack } from 'expo-router'
 import { useSessao } from '@/servicos/sessao'
 import Carregando from '@/componentes/Carregando'
 
-// Telas de quem entrou. Sem sessão, vai para o login. Os formulários (km, chamados, OS e o cadastro do caminhão)
-// sobem por cima da tela.
+// Telas de quem entrou. Sem sessão, vai para o login. Os formulários (km, chamados, OS, o cadastro do caminhão e o
+// intervalo de troca) sobem por cima da tela.
 export default function AreaLogada() {
   const { carregando, usuario } = useSessao()
   if (carregando) return <Carregando />
@@ -16,6 +16,7 @@ export default function AreaLogada() {
       <Stack.Screen name="lancar-os" options={{ presentation: 'modal' }} />
       <Stack.Screen name="cadastro-caminhao" options={{ presentation: 'modal' }} />
       <Stack.Screen name="corrigir-km" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="intervalo" options={{ presentation: 'modal' }} />
     </Stack>
   )
 }
