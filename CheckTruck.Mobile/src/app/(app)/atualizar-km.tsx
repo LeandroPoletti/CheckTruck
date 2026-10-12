@@ -26,7 +26,8 @@ export default function AtualizarKm() {
 
   async function salvar() {
     if (digitado === '' || kmNovo <= kmAtual) {
-      setErro(`Informe um km maior que o atual (${formatKm(kmAtual)}). Se o atual está errado, peça ao gestor para corrigir.`)
+      const quemCorrige = usuario?.cuidaDosAcessos ? 'corrija no site' : 'peça ao gestor para corrigir'
+      setErro(`Informe um km maior que o atual (${formatKm(kmAtual)}). Se o atual está errado, ${quemCorrige}.`)
       return
     }
     setSalvando(true)

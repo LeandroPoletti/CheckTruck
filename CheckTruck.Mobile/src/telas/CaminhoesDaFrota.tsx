@@ -42,8 +42,14 @@ function textoDoPrazo({ kmRestante, diasRestantes }: ItemDeTroca) {
   return `${textoKmRestante(kmRestante)}; ${textoDias(diasRestantes)}`
 }
 
+type Props = {
+  caminhoes: CaminhaoNaLista[]
+  /** Na Frota, o cartão mostra quem está com o caminhão (o Autônomo não tem motorista). */
+  mostrarMotorista: boolean
+}
+
 // Caminhões ativos da empresa, do que vence primeiro para o que vence por último. Toque no caminhão para ver tudo.
-export default function CaminhoesDaFrota({ caminhoes }: { caminhoes: CaminhaoNaLista[] }) {
+export default function CaminhoesDaFrota({ caminhoes, mostrarMotorista }: Props) {
   const [busca, setBusca] = useState('')
   const [filtro, setFiltro] = useState<Filtro>('todos')
 
@@ -66,7 +72,7 @@ export default function CaminhoesDaFrota({ caminhoes }: { caminhoes: CaminhaoNaL
         <TextInput
           value={busca}
           onChangeText={setBusca}
-          placeholder="Buscar por placa, modelo ou motorista"
+          placeholder={mostrarMotorista ? 'Buscar por placa, modelo ou motorista' : 'Buscar por placa ou modelo'}
           placeholderTextColor={cores.textoFraco}
           autoCapitalize="characters"
           autoCorrect={false}
@@ -98,12 +104,12 @@ export default function CaminhoesDaFrota({ caminhoes }: { caminhoes: CaminhaoNaL
 
       {lista.length === 0
         ? <Text style={estilos.nenhum}>Nenhum caminhão encontrado.</Text>
-        : lista.map((c) => <CartaoNaLista key={c.id} caminhao={c} />)}
+        : lista.map((c) => <CartaoNaLista key={c.id} caminhao={c} mostrarMotorista={mostrarMotorista} />)}
     </>
   )
 }
 
-function CartaoNaLista({ caminhao }: { caminhao: CaminhaoNaLista }) {
+function CartaoNaLista({ caminhao, mostrarMotorista }: { caminhao: CaminhaoNaLista; mostrarMotorista: boolean }) {
   const item = caminhao.itemMaisUrgente
   return (
     <Pressable
@@ -119,7 +125,8 @@ function CartaoNaLista({ caminhao }: { caminhao: CaminhaoNaLista }) {
       <View>
         <Text style={estilos.modelo}>{caminhao.fabricante} {caminhao.modelo.nome}, {caminhao.geracao.nome}</Text>
         <Text style={estilos.detalhe}>
-          {formatKm(caminhao.kmAtual)} · {caminhao.motoristaAtual ? caminhao.motoristaAtual.nome : 'Sem motorista'}
+          {formatKm(caminhao.kmAtual)}
+          {mostrarMotorista && <> · {caminhao.motoristaAtual ? caminhao.motoristaAtual.nome : 'Sem motorista'}</>}
         </Text>
       </View>
       <View style={estilos.divisoria} />

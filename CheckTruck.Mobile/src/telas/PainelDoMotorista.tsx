@@ -7,12 +7,10 @@ import { useSessao, type Usuario } from '@/servicos/sessao'
 import { meusCaminhoes, type Caminhao } from '@/servicos/caminhoes'
 import { listarChamados, type Chamado } from '@/servicos/chamados'
 import Botao from '@/componentes/Botao'
-import CartaoDoCaminhao from '@/componentes/CartaoDoCaminhao'
 import CartaoDoChamado from '@/componentes/CartaoDoChamado'
-import ListaDeTrocas from '@/componentes/ListaDeTrocas'
 import MensagemErro from '@/componentes/MensagemErro'
-import ResumoDoStatus from '@/componentes/ResumoDoStatus'
 import Saudacao from '@/componentes/Saudacao'
+import SituacaoDoCaminhao from '@/componentes/SituacaoDoCaminhao'
 import { cores, fontes } from '@/tema'
 
 // Tela do motorista: o caminhão que está com ele (próximas trocas em km e data), atualizar o km e os chamados.
@@ -86,15 +84,7 @@ export default function PainelDoMotorista({ usuario }: { usuario: Usuario }) {
             </View>
           )}
 
-          {caminhao && (
-            <>
-              <CartaoDoCaminhao caminhao={caminhao} podeAtualizarKm />
-              <ResumoDoStatus itens={caminhao.itens} doMotorista />
-
-              <Text style={estilos.secao}>Próximas trocas</Text>
-              <ListaDeTrocas itens={caminhao.itens} />
-            </>
-          )}
+          {caminhao && <SituacaoDoCaminhao caminhao={caminhao} podeAtualizarKm mostrarMotorista={false} falarComOficina />}
 
           {caminhao && podeAbrirChamado && (
             <>

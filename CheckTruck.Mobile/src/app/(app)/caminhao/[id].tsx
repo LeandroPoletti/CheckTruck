@@ -6,18 +6,18 @@ import { Feather } from '@expo/vector-icons'
 import { useSessao } from '@/servicos/sessao'
 import { situacaoDoCaminhao, type Caminhao } from '@/servicos/caminhoes'
 import Botao from '@/componentes/Botao'
-import CartaoDoCaminhao from '@/componentes/CartaoDoCaminhao'
 import FaixaDaEstrada from '@/componentes/FaixaDaEstrada'
-import ListaDeTrocas from '@/componentes/ListaDeTrocas'
 import MensagemErro from '@/componentes/MensagemErro'
-import ResumoDoStatus from '@/componentes/ResumoDoStatus'
+import SituacaoDoCaminhao from '@/componentes/SituacaoDoCaminhao'
 import { cores, fontes } from '@/tema'
 
-// Situação completa de um caminhão da frota (a mesma do detalhe no web), com Atualizar km para quem tem a permissão.
+// Situação completa de um caminhão (a mesma do detalhe no web), com Atualizar km para quem tem a permissão.
+// O Autônomo não tem motorista: para ele, o cartão não fala de motorista e o resumo manda falar com a oficina.
 // Recarrega ao voltar para a tela (ex.: depois de atualizar o km) e ao puxar para baixo.
 export default function DetalheDoCaminhao() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const { chamar, usuario } = useSessao()
+  const autonomo = usuario?.tipoConta === 'Autonomo'
   const [caminhao, setCaminhao] = useState<Caminhao | null>(null)
   const [erro, setErro] = useState('')
   const [puxando, setPuxando] = useState(false)
@@ -64,17 +64,12 @@ export default function DetalheDoCaminhao() {
           {caminhao === null && erro === '' && <ActivityIndicator style={estilos.carregando} color={cores.marca700} />}
 
           {caminhao && (
-            <>
-              <CartaoDoCaminhao
-                caminhao={caminhao}
-                podeAtualizarKm={!!usuario?.permissoes.includes('AtualizarKm')}
-                mostrarMotorista
-              />
-              <ResumoDoStatus itens={caminhao.itens} doMotorista={false} />
-
-              <Text style={estilos.secao}>Próximas trocas</Text>
-              <ListaDeTrocas itens={caminhao.itens} />
-            </>
+            <SituacaoDoCaminhao
+              caminhao={caminhao}
+              podeAtualizarKm={!!usuario?.permissoes.includes('AtualizarKm')}
+              mostrarMotorista={!autonomo}
+              falarComOficina={autonomo}
+            />
           )}
         </ScrollView>
       </View>
@@ -91,5 +86,4 @@ const estilos = StyleSheet.create({
   conteudo: { padding: 20, paddingBottom: 40, gap: 14 },
   bloco: { gap: 10 },
   carregando: { marginTop: 40 },
-  secao: { fontFamily: fontes.subtitulo, fontSize: 22, color: cores.texto, marginTop: 6 },
 })

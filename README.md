@@ -22,7 +22,7 @@ CheckTruck.Repositorio/ Entity Framework: contexto, configuração das tabelas e
 CheckTruck.Testes/      testes das regras do Dominio (xUnit), com um banco de mentira na memória
 CheckTruck.Mobile/      app do celular (Expo + TypeScript): mesma API e mesma conta do web
   src/app/              telas (cada arquivo é uma rota do Expo Router)
-  src/telas/            tela inicial de cada perfil (motorista, frota e a provisória) e as partes dela
+  src/telas/            tela inicial de cada perfil (motorista, frota e autônomo, e o aviso de quem usa só o site)
   src/componentes/      peças das telas (placa, cartões do caminhão e do chamado, campos e botões)
   src/dados/            nomes e formatos iguais aos do web (cargos, chamados, km e datas)
   src/servicos/         chamadas da API, sessão e onde o token fica guardado
@@ -115,7 +115,9 @@ e rode `npx expo start --clear` (sem o `--clear`, o app continua com o endereço
 - **Frota, com Ver frota e/ou Atender chamados** (mecânico, chefe de manutenção, gestor...): os caminhões ativos, do
   que vence primeiro para o último, com busca e a situação completa de cada um (Atualizar km com a permissão), e os
   chamados de todos os caminhões para atender e resolver.
-- **Autônomo:** as telas dele chegam nas próximas versões. Quem não tem nenhuma dessas permissões usa só o site.
+- **Autônomo:** os caminhões dele (com um só, a situação já aparece na tela inicial) e Atualizar km. As outras telas
+  (ordens de serviço, cadastro do caminhão...) chegam nas próximas versões.
+- Na Frota, quem não tem Ver frota nem Atender chamados usa só o site.
 
 **Primeiro acesso:** a API cria dois logins. Troque as senhas fora do ambiente de desenvolvimento.
 

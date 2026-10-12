@@ -3,26 +3,30 @@ import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, T
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useFocusEffect } from 'expo-router'
 import { useSessao, type Usuario } from '@/servicos/sessao'
-import { caminhoesDaFrota, type CaminhaoNaLista } from '@/servicos/caminhoes'
+import { caminhoesDaFrota, situacaoDoCaminhao, type Caminhao, type CaminhaoNaLista } from '@/servicos/caminhoes'
 import { listarChamados, type Chamado } from '@/servicos/chamados'
 import Botao from '@/componentes/Botao'
 import MensagemErro from '@/componentes/MensagemErro'
 import Saudacao from '@/componentes/Saudacao'
+import SituacaoDoCaminhao from '@/componentes/SituacaoDoCaminhao'
 import CaminhoesDaFrota from './CaminhoesDaFrota'
 import ChamadosDaFrota from './ChamadosDaFrota'
 import { cores, coresDoStatus, fontes } from '@/tema'
 
 type Aba = 'caminhoes' | 'chamados'
 
-// Tela de quem cuida da frota (mecânico, chefe de manutenção, gestor...). Mostra o que o acesso libera, igual ao web:
-// Ver frota mostra os caminhões e Atender chamados mostra os chamados. Com os dois, troca nas abas de cima.
+// Tela de quem cuida da frota (mecânico, chefe de manutenção, gestor...) e do Autônomo. Mostra o que o acesso libera,
+// igual ao web: Ver frota mostra os caminhões e Atender chamados (só na Frota) mostra os chamados. Com os dois, troca
+// nas abas de cima. O Autônomo com um caminhão só já vê a situação dele, sem a lista.
 // Recarrega sempre que a tela volta a aparecer (ex.: depois de resolver um chamado) e ao puxar para baixo.
 export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
   const { chamar, sair } = useSessao()
+  const autonomo = usuario.tipoConta === 'Autonomo'
   const verFrota = usuario.permissoes.includes('VerFrota')
-  const atender = usuario.permissoes.includes('AtenderChamados')
+  const atender = usuario.tipoConta === 'Frota' && usuario.permissoes.includes('AtenderChamados')
   const [aba, setAba] = useState<Aba>(verFrota ? 'caminhoes' : 'chamados')
   const [caminhoes, setCaminhoes] = useState<CaminhaoNaLista[] | null>(null)
+  const [unico, setUnico] = useState<Caminhao | null>(null)
   const [chamados, setChamados] = useState<Chamado[] | null>(null)
   const [erro, setErro] = useState('')
   const [puxando, setPuxando] = useState(false)
@@ -33,13 +37,15 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
         verFrota ? caminhoesDaFrota(chamar) : Promise.resolve([]),
         atender ? listarChamados(chamar) : Promise.resolve([]),
       ])
+      const so = autonomo && frota.length === 1 ? await situacaoDoCaminhao(chamar, frota[0].id) : null
       setCaminhoes(frota)
+      setUnico(so)
       setChamados(lista)
       setErro('')
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Não foi possível carregar.')
     }
-  }, [chamar, verFrota, atender])
+  }, [chamar, autonomo, verFrota, atender])
 
   useFocusEffect(useCallback(() => { carregar() }, [carregar]))
 
@@ -79,7 +85,16 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
             <ActivityIndicator style={estilos.carregando} color={cores.marca700} />
           )}
 
-          {aba === 'caminhoes' && caminhoes && <CaminhoesDaFrota caminhoes={caminhoes} />}
+          {aba === 'caminhoes' && caminhoes && (unico ? (
+            <SituacaoDoCaminhao
+              caminhao={unico}
+              podeAtualizarKm={usuario.permissoes.includes('AtualizarKm')}
+              mostrarMotorista={false}
+              falarComOficina
+            />
+          ) : (
+            <CaminhoesDaFrota caminhoes={caminhoes} mostrarMotorista={!autonomo} />
+          ))}
           {aba === 'chamados' && chamados && (
             <ChamadosDaFrota chamados={chamados} usuario={usuario} aoMudar={carregar} />
           )}

@@ -9,6 +9,8 @@ export type Usuario = {
   email: string
   cargo: string
   permissoes: string[]
+  /** Admin e Gestor (e o Autônomo, que é o dono): podem tudo, inclusive corrigir o km. */
+  cuidaDosAcessos: boolean
   empresa: string | null
   tipoConta: 'Frota' | 'Autonomo' | null
 }
