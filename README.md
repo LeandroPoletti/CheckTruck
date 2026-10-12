@@ -120,6 +120,8 @@ e rode `npx expo start --clear` (sem o `--clear`, o app continua com o endereço
 - **Autônomo:** os caminhões dele (com um só, a situação já aparece na tela inicial), Atualizar km, as ordens de
   serviço (cadastrando a oficina ali mesmo), o cadastro do caminhão, os históricos e os intervalos de troca. O
   catálogo chega nas próximas versões.
+- **Admin e Gestor** (e o Autônomo): Minha empresa, no fim da tela inicial, com os dados da conta e o Virar Frota.
+- **Cliente novo:** cria a conta pelo app também (Criar conta, na tela de entrar), Frota ou Autônomo, e já entra.
 - Na Frota, quem não tem Ver frota nem Atender chamados usa só o site.
 
 **Primeiro acesso:** a API cria dois logins. Troque as senhas fora do ambiente de desenvolvimento.
@@ -129,7 +131,7 @@ e rode `npx expo start --clear` (sem o `--clear`, o app continua com o endereço
 | `admin@admin.com` | `Admin@123` | Admin da empresa Transportadora Almeida |
 | `dono@checktruck.com` | `Dono@123` | Dono do sistema: cuida do catálogo do sistema e não é de nenhuma empresa |
 
-Um cliente novo cria a conta dele pelo link **Criar conta**, na tela de login.
+Um cliente novo cria a conta dele pelo link **Criar conta**, na tela de login (no site ou no app).
 
 ## Empresas
 

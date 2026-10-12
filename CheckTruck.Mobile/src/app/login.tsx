@@ -3,7 +3,7 @@ import {
   AccessibilityInfo, Animated, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Redirect } from 'expo-router'
+import { Redirect, router } from 'expo-router'
 import { Feather } from '@expo/vector-icons'
 import { useSessao } from '@/servicos/sessao'
 import { API_URL } from '@/servicos/api'
@@ -14,7 +14,7 @@ import FaixaDaEstrada from '@/componentes/FaixaDaEstrada'
 import MensagemErro from '@/componentes/MensagemErro'
 import { cores, fontes } from '@/tema'
 
-// Entrar com a mesma conta do web (e-mail e senha cadastrados pelo admin ou pelo gestor)
+// Entrar com a mesma conta do web (e-mail e senha cadastrados pelo admin ou pelo gestor). Cliente novo cria a conta aqui também.
 export default function Login() {
   const { carregando, usuario, entrar } = useSessao()
   const margens = useSafeAreaInsets()
@@ -110,6 +110,7 @@ export default function Login() {
 
           <MensagemErro>{erro}</MensagemErro>
           <Botao titulo="Entrar" onPress={aoEntrar} ocupado={entrando} />
+          <Botao titulo="Criar conta" tipo="discreto" icone="user-plus" onPress={() => router.push('/criar-conta')} />
 
           <View style={estilos.servidor}>
             <View style={estilos.pontoServidor} />
