@@ -6,6 +6,9 @@ export function contemBusca(texto: string, busca: string) {
   return limpar(texto).includes(limpar(busca.trim()))
 }
 
+/** "1 modelo", "3 modelos". */
+export const quantos = (n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`
+
 export const formatKm = (km: number) => `${Math.round(km).toLocaleString('pt-BR')} km`
 
 const doisDigitos = (n: number) => String(n).padStart(2, '0')

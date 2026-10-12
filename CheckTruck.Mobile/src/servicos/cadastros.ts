@@ -50,13 +50,22 @@ export const excluirMecanico = (chamar: Chamar, id: number) => chamar<void>(`/ap
 /** Motoristas ativos, para dizer quem estava com o caminhão (só na Frota). */
 export const motoristasAtivos = (chamar: Chamar) => chamar<Motorista[]>('/api/Usuario/motoristas')
 
-export type Fabricante = { id: number; nome: string }
-export type Modelo = { id: number; nome: string; fabricante: { id: number; nome: string } | null }
-export type Geracao = {
-  id: number
-  nome: string
-  modelo: { id: number; nome: string } | null
+// Catálogo: o do sistema todas as empresas veem e só o dono do sistema muda; o que a empresa cadastra (doSistema
+// false) só ela vê e muda. Excluir: a API recusa país com fabricante, fabricante e modelo com geração, e geração
+// com caminhão ou intervalo.
+
+type Resumo = { id: number; nome: string }
+
+export type Pais = Resumo & { doSistema: boolean }
+export type Fabricante = Resumo & { doSistema: boolean; paisOrigem: Resumo | null }
+export type Modelo = Resumo & { doSistema: boolean; fabricante: Resumo | null }
+export type Geracao = Resumo & {
+  doSistema: boolean
+  modelo: Resumo | null
+  fabricante: Resumo | null
+  /** Primeiro ano-modelo vendido no Brasil. */
   anoInicio: number
+  /** Último ano-modelo; null = ainda é vendida. */
   anoFim: number | null
   normaEmissao: string
   motor: string | null
@@ -64,7 +73,45 @@ export type Geracao = {
   /** Da menor para a maior. */
   potencias: { id: number; cv: number }[]
 }
+export type NovaGeracao = {
+  nome: string
+  modeloId: number
+  anoInicio: number
+  anoFim: number | null
+  normaEmissao: string
+  motor: string
+  caixa: string
+  /** Só os cv: a API acrescenta e tira o que mudou. */
+  potencias: number[]
+}
+
+export const paises = (chamar: Chamar) => chamar<Pais[]>('/api/Pais')
+export const cadastrarPais = (chamar: Chamar, nome: string) =>
+  chamar<Pais>('/api/Pais', { metodo: 'POST', corpo: { nome: nome.trim() } })
 
 export const fabricantes = (chamar: Chamar) => chamar<Fabricante[]>('/api/Fabricante')
+export const buscarFabricante = (chamar: Chamar, id: number) => chamar<Fabricante>(`/api/Fabricante/${id}`)
+export const salvarFabricante = (chamar: Chamar, nome: string, paisOrigemId: number, id?: number) =>
+  chamar<Fabricante>(id ? `/api/Fabricante/${id}` : '/api/Fabricante', {
+    metodo: id ? 'PUT' : 'POST',
+    corpo: { nome: nome.trim(), paisOrigemId },
+  })
+export const excluirFabricante = (chamar: Chamar, id: number) => chamar<void>(`/api/Fabricante/${id}`, { metodo: 'DELETE' })
+
 export const modelos = (chamar: Chamar) => chamar<Modelo[]>('/api/Modelo')
+export const buscarModelo = (chamar: Chamar, id: number) => chamar<Modelo>(`/api/Modelo/${id}`)
+export const salvarModelo = (chamar: Chamar, nome: string, fabricanteId: number, id?: number) =>
+  chamar<Modelo>(id ? `/api/Modelo/${id}` : '/api/Modelo', {
+    metodo: id ? 'PUT' : 'POST',
+    corpo: { nome: nome.trim(), fabricanteId },
+  })
+export const excluirModelo = (chamar: Chamar, id: number) => chamar<void>(`/api/Modelo/${id}`, { metodo: 'DELETE' })
+
 export const geracoes = (chamar: Chamar) => chamar<Geracao[]>('/api/Geracao')
+export const buscarGeracao = (chamar: Chamar, id: number) => chamar<Geracao>(`/api/Geracao/${id}`)
+export const salvarGeracao = (chamar: Chamar, g: NovaGeracao, id?: number) =>
+  chamar<Geracao>(id ? `/api/Geracao/${id}` : '/api/Geracao', {
+    metodo: id ? 'PUT' : 'POST',
+    corpo: { ...g, nome: g.nome.trim(), motor: g.motor.trim() || null, caixa: g.caixa.trim() || null },
+  })
+export const excluirGeracao = (chamar: Chamar, id: number) => chamar<void>(`/api/Geracao/${id}`, { metodo: 'DELETE' })

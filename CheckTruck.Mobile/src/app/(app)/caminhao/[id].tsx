@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { Feather } from '@expo/vector-icons'
 import { useSessao } from '@/servicos/sessao'
@@ -55,17 +55,9 @@ export default function DetalheDoCaminhao() {
   return (
     <TelaComTopo
       titulo="Situação do caminhão"
-      direita={pode('Veiculos') && dados && (
-        <Pressable
-          onPress={() => router.push({ pathname: '/cadastro-caminhao', params: { id: dados.caminhao.id } })}
-          hitSlop={12}
-          accessibilityRole="button"
-          style={estilos.editar}
-        >
-          <Feather name="edit-2" size={16} color={cores.marca200} />
-          <Text style={estilos.editarTexto}>Editar</Text>
-        </Pressable>
-      )}
+      aoEditar={pode('Veiculos') && dados
+        ? () => router.push({ pathname: '/cadastro-caminhao', params: { id: dados.caminhao.id } })
+        : undefined}
     >
       <ScrollView
         contentContainerStyle={estilos.conteudo}
@@ -157,17 +149,6 @@ function LinhaDoKm({ registro: h, primeira }: { registro: RegistroDeKm; primeira
 }
 
 const estilos = StyleSheet.create({
-  editar: {
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    padding: 8,
-    paddingHorizontal: 14,
-    borderRadius: 999,
-    backgroundColor: cores.marca800,
-  },
-  editarTexto: { fontFamily: fontes.textoForte, fontSize: 14, color: cores.marca200 },
   conteudo: { padding: 20, paddingBottom: 40, gap: 14 },
   bloco: { gap: 10 },
   carregando: { marginTop: 40 },

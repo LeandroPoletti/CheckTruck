@@ -215,7 +215,8 @@ export default function CadastroCaminhao() {
                 <Escolha opcoes={TRACOES} escolhidos={[form.tracao]} aoTocar={(v) => mudar('tracao', v)} />
               </Grupo>
               <Text style={estilos.dica}>
-                Não achou? Cadastre o modelo e a geração no site, em Cadastros. A geração define os intervalos recomendados.
+                Não achou? Cadastre o modelo e a geração no Catálogo, no fim da tela inicial (ou no site). A geração define os
+                intervalos recomendados.
               </Text>
 
               <Text style={estilos.etapa}>2 · IDENTIFICAÇÃO</Text>

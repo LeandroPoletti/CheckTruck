@@ -118,10 +118,11 @@ e rode `npx expo start --clear` (sem o `--clear`, o app continua com o endereço
   (Admin e Gestor) e os intervalos de troca (do caminhão e da empresa, por geração). Também os chamados de todos os
   caminhões para atender e resolver, e as ordens de serviço.
 - **Autônomo:** os caminhões dele (com um só, a situação já aparece na tela inicial), Atualizar km, as ordens de
-  serviço (cadastrando a oficina ali mesmo), o cadastro do caminhão, os históricos e os intervalos de troca. O
-  catálogo chega nas próximas versões.
-- **Com a permissão Cadastros:** Mecânicos (no Autônomo, Oficinas e mecânicos) e Tipos de manutenção, no fim da tela
-  inicial, para cadastrar, editar, desativar e excluir.
+  serviço (cadastrando a oficina ali mesmo), o cadastro do caminhão, os históricos, os intervalos de troca e os
+  cadastros.
+- **Com a permissão Cadastros:** Mecânicos (no Autônomo, Oficinas e mecânicos), Tipos de manutenção e o Catálogo
+  (fabricante → modelo → geração, com o país no cadastro do fabricante), no fim da tela inicial: cadastrar, editar e
+  excluir (o mecânico também desativa; dos tipos e do catálogo, só o que é da empresa).
 - **Admin e Gestor** (e o Autônomo): Minha empresa, no fim da tela inicial, com os dados da conta e o Virar Frota.
 - **Cliente novo:** cria a conta pelo app também (Criar conta, na tela de entrar), Frota ou Autônomo, e já entra.
 - Na Frota, quem não tem Ver frota nem Atender chamados usa só o site.

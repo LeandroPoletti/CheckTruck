@@ -46,6 +46,10 @@ export type DadosDoIntervalo = {
 
 const rota = (alvo: Alvo) => `/api/${alvo.tipo === 'caminhao' ? 'IntervaloVeiculo' : 'IntervaloRecomendado'}`
 
+/** Os intervalos de fábrica e da empresa cadastrados (no Catálogo, para contar os de cada geração). */
+export const intervalosRecomendados = (chamar: Chamar) =>
+  chamar<{ id: number; geracao: { id: number } | null }[]>('/api/IntervaloRecomendado')
+
 /** Os caminhões ativos (permissão Intervalos, sem precisar de Ver frota). */
 export const caminhoesDosIntervalos = (chamar: Chamar) => chamar<CaminhaoDoIntervalo[]>('/api/IntervaloVeiculo/veiculos')
 

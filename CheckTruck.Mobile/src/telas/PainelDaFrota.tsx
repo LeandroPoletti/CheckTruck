@@ -143,6 +143,7 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
                     onPress={() => router.push('/mecanicos')}
                   />
                   <Atalho icone="list" titulo="Tipos de manutenção" onPress={() => router.push('/tipos-manutencao')} />
+                  <Atalho icone="book-open" titulo="Catálogo" onPress={() => router.push('/catalogo')} />
                 </>
               )}
               {usuario.cuidaDosAcessos && (
