@@ -40,6 +40,15 @@ export type NovaOrdem = {
 
 export const listarOrdens = (chamar: Chamar) => chamar<OrdemDeServico[]>('/api/OrdemServico')
 
+/** Para ordenar da mais nova para a mais velha (pela data da troca; no mesmo dia, a de número maior). */
+export const maisNovaPrimeiro = (a: OrdemDeServico, b: OrdemDeServico) => b.realizadoEm.localeCompare(a.realizadoEm) || b.id - a.id
+
+/** O km da maior OS (0 sem nenhuma): a correção de km do caminhão não pode ficar abaixo dele. */
+export const kmDaMaiorOs = (ordens: OrdemDeServico[]) => Math.max(0, ...ordens.map((os) => os.kmAtual))
+
+export const ordensDoCaminhao = (chamar: Chamar, veiculoId: number) =>
+  chamar<OrdemDeServico[]>(`/api/OrdemServico?$filter=${encodeURIComponent(`Veiculo/Id eq ${veiculoId}`)}`)
+
 /**
  * A próxima troca de cada item vai com km 0 e data null: a API calcula pelo intervalo que vale
  * (caminhão, empresa, fábrica ou padrão), igual ao web. O km da OS atualiza o caminhão quando é maior,

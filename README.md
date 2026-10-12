@@ -112,11 +112,13 @@ e rode `npx expo start --clear` (sem o `--clear`, o app continua com o endereço
 **O que cada um vê no app** (o mesmo login e os mesmos dados do web):
 
 - **Motorista:** o caminhão que está com ele (próximas trocas em km e data), Atualizar km e os chamados dele.
-- **Frota, com Ver frota e/ou Atender chamados** (mecânico, chefe de manutenção, gestor...): os caminhões ativos, do
-  que vence primeiro para o último, com busca e a situação completa de cada um (Atualizar km com a permissão), os
-  chamados de todos os caminhões para atender e resolver, e as ordens de serviço (Lançar OS com a permissão).
-- **Autônomo:** os caminhões dele (com um só, a situação já aparece na tela inicial), Atualizar km e as ordens de
-  serviço, cadastrando a oficina ali mesmo. As outras telas (cadastro do caminhão...) chegam nas próximas versões.
+- **Frota, com Ver frota e/ou Atender chamados** (mecânico, chefe de manutenção, gestor...): os caminhões, do que
+  vence primeiro para o último (os desativados num filtro à parte), com busca e tudo de cada um: situação, histórico
+  de manutenções e de km. Com as permissões: Atualizar km, Lançar OS, cadastrar e editar caminhão, e Corrigir km
+  (Admin e Gestor). Também os chamados de todos os caminhões para atender e resolver, e as ordens de serviço.
+- **Autônomo:** os caminhões dele (com um só, a situação já aparece na tela inicial), Atualizar km, as ordens de
+  serviço (cadastrando a oficina ali mesmo), o cadastro do caminhão e os históricos. Intervalos e catálogo chegam
+  nas próximas versões.
 - Na Frota, quem não tem Ver frota nem Atender chamados usa só o site.
 
 **Primeiro acesso:** a API cria dois logins. Troque as senhas fora do ambiente de desenvolvimento.

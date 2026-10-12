@@ -4,27 +4,40 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { Feather } from '@expo/vector-icons'
 import { useSessao } from '@/servicos/sessao'
-import { situacaoDoCaminhao, type Caminhao } from '@/servicos/caminhoes'
+import { historicoDeKm, situacaoDoCaminhao, type Caminhao, type RegistroDeKm } from '@/servicos/caminhoes'
+import { kmDaMaiorOs, maisNovaPrimeiro, ordensDoCaminhao, type OrdemDeServico } from '@/servicos/ordens'
+import { formatDataHora, formatKm } from '@/dados/formato'
+import { ORIGENS_KM } from '@/dados/caminhoes'
 import Botao from '@/componentes/Botao'
+import CartaoDaOrdem from '@/componentes/CartaoDaOrdem'
 import FaixaDaEstrada from '@/componentes/FaixaDaEstrada'
 import MensagemErro from '@/componentes/MensagemErro'
 import SituacaoDoCaminhao from '@/componentes/SituacaoDoCaminhao'
-import { cores, fontes } from '@/tema'
+import { cores, coresDoStatus, fontes } from '@/tema'
 
-// Situação completa de um caminhão (a mesma do detalhe no web), com Atualizar km e Lançar OS para quem tem a permissão.
-// O Autônomo não tem motorista: para ele, o cartão não fala de motorista e o resumo manda falar com a oficina.
+type Dados = { caminhao: Caminhao; ordens: OrdemDeServico[]; historico: RegistroDeKm[] }
+
+// Tudo de um caminhão, igual ao detalhe no web: a situação (com Atualizar km e Lançar OS), o histórico de manutenções
+// e o histórico de km. Editar (permissão Veículos) e Corrigir km (Admin e Gestor) para quem pode.
+// O Autônomo não tem motorista: para ele, nada fala de motorista e o resumo manda falar com a oficina.
 // Recarrega ao voltar para a tela (ex.: depois de atualizar o km) e ao puxar para baixo.
 export default function DetalheDoCaminhao() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const { chamar, usuario } = useSessao()
   const autonomo = usuario?.tipoConta === 'Autonomo'
-  const [caminhao, setCaminhao] = useState<Caminhao | null>(null)
+  const pode = (permissao: string) => !!usuario?.permissoes.includes(permissao)
+  const [dados, setDados] = useState<Dados | null>(null)
   const [erro, setErro] = useState('')
   const [puxando, setPuxando] = useState(false)
 
   const carregar = useCallback(async () => {
     try {
-      setCaminhao(await situacaoDoCaminhao(chamar, Number(id)))
+      const [caminhao, ordens, historico] = await Promise.all([
+        situacaoDoCaminhao(chamar, Number(id)),
+        ordensDoCaminhao(chamar, Number(id)),
+        historicoDeKm(chamar, Number(id)),
+      ])
+      setDados({ caminhao, ordens: [...ordens].sort(maisNovaPrimeiro), historico })
       setErro('')
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Não foi possível carregar o caminhão.')
@@ -42,9 +55,22 @@ export default function DetalheDoCaminhao() {
   return (
     <SafeAreaView edges={['top']} style={estilos.tela}>
       <View style={estilos.cabecalho}>
-        <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button" accessibilityLabel="Voltar" style={estilos.voltar}>
-          <Feather name="arrow-left" size={20} color={cores.marca200} />
-        </Pressable>
+        <View style={estilos.topo}>
+          <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button" accessibilityLabel="Voltar" style={estilos.redondo}>
+            <Feather name="arrow-left" size={20} color={cores.marca200} />
+          </Pressable>
+          {pode('Veiculos') && dados && (
+            <Pressable
+              onPress={() => router.push({ pathname: '/cadastro-caminhao', params: { id: dados.caminhao.id } })}
+              hitSlop={12}
+              accessibilityRole="button"
+              style={[estilos.redondo, estilos.editar]}
+            >
+              <Feather name="edit-2" size={16} color={cores.marca200} />
+              <Text style={estilos.editarTexto}>Editar</Text>
+            </Pressable>
+          )}
+        </View>
         <Text style={estilos.titulo}>Situação do caminhão</Text>
         <FaixaDaEstrada />
       </View>
@@ -61,16 +87,42 @@ export default function DetalheDoCaminhao() {
             </View>
           )}
 
-          {caminhao === null && erro === '' && <ActivityIndicator style={estilos.carregando} color={cores.marca700} />}
+          {dados === null && erro === '' && <ActivityIndicator style={estilos.carregando} color={cores.marca700} />}
 
-          {caminhao && (
-            <SituacaoDoCaminhao
-              caminhao={caminhao}
-              podeAtualizarKm={!!usuario?.permissoes.includes('AtualizarKm')}
-              mostrarMotorista={!autonomo}
-              falarComOficina={autonomo}
-              podeLancarOS={!!usuario?.permissoes.includes('OrdemServico')}
-            />
+          {dados && (
+            <>
+              {!dados.caminhao.ativo && (
+                <View style={estilos.desativado}>
+                  <Feather name="pause-circle" size={20} color={cores.textoMedio} />
+                  <Text style={estilos.desativadoTexto}>
+                    Caminhão desativado: fica fora da OS e dos chamados. Para voltar a usar, edite e ligue Ativo.
+                  </Text>
+                </View>
+              )}
+
+              <SituacaoDoCaminhao
+                caminhao={dados.caminhao}
+                podeAtualizarKm={pode('AtualizarKm')}
+                mostrarMotorista={!autonomo}
+                falarComOficina={autonomo}
+                podeLancarOS={pode('OrdemServico') && dados.caminhao.ativo}
+                kmMinimoParaCorrigir={usuario?.cuidaDosAcessos ? kmDaMaiorOs(dados.ordens) : undefined}
+              />
+
+              <Text style={estilos.secao}>Histórico de manutenções</Text>
+              {dados.ordens.length === 0
+                ? <Text style={estilos.vazio}>Nenhuma manutenção registrada ainda.</Text>
+                : dados.ordens.map((os) => <CartaoDaOrdem key={os.id} os={os} mostrarMotorista={!autonomo} mostrarPlaca={false} />)}
+
+              <Text style={estilos.secao}>Histórico de km</Text>
+              {dados.historico.length === 0
+                ? <Text style={estilos.vazio}>Nenhuma mudança de km registrada ainda.</Text>
+                : (
+                  <View style={estilos.lista}>
+                    {dados.historico.map((h, i) => <LinhaDoKm key={h.id} registro={h} primeira={i === 0} />)}
+                  </View>
+                )}
+            </>
           )}
         </ScrollView>
       </View>
@@ -78,13 +130,58 @@ export default function DetalheDoCaminhao() {
   )
 }
 
+// "OS nº 12" quando foi uma OS (ou "OS excluída", se ela saiu); o resto pelo nome da origem
+function textoDaOrigem(h: RegistroDeKm) {
+  if (h.origem !== 'OrdemServico') return ORIGENS_KM[h.origem] ?? h.origem
+  return h.ordemServicoId ? `OS nº ${h.ordemServicoId}` : 'OS excluída'
+}
+
+function LinhaDoKm({ registro: h, primeira }: { registro: RegistroDeKm; primeira: boolean }) {
+  const diferenca = h.kmAnterior === null ? null : h.kmNovo - h.kmAnterior
+  const correcao = h.origem === 'Correcao'
+  return (
+    <View style={[estilos.linhaKm, !primeira && estilos.linhaKmComLinha]}>
+      <View style={estilos.linhaKmTopo}>
+        <Text style={[estilos.origem, correcao && estilos.correcao]}>{textoDaOrigem(h)}</Text>
+        <Text style={estilos.meta}>{formatDataHora(h.registradoEm)}</Text>
+      </View>
+      <Text style={estilos.kmTexto}>
+        {h.kmAnterior === null ? formatKm(h.kmNovo) : `${formatKm(h.kmAnterior)} → ${formatKm(h.kmNovo)}`}
+        {diferenca !== null && (
+          <Text style={[estilos.meta, diferenca < 0 && estilos.correcao]}>
+            {`  (${diferenca > 0 ? '+' : '−'}${formatKm(Math.abs(diferenca))})`}
+          </Text>
+        )}
+      </Text>
+      {!!h.motivo && <Text style={estilos.detalhe}>Motivo: {h.motivo}</Text>}
+      {h.registradoPor && <Text style={estilos.meta}>por {h.registradoPor.nome}</Text>}
+    </View>
+  )
+}
+
 const estilos = StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.marca900 },
   cabecalho: { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 40, gap: 12 },
-  voltar: { alignSelf: 'flex-start', padding: 8, borderRadius: 999, backgroundColor: cores.marca800 },
+  topo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  redondo: { alignSelf: 'flex-start', padding: 8, borderRadius: 999, backgroundColor: cores.marca800 },
+  editar: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14 },
+  editarTexto: { fontFamily: fontes.textoForte, fontSize: 14, color: cores.marca200 },
   titulo: { fontFamily: fontes.titulo, fontSize: 32, lineHeight: 36, color: cores.branco },
   corpo: { flex: 1, backgroundColor: cores.fundo, borderTopLeftRadius: 28, borderTopRightRadius: 28, marginTop: -20, overflow: 'hidden' },
   conteudo: { padding: 20, paddingBottom: 40, gap: 14 },
   bloco: { gap: 10 },
   carregando: { marginTop: 40 },
+  desativado: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 16, padding: 16, backgroundColor: cores.borda },
+  desativadoTexto: { flex: 1, fontFamily: fontes.textoMedio, fontSize: 13, lineHeight: 18, color: cores.textoMedio },
+  secao: { fontFamily: fontes.subtitulo, fontSize: 22, color: cores.texto, marginTop: 6 },
+  vazio: { fontFamily: fontes.texto, fontSize: 14, color: cores.textoFraco, textAlign: 'center', paddingVertical: 8 },
+  lista: { backgroundColor: cores.branco, borderRadius: 20, paddingHorizontal: 16 },
+  linhaKm: { paddingVertical: 14, gap: 4 },
+  linhaKmComLinha: { borderTopWidth: 1, borderTopColor: cores.borda },
+  linhaKmTopo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
+  origem: { fontFamily: fontes.textoForte, fontSize: 14, color: cores.texto },
+  correcao: { color: coresDoStatus.atencao.texto },
+  meta: { fontFamily: fontes.texto, fontSize: 12, color: cores.textoFraco },
+  kmTexto: { fontFamily: fontes.textoMedio, fontSize: 14, color: cores.texto },
+  detalhe: { fontFamily: fontes.texto, fontSize: 13, lineHeight: 18, color: cores.textoMedio },
 })

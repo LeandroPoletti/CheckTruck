@@ -10,7 +10,7 @@ export default function CabecalhoDoModal({ titulo, placa }: { titulo: string; pl
     <View style={estilos.cabecalho}>
       <View style={estilos.textos}>
         <Text style={estilos.titulo}>{titulo}</Text>
-        {placa && <Placa placa={placa} pequena />}
+        {!!placa && <Placa placa={placa} pequena />}
       </View>
       <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button" accessibilityLabel="Fechar">
         <Feather name="x" size={24} color={cores.textoMedio} />

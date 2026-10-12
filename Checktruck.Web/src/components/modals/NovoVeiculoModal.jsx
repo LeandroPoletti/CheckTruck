@@ -211,7 +211,7 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
           {autonomo ? (
             <Toggle checked={form.ativo} onChange={(v) => set('ativo', v)} label="Ativo" />
           ) : (
-            <Field label="Motorista atual (opcional)" hint="Muda sozinho quando um motorista abre chamado deste caminhão.">
+            <Field label="Motorista atual (opcional)" hint="Também muda quando uma OS é lançada com motorista.">
               <div className="flex items-center gap-3">
                 <Select className="flex-1" value={form.motoristaId} onChange={(e) => set('motoristaId', e.target.value)}>
                   <option value="">Sem motorista</option>

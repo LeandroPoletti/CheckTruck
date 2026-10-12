@@ -14,10 +14,17 @@ type Props = {
   mostrarMotorista?: boolean
   /** Mostra o atalho Lançar OS, já com este caminhão (permissão Ordem de serviço). */
   podeLancarOS?: boolean
+  /**
+   * Com isso, aparece o botão Corrigir km embaixo do Atualizar km (só Admin e Gestor). O número é o km da maior OS
+   * do caminhão: a correção não pode ficar abaixo dele.
+   */
+  kmMinimoParaCorrigir?: number
 }
 
 // Cartão branco com a placa, o modelo e o km atual do caminhão
-export default function CartaoDoCaminhao({ caminhao, podeAtualizarKm, mostrarMotorista = false, podeLancarOS = false }: Props) {
+export default function CartaoDoCaminhao(
+  { caminhao, podeAtualizarKm, mostrarMotorista = false, podeLancarOS = false, kmMinimoParaCorrigir }: Props,
+) {
   return (
     <View style={estilos.cartao}>
       <Placa placa={caminhao.placa} />
@@ -42,6 +49,17 @@ export default function CartaoDoCaminhao({ caminhao, podeAtualizarKm, mostrarMot
           onPress={() => router.push({
             pathname: '/atualizar-km',
             params: { id: caminhao.id, placa: caminhao.placa, km: caminhao.kmAtual },
+          })}
+        />
+      )}
+      {kmMinimoParaCorrigir !== undefined && (
+        <Botao
+          titulo="Corrigir km"
+          tipo="discreto"
+          icone="edit-3"
+          onPress={() => router.push({
+            pathname: '/corrigir-km',
+            params: { id: caminhao.id, placa: caminhao.placa, km: caminhao.kmAtual, minimo: kmMinimoParaCorrigir },
           })}
         />
       )}

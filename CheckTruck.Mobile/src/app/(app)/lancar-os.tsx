@@ -11,6 +11,7 @@ import {
 import { lancarOrdem } from '@/servicos/ordens'
 import { dataDoCampo, dataParaCampo, formatKm, hoje, mascaraData } from '@/dados/formato'
 import { ORIGENS_INTERVALO } from '@/dados/intervalos'
+import { ANO_MINIMO } from '@/dados/caminhoes'
 import Botao from '@/componentes/Botao'
 import CabecalhoDoModal from '@/componentes/CabecalhoDoModal'
 import Campo from '@/componentes/Campo'
@@ -18,7 +19,6 @@ import Escolha from '@/componentes/Escolha'
 import MensagemErro from '@/componentes/MensagemErro'
 import { cores, coresDoStatus, fontes } from '@/tema'
 
-const ANO_MINIMO = 1900
 const porNome = (a: { nome: string }, b: { nome: string }) => a.nome.localeCompare(b.nome)
 
 type Listas = { caminhoes: CaminhaoNaLista[]; tipos: TipoDeManutencao[]; mecanicos: Mecanico[]; motoristas: Motorista[] }
@@ -58,7 +58,7 @@ export default function LancarOs() {
           frota ? motoristasAtivos(chamar) : Promise.resolve([]),
         ])
         const carregadas = {
-          caminhoes: [...caminhoes].sort((a, b) => a.placa.localeCompare(b.placa)),
+          caminhoes: caminhoes.filter((c) => c.ativo).sort((a, b) => a.placa.localeCompare(b.placa)),
           tipos: [...tipos].sort(porNome),
           mecanicos: [...mecanicos].sort(porNome),
           motoristas,

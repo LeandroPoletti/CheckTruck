@@ -4,12 +4,13 @@ import { router } from 'expo-router'
 import { Feather } from '@expo/vector-icons'
 import type { CaminhaoNaLista, ItemDeTroca, Status } from '@/servicos/caminhoes'
 import { formatKm, textoDias, textoKmRestante } from '@/dados/formato'
+import Botao from '@/componentes/Botao'
 import CampoDeBusca from '@/componentes/CampoDeBusca'
 import EtiquetaStatus from '@/componentes/EtiquetaStatus'
 import Placa from '@/componentes/Placa'
 import { cores, coresDoStatus, fontes } from '@/tema'
 
-type Filtro = 'todos' | Status
+type Filtro = 'todos' | Status | 'desativados'
 
 const FILTROS: { id: Filtro; nome: string }[] = [
   { id: 'todos', nome: 'Todos' },
@@ -44,30 +45,48 @@ function textoDoPrazo({ kmRestante, diasRestantes }: ItemDeTroca) {
 }
 
 type Props = {
+  /** Ativos e desativados. */
   caminhoes: CaminhaoNaLista[]
   /** Na Frota, o cartão mostra quem está com o caminhão (o Autônomo não tem motorista). */
   mostrarMotorista: boolean
+  /** Mostra Cadastrar caminhão (permissão Veículos). */
+  podeCadastrar: boolean
 }
 
-// Caminhões ativos da empresa, do que vence primeiro para o que vence por último. Toque no caminhão para ver tudo.
-export default function CaminhoesDaFrota({ caminhoes, mostrarMotorista }: Props) {
+// Caminhões da empresa, do que vence primeiro para o que vence por último. Os desativados ficam num filtro
+// à parte (só aparece quando tem algum). Toque no caminhão para ver tudo.
+export default function CaminhoesDaFrota({ caminhoes, mostrarMotorista, podeCadastrar }: Props) {
   const [busca, setBusca] = useState('')
   const [filtro, setFiltro] = useState<Filtro>('todos')
+  const cadastrar = podeCadastrar && (
+    <Botao titulo="Cadastrar caminhão" icone="plus" onPress={() => router.push('/cadastro-caminhao')} />
+  )
 
   if (caminhoes.length === 0) {
     return (
-      <View style={estilos.cartaoVazio}>
-        <Text style={estilos.vazioTitulo}>Nenhum caminhão ativo</Text>
-        <Text style={estilos.vazioTexto}>Os caminhões cadastrados no site aparecem aqui.</Text>
-      </View>
+      <>
+        {cadastrar}
+        <View style={estilos.cartaoVazio}>
+          <Text style={estilos.vazioTitulo}>Nenhum caminhão ativo</Text>
+          <Text style={estilos.vazioTexto}>
+            {podeCadastrar ? 'Use "Cadastrar caminhão" para começar.' : 'Os caminhões cadastrados no site aparecem aqui.'}
+          </Text>
+        </View>
+      </>
     )
   }
 
-  const contagem = (f: Filtro) => (f === 'todos' ? caminhoes.length : caminhoes.filter((c) => c.status === f).length)
-  const lista = ordenar(caminhoes).filter((c) => (filtro === 'todos' || c.status === filtro) && combina(c, busca))
+  const ativos = caminhoes.filter((c) => c.ativo)
+  const desativados = caminhoes.filter((c) => !c.ativo)
+  const filtros = desativados.length > 0 ? [...FILTROS, { id: 'desativados' as const, nome: 'Desativados' }] : FILTROS
+  const contagem = (f: Filtro) =>
+    f === 'todos' ? ativos.length : f === 'desativados' ? desativados.length : ativos.filter((c) => c.status === f).length
+  const daVez = filtro === 'desativados' ? desativados : ativos.filter((c) => filtro === 'todos' || c.status === filtro)
+  const lista = ordenar(daVez).filter((c) => combina(c, busca))
 
   return (
     <>
+      {cadastrar}
       <CampoDeBusca
         valor={busca}
         aoMudar={setBusca}
@@ -75,7 +94,7 @@ export default function CaminhoesDaFrota({ caminhoes, mostrarMotorista }: Props)
       />
 
       <View style={estilos.filtros}>
-        {FILTROS.map((f) => (
+        {filtros.map((f) => (
           <Pressable
             key={f.id}
             onPress={() => setFiltro(f.id)}
@@ -108,7 +127,7 @@ function CartaoNaLista({ caminhao, mostrarMotorista }: { caminhao: CaminhaoNaLis
     >
       <View style={estilos.linha}>
         <Placa placa={caminhao.placa} pequena />
-        <EtiquetaStatus status={caminhao.status} />
+        {caminhao.ativo ? <EtiquetaStatus status={caminhao.status} /> : <Text style={estilos.desativado}>Desativado</Text>}
       </View>
       <View>
         <Text style={estilos.modelo}>{caminhao.fabricante} {caminhao.modelo.nome}, {caminhao.geracao.nome}</Text>
@@ -150,6 +169,16 @@ const estilos = StyleSheet.create({
   divisoria: { height: 1, backgroundColor: cores.borda },
   urgente: { flex: 1 },
   urgenteNome: { fontFamily: fontes.textoForte, fontSize: 14, color: cores.texto },
+  desativado: {
+    fontFamily: fontes.textoForte,
+    fontSize: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 999,
+    overflow: 'hidden',
+    color: cores.textoMedio,
+    backgroundColor: cores.borda,
+  },
   cartaoVazio: { backgroundColor: cores.branco, borderRadius: 20, padding: 20, gap: 8 },
   vazioTitulo: { fontFamily: fontes.subtitulo, fontSize: 22, color: cores.texto },
   vazioTexto: { fontFamily: fontes.texto, fontSize: 14, lineHeight: 20, color: cores.textoFraco },
