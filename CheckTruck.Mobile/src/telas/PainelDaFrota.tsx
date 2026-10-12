@@ -22,7 +22,7 @@ type Aba = 'caminhoes' | 'chamados' | 'ordens'
 // Tela de quem cuida da frota (mecânico, chefe de manutenção, gestor...) e do Autônomo. Mostra o que o acesso libera,
 // igual ao web: Ver frota mostra os caminhões e as ordens de serviço, e Atender chamados (só na Frota) mostra os
 // chamados. Com mais de uma, troca nas abas de cima. O Autônomo com um caminhão só já vê a situação dele, sem a lista.
-// No fim da tela, Minha empresa para o Admin e o Gestor.
+// No fim da tela, os cadastros (permissão Cadastros) e Minha empresa (Admin e Gestor).
 // Recarrega sempre que a tela volta a aparecer (ex.: depois de resolver um chamado) e ao puxar para baixo.
 export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
   const { chamar, sair } = useSessao()
@@ -133,8 +133,22 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
           )}
           {aba === 'ordens' && ordens && <OrdensDaFrota ordens={ordens} usuario={usuario} />}
 
-          {usuario.cuidaDosAcessos && caminhoes && chamados && ordens && (
-            <Atalho icone="briefcase" titulo="Minha empresa" onPress={() => router.push('/minha-empresa')} />
+          {caminhoes && chamados && ordens && (
+            <>
+              {usuario.permissoes.includes('Cadastros') && (
+                <>
+                  <Atalho
+                    icone="tool"
+                    titulo={autonomo ? 'Oficinas e mecânicos' : 'Mecânicos'}
+                    onPress={() => router.push('/mecanicos')}
+                  />
+                  <Atalho icone="list" titulo="Tipos de manutenção" onPress={() => router.push('/tipos-manutencao')} />
+                </>
+              )}
+              {usuario.cuidaDosAcessos && (
+                <Atalho icone="briefcase" titulo="Minha empresa" onPress={() => router.push('/minha-empresa')} />
+              )}
+            </>
           )}
         </ScrollView>
       </View>

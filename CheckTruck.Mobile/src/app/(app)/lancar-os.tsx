@@ -5,7 +5,7 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { useSessao } from '@/servicos/sessao'
 import { caminhoesDaFrota, situacaoDoCaminhao, type Caminhao, type CaminhaoNaLista } from '@/servicos/caminhoes'
 import {
-  cadastrarMecanico, mecanicosAtivos, motoristasAtivos, tiposDeManutencao,
+  mecanicosAtivos, motoristasAtivos, salvarMecanico, tiposDeManutencao,
   type Mecanico, type Motorista, type TipoDeManutencao,
 } from '@/servicos/cadastros'
 import { lancarOrdem } from '@/servicos/ordens'
@@ -317,7 +317,7 @@ function CadastroRapido({ frota, aoCadastrar }: { frota: boolean; aoCadastrar(me
     setSalvando(true)
     setErro('')
     try {
-      aoCadastrar(await cadastrarMecanico(chamar, nome, funcao))
+      aoCadastrar(await salvarMecanico(chamar, { nome, funcao, ativo: true }))
       setAberto(false)
       setNome('')
       setFuncao('')

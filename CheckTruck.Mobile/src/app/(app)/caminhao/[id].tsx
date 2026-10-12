@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { Feather } from '@expo/vector-icons'
 import { useSessao } from '@/servicos/sessao'
@@ -11,9 +10,9 @@ import { ORIGENS_KM } from '@/dados/caminhoes'
 import Atalho from '@/componentes/Atalho'
 import Botao from '@/componentes/Botao'
 import CartaoDaOrdem from '@/componentes/CartaoDaOrdem'
-import FaixaDaEstrada from '@/componentes/FaixaDaEstrada'
 import MensagemErro from '@/componentes/MensagemErro'
 import SituacaoDoCaminhao from '@/componentes/SituacaoDoCaminhao'
+import TelaComTopo from '@/componentes/TelaComTopo'
 import { cores, coresDoStatus, fontes } from '@/tema'
 
 type Dados = { caminhao: Caminhao; ordens: OrdemDeServico[]; historico: RegistroDeKm[] }
@@ -54,87 +53,77 @@ export default function DetalheDoCaminhao() {
   }
 
   return (
-    <SafeAreaView edges={['top']} style={estilos.tela}>
-      <View style={estilos.cabecalho}>
-        <View style={estilos.topo}>
-          <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button" accessibilityLabel="Voltar" style={estilos.redondo}>
-            <Feather name="arrow-left" size={20} color={cores.marca200} />
-          </Pressable>
-          {pode('Veiculos') && dados && (
-            <Pressable
-              onPress={() => router.push({ pathname: '/cadastro-caminhao', params: { id: dados.caminhao.id } })}
-              hitSlop={12}
-              accessibilityRole="button"
-              style={[estilos.redondo, estilos.editar]}
-            >
-              <Feather name="edit-2" size={16} color={cores.marca200} />
-              <Text style={estilos.editarTexto}>Editar</Text>
-            </Pressable>
-          )}
-        </View>
-        <Text style={estilos.titulo}>Situação do caminhão</Text>
-        <FaixaDaEstrada />
-      </View>
-
-      <View style={estilos.corpo}>
-        <ScrollView
-          contentContainerStyle={estilos.conteudo}
-          refreshControl={<RefreshControl refreshing={puxando} onRefresh={puxarParaAtualizar} tintColor={cores.marca700} />}
+    <TelaComTopo
+      titulo="Situação do caminhão"
+      direita={pode('Veiculos') && dados && (
+        <Pressable
+          onPress={() => router.push({ pathname: '/cadastro-caminhao', params: { id: dados.caminhao.id } })}
+          hitSlop={12}
+          accessibilityRole="button"
+          style={estilos.editar}
         >
-          {erro !== '' && (
-            <View style={estilos.bloco}>
-              <MensagemErro>{erro}</MensagemErro>
-              <Botao titulo="Tentar de novo" tipo="discreto" icone="refresh-cw" onPress={carregar} />
-            </View>
-          )}
+          <Feather name="edit-2" size={16} color={cores.marca200} />
+          <Text style={estilos.editarTexto}>Editar</Text>
+        </Pressable>
+      )}
+    >
+      <ScrollView
+        contentContainerStyle={estilos.conteudo}
+        refreshControl={<RefreshControl refreshing={puxando} onRefresh={puxarParaAtualizar} tintColor={cores.marca700} />}
+      >
+        {erro !== '' && (
+          <View style={estilos.bloco}>
+            <MensagemErro>{erro}</MensagemErro>
+            <Botao titulo="Tentar de novo" tipo="discreto" icone="refresh-cw" onPress={carregar} />
+          </View>
+        )}
 
-          {dados === null && erro === '' && <ActivityIndicator style={estilos.carregando} color={cores.marca700} />}
+        {dados === null && erro === '' && <ActivityIndicator style={estilos.carregando} color={cores.marca700} />}
 
-          {dados && (
-            <>
-              {!dados.caminhao.ativo && (
-                <View style={estilos.desativado}>
-                  <Feather name="pause-circle" size={20} color={cores.textoMedio} />
-                  <Text style={estilos.desativadoTexto}>
-                    Caminhão desativado: fica fora da OS e dos chamados. Para voltar a usar, edite e ligue Ativo.
-                  </Text>
+        {dados && (
+          <>
+            {!dados.caminhao.ativo && (
+              <View style={estilos.desativado}>
+                <Feather name="pause-circle" size={20} color={cores.textoMedio} />
+                <Text style={estilos.desativadoTexto}>
+                  Caminhão desativado: fica fora da OS e dos chamados. Para voltar a usar, edite e ligue Ativo.
+                </Text>
+              </View>
+            )}
+
+            <SituacaoDoCaminhao
+              caminhao={dados.caminhao}
+              podeAtualizarKm={pode('AtualizarKm')}
+              mostrarMotorista={!autonomo}
+              falarComOficina={autonomo}
+              podeLancarOS={pode('OrdemServico') && dados.caminhao.ativo}
+              kmMinimoParaCorrigir={usuario?.cuidaDosAcessos ? kmDaMaiorOs(dados.ordens) : undefined}
+            />
+            {pode('Intervalos') && dados.caminhao.ativo && (
+              <Atalho
+                icone="sliders"
+                titulo="Intervalos de troca"
+                onPress={() => router.push({ pathname: '/intervalos', params: { id: dados.caminhao.id } })}
+              />
+            )}
+
+            <Text style={estilos.secao}>Histórico de manutenções</Text>
+            {dados.ordens.length === 0
+              ? <Text style={estilos.vazio}>Nenhuma manutenção registrada ainda.</Text>
+              : dados.ordens.map((os) => <CartaoDaOrdem key={os.id} os={os} mostrarMotorista={!autonomo} mostrarPlaca={false} />)}
+
+            <Text style={estilos.secao}>Histórico de km</Text>
+            {dados.historico.length === 0
+              ? <Text style={estilos.vazio}>Nenhuma mudança de km registrada ainda.</Text>
+              : (
+                <View style={estilos.lista}>
+                  {dados.historico.map((h, i) => <LinhaDoKm key={h.id} registro={h} primeira={i === 0} />)}
                 </View>
               )}
-
-              <SituacaoDoCaminhao
-                caminhao={dados.caminhao}
-                podeAtualizarKm={pode('AtualizarKm')}
-                mostrarMotorista={!autonomo}
-                falarComOficina={autonomo}
-                podeLancarOS={pode('OrdemServico') && dados.caminhao.ativo}
-                kmMinimoParaCorrigir={usuario?.cuidaDosAcessos ? kmDaMaiorOs(dados.ordens) : undefined}
-              />
-              {pode('Intervalos') && dados.caminhao.ativo && (
-                <Atalho
-                  icone="sliders"
-                  titulo="Intervalos de troca"
-                  onPress={() => router.push({ pathname: '/intervalos', params: { id: dados.caminhao.id } })}
-                />
-              )}
-
-              <Text style={estilos.secao}>Histórico de manutenções</Text>
-              {dados.ordens.length === 0
-                ? <Text style={estilos.vazio}>Nenhuma manutenção registrada ainda.</Text>
-                : dados.ordens.map((os) => <CartaoDaOrdem key={os.id} os={os} mostrarMotorista={!autonomo} mostrarPlaca={false} />)}
-
-              <Text style={estilos.secao}>Histórico de km</Text>
-              {dados.historico.length === 0
-                ? <Text style={estilos.vazio}>Nenhuma mudança de km registrada ainda.</Text>
-                : (
-                  <View style={estilos.lista}>
-                    {dados.historico.map((h, i) => <LinhaDoKm key={h.id} registro={h} primeira={i === 0} />)}
-                  </View>
-                )}
-            </>
-          )}
-        </ScrollView>
-      </View>
-    </SafeAreaView>
+          </>
+        )}
+      </ScrollView>
+    </TelaComTopo>
   )
 }
 
@@ -168,14 +157,17 @@ function LinhaDoKm({ registro: h, primeira }: { registro: RegistroDeKm; primeira
 }
 
 const estilos = StyleSheet.create({
-  tela: { flex: 1, backgroundColor: cores.marca900 },
-  cabecalho: { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 40, gap: 12 },
-  topo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  redondo: { alignSelf: 'flex-start', padding: 8, borderRadius: 999, backgroundColor: cores.marca800 },
-  editar: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14 },
+  editar: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    padding: 8,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    backgroundColor: cores.marca800,
+  },
   editarTexto: { fontFamily: fontes.textoForte, fontSize: 14, color: cores.marca200 },
-  titulo: { fontFamily: fontes.titulo, fontSize: 32, lineHeight: 36, color: cores.branco },
-  corpo: { flex: 1, backgroundColor: cores.fundo, borderTopLeftRadius: 28, borderTopRightRadius: 28, marginTop: -20, overflow: 'hidden' },
   conteudo: { padding: 20, paddingBottom: 40, gap: 14 },
   bloco: { gap: 10 },
   carregando: { marginTop: 40 },

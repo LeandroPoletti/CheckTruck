@@ -1,11 +1,17 @@
-import { Pressable, StyleSheet, TextInput, View } from 'react-native'
+import { Pressable, StyleSheet, TextInput, View, type TextInputProps } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import { cores, fontes } from '@/tema'
 
-type Props = { valor: string; aoMudar(texto: string): void; placeholder: string }
+type Props = {
+  valor: string
+  aoMudar(texto: string): void
+  placeholder: string
+  /** Maiúscula sozinha (padrão, para placa) ou não ("none", para nomes). */
+  autoCapitalize?: TextInputProps['autoCapitalize']
+}
 
 // Campo de busca das listas, com a lupa e o X para limpar
-export default function CampoDeBusca({ valor, aoMudar, placeholder }: Props) {
+export default function CampoDeBusca({ valor, aoMudar, placeholder, autoCapitalize = 'characters' }: Props) {
   return (
     <View style={estilos.busca}>
       <Feather name="search" size={18} color={cores.textoFraco} />
@@ -14,7 +20,7 @@ export default function CampoDeBusca({ valor, aoMudar, placeholder }: Props) {
         onChangeText={aoMudar}
         placeholder={placeholder}
         placeholderTextColor={cores.textoFraco}
-        autoCapitalize="characters"
+        autoCapitalize={autoCapitalize}
         autoCorrect={false}
         returnKeyType="search"
         style={estilos.entrada}

@@ -9,6 +9,7 @@ import { ORIGENS_INTERVALO, oQueVoltaAValer, textoDoIntervalo } from '@/dados/in
 import Botao from '@/componentes/Botao'
 import CabecalhoDoModal from '@/componentes/CabecalhoDoModal'
 import Campo from '@/componentes/Campo'
+import ConfirmarExclusao from '@/componentes/ConfirmarExclusao'
 import MensagemErro from '@/componentes/MensagemErro'
 import { cores, fontes } from '@/tema'
 
@@ -189,18 +190,15 @@ export default function JanelaDoIntervalo() {
                 <Botao titulo="Excluir intervalo" tipo="discreto" icone="trash-2" onPress={() => setConfirmando(true)} />
               )}
               {meu && confirmando && (
-                <View style={estilos.confirmar}>
-                  <Text style={estilos.confirmarTitulo}>
-                    {daGeracao ? 'Excluir intervalo da empresa' : 'Excluir intervalo do caminhão'}
-                  </Text>
-                  <Text style={estilos.confirmarTexto}>
-                    {daGeracao
-                      ? `Excluir o intervalo de "${tipo.nome}" da geração ${params.nome}? Os caminhões desta geração passam a usar ${oQueVoltaAValer(emOrdem, 'empresa')}, menos os que têm intervalo do caminhão.`
-                      : `Excluir o intervalo próprio de "${tipo.nome}" do caminhão ${params.nome}? Ele volta a usar ${oQueVoltaAValer(emOrdem, 'caminhao')}.`}
-                  </Text>
-                  <Botao titulo="Excluir" tipo="perigo" icone="trash-2" onPress={excluir} ocupado={excluindo} />
-                  <Botao titulo="Cancelar" tipo="discreto" onPress={() => setConfirmando(false)} />
-                </View>
+                <ConfirmarExclusao
+                  titulo={daGeracao ? 'Excluir intervalo da empresa' : 'Excluir intervalo do caminhão'}
+                  texto={daGeracao
+                    ? `Excluir o intervalo de "${tipo.nome}" da geração ${params.nome}? Os caminhões desta geração passam a usar ${oQueVoltaAValer(emOrdem, 'empresa')}, menos os que têm intervalo do caminhão.`
+                    : `Excluir o intervalo próprio de "${tipo.nome}" do caminhão ${params.nome}? Ele volta a usar ${oQueVoltaAValer(emOrdem, 'caminhao')}.`}
+                  excluindo={excluindo}
+                  aoExcluir={excluir}
+                  aoCancelar={() => setConfirmando(false)}
+                />
               )}
             </>
           )}
@@ -219,7 +217,4 @@ const estilos = StyleSheet.create({
   itemHoje: { fontFamily: fontes.texto, fontSize: 14, color: cores.textoMedio },
   aviso: { backgroundColor: cores.marca50, borderRadius: 12, padding: 12 },
   avisoTexto: { fontFamily: fontes.texto, fontSize: 13, lineHeight: 19, color: cores.marca700 },
-  confirmar: { backgroundColor: cores.erroFundo, borderRadius: 16, padding: 16, gap: 12 },
-  confirmarTitulo: { fontFamily: fontes.textoForte, fontSize: 16, color: cores.erroTexto },
-  confirmarTexto: { fontFamily: fontes.texto, fontSize: 14, lineHeight: 20, color: cores.texto },
 })

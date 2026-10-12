@@ -1,4 +1,10 @@
-// Números e datas no jeito brasileiro, iguais aos do web
+// Números e datas no jeito brasileiro, iguais aos do web, e a busca das listas
+
+/** Busca sem ligar para maiúscula nem acento: "joao" acha "João". */
+export function contemBusca(texto: string, busca: string) {
+  const limpar = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  return limpar(texto).includes(limpar(busca.trim()))
+}
 
 export const formatKm = (km: number) => `${Math.round(km).toLocaleString('pt-BR')} km`
 

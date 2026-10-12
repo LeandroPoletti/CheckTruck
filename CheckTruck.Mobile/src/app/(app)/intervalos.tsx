@@ -1,8 +1,6 @@
 import { useCallback, useState } from 'react'
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
-import { Feather } from '@expo/vector-icons'
 import { useSessao } from '@/servicos/sessao'
 import { tiposDeManutencao, type TipoDeManutencao } from '@/servicos/cadastros'
 import {
@@ -12,9 +10,12 @@ import { formatKm } from '@/dados/formato'
 import { COMPONENTES, ORIGENS_INTERVALO, textoDoIntervalo } from '@/dados/intervalos'
 import Abas from '@/componentes/Abas'
 import Botao from '@/componentes/Botao'
-import FaixaDaEstrada from '@/componentes/FaixaDaEstrada'
+import Etiqueta from '@/componentes/Etiqueta'
+import LinhaTocavel from '@/componentes/LinhaTocavel'
 import MensagemErro from '@/componentes/MensagemErro'
+import Pilula from '@/componentes/Pilula'
 import Placa from '@/componentes/Placa'
+import TelaComTopo from '@/componentes/TelaComTopo'
 import { cores, coresDoStatus, fontes } from '@/tema'
 
 type Aba = Alvo['tipo']
@@ -65,86 +66,76 @@ export default function Intervalos() {
   const geracao = dados && `${dados.caminhao.fabricanteNome} ${dados.caminhao.modeloNome} · ${dados.caminhao.geracaoNome}`
 
   return (
-    <SafeAreaView edges={['top']} style={estilos.tela}>
-      <View style={estilos.cabecalho}>
-        <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button" accessibilityLabel="Voltar" style={estilos.voltar}>
-          <Feather name="arrow-left" size={20} color={cores.marca200} />
-        </Pressable>
-        <Text style={estilos.titulo}>Intervalos de troca</Text>
-        <FaixaDaEstrada />
-      </View>
+    <TelaComTopo titulo="Intervalos de troca">
+      <ScrollView
+        contentContainerStyle={estilos.conteudo}
+        refreshControl={<RefreshControl refreshing={puxando} onRefresh={puxarParaAtualizar} tintColor={cores.marca700} />}
+      >
+        <Text style={estilos.explicacao}>
+          Vale o primeiro que existir: do caminhão → da empresa → de fábrica → padrão do sistema. Vence o que chegar primeiro: km ou prazo.
+        </Text>
+        <Abas abas={ABAS} escolhida={aba} aoEscolher={setAba} />
 
-      <View style={estilos.corpo}>
-        <ScrollView
-          contentContainerStyle={estilos.conteudo}
-          refreshControl={<RefreshControl refreshing={puxando} onRefresh={puxarParaAtualizar} tintColor={cores.marca700} />}
-        >
-          <Text style={estilos.explicacao}>
-            Vale o primeiro que existir: do caminhão → da empresa → de fábrica → padrão do sistema. Vence o que chegar primeiro: km ou prazo.
-          </Text>
-          <Abas abas={ABAS} escolhida={aba} aoEscolher={setAba} />
+        {erro !== '' && (
+          <View style={estilos.bloco}>
+            <MensagemErro>{erro}</MensagemErro>
+            <Botao titulo="Tentar de novo" tipo="discreto" icone="refresh-cw" onPress={carregar} />
+          </View>
+        )}
 
-          {erro !== '' && (
-            <View style={estilos.bloco}>
-              <MensagemErro>{erro}</MensagemErro>
-              <Botao titulo="Tentar de novo" tipo="discreto" icone="refresh-cw" onPress={carregar} />
-            </View>
-          )}
+        {dados === null && erro === '' && <ActivityIndicator style={estilos.carregando} color={cores.marca700} />}
 
-          {dados === null && erro === '' && <ActivityIndicator style={estilos.carregando} color={cores.marca700} />}
-
-          {dados && geracao && (
-            <>
-              <View style={estilos.alvo}>
+        {dados && geracao && (
+          <>
+            <View style={estilos.alvo}>
+              {daGeracao
+                ? <Text style={estilos.alvoNome}>{geracao}</Text>
+                : (
+                  <View style={estilos.alvoCaminhao}>
+                    <Placa placa={dados.caminhao.placa} pequena />
+                    <Text style={estilos.alvoNome}>
+                      {dados.caminhao.fabricanteNome} {dados.caminhao.modeloNome} {dados.caminhao.potenciaCv}
+                    </Text>
+                  </View>
+                )}
+              <Text style={estilos.alvoTexto}>
                 {daGeracao
-                  ? <Text style={estilos.alvoNome}>{geracao}</Text>
-                  : (
-                    <View style={estilos.alvoCaminhao}>
-                      <Placa placa={dados.caminhao.placa} pequena />
-                      <Text style={estilos.alvoNome}>
-                        {dados.caminhao.fabricanteNome} {dados.caminhao.modeloNome} {dados.caminhao.potenciaCv}
-                      </Text>
-                    </View>
-                  )}
-                <Text style={estilos.alvoTexto}>
-                  {daGeracao
-                    ? 'Vale para todos os caminhões desta geração na empresa, menos os que têm intervalo do caminhão.'
-                    : 'Vale só para este caminhão e passa na frente dos outros (ex.: plano da concessionária).'}
+                  ? 'Vale para todos os caminhões desta geração na empresa, menos os que têm intervalo do caminhão.'
+                  : 'Vale só para este caminhão e passa na frente dos outros (ex.: plano da concessionária).'}
+              </Text>
+            </View>
+
+            <View style={estilos.lista}>
+              {dados.tipos.map((tipo, i) => (
+                <LinhaDoIntervalo
+                  key={tipo.id}
+                  tipo={tipo}
+                  emOrdem={(daGeracao ? dados.daGeracao : dados.doCaminhao).find((l) => l.tipoManutencaoId === tipo.id)?.emOrdem ?? []}
+                  minhaOrigem={daGeracao ? 'empresa' : 'caminhao'}
+                  primeira={i === 0}
+                  onPress={() => router.push({
+                    pathname: '/intervalo',
+                    params: daGeracao
+                      ? { alvo: 'geracao', id: dados.caminhao.geracaoId, nome: geracao, tipoId: tipo.id }
+                      : { alvo: 'caminhao', id: dados.caminhao.id, nome: dados.caminhao.placa, tipoId: tipo.id },
+                  })}
+                />
+              ))}
+            </View>
+
+            {daGeracao && (
+              <View style={estilos.aviso}>
+                <Text style={estilos.avisoTexto}>
+                  <Text style={estilos.avisoForte}>1ª troca: </Text>
+                  quando o registro de manutenção marca primeira troca, o sistema usa o intervalo de amaciamento em vez
+                  do padrão. Ex.: Volvo FH 4/5 zero km, câmbio com 200.000 km e diferencial Meritor com 10.000 km.
                 </Text>
               </View>
-
-              <View style={estilos.lista}>
-                {dados.tipos.map((tipo, i) => (
-                  <LinhaDoIntervalo
-                    key={tipo.id}
-                    tipo={tipo}
-                    emOrdem={(daGeracao ? dados.daGeracao : dados.doCaminhao).find((l) => l.tipoManutencaoId === tipo.id)?.emOrdem ?? []}
-                    minhaOrigem={daGeracao ? 'empresa' : 'caminhao'}
-                    primeira={i === 0}
-                    onPress={() => router.push({
-                      pathname: '/intervalo',
-                      params: daGeracao
-                        ? { alvo: 'geracao', id: dados.caminhao.geracaoId, nome: geracao, tipoId: tipo.id }
-                        : { alvo: 'caminhao', id: dados.caminhao.id, nome: dados.caminhao.placa, tipoId: tipo.id },
-                    })}
-                  />
-                ))}
-              </View>
-
-              {daGeracao && (
-                <View style={estilos.aviso}>
-                  <Text style={estilos.avisoTexto}>
-                    <Text style={estilos.avisoForte}>1ª troca: </Text>
-                    quando o registro de manutenção marca primeira troca, o sistema usa o intervalo de amaciamento em vez
-                    do padrão. Ex.: Volvo FH 4/5 zero km, câmbio com 200.000 km e diferencial Meritor com 10.000 km.
-                  </Text>
-                </View>
-              )}
-            </>
-          )}
-        </ScrollView>
-      </View>
-    </SafeAreaView>
+            )}
+          </>
+        )}
+      </ScrollView>
+    </TelaComTopo>
   )
 }
 
@@ -160,12 +151,7 @@ function LinhaDoIntervalo({ tipo, emOrdem, minhaOrigem, primeira, onPress }: Pro
   const acao = meu ? 'Editar' : minhaOrigem === 'caminhao' ? 'Definir pro caminhão' : 'Definir pra empresa'
 
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`${tipo.nome}: ${acao}`}
-      style={({ pressed }) => [estilos.linha, !primeira && estilos.linhaComBorda, pressed && estilos.linhaApertada]}
-    >
+    <LinhaTocavel primeira={primeira} rotulo={`${tipo.nome}: ${acao}`} onPress={onPress}>
       <View style={estilos.linhaTopo}>
         <Text style={estilos.nome}>{tipo.nome}</Text>
         <EtiquetaDaOrigem origem={vale?.origem} />
@@ -175,11 +161,8 @@ function LinhaDoIntervalo({ tipo, emOrdem, minhaOrigem, primeira, onPress }: Pro
       {minhaOrigem === 'empresa' && !!vale?.intervaloKmPrimeira && (
         <Text style={estilos.primeira}>1ª troca com {formatKm(vale.intervaloKmPrimeira)}</Text>
       )}
-      <View style={estilos.acao}>
-        <Feather name={meu ? 'edit-2' : 'plus'} size={15} color={cores.marca700} />
-        <Text style={estilos.acaoTexto}>{acao}</Text>
-      </View>
-    </Pressable>
+      <Pilula icone={meu ? 'edit-2' : 'plus'} titulo={acao} />
+    </LinhaTocavel>
   )
 }
 
@@ -194,20 +177,10 @@ const CORES_DA_ORIGEM: Record<Origem | 'nenhum', { texto: string; fundo: string 
 
 function EtiquetaDaOrigem({ origem }: { origem?: Origem }) {
   const nome = origem ? ORIGENS_INTERVALO[origem] : 'não acompanhado'
-  const cor = CORES_DA_ORIGEM[origem ?? 'nenhum']
-  return (
-    <Text style={[estilos.etiqueta, { color: cor.texto, backgroundColor: cor.fundo }]}>
-      {nome[0].toUpperCase() + nome.slice(1)}
-    </Text>
-  )
+  return <Etiqueta texto={nome[0].toUpperCase() + nome.slice(1)} cor={CORES_DA_ORIGEM[origem ?? 'nenhum']} />
 }
 
 const estilos = StyleSheet.create({
-  tela: { flex: 1, backgroundColor: cores.marca900 },
-  cabecalho: { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 40, gap: 12 },
-  voltar: { alignSelf: 'flex-start', padding: 8, borderRadius: 999, backgroundColor: cores.marca800 },
-  titulo: { fontFamily: fontes.titulo, fontSize: 32, lineHeight: 36, color: cores.branco },
-  corpo: { flex: 1, backgroundColor: cores.fundo, borderTopLeftRadius: 28, borderTopRightRadius: 28, marginTop: -20, overflow: 'hidden' },
   conteudo: { padding: 20, paddingBottom: 40, gap: 14 },
   explicacao: { fontFamily: fontes.texto, fontSize: 13, lineHeight: 19, color: cores.textoMedio },
   bloco: { gap: 10 },
@@ -217,29 +190,11 @@ const estilos = StyleSheet.create({
   alvoNome: { fontFamily: fontes.textoForte, fontSize: 16, color: cores.texto },
   alvoTexto: { fontFamily: fontes.texto, fontSize: 13, lineHeight: 18, color: cores.textoFraco },
   lista: { backgroundColor: cores.branco, borderRadius: 20, paddingHorizontal: 16 },
-  linha: { paddingVertical: 14, gap: 4 },
-  linhaComBorda: { borderTopWidth: 1, borderTopColor: cores.borda },
-  linhaApertada: { opacity: 0.6 },
   linhaTopo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   nome: { flex: 1, fontFamily: fontes.textoForte, fontSize: 15, color: cores.texto },
   meta: { fontFamily: fontes.texto, fontSize: 12, color: cores.textoFraco },
   valor: { fontFamily: fontes.textoMedio, fontSize: 15, color: cores.texto, marginTop: 2 },
   primeira: { fontFamily: fontes.textoForte, fontSize: 13, color: coresDoStatus.atencao.texto },
-  acao: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    gap: 6,
-    marginTop: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: cores.marca300,
-    backgroundColor: cores.marca50,
-  },
-  acaoTexto: { fontFamily: fontes.textoForte, fontSize: 14, color: cores.marca700 },
-  etiqueta: { fontFamily: fontes.textoForte, fontSize: 11, paddingHorizontal: 9, paddingVertical: 3, borderRadius: 999, overflow: 'hidden' },
   aviso: { backgroundColor: coresDoStatus.atencao.fundo, borderRadius: 14, padding: 14 },
   avisoTexto: { fontFamily: fontes.texto, fontSize: 12, lineHeight: 18, color: coresDoStatus.atencao.texto },
   avisoForte: { fontFamily: fontes.textoForte },

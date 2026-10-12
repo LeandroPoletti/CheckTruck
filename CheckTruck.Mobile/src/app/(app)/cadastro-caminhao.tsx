@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, View } from 'react-native'
+import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useSessao } from '@/servicos/sessao'
@@ -12,6 +12,7 @@ import { ANO_MINIMO, NORMAS, TRACOES, anoMaximo, anoValido, formatarPlaca, placa
 import Botao from '@/componentes/Botao'
 import CabecalhoDoModal from '@/componentes/CabecalhoDoModal'
 import Campo from '@/componentes/Campo'
+import Chave from '@/componentes/Chave'
 import Escolha from '@/componentes/Escolha'
 import MensagemErro from '@/componentes/MensagemErro'
 import { cores, fontes } from '@/tema'
@@ -292,19 +293,12 @@ export default function CadastroCaminhao() {
                   <Text style={estilos.dica}>Também muda quando uma OS é lançada com motorista.</Text>
                 </Grupo>
               )}
-              <View style={estilos.ativo}>
-                <View style={estilos.ativoTextos}>
-                  <Text style={estilos.ativoTitulo}>Ativo</Text>
-                  <Text style={estilos.dica}>Desativado, o caminhão sai da OS e dos chamados, mas o histórico continua.</Text>
-                </View>
-                <Switch
-                  value={form.ativo}
-                  onValueChange={(v) => mudar('ativo', v)}
-                  trackColor={{ true: cores.marca500, false: cores.borda }}
-                  thumbColor={cores.branco}
-                  accessibilityLabel="Ativo"
-                />
-              </View>
+              <Chave
+                titulo="Ativo"
+                dica="Desativado, o caminhão sai da OS e dos chamados, mas o histórico continua."
+                valor={form.ativo}
+                aoMudar={(v) => mudar('ativo', v)}
+              />
 
               <MensagemErro>{erroApi}</MensagemErro>
               <Botao titulo={editando ? 'Salvar alterações' : 'Cadastrar caminhão'} onPress={salvar} ocupado={salvando} />
@@ -336,7 +330,4 @@ const estilos = StyleSheet.create({
   erro: { fontFamily: fontes.texto, fontSize: 12, lineHeight: 17, color: cores.erroTexto },
   linha: { flexDirection: 'row', gap: 12 },
   metade: { flex: 1 },
-  ativo: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: cores.fundo, borderRadius: 16, padding: 14 },
-  ativoTextos: { flex: 1, gap: 2 },
-  ativoTitulo: { fontFamily: fontes.textoForte, fontSize: 15, color: cores.texto },
 })
