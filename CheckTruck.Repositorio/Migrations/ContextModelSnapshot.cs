@@ -22,6 +22,36 @@ namespace CheckTruck.Repositorio.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CheckTruck.Dominio.Entidades.Celular", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("AtualizadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("Celulares");
+                });
+
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.Chamado", b =>
                 {
                     b.Property<long>("Id")
@@ -803,6 +833,17 @@ namespace CheckTruck.Repositorio.Migrations
                     b.HasIndex("OrdemServicoId");
 
                     b.ToTable("OrdemServicoMecanico");
+                });
+
+            modelBuilder.Entity("CheckTruck.Dominio.Entidades.Celular", b =>
+                {
+                    b.HasOne("CheckTruck.Dominio.Entidades.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("CheckTruck.Dominio.Entidades.Chamado", b =>

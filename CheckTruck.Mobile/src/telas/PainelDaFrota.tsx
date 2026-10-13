@@ -1,8 +1,9 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router, useFocusEffect } from 'expo-router'
 import { useSessao, type Usuario } from '@/servicos/sessao'
+import { quandoTocarNoAvisoDeChamado } from '@/servicos/avisos'
 import { caminhoesDaFrota, situacaoDoCaminhao, type Caminhao, type CaminhaoNaLista } from '@/servicos/caminhoes'
 import { listarChamados, type Chamado } from '@/servicos/chamados'
 import { kmDaMaiorOs, listarOrdens, type OrdemDeServico } from '@/servicos/ordens'
@@ -24,6 +25,7 @@ type Aba = 'caminhoes' | 'chamados' | 'ordens'
 // chamados. Com mais de uma, troca nas abas de cima. O Autônomo com um caminhão só já vê a situação dele, sem a lista.
 // No fim da tela, os avisos de troca (Ver frota), os cadastros (permissão Cadastros) e Minha empresa (Admin e Gestor).
 // Recarrega sempre que a tela volta a aparecer (ex.: depois de resolver um chamado) e ao puxar para baixo.
+// Tocar no aviso de chamado novo volta para cá, na aba Chamados, já com o chamado novo.
 export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
   const { chamar, sair } = useSessao()
   const autonomo = usuario.tipoConta === 'Autonomo'
@@ -56,6 +58,15 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
   }, [chamar, autonomo, verFrota, atender])
 
   useFocusEffect(useCallback(() => { carregar() }, [carregar]))
+
+  useEffect(() => {
+    if (!atender) return
+    return quandoTocarNoAvisoDeChamado(() => {
+      if (router.canDismiss()) router.dismissAll()
+      setAba('chamados')
+      carregar()
+    })
+  }, [atender, carregar])
 
   async function puxarParaAtualizar() {
     setPuxando(true)

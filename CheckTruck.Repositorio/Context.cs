@@ -31,6 +31,8 @@ public class Context : IdentityUserContext<Usuario>
     public DbSet<RegistroKm> RegistrosKm { get; set; }
     public DbSet<Mecanico> Mecanicos { get; set; }
     public DbSet<Chamado> Chamados { get; set; }
+    // Sem coluna da empresa: o celular é de uma pessoa, e a empresa é a dela
+    public DbSet<Celular> Celulares { get; set; }
 
     public Context(DbContextOptions options, IUsuarioLogado usuarioLogado) : base(options)
     {

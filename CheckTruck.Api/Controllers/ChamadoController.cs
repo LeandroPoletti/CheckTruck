@@ -15,7 +15,7 @@ namespace CheckTruck.Api.Controllers;
 [Route("api/[controller]")]
 [SomenteFrota]
 [ExigeUmaDasPermissoes(Permissao.AbrirChamados | Permissao.AtenderChamados)]
-public class ChamadoController(ServicoChamado servicoChamado) : CheckTruckController
+public class ChamadoController(ServicoChamado servicoChamado, ServicoCelular servicoCelular) : CheckTruckController
 {
     /// <summary>Pendentes e concluídos, do mais novo para o mais velho. Quem só abre vê os próprios.</summary>
     [HttpGet]
@@ -30,10 +30,13 @@ public class ChamadoController(ServicoChamado servicoChamado) : CheckTruckContro
             .Select(v => new VeiculoResumoDto { Id = v.Id, Placa = v.Placa })
             .ToList();
 
-    /// <summary>O motorista só abre chamado do caminhão que está com ele.</summary>
+    /// <summary>
+    /// O motorista só abre chamado do caminhão que está com ele. Quem pode atender chamados recebe o aviso no
+    /// celular (se o aviso falhar, o chamado continua aberto).
+    /// </summary>
     [HttpPost]
     [ExigePermissao(Permissao.AbrirChamados)]
-    public ActionResult<ChamadoResponseDto> Post([FromBody] AbrirChamadoRequestDto dto)
+    public async Task<ActionResult<ChamadoResponseDto>> Post([FromBody] AbrirChamadoRequestDto dto)
     {
         var chamado = servicoChamado.Abrir(HttpContext.UsuarioLogado(), dto.VeiculoId!.Value, dto.ToEntity());
         if (chamado is null)
@@ -41,6 +44,7 @@ public class ChamadoController(ServicoChamado servicoChamado) : CheckTruckContro
             return Erro(servicoChamado.Mensagens);
         }
 
+        await servicoCelular.AvisarChamadoNovoAsync(chamado);
         return Buscar(chamado.Id);
     }
 

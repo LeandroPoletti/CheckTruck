@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using CheckTruck.Api.Acesso;
+using CheckTruck.Api.Avisos;
 using CheckTruck.Dominio.Entidades;
 using CheckTruck.Dominio.Enums;
 using CheckTruck.Repositorio;
@@ -96,6 +97,9 @@ builder.Services.AddScoped<ServicoGeracao>();
 builder.Services.AddScoped<ServicoTipoManutencao>();
 builder.Services.AddScoped<ServicoIntervaloRecomendado>();
 builder.Services.AddScoped<ServicoIntervaloVeiculo>();
+builder.Services.AddScoped<ServicoCelular>();
+// Aviso no celular (push) pelo serviço do Expo. Se ele demorar, quem abriu o chamado não espera mais que isso
+builder.Services.AddHttpClient<IEnviadorDeAvisos, AvisosPeloExpo>(http => http.Timeout = TimeSpan.FromSeconds(5));
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy => policy.AllowAnyMethod().AllowAnyOrigin().AllowAnyHeader());

@@ -18,12 +18,14 @@ type Props = {
 }
 
 // Chamados de todos os caminhões, para quem tem Atender chamados: primeiro os pendentes (com Atender e Resolver),
-// depois os últimos concluídos. A placa abre o caminhão para quem tem Ver frota.
+// depois os últimos concluídos. A placa abre o caminhão para quem tem Ver frota. Com Abrir chamados (admin e gestor
+// têm), o botão Abrir chamado no topo, igual ao web.
 export default function ChamadosDaFrota({ chamados, usuario, aoMudar }: Props) {
   const { chamar } = useSessao()
   const [atendendoId, setAtendendoId] = useState<number | null>(null)
   const [erro, setErro] = useState('')
   const verFrota = usuario.permissoes.includes('VerFrota')
+  const podeAbrir = usuario.permissoes.includes('AbrirChamados')
   const pendentes = chamados.filter((c) => c.status === 'Pendente')
   const concluidos = chamados.filter((c) => c.status === 'Concluido').slice(0, CONCLUIDOS_NA_TELA)
 
@@ -44,6 +46,7 @@ export default function ChamadosDaFrota({ chamados, usuario, aoMudar }: Props) {
 
   return (
     <>
+      {podeAbrir && <Botao titulo="Abrir chamado" icone="plus" onPress={() => router.push('/abrir-chamado')} />}
       <MensagemErro>{erro}</MensagemErro>
 
       <Text style={estilos.secao}>Pendentes</Text>

@@ -67,13 +67,13 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
     setUsuario(eu)
   }, [])
 
-  // Os avisos de troca agendados eram de quem estava logado
+  // Os avisos eram de quem estava logado: os de troca agendados e o de chamado novo neste celular
   const sair = useCallback(async () => {
-    await cancelarAvisos().catch(() => {})
+    await cancelarAvisos(token).catch(() => {})
     await salvarToken(null)
     setToken(null)
     setUsuario(null)
-  }, [])
+  }, [token])
 
   // Token vencido no meio do uso (401): sai e o app volta para o login
   const chamar = useCallback(async <T,>(caminho: string, opcoes: Omit<Opcoes, 'token'> = {}): Promise<T> => {

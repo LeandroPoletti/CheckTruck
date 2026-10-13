@@ -27,6 +27,13 @@
       "expo-router",
       "expo-secure-store",
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1288843b-ccb3-4d05-b0b1-bf7cf93a2b0a"
+      }
+    },
+    "owner": "brenocolonello"
   }
 }

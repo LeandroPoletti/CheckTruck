@@ -1,10 +1,12 @@
 import { Platform } from 'react-native'
 import * as Notifications from 'expo-notifications'
 import { HORA_DO_AVISO, caminhaoDoAviso, planejarAvisos, type Aviso, type CaminhaoDoAviso } from '@/dados/avisos'
+import { chamarApi } from './api'
 import { caminhoesDaFrota, meusCaminhoes, situacaoDoCaminhao } from './caminhoes'
 import type { Chamar, Usuario } from './sessao'
 
-// Os avisos de troca no celular (notificações locais: o próprio aparelho agenda, sem servidor). No navegador não tem.
+// Os avisos de troca no celular (notificações locais: o próprio aparelho agenda, sem servidor) e o de chamado novo
+// (push: vem do servidor, mesmo com o app fechado). No navegador não tem.
 
 export const temAvisos = Platform.OS !== 'web'
 
@@ -60,9 +62,48 @@ export async function agendarAvisos(avisos: Aviso[]) {
   }
 }
 
-/** Ao sair: os avisos eram de quem estava logado. */
-export async function cancelarAvisos() {
-  if (temAvisos) await Notifications.cancelAllScheduledNotificationsAsync()
+// Endereço deste celular no serviço de avisos do Expo, já mandado para a API nesta abertura do app
+let celularGravado: string | null = null
+
+/**
+ * Manda para a API o endereço deste celular (com os avisos ligados), uma vez por abertura do app: o celular fica
+ * com quem entrou nele por último, e a API avisa de chamado novo quem pode atender. No Expo Go do Android dá erro
+ * (lá o push não funciona): fica só sem esse aviso.
+ */
+async function gravarCelular(chamar: Chamar) {
+  if (celularGravado || (await situacaoDosAvisos()) !== 'ligados') return
+  const { data: celular } = await Notifications.getExpoPushTokenAsync()
+  await chamar('/api/Celular', { metodo: 'PUT', corpo: { token: celular } })
+  celularGravado = celular
+}
+
+/**
+ * Ao sair: os avisos eram de quem estava logado. Apaga os de troca agendados e o celular para de receber os de
+ * chamado. A API é chamada direto (o chamar da sessão sairia de novo no 401) e sem esperar, para o Sair não travar
+ * sem internet. Com o login vencido ela não apaga, e o celular continua recebendo até alguém entrar nele.
+ */
+export async function cancelarAvisos(token: string | null) {
+  if (!temAvisos) return
+  const celular = celularGravado
+  celularGravado = null
+  if (celular && token) chamarApi('/api/Celular', { metodo: 'DELETE', corpo: { token: celular }, token }).catch(() => {})
+  await Notifications.cancelAllScheduledNotificationsAsync()
+}
+
+/**
+ * Chama aoTocar quando a pessoa toca num aviso de chamado novo, inclusive no que abriu o app (que fica guardado até
+ * alguém tratar). Devolve o que desliga.
+ */
+export function quandoTocarNoAvisoDeChamado(aoTocar: () => void) {
+  if (!temAvisos) return () => {}
+  const tocou = (resposta: Notifications.NotificationResponse | null) => {
+    if (!resposta?.notification.request.content.data?.chamadoId) return
+    Notifications.clearLastNotificationResponse()
+    aoTocar()
+  }
+  Notifications.getLastNotificationResponseAsync().then(tocou)
+  const inscricao = Notifications.addNotificationResponseReceivedListener(tocou)
+  return () => inscricao.remove()
 }
 
 export const avisoDeTeste = () =>
@@ -84,7 +125,15 @@ export async function caminhoesDosAvisos(chamar: Chamar, usuario: Usuario): Prom
   return ativos.map(caminhaoDoAviso)
 }
 
-/** Refaz os avisos com os caminhões de agora (a tela inicial chama toda vez que aparece). */
+/**
+ * Refaz os avisos de troca com os caminhões de agora e manda o celular para a API, para o aviso de chamado novo
+ * (a tela inicial chama toda vez que aparece). Um não depende do outro.
+ */
 export async function atualizarAvisos(chamar: Chamar, usuario: Usuario) {
-  if (temAvisos) await agendarAvisos(planejarAvisos(await caminhoesDosAvisos(chamar, usuario)))
+  if (!temAvisos) return
+  try {
+    await agendarAvisos(planejarAvisos(await caminhoesDosAvisos(chamar, usuario)))
+  } finally {
+    await gravarCelular(chamar)
+  }
 }

@@ -19,6 +19,9 @@ export type Chamado = {
 /** Do mais novo para o mais velho. Quem só abre recebe os próprios; quem atende recebe todos. */
 export const listarChamados = (chamar: Chamar) => chamar<Chamado[]>('/api/Chamado')
 
+/** Caminhões ativos (id e placa) para escolher ao abrir. O motorista só recebe os que estão com ele. */
+export const caminhoesDoChamado = (chamar: Chamar) => chamar<{ id: number; placa: string }[]>('/api/Chamado/veiculos')
+
 export const abrirChamado = (
   chamar: Chamar,
   dados: { veiculoId: number; tipo: string; urgencia: Chamado['urgencia']; descricao: string },

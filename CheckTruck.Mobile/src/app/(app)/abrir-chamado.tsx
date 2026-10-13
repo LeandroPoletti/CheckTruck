@@ -1,9 +1,9 @@
-import { useState } from 'react'
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useEffect, useState } from 'react'
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useSessao } from '@/servicos/sessao'
-import { abrirChamado, type Chamado } from '@/servicos/chamados'
+import { abrirChamado, caminhoesDoChamado, type Chamado } from '@/servicos/chamados'
 import { TIPOS_OCORRENCIA, URGENCIAS } from '@/dados/chamados'
 import Botao from '@/componentes/Botao'
 import CabecalhoDoModal from '@/componentes/CabecalhoDoModal'
@@ -12,17 +12,32 @@ import Escolha from '@/componentes/Escolha'
 import MensagemErro from '@/componentes/MensagemErro'
 import { cores, fontes } from '@/tema'
 
-// O motorista conta um problema do caminhão dele, e quem atende chamados vê no web e no app.
+// Conta um problema do caminhão, e quem atende chamados vê no web e no app. O motorista abre do caminhão dele (a placa
+// já vem); pela aba Chamados (admin, gestor, quem tem Abrir chamados) escolhe o caminhão, igual ao web.
 export default function AbrirChamado() {
-  const { id, placa } = useLocalSearchParams<{ id: string; placa: string }>()
+  const { id, placa } = useLocalSearchParams<{ id?: string; placa?: string }>()
   const { chamar } = useSessao()
+  const [caminhoes, setCaminhoes] = useState<{ id: number; nome: string }[] | null>(null)
+  const [erroCarga, setErroCarga] = useState('')
+  const [veiculoId, setVeiculoId] = useState<number | null>(id ? Number(id) : null)
   const [tipo, setTipo] = useState<string | null>(null)
   const [urgencia, setUrgencia] = useState<Chamado['urgencia']>('Media')
   const [descricao, setDescricao] = useState('')
   const [erro, setErro] = useState('')
   const [enviando, setEnviando] = useState(false)
 
+  useEffect(() => {
+    if (id) return
+    caminhoesDoChamado(chamar)
+      .then((lista) => setCaminhoes(lista.map((c) => ({ id: c.id, nome: c.placa }))))
+      .catch((e) => setErroCarga(`Não foi possível carregar os caminhões: ${e instanceof Error ? e.message : ''}`))
+  }, [chamar, id])
+
   async function enviar() {
+    if (!veiculoId) {
+      setErro('Escolha o caminhão.')
+      return
+    }
     if (!tipo) {
       setErro('Escolha o que está acontecendo.')
       return
@@ -34,7 +49,7 @@ export default function AbrirChamado() {
     setEnviando(true)
     setErro('')
     try {
-      await abrirChamado(chamar, { veiculoId: Number(id), tipo, urgencia, descricao })
+      await abrirChamado(chamar, { veiculoId, tipo, urgencia, descricao })
       router.back()
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Não foi possível abrir o chamado.')
@@ -47,6 +62,17 @@ export default function AbrirChamado() {
       <KeyboardAvoidingView style={estilos.tela} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={estilos.conteudo} keyboardShouldPersistTaps="handled">
           <CabecalhoDoModal titulo="Abrir chamado" placa={placa} />
+
+          {!id && (
+            <View style={estilos.grupo}>
+              <Text style={estilos.rotulo}>Caminhão</Text>
+              {caminhoes === null && !erroCarga && <ActivityIndicator color={cores.marca700} />}
+              {caminhoes?.length === 0 && <Text style={estilos.vazio}>Nenhum caminhão ativo.</Text>}
+              {!!caminhoes?.length && (
+                <Escolha opcoes={caminhoes} escolhidos={veiculoId ? [veiculoId] : []} aoTocar={setVeiculoId} />
+              )}
+            </View>
+          )}
 
           <View style={estilos.grupo}>
             <Text style={estilos.rotulo}>O que está acontecendo?</Text>
@@ -79,7 +105,7 @@ export default function AbrirChamado() {
             maxLength={1000}
           />
 
-          <MensagemErro>{erro}</MensagemErro>
+          <MensagemErro>{erro || erroCarga}</MensagemErro>
           <Botao titulo="Abrir chamado" onPress={enviar} ocupado={enviando} />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -92,6 +118,7 @@ const estilos = StyleSheet.create({
   conteudo: { padding: 24, gap: 22 },
   grupo: { gap: 10 },
   rotulo: { fontFamily: fontes.textoMedio, fontSize: 13, color: cores.textoMedio },
+  vazio: { fontFamily: fontes.texto, fontSize: 14, color: cores.textoFraco },
   opcaoEscolhida: { backgroundColor: cores.marca700 },
   opcaoTexto: { fontFamily: fontes.textoMedio, fontSize: 14, color: cores.texto },
   opcaoTextoEscolhida: { color: cores.branco },

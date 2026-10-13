@@ -16,7 +16,7 @@ dos motoristas.
 ## Estrutura
 
 ```
-CheckTruck.Api/         controllers, DTOs e filtros de acesso (quem pode o quê)
+CheckTruck.Api/         controllers, DTOs, filtros de acesso (quem pode o quê) e o envio dos avisos ao celular
 CheckTruck.Dominio/     entidades, enums e as regras do negócio (serviços)
 CheckTruck.Repositorio/ Entity Framework: contexto, configuração das tabelas e migrations
 CheckTruck.Testes/      testes das regras do Dominio (xUnit), com um banco de mentira na memória
@@ -109,6 +109,9 @@ O app procura a API no mesmo PC que roda o `expo start`, na porta 5202 (o endere
 login). Para outro endereço (túnel ou servidor), crie `CheckTruck.Mobile/.env` com `EXPO_PUBLIC_API_URL=https://...`
 e rode `npx expo start --clear` (sem o `--clear`, o app continua com o endereço antigo).
 
+O aviso de chamado novo precisa do projeto no Expo (uma vez só): na pasta `CheckTruck.Mobile`, rode
+`npx eas-cli@latest init` e entre com a sua conta do Expo. Ele cria o projeto e grava o `projectId` no `app.json`.
+
 **O que cada um vê no app** (o mesmo login e os mesmos dados do web):
 
 - **Motorista:** o caminhão que está com ele (próximas trocas em km e data), Atualizar km e os chamados dele.
@@ -124,6 +127,11 @@ e rode `npx expo start --clear` (sem o `--clear`, o app continua com o endereço
   ou chegando, e às 8h do dia em que vence a data de uma troca. O próprio celular agenda (sem servidor) e refaz os
   avisos toda vez que o app abre. A tela Avisos de troca, no fim da tela inicial, mostra se estão ligados, os próximos
   avisos e manda um aviso de teste.
+- **Aviso de chamado novo** (na Frota, para quem pode atender chamados): quando alguém abre um chamado, pelo site ou
+  pelo app, chega no celular "Chamado novo: ABC-1D23" com o tipo e a urgência, mesmo com o app fechado (quem abriu
+  não recebe). Tocar no aviso abre os chamados. Vem da API, pelo serviço de push do Expo: o app grava o celular de
+  quem entrou (`api/Celular`) e apaga ao sair. No Expo Go só funciona no iPhone; no Android precisa de uma versão
+  própria do app (development build).
 - **Com a permissão Cadastros:** Mecânicos (no Autônomo, Oficinas e mecânicos), Tipos de manutenção e o Catálogo
   (fabricante → modelo → geração, com o país no cadastro do fabricante), no fim da tela inicial: cadastrar, editar e
   excluir (o mecânico também desativa; dos tipos e do catálogo, só o que é da empresa).
