@@ -115,6 +115,12 @@ public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usu
             return null;
         }
 
+        // Senha ou e-mail novos: os logins abertos não renovam mais, e a pessoa entra de novo (ver api/Auth/renovar)
+        if (!string.IsNullOrWhiteSpace(novaSenha) || !string.Equals(dados.Email, usuario.Email, StringComparison.OrdinalIgnoreCase))
+        {
+            usuario.SecurityStamp = Guid.NewGuid().ToString();
+        }
+
         usuario.Nome = dados.Nome;
         usuario.Email = dados.Email;
         usuario.UserName = dados.Email;

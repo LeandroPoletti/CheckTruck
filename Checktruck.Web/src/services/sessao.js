@@ -22,7 +22,7 @@ export function obterUsuario() {
 export async function entrar(email, senha) {
   salvarSessao(null) // sessão velha não pode atrapalhar o erro de login
   const token = await authService.login(email, senha)
-  salvarSessao({ accessToken: token.accessToken }) // o /me já precisa do token
+  salvarSessao({ accessToken: token.accessToken, refreshToken: token.refreshToken }) // o /me já precisa do token
   try {
     await recarregarUsuario()
   } catch (e) {
@@ -34,8 +34,10 @@ export async function entrar(email, senha) {
 // Busca de novo quem está logado e grava na sessão (no login e quando a conta muda, ex.: virar Frota)
 export async function recarregarUsuario() {
   const me = await usuarioService.obterMe()
+  const { accessToken, refreshToken } = lerSessao()
   salvarSessao({
-    accessToken: lerSessao().accessToken,
+    accessToken,
+    refreshToken,
     usuarioId: me.id,
     nome: me.nome,
     email: me.email,

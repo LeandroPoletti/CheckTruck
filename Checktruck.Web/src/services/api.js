@@ -46,16 +46,45 @@ function extrairMensagem(data, status) {
   return data?.title ?? `Erro ${status} ao chamar a API.`
 }
 
+const SEM_CONEXAO = 'Não foi possível conectar à API. Verifique se a CheckTruck.Api está rodando.'
+
+// O token vale 1 hora. Vencido, troca a chave de renovação (refreshToken) por tokens novos, sem pedir a senha.
+// false: a chave não vale mais (venceu, a senha ou o e-mail mudou, ou o acesso foi desativado).
+// Vários pedidos com o token vencido ao mesmo tempo esperam a mesma renovação.
+let renovando = null
+function renovarLogin() {
+  renovando ??= (async () => {
+    const refreshToken = lerSessao()?.refreshToken
+    if (!refreshToken) return false
+    try {
+      const { data } = await axios.post(`${api.defaults.baseURL}/api/Auth/renovar`, { refreshToken })
+      salvarSessao({ ...lerSessao(), accessToken: data.accessToken, refreshToken: data.refreshToken })
+      return true
+    } catch (e) {
+      if (e.response?.status === 401) return false
+      throw e
+    }
+  })().finally(() => { renovando = null })
+  return renovando
+}
+
 api.interceptors.response.use(
   (resp) => resp,
-  (error) => {
-    if (!error.response) {
-      return Promise.reject(new Error('Não foi possível conectar à API. Verifique se a CheckTruck.Api está rodando.'))
-    }
+  async (error) => {
+    if (!error.response) return Promise.reject(new Error(SEM_CONEXAO))
     const { status, data } = error.response
-    // Token expirado/inválido: encerra a sessão e volta para o login
+    // Token vencido: renova e repete o pedido (uma vez). Sem renovação, encerra a sessão e volta para o login
     // (sem sessão, o 401 é do próprio login e a tela trata a mensagem).
     if (status === 401 && lerSessao()) {
+      if (!error.config.renovado) {
+        let renovou
+        try {
+          renovou = await renovarLogin()
+        } catch {
+          return Promise.reject(new Error(SEM_CONEXAO))
+        }
+        if (renovou) return api({ ...error.config, renovado: true })
+      }
       salvarSessao(null)
       window.location.assign('/login')
     }

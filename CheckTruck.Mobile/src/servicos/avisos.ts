@@ -1,7 +1,8 @@
 import { Platform } from 'react-native'
 import * as Notifications from 'expo-notifications'
 import { HORA_DO_AVISO, caminhaoDoAviso, planejarAvisos, type Aviso, type CaminhaoDoAviso } from '@/dados/avisos'
-import { chamarApi } from './api'
+import { chamarApi, ErroDaApi } from './api'
+import type { Tokens } from './armazenamento'
 import { caminhoesDaFrota, meusCaminhoes, situacaoDoCaminhao } from './caminhoes'
 import type { Chamar, Usuario } from './sessao'
 
@@ -77,16 +78,28 @@ async function gravarCelular(chamar: Chamar) {
   celularGravado = celular
 }
 
+// Apaga o celular na API com os tokens de quem saiu. Token vencido: renova só para isso (sem guardar, a pessoa saiu)
+async function apagarCelular(celular: string, { accessToken, refreshToken }: Tokens) {
+  const apagar = (token: string) => chamarApi('/api/Celular', { metodo: 'DELETE', corpo: { token: celular }, token })
+  try {
+    await apagar(accessToken)
+  } catch (erro) {
+    if (!(erro instanceof ErroDaApi && erro.status === 401) || !refreshToken) throw erro
+    const novos = await chamarApi<Tokens>('/api/Auth/renovar', { metodo: 'POST', corpo: { refreshToken } })
+    await apagar(novos.accessToken)
+  }
+}
+
 /**
  * Ao sair: os avisos eram de quem estava logado. Apaga os de troca agendados e o celular para de receber os de
  * chamado. A API é chamada direto (o chamar da sessão sairia de novo no 401) e sem esperar, para o Sair não travar
- * sem internet. Com o login vencido ela não apaga, e o celular continua recebendo até alguém entrar nele.
+ * sem internet. Sem internet ou sem renovação, ela não apaga, e o celular continua recebendo até alguém entrar nele.
  */
-export async function cancelarAvisos(token: string | null) {
+export async function cancelarAvisos(tokens: Tokens | null) {
   if (!temAvisos) return
   const celular = celularGravado
   celularGravado = null
-  if (celular && token) chamarApi('/api/Celular', { metodo: 'DELETE', corpo: { token: celular }, token }).catch(() => {})
+  if (celular && tokens) apagarCelular(celular, tokens).catch(() => {})
   await Notifications.cancelAllScheduledNotificationsAsync()
 }
 

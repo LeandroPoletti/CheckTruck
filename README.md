@@ -188,6 +188,9 @@ Cada pessoa tem um **cargo** e as **permissões** que o Admin ou o Gestor marcar
 - **Cargos:** Admin, Gestor, Almoxarife, Mecânico, Chefe de Manutenção, Técnico de Logística, Auxiliar de Logística e Motorista.
 - **Admin e Gestor** têm todas as permissões e são os únicos que cadastram, editam e desativam acessos.
 - Acesso **desativado** não entra no sistema.
+- O **login** vale 1 hora e o site e o app renovam sozinhos, sem pedir a senha (`POST api/Auth/renovar`, com a chave
+  de renovação que vem no login). Entra de novo quem ficou 14 dias sem usar, trocou a senha ou o e-mail, ou teve o
+  acesso desativado.
 - O **dono do sistema** é um login à parte, criado pelo sistema: só vê as telas do catálogo e os intervalos de fábrica.
 
 | Permissão | Libera |

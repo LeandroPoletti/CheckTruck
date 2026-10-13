@@ -1,22 +1,37 @@
 import * as SecureStore from 'expo-secure-store'
 import { Platform } from 'react-native'
 
-// O token fica no cofre do celular (Keychain no iPhone, Keystore no Android).
+// Os tokens do login ficam no cofre do celular (Keychain no iPhone, Keystore no Android).
 // No navegador (npm run web, só para testar) não existe esse cofre: usa o localStorage.
 const CHAVE = 'checktruck.token'
+const CHAVE_DA_RENOVACAO = 'checktruck.renovacao'
 
-export async function lerToken(): Promise<string | null> {
-  if (Platform.OS === 'web') return localStorage.getItem(CHAVE)
-  return SecureStore.getItemAsync(CHAVE)
+/** O accessToken vale 1 hora; o refreshToken (chave de renovação) pede outro sem a senha. */
+export type Tokens = { accessToken: string; refreshToken: string }
+
+async function ler(chave: string): Promise<string | null> {
+  if (Platform.OS === 'web') return localStorage.getItem(chave)
+  return SecureStore.getItemAsync(chave)
 }
 
-export async function salvarToken(token: string | null): Promise<void> {
+async function gravar(chave: string, valor: string | null): Promise<void> {
   if (Platform.OS === 'web') {
-    if (token) localStorage.setItem(CHAVE, token)
-    else localStorage.removeItem(CHAVE)
+    if (valor) localStorage.setItem(chave, valor)
+    else localStorage.removeItem(chave)
     return
   }
 
-  if (token) await SecureStore.setItemAsync(CHAVE, token)
-  else await SecureStore.deleteItemAsync(CHAVE)
+  if (valor) await SecureStore.setItemAsync(chave, valor)
+  else await SecureStore.deleteItemAsync(chave)
+}
+
+/** Login de antes da renovação (só o token guardado) volta sem a chave: quando vencer, entra de novo. */
+export async function lerTokens(): Promise<Tokens | null> {
+  const [accessToken, refreshToken] = await Promise.all([ler(CHAVE), ler(CHAVE_DA_RENOVACAO)])
+  return accessToken ? { accessToken, refreshToken: refreshToken ?? '' } : null
+}
+
+export async function salvarTokens(tokens: Tokens | null): Promise<void> {
+  await gravar(CHAVE, tokens?.accessToken ?? null)
+  await gravar(CHAVE_DA_RENOVACAO, tokens?.refreshToken ?? null)
 }
