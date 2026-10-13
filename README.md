@@ -120,6 +120,10 @@ e rode `npx expo start --clear` (sem o `--clear`, o app continua com o endereço
 - **Autônomo:** os caminhões dele (com um só, a situação já aparece na tela inicial), Atualizar km, as ordens de
   serviço (cadastrando a oficina ali mesmo), o cadastro do caminhão, os históricos, os intervalos de troca e os
   cadastros.
+- **Avisos de troca no celular** (motorista, autônomo e quem vê a frota): todo dia às 8h enquanto tiver troca vencida
+  ou chegando, e às 8h do dia em que vence a data de uma troca. O próprio celular agenda (sem servidor) e refaz os
+  avisos toda vez que o app abre. A tela Avisos de troca, no fim da tela inicial, mostra se estão ligados, os próximos
+  avisos e manda um aviso de teste.
 - **Com a permissão Cadastros:** Mecânicos (no Autônomo, Oficinas e mecânicos), Tipos de manutenção e o Catálogo
   (fabricante → modelo → geração, com o país no cadastro do fabricante), no fim da tela inicial: cadastrar, editar e
   excluir (o mecânico também desativa; dos tipos e do catálogo, só o que é da empresa).

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { chamarApi, ErroDaApi, type Opcoes } from './api'
 import { lerToken, salvarToken } from './armazenamento'
+import { cancelarAvisos } from './avisos'
 
 /** Quem está logado: o mesmo GET /api/Usuario/me que o web usa. */
 export type Usuario = {
@@ -66,7 +67,9 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
     setUsuario(eu)
   }, [])
 
+  // Os avisos de troca agendados eram de quem estava logado
   const sair = useCallback(async () => {
+    await cancelarAvisos().catch(() => {})
     await salvarToken(null)
     setToken(null)
     setUsuario(null)

@@ -6,6 +6,7 @@ import { Feather } from '@expo/vector-icons'
 import { useSessao, type Usuario } from '@/servicos/sessao'
 import { meusCaminhoes, type Caminhao } from '@/servicos/caminhoes'
 import { listarChamados, type Chamado } from '@/servicos/chamados'
+import Atalho from '@/componentes/Atalho'
 import Botao from '@/componentes/Botao'
 import CartaoDoChamado from '@/componentes/CartaoDoChamado'
 import MensagemErro from '@/componentes/MensagemErro'
@@ -13,7 +14,8 @@ import Saudacao from '@/componentes/Saudacao'
 import SituacaoDoCaminhao from '@/componentes/SituacaoDoCaminhao'
 import { cores, fontes } from '@/tema'
 
-// Tela do motorista: o caminhão que está com ele (próximas trocas em km e data), atualizar o km e os chamados.
+// Tela do motorista: o caminhão que está com ele (próximas trocas em km e data), atualizar o km, os chamados e, no
+// fim, os avisos de troca do celular.
 // Recarrega sempre que a tela volta a aparecer (ex.: depois de atualizar o km) e ao puxar para baixo.
 export default function PainelDoMotorista({ usuario }: { usuario: Usuario }) {
   const { chamar, sair } = useSessao()
@@ -99,6 +101,8 @@ export default function PainelDoMotorista({ usuario }: { usuario: Usuario }) {
                 : chamados.slice(0, 5).map((c) => <CartaoDoChamado key={c.id} chamado={c} />)}
             </>
           )}
+
+          {caminhao && <Atalho icone="bell" titulo="Avisos de troca" onPress={() => router.push('/avisos')} />}
         </ScrollView>
       </View>
     </SafeAreaView>

@@ -22,7 +22,7 @@ type Aba = 'caminhoes' | 'chamados' | 'ordens'
 // Tela de quem cuida da frota (mecânico, chefe de manutenção, gestor...) e do Autônomo. Mostra o que o acesso libera,
 // igual ao web: Ver frota mostra os caminhões e as ordens de serviço, e Atender chamados (só na Frota) mostra os
 // chamados. Com mais de uma, troca nas abas de cima. O Autônomo com um caminhão só já vê a situação dele, sem a lista.
-// No fim da tela, os cadastros (permissão Cadastros) e Minha empresa (Admin e Gestor).
+// No fim da tela, os avisos de troca (Ver frota), os cadastros (permissão Cadastros) e Minha empresa (Admin e Gestor).
 // Recarrega sempre que a tela volta a aparecer (ex.: depois de resolver um chamado) e ao puxar para baixo.
 export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
   const { chamar, sair } = useSessao()
@@ -135,6 +135,7 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
 
           {caminhoes && chamados && ordens && (
             <>
+              {verFrota && <Atalho icone="bell" titulo="Avisos de troca" onPress={() => router.push('/avisos')} />}
               {usuario.permissoes.includes('Cadastros') && (
                 <>
                   <Atalho

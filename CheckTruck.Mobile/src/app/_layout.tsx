@@ -7,8 +7,11 @@ import { Inter_400Regular } from '@expo-google-fonts/inter/400Regular'
 import { Inter_500Medium } from '@expo-google-fonts/inter/500Medium'
 import { Inter_600SemiBold } from '@expo-google-fonts/inter/600SemiBold'
 import { SessaoProvider } from '@/servicos/sessao'
+import { prepararAvisos } from '@/servicos/avisos'
 import Carregando from '@/componentes/Carregando'
 import { cores } from '@/tema'
+
+prepararAvisos()
 
 // Raiz do app: carrega as fontes e a sessão (quem está logado), que valem para todas as telas
 export default function Raiz() {
