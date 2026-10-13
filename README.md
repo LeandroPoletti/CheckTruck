@@ -1,8 +1,11 @@
 # CheckTruck
 
-Sistema web para controlar a manutenção de uma frota de caminhões: avisa o que está perto de vencer
-(por km e por prazo), guarda o histórico de ordens de serviço de cada caminhão e recebe os chamados
-dos motoristas.
+Sistema (site e app de celular) para controlar a manutenção de uma frota de caminhões: avisa o que está perto de
+vencer (por km e por prazo), guarda o histórico de ordens de serviço de cada caminhão e recebe os chamados dos
+motoristas.
+
+A documentação técnica (arquitetura, banco, classes, casos de uso, fluxos, requisitos, telas e rotas da API, com
+diagramas) está em [`docs/`](docs/README.md).
 
 ## Tecnologias
 
@@ -33,6 +36,7 @@ Checktruck.Web/         front (React)
   src/components/ui/    campos, botões, mensagem de erro, etiquetas e a barra de uso do intervalo
   src/hooks/useCarga.js carregar dados da API numa tela (carregando, erro, tentar de novo e recarregar)
   src/services/         chamadas da API e conversão dos dados
+docs/                   documentação técnica com os diagramas
 compose.yaml            PostgreSQL (e Adminer) em Docker
 .github/workflows/      CI: a cada push na main, compila a API, roda os testes, passa lint e build no front e confere o app
 ```
