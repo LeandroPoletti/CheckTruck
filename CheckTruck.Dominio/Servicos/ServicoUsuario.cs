@@ -9,7 +9,8 @@ namespace CheckTruck.Dominio.Servicos;
 /// <summary>
 /// Regras dos acessos: cadastrar, editar (inclusive e-mail e senha) e ativar/desativar, só para Admin ou Gestor
 /// (a API confere antes). Também lista e acha os motoristas para o caminhão e a OS, sempre da própria empresa.
-/// A conta Autônomo tem um acesso só; o primeiro acesso de cada conta nasce na tela Criar conta.
+/// A conta Autônomo tem um acesso só. O primeiro acesso de cada empresa (o Admin) é cadastrado pelo dono do sistema,
+/// que também define uma senha nova para ele quando ele esquece a dele.
 /// </summary>
 public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usuarioLogado)
 {
@@ -60,7 +61,7 @@ public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usu
     }
 
     /// <summary>
-    /// Primeiro acesso de uma conta nova (tela Criar conta, sem ninguém logado): Admin da empresa,
+    /// Primeiro acesso de uma empresa nova (o dono do sistema cadastra na tela Empresas): Admin da empresa,
     /// que é gravada junto com ele. Se o acesso não puder ser criado, a empresa também não fica.
     /// </summary>
     public async Task<Usuario?> CriarPrimeiroAcessoAsync(Empresa empresa, string nome, string? cpf, string email, string senha)
@@ -73,6 +74,42 @@ public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usu
         }
 
         return await GravarNovoAsync(novo, senha);
+    }
+
+    /// <summary>Os Admins de todas as empresas, para a tela Empresas do dono do sistema.</summary>
+    public IQueryable<Usuario> ListarAdminsDasEmpresas() =>
+        userManager.Users.Where(u => u.EmpresaId != null && u.Cargo == Cargo.Admin).OrderBy(u => u.Nome);
+
+    /// <summary>
+    /// O dono do sistema define uma senha nova para o Admin de uma empresa (quando ele esquece a dele).
+    /// Os logins abertos dele param de renovar, e o bloqueio por tentativas erradas é liberado.
+    /// </summary>
+    public async Task<bool> DefinirSenhaDoAdminAsync(long empresaId, string usuarioId, string? senha)
+    {
+        var usuario = await userManager.FindByIdAsync(usuarioId);
+        if (usuario is null || usuario.EmpresaId != empresaId || usuario.Cargo != Cargo.Admin)
+        {
+            Mensagens.Add("Admin não encontrado nessa empresa.");
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(senha))
+        {
+            Mensagens.Add("Informe a senha.");
+            return false;
+        }
+
+        await ValidarSenhaAsync(usuario, senha);
+        if (Mensagens.Count > 0)
+        {
+            return false;
+        }
+
+        usuario.PasswordHash = userManager.PasswordHasher.HashPassword(usuario, senha);
+        usuario.SecurityStamp = Guid.NewGuid().ToString();
+        usuario.AccessFailedCount = 0;
+        usuario.LockoutEnd = null;
+        return Concluir(await userManager.UpdateAsync(usuario));
     }
 
     /// <param name="dados">Dados novos (nome, e-mail, CPF, cargo e permissões).</param>

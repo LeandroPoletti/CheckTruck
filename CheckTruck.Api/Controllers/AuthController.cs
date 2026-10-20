@@ -1,6 +1,5 @@
 using CheckTruck.Api.Dtos.Auth;
 using CheckTruck.Dominio.Entidades;
-using CheckTruck.Dominio.Servicos;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -8,30 +7,16 @@ using Microsoft.Extensions.Options;
 
 namespace CheckTruck.Api.Controllers;
 
+/// <summary>
+/// Login e renovação do login. Não existe criar conta: quem cadastra a empresa e o Admin dela é o dono do sistema
+/// (api/Empresa), e o Admin cadastra o resto da equipe (api/Usuario).
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController(
     SignInManager<Usuario> signInManager,
-    ServicoEmpresa servicoEmpresa,
     IOptionsMonitor<BearerTokenOptions> opcoesDoToken) : CheckTruckController
 {
-    /// <summary>
-    /// Cria a conta de um cliente novo: a empresa (Frota ou Autônomo) e o primeiro acesso, que é Admin.
-    /// Não precisa estar logado. Depois o front entra com o e-mail e a senha (POST api/Auth/login).
-    /// </summary>
-    [HttpPost("criar-conta")]
-    public async Task<IActionResult> CriarConta([FromBody] CriarContaRequestDto dto)
-    {
-        var usuario = await servicoEmpresa.CriarContaAsync(
-            dto.TipoConta!.Value, dto.NomeEmpresa, dto.Cnpj, dto.Nome, dto.Cpf, dto.Email, dto.Senha);
-        if (usuario is null)
-        {
-            return Erro(servicoEmpresa.Mensagens);
-        }
-
-        return NoContent();
-    }
-
     /// <summary>
     /// Entra com e-mail e senha. Devolve { tokenType, accessToken, expiresIn, refreshToken };
     /// o front manda o accessToken no cabeçalho Authorization: Bearer. Acesso inativo não entra.
@@ -52,7 +37,11 @@ public class AuthController(
 
         if (resultado.IsNotAllowed)
         {
-            return Erro("Seu acesso está desativado. Fale com o admin ou o gestor.", StatusCodes.Status401Unauthorized);
+            // Acesso ativo que não entra: é a empresa que está desativada
+            var usuario = await signInManager.UserManager.FindByEmailAsync(dto.Email.Trim());
+            return Erro(usuario is { Ativo: true }
+                ? "O acesso da sua empresa ao CheckTruck está desativado. Fale com o suporte do CheckTruck."
+                : "Seu acesso está desativado. Fale com o admin ou o gestor.", StatusCodes.Status401Unauthorized);
         }
 
         if (resultado.IsLockedOut)
@@ -66,14 +55,15 @@ public class AuthController(
     /// <summary>
     /// Troca a chave de renovação (refreshToken) por tokens novos, sem pedir a senha. Devolve o mesmo que o login.
     /// A chave vale 14 dias (cada renovação dá uma nova). Chave vencida ou inválida, senha ou e-mail trocados
-    /// (muda o carimbo de segurança) ou acesso desativado: 401, e a pessoa entra de novo.
+    /// (muda o carimbo de segurança), acesso ou empresa desativados: 401, e a pessoa entra de novo.
     /// </summary>
     [HttpPost("renovar")]
     public async Task<IActionResult> Renovar([FromBody] RenovarRequestDto dto)
     {
         var chave = opcoesDoToken.Get(IdentityConstants.BearerScheme).RefreshTokenProtector.Unprotect(dto.RefreshToken);
         if (chave?.Properties.ExpiresUtc is not { } vence || DateTimeOffset.UtcNow >= vence
-            || await signInManager.ValidateSecurityStampAsync(chave.Principal) is not { Ativo: true } usuario)
+            || await signInManager.ValidateSecurityStampAsync(chave.Principal) is not { } usuario
+            || !await signInManager.CanSignInAsync(usuario))
         {
             return Erro("Sua sessão acabou. Entre de novo.", StatusCodes.Status401Unauthorized);
         }

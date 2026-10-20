@@ -7,7 +7,8 @@ import {
   LayoutDashboard, Truck, ShieldCheck, LibraryBig, Clock, MessageSquareWarning, ClipboardList,
   Globe, Factory, Layers, Boxes, Wrench, HardHat, Building2,
 } from 'lucide-react'
-import { GESTAO, pode, ehDonoDoSistema, ehAutonomo } from './data/acesso'
+import { GESTAO, DONO, pode, ehDonoDoSistema, ehAutonomo } from './data/acesso'
+import Empresas from './pages/Empresas'
 import Dashboard from './pages/Dashboard'
 import Veiculos from './pages/Veiculos'
 import VeiculoDetalhe from './pages/VeiculoDetalhe'
@@ -25,6 +26,8 @@ import Acesso from './pages/Acesso'
 import MinhaEmpresa from './pages/MinhaEmpresa'
 
 export const PAGINAS = [
+  { path: '/empresas', label: 'Empresas', icon: Building2, permissao: DONO, Pagina: Empresas },
+
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, permissao: 'VerFrota', Pagina: Dashboard },
 
   { path: '/veiculos', label: 'Veículos', icon: Truck, grupo: 'FROTA', permissao: 'VerFrota', Pagina: Veiculos },

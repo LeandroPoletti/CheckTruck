@@ -127,6 +127,9 @@ namespace CheckTruck.Repositorio.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<DateTime?>("DesativadaEm")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Documento")
                         .HasMaxLength(14)
                         .HasColumnType("character varying(14)");

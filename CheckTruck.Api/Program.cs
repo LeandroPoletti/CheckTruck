@@ -65,7 +65,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddIdentityCore<Usuario>(options =>
     {
         options.User.RequireUniqueEmail = true;
-        // Faz o login perguntar à ConfirmacaoUsuarioAtivo se a conta pode entrar (inativo não entra)
+        // Faz o login perguntar à ConfirmacaoUsuarioAtivo se a conta pode entrar (acesso inativo ou empresa desativada não entra)
         options.SignIn.RequireConfirmedAccount = true;
     })
     .AddEntityFrameworkStores<Context>()

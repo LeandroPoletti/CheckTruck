@@ -86,6 +86,8 @@ classDiagram
         +string Nome
         +TipoConta TipoConta
         +string? Documento
+        +DateTime? DesativadaEm
+        +bool Ativa
     }
     class Usuario {
         +string Nome
@@ -271,13 +273,15 @@ classDiagram
         +CriarAsync() AtualizarAsync()
         +AlterarAtivoAsync()
         +ListarMotoristasAtivos()
+        +DefinirSenhaDoAdminAsync()
     }
     class ServicoCelular {
         +Registrar() Esquecer()
         +AvisarChamadoNovoAsync()
     }
     class ServicoEmpresa {
-        +CriarContaAsync()
+        +Listar() CriarAsync()
+        +AlterarAtiva()
         +VirarFrota()
     }
 
@@ -299,8 +303,8 @@ classDiagram
 | `ServicoVeiculo` | Cadastro do caminhão e o km: só sobe (Atualizar km, OS, edição); a correção (Admin e Gestor) pode baixar, com motivo. Toda mudança vai para o histórico. |
 | `ServicoChamado` | Abrir (o motorista só do caminhão dele), editar e excluir enquanto pendente, atender e resolver. |
 | `ServicoCelular` | Guardar o celular de quem entrou e avisar de chamado novo quem pode atender. |
-| `ServicoUsuario` | Acessos: cadastrar, editar, ativar e desativar (só Admin e Gestor), sempre na própria empresa. |
-| `ServicoEmpresa` | Criar a conta (empresa + primeiro acesso, Admin) e virar Frota. |
+| `ServicoUsuario` | Acessos: cadastrar, editar, ativar e desativar (só Admin e Gestor), sempre na própria empresa. Para o dono do sistema, os Admins das empresas e a senha nova de cada um. |
+| `ServicoEmpresa` | Empresas (só o dono do sistema): cadastrar com o primeiro acesso (Admin), desativar e ativar. Também o virar Frota. |
 | `ServicoCatalogo<T>` e filhos | Itens do catálogo: o do sistema só o dono do sistema muda; nome que não repete; não exclui o que está em uso. |
 | `ServicoDashboard` | Resumo da frota para o dashboard: quantos itens em cada status, alertas e caminhões por geração. |
 

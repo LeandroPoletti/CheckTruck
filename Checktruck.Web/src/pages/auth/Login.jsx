@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { entrar } from '../../services/sessao'
 import { Field, Input, Button, MensagemErro } from '../../components/ui/Form'
 import TelaPublica from './TelaPublica'
@@ -65,8 +65,7 @@ export default function Login() {
       </form>
 
       <p className="mt-5 text-center text-sm text-stone-500">
-        Não tem conta?{' '}
-        <Link to="/criar-conta" className="font-semibold text-brand-700 hover:text-brand-900">Criar conta</Link>
+        Não tem acesso? Peça ao gestor da sua empresa.
       </p>
 
       <p className="mt-3 text-center text-xs text-stone-400">

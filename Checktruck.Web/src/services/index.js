@@ -136,14 +136,29 @@ export const authService = {
     const { data } = await api.post('/api/Auth/login', { email: email.trim(), senha })
     return data
   },
-  // Empresa nova (Frota ou Autônomo) e o primeiro acesso, Admin. Depois é só entrar com o e-mail e a senha.
-  async criarConta(dados) {
-    await api.post('/api/Auth/criar-conta', m.contaToApi(dados))
-  },
 }
 
-// A empresa de quem está logado (tela Minha empresa). Só Admin e Gestor.
+// Empresas (clientes do CheckTruck): listar, cadastrar, ativar/desativar e senha nova do Admin são só do dono do
+// sistema. Minha empresa (a de quem está logado): só Admin e Gestor.
 export const empresaService = {
+  async listar() {
+    const { data } = await api.get('/api/Empresa')
+    return data.map(m.empresaFromApi)
+  },
+  // Empresa nova com o Admin dela (o login que o dono do sistema passa para o dono da empresa)
+  async cadastrar(dados) {
+    const { data } = await api.post('/api/Empresa', m.empresaToApi(dados))
+    return m.empresaFromApi(data)
+  },
+  // Corpo é só true/false; vai como texto JSON porque o axios não manda false sozinho
+  async alterarAtiva(id, ativa) {
+    await api.put(`/api/Empresa/${id}/ativa`, JSON.stringify(ativa), {
+      headers: { 'Content-Type': 'application/json' },
+    })
+  },
+  async definirSenhaDoAdmin(id, adminId, senha) {
+    await api.put(`/api/Empresa/${id}/admins/${adminId}/senha`, { senha })
+  },
   async obterMinha() {
     const { data } = await api.get('/api/Empresa/minha')
     return data

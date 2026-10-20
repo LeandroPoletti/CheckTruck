@@ -7,9 +7,10 @@ uma tela é só para não confundir.
 
 ```mermaid
 flowchart LR
-    login["Entrar"] <--> criar["Criar conta"]
-    login --> menu{{"Menu lateral<br/>(só o que a pessoa pode)"}}
+    login["Entrar"] --> menu{{"Menu lateral<br/>(só o que a pessoa pode)"}}
 
+    menu --> empresas["Empresas<br/>(dono do sistema)"]
+    empresas --> acoesEmp["Nova empresa · Nova senha<br/>Desativar · Ativar"]
     menu --> dash["Dashboard"]
     menu --> veic["Veículos"]
     veic --> det["Detalhe do caminhão<br/>situação · OS · histórico de km"]
@@ -25,6 +26,7 @@ flowchart LR
 
 | Grupo do menu | Tela | Precisa de |
 |---|---|---|
+| — | Empresas | Dono do sistema |
 | — | Dashboard | Ver frota |
 | Frota | Veículos (e o detalhe de cada um) | Ver frota |
 | Frota | Catálogo | Cadastros |
@@ -39,6 +41,10 @@ flowchart LR
 Os botões dentro das telas também seguem as permissões: Atualizar km (Atualizar km), Corrigir km (Admin e
 Gestor), Editar (Veículos), Lançar OS (Ordem de serviço).
 
+Não tem tela de criar conta: a tela Entrar diz para pedir o acesso ao gestor da empresa. Na tela **Empresas** o
+dono do sistema cadastra a empresa com o Admin dela (e vê o login para passar ao dono da empresa), define uma senha
+nova para o Admin e desativa ou ativa a empresa (abas Ativas e Desativadas).
+
 ## App
 
 A tela inicial muda conforme quem entrou. As janelas de formulário sobem por cima da tela (modal) e voltam para
@@ -46,8 +52,7 @@ onde a pessoa estava.
 
 ```mermaid
 flowchart TB
-    login["Entrar"] <--> criar["Criar conta"]
-    login --> inicio{"Quem entrou?"}
+    login["Entrar"] --> inicio{"Quem entrou?"}
 
     inicio -->|Motorista| mot["Painel do motorista<br/>o caminhão que está com ele"]
     inicio -->|"Frota com Ver frota<br/>ou Atender chamados"| frota["Painel da frota<br/>abas Caminhões · Chamados · OS"]
@@ -80,7 +85,7 @@ flowchart TB
 
 | Tela (arquivo em `src/app`) | O que faz | Quem vê |
 |---|---|---|
-| `login`, `criar-conta` | Entrar e criar conta (Frota ou Autônomo) | Todos |
+| `login` | Entrar (sem criar conta: o acesso vem do admin ou do gestor) | Todos |
 | `(app)/index` | Tela inicial de cada perfil (`src/telas`) | Logado |
 | `(app)/caminhao/[id]` | Situação, próximas trocas, OS e histórico de km do caminhão | Ver frota |
 | `(app)/atualizar-km` | Atualizar km (o motorista, no caminhão dele) | Atualizar km ou motorista |
@@ -96,7 +101,7 @@ flowchart TB
 | `(app)/minha-empresa` | Dados da conta e virar Frota | Admin e Gestor (e o Autônomo) |
 
 Ficam só no site: o **dashboard**, os **acessos** (cadastrar pessoas e permissões) e as telas do **dono do
-sistema**.
+sistema** (empresas e catálogo do sistema).
 
 ## Visual
 

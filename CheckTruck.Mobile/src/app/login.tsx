@@ -3,7 +3,7 @@ import {
   AccessibilityInfo, Animated, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Redirect, router } from 'expo-router'
+import { Redirect } from 'expo-router'
 import { Feather } from '@expo/vector-icons'
 import { useSessao } from '@/servicos/sessao'
 import { API_URL } from '@/servicos/api'
@@ -14,7 +14,7 @@ import FaixaDaEstrada from '@/componentes/FaixaDaEstrada'
 import MensagemErro from '@/componentes/MensagemErro'
 import { cores, fontes } from '@/tema'
 
-// Entrar com a mesma conta do web (e-mail e senha cadastrados pelo admin ou pelo gestor). Cliente novo cria a conta aqui também.
+// Entrar com a mesma conta do web (e-mail e senha cadastrados pelo admin ou pelo gestor)
 export default function Login() {
   const { carregando, usuario, entrar } = useSessao()
   const margens = useSafeAreaInsets()
@@ -110,7 +110,7 @@ export default function Login() {
 
           <MensagemErro>{erro}</MensagemErro>
           <Botao titulo="Entrar" onPress={aoEntrar} ocupado={entrando} />
-          <Botao titulo="Criar conta" tipo="discreto" icone="user-plus" onPress={() => router.push('/criar-conta')} />
+          <Text style={estilos.semAcesso}>Não tem acesso? Peça ao gestor da sua empresa.</Text>
 
           <View style={estilos.servidor}>
             <View style={estilos.pontoServidor} />
@@ -147,6 +147,7 @@ const estilos = StyleSheet.create({
   },
   titulo: { fontFamily: fontes.subtitulo, fontSize: 28, color: cores.texto },
   subtitulo: { fontFamily: fontes.texto, fontSize: 14, lineHeight: 20, color: cores.textoFraco, marginTop: 2 },
+  semAcesso: { fontFamily: fontes.texto, fontSize: 14, lineHeight: 20, color: cores.textoFraco, textAlign: 'center' },
   servidor: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   pontoServidor: { width: 6, height: 6, borderRadius: 3, backgroundColor: cores.marca500 },
   servidorTexto: { fontFamily: fontes.texto, fontSize: 12, color: cores.textoFraco },

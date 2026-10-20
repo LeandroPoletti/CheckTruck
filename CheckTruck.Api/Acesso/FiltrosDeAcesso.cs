@@ -10,7 +10,8 @@ namespace CheckTruck.Api.Acesso;
 
 /// <summary>
 /// Base dos filtros de acesso: carrega quem está logado (pelo token), com a empresa dele, e barra quem não
-/// está logado ou está inativo (401). Cada filtro filho diz o que mais a rota exige (403 quando falta).
+/// está logado, está inativo ou é de uma empresa desativada (401). Cada filtro filho diz o que mais a rota exige
+/// (403 quando falta).
 /// </summary>
 public abstract class FiltroDeAcessoAttribute : Attribute, IAsyncAuthorizationFilter
 {
@@ -19,7 +20,7 @@ public abstract class FiltroDeAcessoAttribute : Attribute, IAsyncAuthorizationFi
         // O controller e a rota podem ter um filtro cada: o segundo reaproveita o usuário que o primeiro carregou
         var usuario = context.HttpContext.Items[typeof(Usuario)] as Usuario ?? await CarregarAsync(context.HttpContext);
 
-        if (usuario is null || !usuario.Ativo)
+        if (usuario is null || !usuario.Ativo || usuario.Empresa is { Ativa: false })
         {
             context.Result = new UnauthorizedResult();
             return;
@@ -68,6 +69,13 @@ public class ExigeUmaDasPermissoesAttribute(Permissao permissoes) : FiltroDeAces
 public class SomenteGestaoAttribute : FiltroDeAcessoAttribute
 {
     protected override bool Permite(Usuario usuario) => usuario.CuidaDosAcessos;
+}
+
+/// <summary>Só o dono do sistema (ex.: cadastrar e desativar as empresas, que são os clientes do CheckTruck).</summary>
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+public class SomenteDonoDoSistemaAttribute : FiltroDeAcessoAttribute
+{
+    protected override bool Permite(Usuario usuario) => usuario.Cargo == Cargo.DonoDoSistema;
 }
 
 /// <summary>Só conta Frota (ex.: chamados). O Autônomo é uma pessoa só: dirige e cuida do caminhão.</summary>

@@ -17,7 +17,7 @@ como ele é hoje, mais os que surgiram no desenvolvimento. **Situação:** ✅ f
 | RF-08 | Listar as trocas próximas ou vencidas de um caminhão | ✅ | Situação do caminhão, no site e no app |
 | RF-09 | Consultar os intervalos de troca por geração e por caminhão | ✅ | Tela Intervalos, no site e no app |
 | RF-10 | Abrir, atender e resolver chamados | ✅ | Novo. Só na conta Frota |
-| RF-11 | Criar a conta da empresa (Frota ou Autônomo) e virar Frota | ✅ | Novo. Multiempresa |
+| RF-11 | Cadastrar as empresas clientes com o login do Admin de cada uma, desativar e ativar | ✅ | Novo. Multiempresa. Só o dono do sistema; não existe criar conta |
 | RF-12 | Cadastrar acessos, cargos e permissões; ativar e desativar | ✅ | Novo. Só Admin e Gestor |
 | RF-13 | Manter o catálogo (país, fabricante, modelo, geração, potências) e os tipos de manutenção | ✅ | Novo. Do sistema (dono do sistema) e da empresa |
 | RF-14 | Cadastrar intervalos da empresa (por geração) e do caminhão | ✅ | Novo. Valem antes do de fábrica |
@@ -33,11 +33,11 @@ como ele é hoje, mais os que surgiram no desenvolvimento. **Situação:** ✅ f
 | RNF-01 | App para iPhone e Android | ✅ | React Native + Expo; também há o site (React) |
 | RNF-02 | Respostas da API em menos de 3 segundos | 🟡 | Ainda não medido com carga. O cálculo da situação é feito no servidor; o aviso pelo Expo espera no máximo 5 s |
 | RNF-03 | Dados no PostgreSQL, na nuvem, com backup | 🟡 | PostgreSQL ✅; hoje roda local (Docker), sem nuvem e sem backup automático ⏳ |
-| RNF-04 | Segurança | ✅ | Token Bearer de 1 hora com renovação, senhas com hash, bloqueio por tentativas erradas, dados separados por empresa, HTTPS fora de desenvolvimento |
+| RNF-04 | Segurança | ✅ | Token Bearer de 1 hora com renovação, senhas com hash, bloqueio por tentativas erradas, dados separados por empresa, empresa desativada não entra, HTTPS fora de desenvolvimento |
 | RNF-05 | Escalabilidade | 🟡 | Um banco para todas as empresas (multiempresa); ainda não foi publicada nem testada com carga |
 | RNF-06 | Integridade dos dados em camadas | ✅ | Banco (chaves, únicos, obrigatórios) + API (todas as regras) + telas (avisam antes de enviar) |
 | RNF-07 | API documentada | 🟡 | Scalar em `/docs` em desenvolvimento e a lista de rotas em [api.md](api.md); falta publicar |
-| RNF-08 | Testes automáticos e integração contínua | ✅ | Novo. 105 testes (xUnit) e GitHub Actions a cada push |
+| RNF-08 | Testes automáticos e integração contínua | ✅ | Novo. 113 testes (xUnit) e GitHub Actions a cada push |
 | RNF-09 | Fácil para quem tem pouca prática com celular | ✅ | Novo. Botões grandes, textos simples, ações onde se procura |
 
 ## Regras de negócio
@@ -62,6 +62,7 @@ como ele é hoje, mais os que surgiram no desenvolvimento. **Situação:** ✅ f
 | RN-16 | **Catálogo do sistema e da empresa:** o do sistema só o dono do sistema muda; o da empresa só ela vê. Nomes não repetem; não se exclui o que está em uso | `ServicoCatalogo` e filhos | — |
 | RN-17 | **Acessos:** só Admin e Gestor cadastram, editam e desativam; ninguém tira o próprio cargo de gestão; CPF único na empresa; o Autônomo tem um acesso só | `ServicoUsuario` | `DocumentosTests` (CPF e CNPJ) |
 | RN-18 | **Valores aceitos:** nenhum número negativo; anos de 1900 até o ano que vem, e o ano modelo é o de fabricação ou o seguinte; Renavam opcional, com 11 números | `ServicoVeiculo` e demais serviços | `VeiculoTests` |
+| RN-19 | **Empresas:** só o dono do sistema cadastra, sempre com o Admin dela; CNPJ válido e que não repete; empresa desativada não entra nem renova o login, e os dados ficam guardados | `ServicoEmpresa`, filtros de acesso, `ConfirmacaoUsuarioAtivo` | `EmpresaTests` |
 
 As regras ficam na API (serviços do `CheckTruck.Dominio`). O banco garante o que dá para garantir com chaves,
 obrigatórios e índices únicos, e o site e o app conferem antes de enviar, só para avisar mais rápido.

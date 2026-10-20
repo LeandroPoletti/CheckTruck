@@ -1,8 +1,8 @@
 // Nomes dos tipos de conta (enum TipoConta da API), iguais aos do web
 export const TIPOS_CONTA = { Frota: 'Frota', Autonomo: 'Autônomo' } as const
 
-/** Vai pondo os pontos e o traço do CPF enquanto a pessoa digita: 123.456.789-09. */
-export function mascaraCpf(texto: string) {
+/** Põe os pontos e o traço do CPF: 123.456.789-09. */
+function mascaraCpf(texto: string) {
   const d = texto.replace(/\D/g, '').slice(0, 11)
   return d
     .replace(/^(\d{3})(\d)/, '$1.$2')

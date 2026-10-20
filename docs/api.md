@@ -5,21 +5,33 @@ Base: `/api`. Tudo em JSON. Toda rota, menos as de `Auth`, exige o token no cabe
 fica em `/docs`.
 
 - **Erros** saem sempre como ProblemDetails, com a mensagem para o usuário em `detail` (400 dado inválido,
-  401 sem login ou acesso inativo, 403 sem permissão, 404 não encontrado).
+  401 sem login, acesso inativo ou empresa desativada, 403 sem permissão, 404 não encontrado).
 - **Listas** com OData aceitam `$filter`, `$orderby`, `$top` (até 100), `$skip` e `$count`
   (ex.: `GET /api/OrdemServico?$filter=Veiculo/Id eq 7`).
-- **Permissão** na tabela: o que a rota exige além de estar logado. "Gestão" = Admin ou Gestor.
+- **Permissão** na tabela: o que a rota exige além de estar logado. "Gestão" = Admin ou Gestor; "Dono" = dono do
+  sistema.
 - **Enums** vão como texto (ex.: `"Vazamento"`, `"Alta"`), menos o componente do tipo de manutenção, que vai como número.
 
-## Conta e login
+## Login
+
+Não existe criar conta: o dono do sistema cadastra a empresa e o Admin dela (`POST /api/Empresa`), e o Admin
+cadastra o resto da equipe (`POST /api/Usuario`).
 
 | Método | Rota | O que faz | Permissão |
 |---|---|---|---|
-| POST | `/api/Auth/criar-conta` | Cria a empresa (Frota ou Autônomo) e o primeiro acesso, que é Admin | Público |
 | POST | `/api/Auth/login` | Entra; devolve `accessToken` (1 hora) e `refreshToken` (14 dias) | Público |
 | POST | `/api/Auth/renovar` | Troca o `refreshToken` por tokens novos, sem a senha | Público (com a chave) |
 | GET | `/api/Usuario/me` | Quem está logado: cargo, permissões, empresa e tipo de conta | — |
-| GET | `/api/Empresa/minha` | Dados da conta | Gestão |
+
+## Empresas
+
+| Método | Rota | O que faz | Permissão |
+|---|---|---|---|
+| GET | `/api/Empresa` | Todas as empresas (ativas e desativadas), com os Admins de cada uma | Dono |
+| POST | `/api/Empresa` | Cadastra a empresa (nome e CNPJ) e o Admin dela (nome, CPF, e-mail e senha) | Dono |
+| PUT | `/api/Empresa/{id}/ativa` | Ativa ou desativa (corpo: `true` ou `false`); desativada, ninguém dela entra | Dono |
+| PUT | `/api/Empresa/{id}/admins/{usuarioId}/senha` | Senha nova para o Admin da empresa (corpo: `{ "senha" }`) | Dono |
+| GET | `/api/Empresa/minha` | Dados da empresa de quem está logado | Gestão |
 | PUT | `/api/Empresa/minha/virar-frota` | O Autônomo vira Frota (não volta) | Gestão |
 
 ## Acessos

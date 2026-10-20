@@ -302,19 +302,6 @@ export const usuarioFromApi = (dto) => ({
 // Quem está logado: o acesso e a empresa, com o tipo de conta (null para o dono do sistema)
 export const usuarioLogadoFromApi = (dto) => ({ ...usuarioFromApi(dto), empresa: dto.empresa, tipoConta: dto.tipoConta })
 
-// Tela Criar conta: na Frota vão o nome da empresa e o CNPJ; no Autônomo, a conta leva o nome e o CPF da pessoa
-export const contaToApi = (c) => {
-  const frota = c.tipoConta === 'Frota'
-  return {
-    tipoConta: c.tipoConta,
-    nomeEmpresa: frota ? c.nomeEmpresa.trim() : null,
-    cnpj: frota ? c.cnpj.trim() : null,
-    nome: c.nome.trim(),
-    cpf: c.cpf.trim(),
-    email: c.email.trim(),
-    senha: c.senha,
-  }
-}
 export const usuarioToApi = (u) => ({
   nome: u.nome.trim(),
   email: u.email.trim(),
@@ -322,6 +309,25 @@ export const usuarioToApi = (u) => ({
   cargo: u.cargo,
   permissoes: u.permissoes,
   senha: u.senha || null,
+})
+
+// Empresas (tela Empresas do dono do sistema). documento: CNPJ sem máscara; admins: [{ id, nome, email, ativo }]
+export const empresaFromApi = (dto) => ({
+  id: toId(dto.id),
+  nome: dto.nome,
+  documento: dto.documento,
+  ativa: dto.ativa,
+  desativadaEm: dto.desativadaEm,
+  admins: dto.admins,
+})
+// Empresa nova: nome e CNPJ, e o Admin dela (nome, CPF, e-mail e senha)
+export const empresaToApi = (e) => ({
+  nomeEmpresa: e.nomeEmpresa.trim(),
+  cnpj: e.cnpj.trim(),
+  nome: e.nome.trim(),
+  cpf: e.cpf.trim(),
+  email: e.email.trim(),
+  senha: e.senha,
 })
 
 // Mecânicos — cadastro simples (nome e função), sem login. Usado na OS.

@@ -18,4 +18,9 @@ public class Empresa : EntidadeBanco
 
     /// <summary>Sem máscara: CNPJ na frota, CPF no autônomo. Não repete. A empresa do TCC fica sem.</summary>
     public string? Documento { get; set; }
+
+    /// <summary>Quando o dono do sistema desativou a empresa (ninguém dela entra). null = ativa.</summary>
+    public DateTime? DesativadaEm { get; set; }
+
+    public bool Ativa => DesativadaEm is null;
 }

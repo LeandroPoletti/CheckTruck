@@ -7,8 +7,9 @@ using Microsoft.Extensions.Logging;
 namespace CheckTruck.Dominio.Servicos;
 
 /// <summary>
-/// Conta de cada cliente: criar a conta (a empresa e o primeiro acesso, que é Admin) e virar Frota.
-/// Frota tem nome e CNPJ; o Autônomo é a própria pessoa, com o nome e o CPF dela.
+/// Empresas (clientes do CheckTruck). Só o dono do sistema cadastra (a API confere antes): a empresa e o primeiro
+/// acesso, que é o Admin dela e cadastra o resto da equipe. O dono do sistema também desativa a empresa (ninguém
+/// dela entra, e os dados continuam guardados) e ativa de novo.
 /// </summary>
 public class ServicoEmpresa(
     IRepositorioCrud repositorioCrud,
@@ -16,38 +17,35 @@ public class ServicoEmpresa(
     IUsuarioLogado usuarioLogado,
     ILogger<ServicoEmpresa> logger) : ServicoCrud<Empresa>(repositorioCrud, logger)
 {
-    /// <param name="nomeEmpresa">Só na Frota. O Autônomo leva o nome da pessoa.</param>
-    /// <param name="cnpj">Só na Frota. O Autônomo é identificado pelo CPF.</param>
-    public async Task<Usuario?> CriarContaAsync(
-        TipoConta tipoConta, string? nomeEmpresa, string? cnpj, string nome, string cpf, string email, string senha)
-    {
-        if (!Enum.IsDefined(tipoConta))
-        {
-            Mensagens.Add("Escolha Frota ou Autônomo.");
-            return null;
-        }
+    /// <summary>Todas as empresas, por nome (a tabela de empresas não tem filtro: só o dono do sistema chega aqui).</summary>
+    public IQueryable<Empresa> Listar() => Query(_ => true).OrderBy(e => e.Nome);
 
-        var autonomo = tipoConta == TipoConta.Autonomo;
+    /// <summary>
+    /// Cadastra a empresa e o Admin dela (o login que o dono do sistema passa para o dono da empresa).
+    /// Se o acesso não puder ser criado, a empresa também não fica.
+    /// </summary>
+    public async Task<Usuario?> CriarAsync(string nomeEmpresa, string cnpj, string nome, string cpf, string email, string senha)
+    {
         cpf = CpfUtil.RemoverMascaraCpf(cpf.Trim());
         var empresa = new Empresa
         {
-            Nome = (autonomo ? nome : nomeEmpresa ?? "").Trim(),
-            TipoConta = tipoConta,
-            Documento = autonomo ? cpf : CnpjUtil.RemoverMascaraCnpj(cnpj ?? "")
+            Nome = nomeEmpresa.Trim(),
+            TipoConta = TipoConta.Frota,
+            Documento = CnpjUtil.RemoverMascaraCnpj(cnpj.Trim())
         };
 
-        if (!autonomo && empresa.Nome.Length == 0)
+        if (empresa.Nome.Length == 0)
         {
             Mensagens.Add("Informe o nome da empresa.");
         }
 
-        if (!autonomo && !CnpjUtil.IsValid(empresa.Documento))
+        if (!CnpjUtil.IsValid(empresa.Documento))
         {
             Mensagens.Add("CNPJ inválido.");
         }
         else if (Query(e => e.Documento == empresa.Documento).Any())
         {
-            Mensagens.Add($"Já existe uma conta com esse {(autonomo ? "CPF" : "CNPJ")}.");
+            Mensagens.Add("Já existe uma empresa com esse CNPJ.");
         }
 
         if (cpf.Length == 0 || !CpfUtil.IsValid(cpf))
@@ -63,6 +61,25 @@ public class ServicoEmpresa(
         var usuario = await servicoUsuario.CriarPrimeiroAcessoAsync(empresa, nome, cpf, email, senha);
         Mensagens.AddRange(servicoUsuario.Mensagens);
         return usuario;
+    }
+
+    /// <summary>Desativada, ninguém da empresa entra no site nem no app (os dados continuam guardados).</summary>
+    public Empresa? AlterarAtiva(long id, bool ativa)
+    {
+        var empresa = GetById(id);
+        if (empresa is null)
+        {
+            Mensagens.Add("Empresa não encontrada.");
+            return null;
+        }
+
+        if (empresa.Ativa == ativa)
+        {
+            return empresa;
+        }
+
+        empresa.DesativadaEm = ativa ? null : DateTime.UtcNow;
+        return Atualizar(empresa);
     }
 
     /// <summary>Empresa de quem está logado (null para o dono do sistema). Vem junto com o usuário, nos filtros de acesso.</summary>

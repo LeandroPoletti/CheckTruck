@@ -140,7 +140,7 @@ O aviso de chamado novo precisa do projeto no Expo (uma vez só): na pasta `Chec
   (fabricante → modelo → geração, com o país no cadastro do fabricante), no fim da tela inicial: cadastrar, editar e
   excluir (o mecânico também desativa; dos tipos e do catálogo, só o que é da empresa).
 - **Admin e Gestor** (e o Autônomo): Minha empresa, no fim da tela inicial, com os dados da conta e o Virar Frota.
-- **Cliente novo:** cria a conta pelo app também (Criar conta, na tela de entrar), Frota ou Autônomo, e já entra.
+- **Sem criar conta:** no app entra quem já tem acesso (o e-mail e a senha que o admin ou o gestor cadastrou no site).
 - Na Frota, quem não tem Ver frota nem Atender chamados usa só o site.
 
 **Primeiro acesso:** a API cria dois logins. Troque as senhas fora do ambiente de desenvolvimento.
@@ -148,26 +148,29 @@ O aviso de chamado novo precisa do projeto no Expo (uma vez só): na pasta `Chec
 | Login | Senha | Quem é |
 |-------|-------|--------|
 | `admin@admin.com` | `Admin@123` | Admin da empresa Transportadora Almeida |
-| `dono@checktruck.com` | `Dono@123` | Dono do sistema: cuida do catálogo do sistema e não é de nenhuma empresa |
+| `dono@checktruck.com` | `Dono@123` | Dono do sistema: cadastra as empresas, cuida do catálogo do sistema e não é de nenhuma empresa |
 
-Um cliente novo cria a conta dele pelo link **Criar conta**, na tela de login (no site ou no app).
+Não existe criar conta: o dono do sistema cadastra cada empresa cliente com o login do Admin dela, e o Admin
+cadastra a equipe (veja Empresas, abaixo).
 
 ## Empresas
 
 Cada cliente do CheckTruck é uma **empresa**. Caminhões, ordens de serviço, chamados, mecânicos, intervalos por
 caminhão, histórico de km e acessos são da empresa: quem entra só vê e mexe nos da própria.
 
-Na tela **Criar conta** o cliente escolhe o tipo de conta, e quem cria vira o Admin da empresa nova:
+Quem cadastra as empresas é o **dono do sistema**, na tela **Empresas** do site: o nome e o CNPJ da empresa e o
+login do **Admin** dela (nome, CPF, e-mail e senha), que ele passa para o dono da empresa. O Admin pode tudo e
+cadastra o resto da equipe em **Acesso**. Na mesma tela o dono do sistema:
 
-| Tipo | Para quem | Pede |
-|------|-----------|------|
-| **Frota** | Empresa com equipe: gestor, motoristas, mecânicos | Nome da empresa, CNPJ, seu nome, seu CPF, e-mail e senha |
-| **Autônomo** | O dono de 1 ou 2 caminhões, que faz tudo sozinho | Seu nome, CPF, e-mail e senha |
+- **desativa** a empresa: ninguém dela entra no site nem no app (quem estava dentro sai na próxima ação), e os
+  dados ficam guardados. Ativa de novo quando quiser;
+- define uma **senha nova** para o Admin que esqueceu a dele (os logins abertos dele param de renovar).
+
+O CNPJ não repete entre as empresas e pode ter letras (o alfanumérico da Receita, desde julho de 2026).
 
 O **Autônomo** tem um acesso só: o menu fica sem Chamados e sem Acesso (a API também barra os chamados), não tem
 motorista (é ele), e o mecânico da OS aparece como "oficina ou mecânico". Em **Minha empresa** ele pode **virar Frota** a qualquer hora: ganha
-Acesso e Chamados, e nada do que já cadastrou muda (não dá para voltar a Autônomo). CNPJ e CPF não repetem entre
-as contas, e o CNPJ pode ter letras (o alfanumérico da Receita, desde julho de 2026).
+Acesso e Chamados, e nada do que já cadastrou muda (não dá para voltar a Autônomo).
 
 O catálogo (países, fabricantes, modelos, gerações com as potências, tipos de manutenção e intervalos da
 geração) tem dois tipos de item:
@@ -191,11 +194,12 @@ Cada pessoa tem um **cargo** e as **permissões** que o Admin ou o Gestor marcar
 
 - **Cargos:** Admin, Gestor, Almoxarife, Mecânico, Chefe de Manutenção, Técnico de Logística, Auxiliar de Logística e Motorista.
 - **Admin e Gestor** têm todas as permissões e são os únicos que cadastram, editam e desativam acessos.
-- Acesso **desativado** não entra no sistema.
+- Acesso **desativado** não entra no sistema, nem ninguém de uma empresa desativada pelo dono do sistema.
 - O **login** vale 1 hora e o site e o app renovam sozinhos, sem pedir a senha (`POST api/Auth/renovar`, com a chave
   de renovação que vem no login). Entra de novo quem ficou 14 dias sem usar, trocou a senha ou o e-mail, ou teve o
-  acesso desativado.
-- O **dono do sistema** é um login à parte, criado pelo sistema: só vê as telas do catálogo e os intervalos de fábrica.
+  acesso (ou a empresa) desativado.
+- O **dono do sistema** é um login à parte, criado pelo sistema: cadastra e desativa as empresas (tela Empresas) e
+  cuida das telas do catálogo e dos intervalos de fábrica.
 
 | Permissão | Libera |
 |-----------|--------|

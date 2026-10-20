@@ -45,15 +45,22 @@ export const DEPENDEM_DA_BASE = ['Veiculos', 'AtualizarKm', 'OrdemServico']
 // Telas que só Admin e Gestor veem (Acesso)
 export const GESTAO = 'Gestao'
 
+// Telas que só o dono do sistema vê (Empresas)
+export const DONO = 'Dono'
+
 export const nomeCargo = (id) => [...CARGOS, DONO_DO_SISTEMA].find((c) => c.id === id)?.nome ?? 'Sem cargo'
 
-// permissao: uma permissão, GESTAO ou uma lista (basta ter uma delas)
+// permissao: uma permissão, GESTAO, DONO ou uma lista (basta ter uma delas)
 export function pode(usuario, permissao) {
   if (!usuario) return false
   if (Array.isArray(permissao)) return permissao.some((p) => pode(usuario, p))
   if (permissao === GESTAO) return usuario.cuidaDosAcessos
+  if (permissao === DONO) return ehDonoDoSistema(usuario)
   return usuario.permissoes.includes(permissao)
 }
+
+// As regras da senha (as padrão do ASP.NET Identity, que a API confere)
+export const REGRAS_DA_SENHA = 'A senha precisa ter 6 caracteres ou mais, com letra maiúscula, minúscula, número e símbolo (ex.: @).'
 
 export function formatCpf(cpf) {
   const d = String(cpf ?? '').replace(/\D/g, '')

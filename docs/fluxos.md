@@ -139,7 +139,7 @@ sequenceDiagram
 
     P->>C: e-mail e senha
     C->>A: POST /api/Auth/login
-    A->>Id: confere a senha, se está ativo e o bloqueio
+    A->>Id: confere a senha, se o acesso e a empresa estão ativos e o bloqueio
     Id-->>A: ok
     A-->>C: accessToken (1 hora) e refreshToken (14 dias)
     C->>A: GET /api/Usuario/me
@@ -150,11 +150,11 @@ sequenceDiagram
     C->>A: qualquer pedido com o token vencido
     A-->>C: 401
     C->>A: POST /api/Auth/renovar (refreshToken)
-    alt chave válida, mesma senha e e-mail, acesso ativo
+    alt chave válida, mesma senha e e-mail, acesso e empresa ativos
         A-->>C: tokens novos
         C->>A: repete o pedido
         A-->>C: resposta normal (a pessoa nem percebe)
-    else chave vencida, senha ou e-mail trocados, ou acesso desativado
+    else chave vencida, senha ou e-mail trocados, ou acesso ou empresa desativados
         A-->>C: 401
         C-->>P: volta para a tela de entrar
     end
@@ -162,6 +162,37 @@ sequenceDiagram
 
 O site guarda os tokens no navegador; o app, no cofre do celular. Vários pedidos vencidos ao mesmo tempo
 esperam uma renovação só.
+
+## Dono do sistema cadastra uma empresa
+
+Não existe criar conta: o login de cada empresa nasce aqui, e o Admin dela cadastra o resto da equipe.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor D as Dono do sistema
+    participant S as Site (Empresas)
+    participant A as API (EmpresaController)
+    participant E as ServicoEmpresa
+    participant U as ServicoUsuario
+    actor Ad as Admin da empresa
+
+    D->>S: Nova empresa: nome, CNPJ e o login do Admin
+    S->>A: POST /api/Empresa
+    A->>A: é o dono do sistema? (SomenteDonoDoSistema)
+    A->>E: CriarAsync
+    E->>E: nome, CNPJ válido e que não repete, CPF do Admin
+    E->>U: CriarPrimeiroAcessoAsync (Admin, gravado junto com a empresa)
+    U-->>E: Admin criado
+    A-->>S: 201 com a empresa e o Admin
+    S-->>D: o login para passar ao dono da empresa
+    D-->>Ad: e-mail e senha
+    Ad->>S: entra e cadastra a equipe em Acesso
+```
+
+Desativar a empresa (`PUT /api/Empresa/{id}/ativa` com `false`) não apaga nada: ninguém dela entra, quem estava
+dentro recebe 401 no próximo pedido e a renovação do login também é recusada. Ativar de novo devolve o acesso a
+todos.
 
 ## Motorista atualiza o km
 

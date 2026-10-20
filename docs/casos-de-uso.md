@@ -105,31 +105,31 @@ flowchart LR
 O Autônomo é o dono de um ou poucos caminhões e faz tudo sozinho. Não tem chamados nem outros acessos; se
 contratar gente, **vira Frota** em Minha empresa e ganha os dois.
 
-## Visitante e dono do sistema
+## Dono do sistema
 
 ```mermaid
 flowchart LR
-    vis["Visitante"]
     dono["Dono do sistema"]
 
-    subgraph ct["CheckTruck"]
-        uc02(["UC02 Criar conta<br/>(Frota ou Autônomo)"])
+    subgraph ct["CheckTruck (site)"]
+        uc02(["UC02 Gerenciar empresas<br/>cadastrar com o Admin · desativar · senha nova do Admin"])
         uc19(["UC19 Manter o catálogo do sistema<br/>e os intervalos de fábrica"])
     end
 
-    vis --- uc02
+    dono --- uc02
     dono --- uc19
 ```
 
-O dono do sistema é um login à parte, sem empresa: mantém os fabricantes, modelos, gerações e intervalos de
-fábrica que todas as empresas usam.
+O dono do sistema é um login à parte, sem empresa. Ele cadastra cada empresa cliente com o login do Admin dela
+(não existe criar conta), e o Admin cadastra o resto da equipe (UC17). Também mantém os fabricantes, modelos,
+gerações e intervalos de fábrica que todas as empresas usam.
 
 ## Casos de uso × permissões
 
 | Caso de uso | Quem pode | Onde |
 |---|---|---|
 | UC01 Entrar (o login renova sozinho) | Todos os acessos ativos | Site e app |
-| UC02 Criar conta | Qualquer pessoa (vira o Admin da conta) | Site e app |
+| UC02 Gerenciar empresas (cadastrar com o Admin, desativar, senha nova do Admin) | Dono do sistema | Site |
 | UC03 Ver a situação dos caminhões | Ver frota | Site e app |
 | UC04 Ver o caminhão que está comigo | Motorista que é o motorista atual | App |
 | UC05 Atualizar km | Atualizar km; o motorista, no caminhão dele (pelo app) | Site e app |

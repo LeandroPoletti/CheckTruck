@@ -226,6 +226,7 @@ erDiagram
 erDiagram
     Empresa {
         bigint Id PK
+        timestamp DesativadaEm "opcional; vazia = ativa"
         varchar Documento UK "até 14; opcional"
         varchar Nome "até 150"
         int TipoConta "TipoConta"
