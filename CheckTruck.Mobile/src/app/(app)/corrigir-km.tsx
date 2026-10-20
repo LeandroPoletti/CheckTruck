@@ -11,7 +11,7 @@ import Campo from '@/componentes/Campo'
 import MensagemErro from '@/componentes/MensagemErro'
 import { cores, fontes } from '@/tema'
 
-// Só Admin e Gestor (e o Autônomo): corrige um km digitado errado (ex.: um zero a mais), igual ao web.
+// Só Admin e Gestor: corrige um km digitado errado (ex.: um zero a mais), igual ao web.
 // Pode baixar o km, mas não para menos que o km da maior OS do caminhão (minimo).
 export default function CorrigirKm() {
   const { id, placa, km, minimo: minimoDaOs } = useLocalSearchParams<{ id: string; placa: string; km: string; minimo: string }>()

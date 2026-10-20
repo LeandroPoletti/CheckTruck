@@ -7,14 +7,12 @@ import { cores, coresDoStatus, fontes } from '@/tema'
 
 type Props = {
   os: OrdemDeServico
-  /** Na Frota mostra o motorista que estava com o caminhão (o Autônomo não tem motorista). */
-  mostrarMotorista: boolean
   /** A placa abre o caminhão. Sem isso (ex.: no próprio caminhão), a placa não aparece. */
   mostrarPlaca?: boolean
 }
 
-// Uma ordem de serviço: número, data e km, os itens com a próxima troca, quem fez e quem lançou
-export default function CartaoDaOrdem({ os, mostrarMotorista, mostrarPlaca = true }: Props) {
+// Uma ordem de serviço: número, data e km, os itens com a próxima troca, quem fez, o motorista e quem lançou
+export default function CartaoDaOrdem({ os, mostrarPlaca = true }: Props) {
   const veiculo = mostrarPlaca ? os.veiculo : null
   return (
     <View style={estilos.cartao}>
@@ -47,7 +45,7 @@ export default function CartaoDaOrdem({ os, mostrarMotorista, mostrarPlaca = tru
 
       <Text style={estilos.detalhe}>Feita por {os.mecanicos.map((m) => `${m.nome} (${m.funcao})`).join(', ')}</Text>
       {!!os.concessionaria && <Text style={estilos.detalhe}>Concessionária / oficina: {os.concessionaria}</Text>}
-      {mostrarMotorista && <Text style={estilos.detalhe}>Motorista: {os.motorista?.nome ?? 'Sem motorista'}</Text>}
+      <Text style={estilos.detalhe}>Motorista: {os.motorista?.nome ?? 'Sem motorista'}</Text>
       {!!os.observacao && <Text style={estilos.detalhe}>Observações: {os.observacao}</Text>}
       <Text style={estilos.meta}>
         Lançada{os.lancadoPor ? ` por ${os.lancadoPor.nome}` : ''} em {formatDataHora(os.lancadoEm)}

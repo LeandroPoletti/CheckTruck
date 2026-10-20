@@ -1,5 +1,4 @@
 using CheckTruck.Dominio.Entidades;
-using CheckTruck.Dominio.Enums;
 using CheckTruck.Dominio.Interfaces;
 using CheckTruck.Dominio.Util;
 using Microsoft.Extensions.Logging;
@@ -30,7 +29,6 @@ public class ServicoEmpresa(
         var empresa = new Empresa
         {
             Nome = nomeEmpresa.Trim(),
-            TipoConta = TipoConta.Frota,
             Documento = CnpjUtil.RemoverMascaraCnpj(cnpj.Trim())
         };
 
@@ -84,24 +82,4 @@ public class ServicoEmpresa(
 
     /// <summary>Empresa de quem está logado (null para o dono do sistema). Vem junto com o usuário, nos filtros de acesso.</summary>
     public Empresa? ObterAtual() => usuarioLogado.Usuario?.Empresa;
-
-    /// <summary>O Autônomo vira Frota: passa a cadastrar acessos (motoristas, mecânicos, gestor) e a usar chamados.</summary>
-    public Empresa? VirarFrota()
-    {
-        var empresa = ObterAtual();
-        if (empresa is null)
-        {
-            Mensagens.Add("Empresa não encontrada.");
-            return null;
-        }
-
-        if (empresa.TipoConta == TipoConta.Frota)
-        {
-            Mensagens.Add("A conta já é Frota.");
-            return null;
-        }
-
-        empresa.TipoConta = TipoConta.Frota;
-        return Atualizar(empresa);
-    }
 }

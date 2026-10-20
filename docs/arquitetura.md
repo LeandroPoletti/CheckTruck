@@ -14,7 +14,6 @@ flowchart LR
     gestao(["Admin e Gestor"])
     almox(["Almoxarife e logística"])
     dono(["Dono do sistema"])
-    aut(["Autônomo"])
     mec(["Mecânico e chefe<br/>de manutenção"])
     mot(["Motorista"])
 
@@ -27,16 +26,13 @@ flowchart LR
     gestao --> site
     almox --> site
     dono --> site
-    aut --> site
-    aut --> app
     mec --> app
     mot --> app
 ```
 
 O site é para quem está no computador (cadastros, acessos, dashboard, lançamento de OS). O app é para quem está
-no pátio e na estrada: ver a situação dos caminhões, atualizar o km, abrir e atender chamados e receber avisos. O
-Autônomo faz tudo pelos dois, porque muitos só usam o celular. Qualquer um pode usar os dois; o diagrama mostra o
-uso principal de cada perfil.
+no pátio e na estrada: ver a situação dos caminhões, atualizar o km, abrir e atender chamados e receber avisos.
+Qualquer um pode usar os dois; o diagrama mostra o uso principal de cada perfil.
 
 ## Containers
 
@@ -136,8 +132,8 @@ Os dois mostram só o que as permissões de quem entrou liberam, mas quem decide
 - Toda rota, menos login e renovação, exige o token. Acesso inativo ou de empresa desativada recebe 401 mesmo com
   token válido.
 - Não existe criar conta: só o dono do sistema cadastra empresas, e só o Admin ou o Gestor cadastra acessos.
-- Permissões conferidas na API por filtros (`ExigePermissao`, `SomenteGestao`, `SomenteDonoDoSistema`,
-  `SomenteFrota`); o site e o app só escondem o que a pessoa não pode usar.
+- Permissões conferidas na API por filtros (`ExigePermissao`, `SomenteGestao`, `SomenteDonoDoSistema`); o site e o
+  app só escondem o que a pessoa não pode usar.
 - Dados separados por empresa no `Context` (filtro global), e não por cada tela.
 - No celular, os tokens ficam no cofre do aparelho (Keychain no iPhone, Keystore no Android).
 - HTTPS obrigatório fora de desenvolvimento. Em desenvolvimento, o app fala por HTTP na rede local (perfil

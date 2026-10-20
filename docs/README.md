@@ -26,7 +26,7 @@ O sistema cresceu depois do documento. Para atualizá-lo:
 
 | No documento | Hoje |
 |---|---|
-| App Android | Site + app (iPhone e Android), multiempresa (Frota e Autônomo) |
+| App Android | Site + app (iPhone e Android), multiempresa (B2B: o dono do sistema cadastra cada empresa) |
 | .NET 8 | .NET 10 |
 | Projetos API / Application / Domain / Infrastructure | Api / Dominio / Repositorio / Testes, mais Web e Mobile ([arquitetura](arquitetura.md#camadas-do-backend)) |
 | 8 entidades; Fabricante → Geração → Modelo | 17 entidades; País → Fabricante → Modelo → Geração → Potência ([banco](banco-de-dados.md)) |

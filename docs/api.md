@@ -21,7 +21,7 @@ cadastra o resto da equipe (`POST /api/Usuario`).
 |---|---|---|---|
 | POST | `/api/Auth/login` | Entra; devolve `accessToken` (1 hora) e `refreshToken` (14 dias) | Público |
 | POST | `/api/Auth/renovar` | Troca o `refreshToken` por tokens novos, sem a senha | Público (com a chave) |
-| GET | `/api/Usuario/me` | Quem está logado: cargo, permissões, empresa e tipo de conta | — |
+| GET | `/api/Usuario/me` | Quem está logado: cargo, permissões e empresa | — |
 
 ## Empresas
 
@@ -32,7 +32,6 @@ cadastra o resto da equipe (`POST /api/Usuario`).
 | PUT | `/api/Empresa/{id}/ativa` | Ativa ou desativa (corpo: `true` ou `false`); desativada, ninguém dela entra | Dono |
 | PUT | `/api/Empresa/{id}/admins/{usuarioId}/senha` | Senha nova para o Admin da empresa (corpo: `{ "senha" }`) | Dono |
 | GET | `/api/Empresa/minha` | Dados da empresa de quem está logado | Gestão |
-| PUT | `/api/Empresa/minha/virar-frota` | O Autônomo vira Frota (não volta) | Gestão |
 
 ## Acessos
 
@@ -73,7 +72,7 @@ cadastra o resto da equipe (`POST /api/Usuario`).
 | PUT | `/api/OrdemServico/{id}` | Edita | Ordem de serviço |
 | DELETE | `/api/OrdemServico/{id}` | Exclui | Ordem de serviço |
 
-## Chamados (só na conta Frota)
+## Chamados
 
 | Método | Rota | O que faz | Permissão |
 |---|---|---|---|

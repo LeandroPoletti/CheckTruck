@@ -19,12 +19,10 @@ type Dados = { caminhao: Caminhao; ordens: OrdemDeServico[]; historico: Registro
 
 // Tudo de um caminhão, igual ao detalhe no web: a situação (com Atualizar km e Lançar OS), o histórico de manutenções
 // e o histórico de km. Editar (permissão Veículos), Corrigir km (Admin e Gestor) e Intervalos de troca para quem pode.
-// O Autônomo não tem motorista: para ele, nada fala de motorista e o resumo manda falar com a oficina.
 // Recarrega ao voltar para a tela (ex.: depois de atualizar o km) e ao puxar para baixo.
 export default function DetalheDoCaminhao() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const { chamar, usuario } = useSessao()
-  const autonomo = usuario?.tipoConta === 'Autonomo'
   const pode = (permissao: string) => !!usuario?.permissoes.includes(permissao)
   const [dados, setDados] = useState<Dados | null>(null)
   const [erro, setErro] = useState('')
@@ -86,8 +84,8 @@ export default function DetalheDoCaminhao() {
             <SituacaoDoCaminhao
               caminhao={dados.caminhao}
               podeAtualizarKm={pode('AtualizarKm')}
-              mostrarMotorista={!autonomo}
-              falarComOficina={autonomo}
+              mostrarMotorista
+              falarComOficina={false}
               podeLancarOS={pode('OrdemServico') && dados.caminhao.ativo}
               kmMinimoParaCorrigir={usuario?.cuidaDosAcessos ? kmDaMaiorOs(dados.ordens) : undefined}
             />
@@ -102,7 +100,7 @@ export default function DetalheDoCaminhao() {
             <Text style={estilos.secao}>Histórico de manutenções</Text>
             {dados.ordens.length === 0
               ? <Text style={estilos.vazio}>Nenhuma manutenção registrada ainda.</Text>
-              : dados.ordens.map((os) => <CartaoDaOrdem key={os.id} os={os} mostrarMotorista={!autonomo} mostrarPlaca={false} />)}
+              : dados.ordens.map((os) => <CartaoDaOrdem key={os.id} os={os} mostrarPlaca={false} />)}
 
             <Text style={estilos.secao}>Histórico de km</Text>
             {dados.historico.length === 0

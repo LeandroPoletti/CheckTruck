@@ -9,8 +9,8 @@ namespace CheckTruck.Dominio.Servicos;
 /// <summary>
 /// Regras dos acessos: cadastrar, editar (inclusive e-mail e senha) e ativar/desativar, só para Admin ou Gestor
 /// (a API confere antes). Também lista e acha os motoristas para o caminhão e a OS, sempre da própria empresa.
-/// A conta Autônomo tem um acesso só. O primeiro acesso de cada empresa (o Admin) é cadastrado pelo dono do sistema,
-/// que também define uma senha nova para ele quando ele esquece a dele.
+/// O primeiro acesso de cada empresa (o Admin) é cadastrado pelo dono do sistema, que também define uma senha nova
+/// para ele quando ele esquece a dele.
 /// </summary>
 public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usuarioLogado)
 {
@@ -42,11 +42,6 @@ public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usu
         if (string.IsNullOrWhiteSpace(senha))
         {
             Mensagens.Add("Informe a senha.");
-        }
-
-        if (usuarioLogado.Usuario!.Empresa?.TipoConta == TipoConta.Autonomo)
-        {
-            Mensagens.Add("A conta Autônomo tem um acesso só. Para cadastrar mais pessoas, vire Frota em Minha empresa.");
         }
 
         Preparar(novo, adminDoSistema: false);

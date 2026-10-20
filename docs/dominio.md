@@ -84,7 +84,6 @@ classDiagram
     direction TB
     class Empresa {
         +string Nome
-        +TipoConta TipoConta
         +string? Documento
         +DateTime? DesativadaEm
         +bool Ativa
@@ -179,7 +178,6 @@ classDiagram
 
 | Enum | Valores |
 |------|---------|
-| `TipoConta` | Frota, Autonomo |
 | `Cargo` | Admin, Gestor, Almoxarife, Mecanico, ChefeManutencao, TecnicoLogistica, AuxiliarLogistica, Motorista, DonoDoSistema |
 | `Permissao` (bits) | VerFrota, Veiculos, AtualizarKm, OrdemServico, Cadastros, Intervalos, AbrirChamados, AtenderChamados |
 | `Componente` | Motor, Cambio, Diferencial1, Diferencial2, Filtro, Embreagem |
@@ -282,7 +280,6 @@ classDiagram
     class ServicoEmpresa {
         +Listar() CriarAsync()
         +AlterarAtiva()
-        +VirarFrota()
     }
 
     ServicoCrud~T~ ..> IRepositorioCrud
@@ -304,7 +301,7 @@ classDiagram
 | `ServicoChamado` | Abrir (o motorista só do caminhão dele), editar e excluir enquanto pendente, atender e resolver. |
 | `ServicoCelular` | Guardar o celular de quem entrou e avisar de chamado novo quem pode atender. |
 | `ServicoUsuario` | Acessos: cadastrar, editar, ativar e desativar (só Admin e Gestor), sempre na própria empresa. Para o dono do sistema, os Admins das empresas e a senha nova de cada um. |
-| `ServicoEmpresa` | Empresas (só o dono do sistema): cadastrar com o primeiro acesso (Admin), desativar e ativar. Também o virar Frota. |
+| `ServicoEmpresa` | Empresas (só o dono do sistema): cadastrar com o primeiro acesso (Admin), desativar e ativar. |
 | `ServicoCatalogo<T>` e filhos | Itens do catálogo: o do sistema só o dono do sistema muda; nome que não repete; não exclui o que está em uso. |
 | `ServicoDashboard` | Resumo da frota para o dashboard: quantos itens em cada status, alertas e caminhões por geração. |
 

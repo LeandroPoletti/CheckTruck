@@ -299,8 +299,8 @@ export const usuarioFromApi = (dto) => ({
   adminDoSistema: dto.adminDoSistema,
   ativo: dto.ativo,
 })
-// Quem está logado: o acesso e a empresa, com o tipo de conta (null para o dono do sistema)
-export const usuarioLogadoFromApi = (dto) => ({ ...usuarioFromApi(dto), empresa: dto.empresa, tipoConta: dto.tipoConta })
+// Quem está logado: o acesso e o nome da empresa (null para o dono do sistema)
+export const usuarioLogadoFromApi = (dto) => ({ ...usuarioFromApi(dto), empresa: dto.empresa })
 
 export const usuarioToApi = (u) => ({
   nome: u.nome.trim(),

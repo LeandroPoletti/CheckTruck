@@ -16,11 +16,9 @@ function combina(os: OrdemDeServico, busca: string) {
 }
 
 // Ordens de serviço da empresa (Ver frota), com Lançar OS para quem tem a permissão Ordem de serviço.
-// Na Frota o cartão mostra o motorista que estava com o caminhão; o Autônomo não tem motorista.
 export default function OrdensDaFrota({ ordens, usuario }: { ordens: OrdemDeServico[]; usuario: Usuario }) {
   const [busca, setBusca] = useState('')
   const podeLancar = usuario.permissoes.includes('OrdemServico')
-  const frota = usuario.tipoConta === 'Frota'
   const lista = [...ordens].sort(maisNovaPrimeiro).filter((o) => combina(o, busca))
 
   return (
@@ -39,7 +37,7 @@ export default function OrdensDaFrota({ ordens, usuario }: { ordens: OrdemDeServ
           <CampoDeBusca valor={busca} aoMudar={setBusca} placeholder="Buscar por placa ou nº da OS" />
           {lista.length === 0
             ? <Text style={estilos.nenhuma}>Nenhuma OS encontrada.</Text>
-            : lista.map((o) => <CartaoDaOrdem key={o.id} os={o} mostrarMotorista={frota} />)}
+            : lista.map((o) => <CartaoDaOrdem key={o.id} os={o} />)}
         </>
       )}
     </>

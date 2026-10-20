@@ -50,7 +50,7 @@ Todos os clientes ficam no mesmo banco, e a coluna `EmpresaId` diz de quem é ca
 | **Dados da empresa** | Veiculos, OrdensServico, ItensOrdemServico, RegistrosKm, IntervalosVeiculo, Mecanicos, Chamados | Obrigatória |
 | **Catálogo** | Paises, Fabricantes, Modelos, Geracoes, Potencias, TiposManutencao, IntervalosRecomendados | Vazia = do sistema (todos veem, só o dono do sistema muda); preenchida = da empresa (só ela vê) |
 | **Acessos** | AspNetUsers (Usuario) | A empresa da pessoa; vazia só no dono do sistema |
-| **Contas** | Empresas | É a própria empresa |
+| **Empresas** | Empresas | É a própria empresa |
 | **Celulares** | Celulares | Não tem: a empresa é a da pessoa dona do celular |
 
 A empresa **nunca vem do site ou do app**. O `Context` do EF grava a empresa de quem está logado em todo
@@ -229,7 +229,6 @@ erDiagram
         timestamp DesativadaEm "opcional; vazia = ativa"
         varchar Documento UK "até 14; opcional"
         varchar Nome "até 150"
-        int TipoConta "TipoConta"
     }
     Usuario {
         varchar Id PK
@@ -282,7 +281,7 @@ outras são do Identity (hash da senha, carimbo de segurança, bloqueio por tent
 
 | Tabela | Não repete |
 |---|---|
-| Empresas | Documento (CNPJ da Frota ou CPF do Autônomo) |
+| Empresas | Documento (CNPJ; nas contas antigas de uma pessoa só, o CPF) |
 | AspNetUsers | E-mail (login), em todo o sistema; CPF, dentro da empresa |
 | Veiculos | Placa e chassi, dentro da empresa |
 | Potencias | Potência (cv) dentro da geração |

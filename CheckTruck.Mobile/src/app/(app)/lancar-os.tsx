@@ -25,12 +25,11 @@ type Listas = { caminhoes: CaminhaoNaLista[]; tipos: TipoDeManutencao[]; mecanic
 /** isPrimeiraTroca null = segue a sugestão do caminhão. */
 type Item = { tipoId: number; isPrimeiraTroca: boolean | null }
 
-// Lançar uma ordem de serviço, igual ao web: um ou mais itens trocados e quem fez (no Autônomo, "oficina ou mecânico").
-// Na Frota tem também o motorista que estava com o caminhão. Aberta pelo caminhão, já vem com ele escolhido.
+// Lançar uma ordem de serviço, igual ao web: um ou mais itens trocados, quem fez e o motorista que estava com o
+// caminhão. Aberta pelo caminhão, já vem com ele escolhido.
 export default function LancarOs() {
   const { id } = useLocalSearchParams<{ id?: string }>()
   const { chamar, usuario } = useSessao()
-  const frota = usuario?.tipoConta === 'Frota'
   const podeCadastrar = !!usuario?.permissoes.includes('Cadastros')
 
   const [listas, setListas] = useState<Listas | null>(null)
@@ -55,7 +54,7 @@ export default function LancarOs() {
           caminhoesDaFrota(chamar),
           tiposDeManutencao(chamar),
           mecanicosAtivos(chamar),
-          frota ? motoristasAtivos(chamar) : Promise.resolve([]),
+          motoristasAtivos(chamar),
         ])
         const carregadas = {
           caminhoes: caminhoes.filter((c) => c.ativo).sort((a, b) => a.placa.localeCompare(b.placa)),
@@ -119,7 +118,7 @@ export default function LancarOs() {
     const dataDaTroca = dataDoCampo(data)
     if (veiculoId === null) { setErro('Escolha o caminhão.'); return }
     if (itens.length === 0) { setErro('Escolha pelo menos um item trocado.'); return }
-    if (mecanicoIds.length === 0) { setErro(frota ? 'Escolha pelo menos um mecânico.' : 'Escolha pelo menos uma oficina ou mecânico.'); return }
+    if (mecanicoIds.length === 0) { setErro('Escolha pelo menos um mecânico.'); return }
     // OS antiga pode ter km menor que o atual; só não aceita km inválido
     if (km === '' || !Number.isInteger(kmNaTroca) || kmNaTroca < 0) { setErro('Informe o km do caminhão na troca (sem negativo).'); return }
     // A troca já foi feita: a data vai de 1900 até hoje
@@ -211,7 +210,7 @@ export default function LancarOs() {
               </View>
 
               <View style={estilos.grupo}>
-                <Text style={estilos.rotulo}>{frota ? 'Mecânicos' : 'Oficina ou mecânico'}</Text>
+                <Text style={estilos.rotulo}>Mecânicos</Text>
                 {listas.mecanicos.length > 0 && (
                   <Escolha
                     opcoes={listas.mecanicos.map((m) => ({ id: m.id, nome: `${m.nome} (${m.funcao})` }))}
@@ -225,20 +224,18 @@ export default function LancarOs() {
                     {podeCadastrar ? 'Nada cadastrado ainda.' : 'Nenhum mecânico cadastrado. Peça para quem cuida dos cadastros.'}
                   </Text>
                 )}
-                {podeCadastrar && <CadastroRapido frota={frota} aoCadastrar={cadastrado} />}
+                {podeCadastrar && <CadastroRapido aoCadastrar={cadastrado} />}
               </View>
 
-              {frota && (
-                <View style={estilos.grupo}>
-                  <Text style={estilos.rotulo}>Motorista</Text>
-                  <Escolha
-                    opcoes={[{ id: '', nome: 'Sem motorista' }, ...listas.motoristas]}
-                    escolhidos={[motoristaId]}
-                    aoTocar={setMotoristaId}
-                  />
-                  <Text style={estilos.dica}>Quem estava com o caminhão. Se escolher alguém, ele vira o motorista atual do caminhão.</Text>
-                </View>
-              )}
+              <View style={estilos.grupo}>
+                <Text style={estilos.rotulo}>Motorista</Text>
+                <Escolha
+                  opcoes={[{ id: '', nome: 'Sem motorista' }, ...listas.motoristas]}
+                  escolhidos={[motoristaId]}
+                  aoTocar={setMotoristaId}
+                />
+                <Text style={estilos.dica}>Quem estava com o caminhão. Se escolher alguém, ele vira o motorista atual do caminhão.</Text>
+              </View>
 
               <View style={estilos.linha}>
                 <View style={estilos.metade}>
@@ -289,7 +286,7 @@ export default function LancarOs() {
 }
 
 // Cadastrar a oficina ou o mecânico ali mesmo, sem sair da OS (permissão Cadastros). Já entra escolhido.
-function CadastroRapido({ frota, aoCadastrar }: { frota: boolean; aoCadastrar(mecanico: Mecanico): void }) {
+function CadastroRapido({ aoCadastrar }: { aoCadastrar(mecanico: Mecanico): void }) {
   const { chamar } = useSessao()
   const [aberto, setAberto] = useState(false)
   const [nome, setNome] = useState('')
@@ -299,21 +296,13 @@ function CadastroRapido({ frota, aoCadastrar }: { frota: boolean; aoCadastrar(me
 
   if (!aberto) {
     return (
-      <Botao
-        titulo={frota ? 'Cadastrar mecânico' : 'Cadastrar oficina ou mecânico'}
-        tipo="discreto"
-        icone="plus"
-        onPress={() => setAberto(true)}
-      />
+      <Botao titulo="Cadastrar mecânico" tipo="discreto" icone="plus" onPress={() => setAberto(true)} />
     )
   }
 
   async function salvar() {
-    if (!nome.trim()) { setErro(frota ? 'Informe o nome do mecânico.' : 'Informe o nome.'); return }
-    if (!funcao.trim()) {
-      setErro(frota ? 'Informe a função (ex.: mecânico, borracheiro).' : 'Informe a função (ex.: oficina, mecânico, borracheiro).')
-      return
-    }
+    if (!nome.trim()) { setErro('Informe o nome do mecânico.'); return }
+    if (!funcao.trim()) { setErro('Informe a função (ex.: mecânico, borracheiro).'); return }
     setSalvando(true)
     setErro('')
     try {
@@ -329,8 +318,8 @@ function CadastroRapido({ frota, aoCadastrar }: { frota: boolean; aoCadastrar(me
 
   return (
     <View style={estilos.cadastro}>
-      <Campo rotulo="Nome" value={nome} onChangeText={setNome} placeholder={frota ? 'Marco Rueda' : 'Oficina do Zé'} maxLength={150} />
-      <Campo rotulo="Função" value={funcao} onChangeText={setFuncao} placeholder={frota ? 'Borracheiro' : 'Oficina'} maxLength={100} />
+      <Campo rotulo="Nome" value={nome} onChangeText={setNome} placeholder="Marco Rueda" maxLength={150} />
+      <Campo rotulo="Função" value={funcao} onChangeText={setFuncao} placeholder="Borracheiro" maxLength={100} />
       <MensagemErro>{erro}</MensagemErro>
       <View style={estilos.linha}>
         <View style={estilos.metade}>

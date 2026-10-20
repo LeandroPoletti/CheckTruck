@@ -2,17 +2,16 @@
 import { authService, usuarioService } from './index'
 import { lerSessao, salvarSessao } from './api'
 
-// Cargo, permissões e empresa (nome e tipo de conta) vêm de GET /api/Usuario/me, gravados na sessão no login.
-// Sessão antiga, sem o tipo de conta, obriga a entrar de novo (o dono do sistema tem empresa e tipo null).
+// Cargo, permissões e empresa vêm de GET /api/Usuario/me, gravados na sessão no login.
+// Sessão antiga, sem permissões ou sem empresa, obriga a entrar de novo (o dono do sistema tem empresa null).
 export function obterUsuario() {
   const sessao = lerSessao()
-  if (!Array.isArray(sessao?.permissoes) || sessao.tipoConta === undefined) return null
+  if (!Array.isArray(sessao?.permissoes) || sessao.empresa === undefined) return null
   return {
     id: sessao.usuarioId,
     nome: sessao.nome,
     email: sessao.email,
     empresa: sessao.empresa,
-    tipoConta: sessao.tipoConta,
     cargo: sessao.cargo,
     permissoes: sessao.permissoes,
     cuidaDosAcessos: sessao.cuidaDosAcessos,
@@ -31,8 +30,8 @@ export async function entrar(email, senha) {
   }
 }
 
-// Busca de novo quem está logado e grava na sessão (no login e quando a conta muda, ex.: virar Frota)
-export async function recarregarUsuario() {
+// Busca quem está logado e grava na sessão
+async function recarregarUsuario() {
   const me = await usuarioService.obterMe()
   const { accessToken, refreshToken } = lerSessao()
   salvarSessao({
@@ -42,7 +41,6 @@ export async function recarregarUsuario() {
     nome: me.nome,
     email: me.email,
     empresa: me.empresa,
-    tipoConta: me.tipoConta,
     cargo: me.cargo,
     permissoes: me.permissoes,
     cuidaDosAcessos: me.cuidaDosAcessos,

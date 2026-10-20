@@ -8,7 +8,7 @@ import { formatKm, nomeDoModelo, textoDias } from '../data/domain'
 import { dashboardService } from '../services'
 import { useCarga } from '../hooks/useCarga'
 import { obterUsuario } from '../services/sessao'
-import { pode, ehAutonomo } from '../data/acesso'
+import { pode } from '../data/acesso'
 import NovoVeiculoModal from '../components/modals/NovoVeiculoModal'
 import UsuarioModal from '../components/modals/UsuarioModal'
 import MecanicoModal from '../components/modals/MecanicoModal'
@@ -19,11 +19,10 @@ const ITENS = ['item', 'itens']
 export default function Dashboard() {
   const navigate = useNavigate()
   const usuario = obterUsuario()
-  // Atalhos de cadastro: cada um só para quem tem a permissão dele (o Autônomo tem um acesso só)
-  const autonomo = ehAutonomo(usuario)
+  // Atalhos de cadastro: cada um só para quem tem a permissão dele
   const atalhos = {
     veiculo: pode(usuario, 'Veiculos'),
-    acesso: usuario.cuidaDosAcessos && !autonomo,
+    acesso: usuario.cuidaDosAcessos,
     mecanico: pode(usuario, 'Cadastros'),
   }
   // A API já devolve a situação da frota calculada: contagens, alertas e frota por geração
@@ -113,7 +112,7 @@ export default function Dashboard() {
                 )}
                 {atalhos.mecanico && (
                   <Button variant="secondary" className="w-full justify-center" onClick={() => setNovoMecanicoOpen(true)}>
-                    {autonomo ? 'Oficina ou mecânico' : 'Novo mecânico'}
+                    Novo mecânico
                   </Button>
                 )}
               </div>

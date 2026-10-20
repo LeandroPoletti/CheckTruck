@@ -8,9 +8,9 @@ import { cores, fontes } from '@/tema'
 type Props = {
   caminhao: Caminhao
   podeAtualizarKm: boolean
-  /** Mostra quem está com o caminhão (só na Frota: o Autônomo não tem motorista). */
+  /** Mostra quem está com o caminhão (para quem cuida da frota; o motorista já sabe que é ele). */
   mostrarMotorista: boolean
-  /** Quem leva o caminhão na oficina (motorista, autônomo) recebe "Fale com a oficina". */
+  /** Quem leva o caminhão na oficina (o motorista) recebe "Fale com a oficina". */
   falarComOficina: boolean
   podeLancarOS?: boolean
   /** Com isso aparece Corrigir km (só Admin e Gestor): o km da maior OS do caminhão. */

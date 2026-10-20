@@ -67,7 +67,7 @@ export default function Empresas() {
             <tr key={e.id}>
               <td className="px-5 py-3.5">
                 <p className="font-semibold text-stone-900">{e.nome}</p>
-                <p className="text-xs text-stone-500">{e.documento ? `CNPJ ${formatDocumento(e.documento)}` : 'Sem CNPJ'}</p>
+                <p className="text-xs text-stone-500">{e.documento ? `${e.documento.length === 11 ? 'CPF' : 'CNPJ'} ${formatDocumento(e.documento)}` : 'Sem CNPJ'}</p>
               </td>
               <td className="space-y-1.5 px-5 py-3.5">
                 {e.admins.length === 0 && <span className="text-stone-400">Sem admin</span>}

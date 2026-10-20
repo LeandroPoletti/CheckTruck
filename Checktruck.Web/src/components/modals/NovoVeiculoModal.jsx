@@ -2,8 +2,6 @@ import { useMemo, useState } from 'react'
 import { Drawer } from '../ui/Overlay'
 import { Field, Input, Select, Toggle, Button, MensagemErro } from '../ui/Form'
 import { TRACOES, ANO_MINIMO, ANO_MAXIMO, anoValido, formatarPlaca, placaValida } from '../../data/domain'
-import { obterUsuario } from '../../services/sessao'
-import { ehAutonomo } from '../../data/acesso'
 import { veiculoService, fabricanteService, modeloService, geracaoService, usuarioService } from '../../services'
 import { useCarga } from '../../hooks/useCarga'
 
@@ -28,9 +26,7 @@ const formDoVeiculo = (v) => ({
 
 // Cadastrar ou editar um caminhão.
 // O caminhão aponta para uma potência: fabricante → modelo → geração → potência, em cascata.
-// No Autônomo não tem motorista: é o próprio dono.
 export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }) {
-  const autonomo = ehAutonomo(obterUsuario())
   const [form, setForm] = useState(() => formDoVeiculo(veiculoParaEditar))
   const [errors, setErrors] = useState({})
   const [salvando, setSalvando] = useState(false)
@@ -207,22 +203,18 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
         </div>
 
         <div>
-          <p className="mb-3 text-xs font-bold tracking-wide text-brand-700">3 · {autonomo ? 'SITUAÇÃO' : 'VÍNCULOS'}</p>
-          {autonomo ? (
-            <Toggle checked={form.ativo} onChange={(v) => set('ativo', v)} label="Ativo" />
-          ) : (
-            <Field label="Motorista atual (opcional)" hint="Também muda quando uma OS é lançada com motorista.">
-              <div className="flex items-center gap-3">
-                <Select className="flex-1" value={form.motoristaId} onChange={(e) => set('motoristaId', e.target.value)}>
-                  <option value="">Sem motorista</option>
-                  {motoristas.map((m) => (
-                    <option key={m.id} value={m.id}>{m.nome}</option>
-                  ))}
-                </Select>
-                <Toggle checked={form.ativo} onChange={(v) => set('ativo', v)} label="Ativo" />
-              </div>
-            </Field>
-          )}
+          <p className="mb-3 text-xs font-bold tracking-wide text-brand-700">3 · VÍNCULOS</p>
+          <Field label="Motorista atual (opcional)" hint="Também muda quando uma OS é lançada com motorista.">
+            <div className="flex items-center gap-3">
+              <Select className="flex-1" value={form.motoristaId} onChange={(e) => set('motoristaId', e.target.value)}>
+                <option value="">Sem motorista</option>
+                {motoristas.map((m) => (
+                  <option key={m.id} value={m.id}>{m.nome}</option>
+                ))}
+              </Select>
+              <Toggle checked={form.ativo} onChange={(v) => set('ativo', v)} label="Ativo" />
+            </div>
+          </Field>
         </div>
 
         <MensagemErro>{errors.api}</MensagemErro>

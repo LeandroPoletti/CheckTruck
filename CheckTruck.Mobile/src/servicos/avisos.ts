@@ -3,7 +3,7 @@ import * as Notifications from 'expo-notifications'
 import { HORA_DO_AVISO, caminhaoDoAviso, planejarAvisos, type Aviso, type CaminhaoDoAviso } from '@/dados/avisos'
 import { chamarApi, ErroDaApi } from './api'
 import type { Tokens } from './armazenamento'
-import { caminhoesDaFrota, meusCaminhoes, situacaoDoCaminhao } from './caminhoes'
+import { caminhoesDaFrota, meusCaminhoes } from './caminhoes'
 import type { Chamar, Usuario } from './sessao'
 
 // Os avisos de troca no celular (notificações locais: o próprio aparelho agenda, sem servidor) e o de chamado novo
@@ -126,16 +126,13 @@ export const avisoDeTeste = () =>
   })
 
 /**
- * Os caminhões de quem está logado, como a tela inicial carrega: o motorista, os dele; quem vê a frota, a lista
- * (no Autônomo com um caminhão só, com todos os itens). Sem Ver frota (só chamados), nenhum.
+ * Os caminhões de quem está logado, como a tela inicial carrega: o motorista, os dele; quem vê a frota, os ativos da
+ * lista. Sem Ver frota (só chamados), nenhum.
  */
 export async function caminhoesDosAvisos(chamar: Chamar, usuario: Usuario): Promise<CaminhaoDoAviso[]> {
   if (usuario.cargo === 'Motorista') return (await meusCaminhoes(chamar)).map(caminhaoDoAviso)
   if (!usuario.permissoes.includes('VerFrota')) return []
-  const ativos = (await caminhoesDaFrota(chamar)).filter((c) => c.ativo)
-  const [unico] = ativos
-  if (usuario.tipoConta === 'Autonomo' && ativos.length === 1) return [caminhaoDoAviso(await situacaoDoCaminhao(chamar, unico.id))]
-  return ativos.map(caminhaoDoAviso)
+  return (await caminhoesDaFrota(chamar)).filter((c) => c.ativo).map(caminhaoDoAviso)
 }
 
 /**

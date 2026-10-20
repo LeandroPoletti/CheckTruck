@@ -43,12 +43,11 @@ const porNome = (a: { nome: string }, b: { nome: string }) => a.nome.localeCompa
 const ano = (data: string) => data.slice(0, 4)
 
 // Cadastrar ou editar um caminhão, igual ao web (permissão Veículos). O caminhão aponta para uma potência:
-// fabricante → modelo → geração → potência, em cascata. Na Frota tem o motorista atual; o Autônomo não tem motorista.
+// fabricante → modelo → geração → potência, em cascata, e o motorista atual.
 export default function CadastroCaminhao() {
   const { id } = useLocalSearchParams<{ id?: string }>()
   const editando = !!id
-  const { chamar, usuario } = useSessao()
-  const frota = usuario?.tipoConta === 'Frota'
+  const { chamar } = useSessao()
 
   const [listas, setListas] = useState<Listas | null>(null)
   const [erroCarga, setErroCarga] = useState('')
@@ -66,7 +65,7 @@ export default function CadastroCaminhao() {
           listarFabricantes(chamar),
           listarModelos(chamar),
           listarGeracoes(chamar),
-          frota ? motoristasAtivos(chamar) : Promise.resolve([]),
+          motoristasAtivos(chamar),
           id ? cadastroDoCaminhao(chamar, Number(id)) : Promise.resolve(null),
         ])
         // O motorista do caminhão continua na lista mesmo se já estiver inativo
@@ -101,7 +100,7 @@ export default function CadastroCaminhao() {
       }
     }
     carregar()
-  }, [chamar, frota, id])
+  }, [chamar, id])
 
   // Mexer num campo tira o erro dele. Trocar um nível da cascata limpa os de baixo
   function mudar<K extends keyof Form>(campo: K, valor: Form[K]) {
@@ -283,17 +282,15 @@ export default function CadastroCaminhao() {
                 erro={erros.kmAtual}
               />
 
-              <Text style={estilos.etapa}>3 · {frota ? 'VÍNCULOS' : 'SITUAÇÃO'}</Text>
-              {frota && (
-                <Grupo rotulo="Motorista atual">
-                  <Escolha
-                    opcoes={[{ id: '', nome: 'Sem motorista' }, ...listas.motoristas]}
-                    escolhidos={[form.motoristaId]}
-                    aoTocar={(v) => mudar('motoristaId', v)}
-                  />
-                  <Text style={estilos.dica}>Também muda quando uma OS é lançada com motorista.</Text>
-                </Grupo>
-              )}
+              <Text style={estilos.etapa}>3 · VÍNCULOS</Text>
+              <Grupo rotulo="Motorista atual">
+                <Escolha
+                  opcoes={[{ id: '', nome: 'Sem motorista' }, ...listas.motoristas]}
+                  escolhidos={[form.motoristaId]}
+                  aoTocar={(v) => mudar('motoristaId', v)}
+                />
+                <Text style={estilos.dica}>Também muda quando uma OS é lançada com motorista.</Text>
+              </Grupo>
               <Chave
                 titulo="Ativo"
                 dica="Desativado, o caminhão sai da OS e dos chamados, mas o histórico continua."

@@ -56,9 +56,6 @@ public class UsuarioLogadoResponseDto : UsuarioResponseDto
 {
     /// <summary>Nome da empresa: aparece no menu.</summary>
     public string? Empresa { get; set; }
-
-    /// <summary>No Autônomo o menu fica sem Chamados e Acesso.</summary>
-    public TipoConta? TipoConta { get; set; }
 }
 
 public static class UsuarioDtoExtensions
@@ -66,7 +63,7 @@ public static class UsuarioDtoExtensions
     public static UsuarioResponseDto ToResponseDto(this Usuario entidade) => Preencher(new UsuarioResponseDto(), entidade);
 
     public static UsuarioLogadoResponseDto ToLogadoResponseDto(this Usuario entidade) =>
-        Preencher(new UsuarioLogadoResponseDto { Empresa = entidade.Empresa?.Nome, TipoConta = entidade.Empresa?.TipoConta }, entidade);
+        Preencher(new UsuarioLogadoResponseDto { Empresa = entidade.Empresa?.Nome }, entidade);
 
     private static T Preencher<T>(T dto, Usuario entidade) where T : UsuarioResponseDto
     {

@@ -19,7 +19,7 @@ import { cores, fontes } from '@/tema'
 // Recarrega sempre que a tela volta a aparecer (ex.: depois de atualizar o km) e ao puxar para baixo.
 export default function PainelDoMotorista({ usuario }: { usuario: Usuario }) {
   const { chamar, sair } = useSessao()
-  const podeAbrirChamado = usuario.tipoConta === 'Frota' && usuario.permissoes.includes('AbrirChamados')
+  const podeAbrirChamado = usuario.permissoes.includes('AbrirChamados')
   const [caminhoes, setCaminhoes] = useState<Caminhao[] | null>(null)
   const [chamados, setChamados] = useState<Chamado[]>([])
   const [escolhidoId, setEscolhidoId] = useState<number | null>(null)

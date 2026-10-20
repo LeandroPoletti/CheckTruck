@@ -74,18 +74,4 @@ public class EmpresaController(ServicoEmpresa servicoEmpresa, ServicoUsuario ser
 
         return empresa.ToResponseDto();
     }
-
-    /// <summary>O Autônomo vira Frota: libera os acessos (motoristas, mecânicos, gestor) e os chamados. Não volta.</summary>
-    [HttpPut("minha/virar-frota")]
-    [SomenteGestao]
-    public ActionResult<EmpresaResponseDto> VirarFrota()
-    {
-        var empresa = servicoEmpresa.VirarFrota();
-        if (empresa is null)
-        {
-            return Erro(servicoEmpresa.Mensagens);
-        }
-
-        return empresa.ToResponseDto();
-    }
 }

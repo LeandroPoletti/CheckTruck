@@ -126,6 +126,6 @@ export type RegistroDeKm = {
 /** Do mais novo para o mais velho. */
 export const historicoDeKm = (chamar: Chamar, id: number) => chamar<RegistroDeKm[]>(`/api/Veiculo/${id}/historico-km`)
 
-/** Só Admin e Gestor (e o Autônomo): corrige um km digitado errado, com o motivo no histórico. */
+/** Só Admin e Gestor: corrige um km digitado errado, com o motivo no histórico. */
 export const corrigirKm = (chamar: Chamar, id: number, km: number, motivo: string) =>
   chamar<void>(`/api/Veiculo/${id}/corrigir-km`, { metodo: 'PUT', corpo: { km, motivo: motivo.trim() } })

@@ -1,6 +1,6 @@
 import type { Chamar } from './sessao'
 
-// Chamados (só na conta Frota): quem está com o caminhão abre, quem tem Atender chamados atende e resolve.
+// Chamados: quem está com o caminhão abre, quem tem Atender chamados atende e resolve.
 
 export type Chamado = {
   id: number

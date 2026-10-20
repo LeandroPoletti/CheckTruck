@@ -163,9 +163,4 @@ export const empresaService = {
     const { data } = await api.get('/api/Empresa/minha')
     return data
   },
-  // O Autônomo vira Frota: volta a ter Acesso e Chamados
-  async virarFrota() {
-    const { data } = await api.put('/api/Empresa/minha/virar-frota')
-    return data
-  },
 }

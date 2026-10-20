@@ -6,7 +6,7 @@ import Botao from '@/componentes/Botao'
 import Saudacao from '@/componentes/Saudacao'
 import { cores, fontes } from '@/tema'
 
-// Tela de quem não tem nada liberado no app (na Frota, sem Ver frota e sem Atender chamados): o acesso é pelo site.
+// Tela de quem não tem nada liberado no app (sem Ver frota e sem Atender chamados): o acesso é pelo site.
 export default function SoPeloSite({ usuario }: { usuario: Usuario }) {
   const { sair } = useSessao()
 

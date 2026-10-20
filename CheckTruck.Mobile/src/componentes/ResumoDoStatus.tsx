@@ -4,7 +4,7 @@ import type { ItemDeTroca } from '@/servicos/caminhoes'
 import { coresDoStatus, fontes } from '@/tema'
 
 // Faixa com o resumo do caminhão: quantas trocas venceram ou estão chegando.
-// Quem leva o caminhão na oficina (motorista, autônomo) é orientado a falar com ela; quem cuida da frota, a programar a troca.
+// Quem leva o caminhão na oficina (o motorista) é orientado a falar com ela; quem cuida da frota, a programar a troca.
 export default function ResumoDoStatus({ itens, falarComOficina }: { itens: ItemDeTroca[]; falarComOficina: boolean }) {
   const vencidas = itens.filter((i) => i.status === 'critico').length
   const chegando = itens.filter((i) => i.status === 'atencao').length

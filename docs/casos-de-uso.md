@@ -73,38 +73,6 @@ flowchart LR
 
 Admin e Gestor podem tudo, inclusive os casos de uso do campo. Só eles cuidam dos acessos e corrigem o km.
 
-## Autônomo
-
-```mermaid
-flowchart LR
-    aut["Autônomo"]
-
-    subgraph ct["CheckTruck (site e app)"]
-        uc03(["UC03 Ver a situação<br/>dos caminhões"])
-        uc05(["UC05 Atualizar km"])
-        uc06(["UC06 Corrigir km"])
-        uc08(["UC08 Lançar OS"])
-        uc09(["UC09 Cadastrar caminhão"])
-        uc10(["UC10 Cadastrar intervalos"])
-        uc11(["UC11 Cadastros"])
-        uc14(["UC14 Receber aviso de troca"])
-        uc18(["UC18 Minha empresa<br/>(virar Frota)"])
-    end
-
-    aut --- uc03
-    aut --- uc05
-    aut --- uc06
-    aut --- uc08
-    aut --- uc09
-    aut --- uc10
-    aut --- uc11
-    aut --- uc14
-    aut --- uc18
-```
-
-O Autônomo é o dono de um ou poucos caminhões e faz tudo sozinho. Não tem chamados nem outros acessos; se
-contratar gente, **vira Frota** em Minha empresa e ganha os dois.
-
 ## Dono do sistema
 
 ```mermaid
@@ -139,20 +107,20 @@ gerações e intervalos de fábrica que todas as empresas usam.
 | UC09 Cadastrar, editar e desativar caminhão | Veículos | Site e app |
 | UC10 Cadastrar intervalos (do caminhão e da empresa) | Intervalos | Site e app |
 | UC11 Cadastros (catálogo da empresa, tipos, mecânicos) | Cadastros | Site e app |
-| UC12 Abrir chamado | Abrir chamados (só na Frota; o motorista, só do caminhão dele) | Site e app |
-| UC13 Atender e resolver chamado | Atender chamados (só na Frota) | Site e app |
+| UC12 Abrir chamado | Abrir chamados (o motorista, só do caminhão dele) | Site e app |
+| UC13 Atender e resolver chamado | Atender chamados | Site e app |
 | UC14 Receber aviso de troca | Motorista e quem tem Ver frota | App |
 | UC15 Receber aviso de chamado novo | Atender chamados (menos quem abriu) | App |
 | UC16 Ver o dashboard | Ver frota | Site |
-| UC17 Gerenciar acessos | Admin e Gestor (só na Frota) | Site |
-| UC18 Minha empresa / virar Frota | Admin e Gestor (e o Autônomo) | Site e app |
+| UC17 Gerenciar acessos | Admin e Gestor | Site |
+| UC18 Minha empresa | Admin e Gestor | Site e app |
 | UC19 Manter o catálogo do sistema | Dono do sistema | Site |
 
 ## Antes e depois
 
 | Etapa | Antes (sem o sistema) | Com o CheckTruck |
 |---|---|---|
-| Fazer a manutenção | O registro fica só no sistema da concessionária | O almoxarife (ou o autônomo) lança a OS no mesmo dia, pelo site ou pelo app |
+| Fazer a manutenção | O registro fica só no sistema da concessionária | O almoxarife lança a OS no mesmo dia, pelo site ou pelo app |
 | Guardar o histórico | Espalhado entre concessionárias; a empresa não tem cópia | Histórico de OS e de km de cada caminhão, sempre à mão |
 | Saber a próxima troca | Memória do gestor ou anotação | O sistema calcula por km e por data, pelo intervalo que vale para aquele caminhão |
 | Ser avisado | Descobre quando já venceu | Atenção quando falta 10% do ciclo (no mínimo 5.000 km) ou 30 dias; crítico quando vence; aviso no celular |

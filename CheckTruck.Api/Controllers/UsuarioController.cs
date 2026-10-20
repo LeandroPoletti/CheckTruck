@@ -12,7 +12,7 @@ namespace CheckTruck.Api.Controllers;
 public class UsuarioController(ServicoUsuario servicoUsuario) : CheckTruckController
 {
     /// <summary>
-    /// Quem está logado, com cargo, permissões e a empresa (nome e tipo de conta): o front monta o menu com isso.
+    /// Quem está logado, com cargo, permissões e o nome da empresa: o front monta o menu com isso.
     /// O dono do sistema vem sem empresa.
     /// </summary>
     [HttpGet("me")]

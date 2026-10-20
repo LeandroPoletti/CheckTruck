@@ -25,7 +25,7 @@ CheckTruck.Repositorio/ Entity Framework: contexto, configuração das tabelas e
 CheckTruck.Testes/      testes das regras do Dominio (xUnit), com um banco de mentira na memória
 CheckTruck.Mobile/      app do celular (Expo + TypeScript): mesma API e mesma conta do web
   src/app/              telas (cada arquivo é uma rota do Expo Router)
-  src/telas/            tela inicial de cada perfil (motorista, frota e autônomo, e o aviso de quem usa só o site)
+  src/telas/            tela inicial de cada perfil (motorista e frota, e o aviso de quem usa só o site)
   src/componentes/      peças das telas (placa, cartões do caminhão e do chamado, campos e botões)
   src/dados/            nomes e formatos iguais aos do web (cargos, chamados, km e datas)
   src/servicos/         chamadas da API, sessão e onde o token fica guardado
@@ -119,29 +119,26 @@ O aviso de chamado novo precisa do projeto no Expo (uma vez só): na pasta `Chec
 **O que cada um vê no app** (o mesmo login e os mesmos dados do web):
 
 - **Motorista:** o caminhão que está com ele (próximas trocas em km e data), Atualizar km e os chamados dele.
-- **Frota, com Ver frota e/ou Atender chamados** (mecânico, chefe de manutenção, gestor...): os caminhões, do que
+- **Com Ver frota e/ou Atender chamados** (mecânico, chefe de manutenção, gestor...): os caminhões, do que
   vence primeiro para o último (os desativados num filtro à parte), com busca e tudo de cada um: situação, histórico
   de manutenções e de km. Com as permissões: Atualizar km, Lançar OS, cadastrar e editar caminhão, Corrigir km
   (Admin e Gestor) e os intervalos de troca (do caminhão e da empresa, por geração). Também os chamados de todos os
   caminhões para atender e resolver, e as ordens de serviço.
-- **Autônomo:** os caminhões dele (com um só, a situação já aparece na tela inicial), Atualizar km, as ordens de
-  serviço (cadastrando a oficina ali mesmo), o cadastro do caminhão, os históricos, os intervalos de troca e os
-  cadastros.
-- **Avisos de troca no celular** (motorista, autônomo e quem vê a frota): todo dia às 8h enquanto tiver troca vencida
+- **Avisos de troca no celular** (motorista e quem vê a frota): todo dia às 8h enquanto tiver troca vencida
   ou chegando, e às 8h do dia em que vence a data de uma troca. O próprio celular agenda (sem servidor) e refaz os
   avisos toda vez que o app abre. A tela Avisos de troca, no fim da tela inicial, mostra se estão ligados, os próximos
   avisos e manda um aviso de teste.
-- **Aviso de chamado novo** (na Frota, para quem pode atender chamados): quando alguém abre um chamado, pelo site ou
+- **Aviso de chamado novo** (para quem pode atender chamados): quando alguém abre um chamado, pelo site ou
   pelo app, chega no celular "Chamado novo: ABC-1D23" com o tipo e a urgência, mesmo com o app fechado (quem abriu
   não recebe). Tocar no aviso abre os chamados. Vem da API, pelo serviço de push do Expo: o app grava o celular de
   quem entrou (`api/Celular`) e apaga ao sair. No Expo Go só funciona no iPhone; no Android precisa de uma versão
   própria do app (development build).
-- **Com a permissão Cadastros:** Mecânicos (no Autônomo, Oficinas e mecânicos), Tipos de manutenção e o Catálogo
+- **Com a permissão Cadastros:** Mecânicos, Tipos de manutenção e o Catálogo
   (fabricante → modelo → geração, com o país no cadastro do fabricante), no fim da tela inicial: cadastrar, editar e
   excluir (o mecânico também desativa; dos tipos e do catálogo, só o que é da empresa).
-- **Admin e Gestor** (e o Autônomo): Minha empresa, no fim da tela inicial, com os dados da conta e o Virar Frota.
+- **Admin e Gestor:** Minha empresa, no fim da tela inicial, com os dados da empresa.
 - **Sem criar conta:** no app entra quem já tem acesso (o e-mail e a senha que o admin ou o gestor cadastrou no site).
-- Na Frota, quem não tem Ver frota nem Atender chamados usa só o site.
+- Quem não tem Ver frota nem Atender chamados usa só o site.
 
 **Primeiro acesso:** a API cria dois logins. Troque as senhas fora do ambiente de desenvolvimento.
 
@@ -168,9 +165,9 @@ cadastra o resto da equipe em **Acesso**. Na mesma tela o dono do sistema:
 
 O CNPJ não repete entre as empresas e pode ter letras (o alfanumérico da Receita, desde julho de 2026).
 
-O **Autônomo** tem um acesso só: o menu fica sem Chamados e sem Acesso (a API também barra os chamados), não tem
-motorista (é ele), e o mecânico da OS aparece como "oficina ou mecânico". Em **Minha empresa** ele pode **virar Frota** a qualquer hora: ganha
-Acesso e Chamados, e nada do que já cadastrou muda (não dá para voltar a Autônomo).
+As contas de uma pessoa só (o antigo **Autônomo**, de quando dava para criar conta sozinho) viraram empresas
+normais: o Admin delas cadastra a equipe em Acesso e usa os chamados como qualquer empresa, e o documento delas
+continua o CPF.
 
 O catálogo (países, fabricantes, modelos, gerações com as potências, tipos de manutenção e intervalos da
 geração) tem dois tipos de item:

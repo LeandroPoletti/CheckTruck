@@ -10,7 +10,7 @@ import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { ordemServicoService } from '../services'
 import { useCarga } from '../hooks/useCarga'
 import { obterUsuario } from '../services/sessao'
-import { pode, ehAutonomo } from '../data/acesso'
+import { pode } from '../data/acesso'
 import { formatKm, formatData, formatDataHora, contemBusca } from '../data/domain'
 
 // Todas as ordens de serviço da frota, da mais nova para a mais velha.
@@ -19,7 +19,6 @@ export default function OrdensServico() {
   const navigate = useNavigate()
   const usuario = obterUsuario()
   const podeMexer = pode(usuario, 'OrdemServico')
-  const autonomo = ehAutonomo(usuario) // sem motorista: é o próprio dono
 
   const { dados: ordens = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => ordemServicoService.listar())
   const [busca, setBusca] = useState('')
@@ -76,7 +75,7 @@ export default function OrdensServico() {
                 <button onClick={() => navigate(`/veiculos/${o.veiculoId}`)}>
                   <PlacaBadge placa={o.placa} size="sm" />
                 </button>
-                {!autonomo && <p className="mt-1 text-xs text-stone-400">{o.motoristaNome ?? 'Sem motorista'}</p>}
+                <p className="mt-1 text-xs text-stone-400">{o.motoristaNome ?? 'Sem motorista'}</p>
               </td>
               <td className="px-5 py-3.5">
                 {o.itens.map((i) => (

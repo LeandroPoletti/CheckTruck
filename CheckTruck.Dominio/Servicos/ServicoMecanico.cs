@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 namespace CheckTruck.Dominio.Servicos;
 
 /// <summary>
-/// Mecânicos (no Autônomo, oficinas ou mecânicos) que fazem as trocas. É só um cadastro, sem login.
+/// Mecânicos (ou oficinas) que fazem as trocas. É só um cadastro, sem login.
 /// Quem tem OS lançada não é excluído: o certo é desativar, e ele continua no histórico.
 /// </summary>
 public class ServicoMecanico(

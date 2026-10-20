@@ -16,11 +16,10 @@ import { cores, fontes } from '@/tema'
 // Ativos primeiro, depois pelo nome (igual ao web)
 const ordem = (a: Mecanico, b: Mecanico) => (a.ativo === b.ativo ? a.nome.localeCompare(b.nome) : a.ativo ? -1 : 1)
 
-// Quem faz as trocas nas OS, igual à tela do web (permissão Cadastros). No Autônomo: as oficinas e os mecânicos
-// onde ele leva o caminhão. Tocar num abre para editar, desativar ou excluir. Recarrega ao voltar para a tela.
+// Quem faz as trocas nas OS, igual à tela do web (permissão Cadastros). Tocar num abre para editar, desativar ou
+// excluir. Recarrega ao voltar para a tela.
 export default function Mecanicos() {
-  const { chamar, usuario } = useSessao()
-  const autonomo = usuario?.tipoConta === 'Autonomo'
+  const { chamar } = useSessao()
   const [lista, setLista] = useState<Mecanico[] | null>(null)
   const [erro, setErro] = useState('')
   const [busca, setBusca] = useState('')
@@ -38,18 +37,12 @@ export default function Mecanicos() {
 
   const ativos = lista?.filter((m) => m.ativo).length ?? 0
   const filtrados = [...(lista ?? [])].sort(ordem).filter((m) => contemBusca(`${m.nome} ${m.funcao}`, busca))
-  const subtitulo = lista
-    ? `${ativos} ativo${ativos === 1 ? '' : 's'} · ${autonomo ? 'onde e com quem você faz as trocas' : 'quem faz as trocas nas OS'}`
-    : undefined
+  const subtitulo = lista ? `${ativos} ativo${ativos === 1 ? '' : 's'} · quem faz as trocas nas OS` : undefined
 
   return (
-    <TelaComTopo titulo={autonomo ? 'Oficinas e mecânicos' : 'Mecânicos'} subtitulo={subtitulo}>
+    <TelaComTopo titulo="Mecânicos" subtitulo={subtitulo}>
       <ScrollView contentContainerStyle={estilos.conteudo} keyboardShouldPersistTaps="handled">
-        <Botao
-          titulo={autonomo ? 'Cadastrar oficina ou mecânico' : 'Cadastrar mecânico'}
-          icone="plus"
-          onPress={() => router.push('/mecanico')}
-        />
+        <Botao titulo="Cadastrar mecânico" icone="plus" onPress={() => router.push('/mecanico')} />
 
         {erro !== '' && (
           <View style={estilos.bloco}>
@@ -66,7 +59,7 @@ export default function Mecanicos() {
             )}
             {filtrados.length === 0 ? (
               <Text style={estilos.vazio}>
-                {lista.length > 0 ? 'Nada encontrado' : autonomo ? 'Nenhuma oficina ou mecânico cadastrado' : 'Nenhum mecânico cadastrado'}
+                {lista.length > 0 ? 'Nada encontrado' : 'Nenhum mecânico cadastrado'}
               </Text>
             ) : (
               <View style={estilos.lista}>

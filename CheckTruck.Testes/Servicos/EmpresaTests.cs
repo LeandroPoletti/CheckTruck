@@ -30,7 +30,7 @@ public class EmpresaTests
 
     private Empresa EmpresaGravada()
     {
-        var empresa = new Empresa { Id = 1, Nome = "Transportes Teste", TipoConta = TipoConta.Frota, Documento = "11222333000181" };
+        var empresa = new Empresa { Id = 1, Nome = "Transportes Teste", Documento = "11222333000181" };
         Empresas.Add(empresa);
         return empresa;
     }

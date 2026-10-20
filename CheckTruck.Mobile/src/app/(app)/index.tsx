@@ -6,8 +6,8 @@ import PainelDoMotorista from '@/telas/PainelDoMotorista'
 import PainelDaFrota from '@/telas/PainelDaFrota'
 import SoPeloSite from '@/telas/SoPeloSite'
 
-// Tela inicial de cada perfil: o motorista vê o caminhão dele; o Autônomo e, na Frota, quem vê a frota ou atende
-// chamados veem o painel da frota. Quem não tem nada disso liberado é avisado de que o acesso é pelo site.
+// Tela inicial de cada perfil: o motorista vê o caminhão dele, e quem vê a frota ou atende chamados vê o painel da
+// frota. Quem não tem nada disso liberado (e o dono do sistema) é avisado de que o acesso é pelo site.
 // Toda vez que a tela aparece, os avisos de troca do celular são refeitos com os caminhões de agora.
 export default function Inicio() {
   const { chamar, usuario } = useSessao()
@@ -20,6 +20,5 @@ export default function Inicio() {
   if (usuario.cargo === 'Motorista') return <PainelDoMotorista usuario={usuario} />
 
   const cuidaDaFrota = usuario.permissoes.includes('VerFrota') || usuario.permissoes.includes('AtenderChamados')
-  const temPainel = usuario.tipoConta === 'Autonomo' || (usuario.tipoConta === 'Frota' && cuidaDaFrota)
-  return temPainel ? <PainelDaFrota usuario={usuario} /> : <SoPeloSite usuario={usuario} />
+  return cuidaDaFrota ? <PainelDaFrota usuario={usuario} /> : <SoPeloSite usuario={usuario} />
 }

@@ -31,12 +31,12 @@ flowchart LR
 | Frota | Veículos (e o detalhe de cada um) | Ver frota |
 | Frota | Catálogo | Cadastros |
 | Manutenção | Ordens de serviço | Ver frota |
-| Manutenção | Chamados | Abrir ou Atender chamados (só na Frota) |
+| Manutenção | Chamados | Abrir ou Atender chamados |
 | Manutenção | Intervalos | Intervalos |
 | Cadastros | Países, Fabricantes, Modelos, Gerações, Tipos de manutenção | Cadastros |
-| Cadastros | Mecânicos (no Autônomo, "Oficinas e mecânicos") | Cadastros (não aparece para o dono do sistema) |
-| — | Acesso | Admin ou Gestor (só na Frota) |
-| — | Minha empresa | Admin ou Gestor (e o Autônomo) |
+| Cadastros | Mecânicos | Cadastros (não aparece para o dono do sistema) |
+| — | Acesso | Admin ou Gestor |
+| — | Minha empresa | Admin ou Gestor |
 
 Os botões dentro das telas também seguem as permissões: Atualizar km (Atualizar km), Corrigir km (Admin e
 Gestor), Editar (Veículos), Lançar OS (Ordem de serviço).
@@ -55,16 +55,14 @@ flowchart TB
     login["Entrar"] --> inicio{"Quem entrou?"}
 
     inicio -->|Motorista| mot["Painel do motorista<br/>o caminhão que está com ele"]
-    inicio -->|"Frota com Ver frota<br/>ou Atender chamados"| frota["Painel da frota<br/>abas Caminhões · Chamados · OS"]
-    inicio -->|Autônomo| aut["Painel da frota<br/>(com 1 caminhão, a situação direto)"]
-    inicio -->|"Frota sem essas permissões"| site["Aviso: use o site"]
+    inicio -->|"Ver frota ou<br/>Atender chamados"| frota["Painel da frota<br/>abas Caminhões · Chamados · OS"]
+    inicio -->|"Sem essas permissões<br/>(e o dono do sistema)"| site["Aviso: use o site"]
 
     mot --> km["Atualizar km"]
     mot --> abrir["Abrir chamado"]
     mot --> avisos["Avisos de troca"]
 
     frota --> det["Caminhão<br/>situação · OS · histórico de km"]
-    aut --> det
     det --> km
     det --> corrigir["Corrigir km"]
     det --> lancar["Lançar OS"]
@@ -75,7 +73,6 @@ flowchart TB
     frota --> novo["Cadastrar caminhão"]
 
     frota --> atalhos["Atalhos no fim da tela"]
-    aut --> atalhos
     atalhos --> avisos
     atalhos --> mec["Mecânicos"]
     atalhos --> tipos["Tipos de manutenção"]
@@ -94,11 +91,11 @@ flowchart TB
 | `(app)/cadastro-caminhao` | Cadastrar e editar caminhão | Veículos |
 | `(app)/abrir-chamado`, `(app)/resolver-chamado` | Abrir, atender e resolver chamados | Abrir / Atender chamados |
 | `(app)/intervalos`, `(app)/intervalo` | Intervalos por caminhão e por geração | Intervalos |
-| `(app)/mecanicos`, `(app)/mecanico` | Mecânicos (no Autônomo, oficinas e mecânicos) | Cadastros |
+| `(app)/mecanicos`, `(app)/mecanico` | Mecânicos | Cadastros |
 | `(app)/tipos-manutencao`, `(app)/tipo-manutencao` | Tipos de manutenção | Cadastros |
 | `(app)/catalogo`, `modelos`, `geracoes`, `fabricante`, `modelo`, `geracao` | Catálogo, um nível por vez | Cadastros |
 | `(app)/avisos` | Avisos de troca: se estão ligados, os próximos e um aviso de teste | Motorista e Ver frota |
-| `(app)/minha-empresa` | Dados da conta e virar Frota | Admin e Gestor (e o Autônomo) |
+| `(app)/minha-empresa` | Dados da empresa | Admin e Gestor |
 
 Ficam só no site: o **dashboard**, os **acessos** (cadastrar pessoas e permissões) e as telas do **dono do
 sistema** (empresas e catálogo do sistema).

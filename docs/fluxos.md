@@ -59,7 +59,7 @@ itens.
 ```mermaid
 sequenceDiagram
     autonumber
-    actor P as Almoxarife (ou autônomo)
+    actor P as Almoxarife
     participant C as Site ou app
     participant A as API (OrdemServicoController)
     participant O as ServicoOrdemServico
@@ -143,7 +143,7 @@ sequenceDiagram
     Id-->>A: ok
     A-->>C: accessToken (1 hora) e refreshToken (14 dias)
     C->>A: GET /api/Usuario/me
-    A-->>C: nome, cargo, permissões, empresa e tipo de conta
+    A-->>C: nome, cargo, permissões e empresa
     C-->>P: tela inicial do perfil
 
     Note over C,A: mais de 1 hora depois

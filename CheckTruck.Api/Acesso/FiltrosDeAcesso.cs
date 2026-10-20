@@ -78,15 +78,6 @@ public class SomenteDonoDoSistemaAttribute : FiltroDeAcessoAttribute
     protected override bool Permite(Usuario usuario) => usuario.Cargo == Cargo.DonoDoSistema;
 }
 
-/// <summary>Só conta Frota (ex.: chamados). O Autônomo é uma pessoa só: dirige e cuida do caminhão.</summary>
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public class SomenteFrotaAttribute : FiltroDeAcessoAttribute
-{
-    protected override bool Permite(Usuario usuario) => usuario.Empresa?.TipoConta == TipoConta.Frota;
-
-    protected override string MensagemSemPermissao => "Isso é só da conta Frota. Para usar, vire Frota em Minha empresa.";
-}
-
 public static class AcessoHttpContextExtensions
 {
     /// <summary>Quem está logado. Só existe nas rotas com um dos filtros de acesso acima.</summary>

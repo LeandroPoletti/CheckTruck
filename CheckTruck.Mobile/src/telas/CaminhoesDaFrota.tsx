@@ -47,15 +47,13 @@ function textoDoPrazo({ kmRestante, diasRestantes }: ItemDeTroca) {
 type Props = {
   /** Ativos e desativados. */
   caminhoes: CaminhaoNaLista[]
-  /** Na Frota, o cartão mostra quem está com o caminhão (o Autônomo não tem motorista). */
-  mostrarMotorista: boolean
   /** Mostra Cadastrar caminhão (permissão Veículos). */
   podeCadastrar: boolean
 }
 
 // Caminhões da empresa, do que vence primeiro para o que vence por último. Os desativados ficam num filtro
 // à parte (só aparece quando tem algum). Toque no caminhão para ver tudo.
-export default function CaminhoesDaFrota({ caminhoes, mostrarMotorista, podeCadastrar }: Props) {
+export default function CaminhoesDaFrota({ caminhoes, podeCadastrar }: Props) {
   const [busca, setBusca] = useState('')
   const [filtro, setFiltro] = useState<Filtro>('todos')
   const cadastrar = podeCadastrar && (
@@ -87,11 +85,7 @@ export default function CaminhoesDaFrota({ caminhoes, mostrarMotorista, podeCada
   return (
     <>
       {cadastrar}
-      <CampoDeBusca
-        valor={busca}
-        aoMudar={setBusca}
-        placeholder={mostrarMotorista ? 'Buscar por placa, modelo ou motorista' : 'Buscar por placa ou modelo'}
-      />
+      <CampoDeBusca valor={busca} aoMudar={setBusca} placeholder="Buscar por placa, modelo ou motorista" />
 
       <View style={estilos.filtros}>
         {filtros.map((f) => (
@@ -111,12 +105,12 @@ export default function CaminhoesDaFrota({ caminhoes, mostrarMotorista, podeCada
 
       {lista.length === 0
         ? <Text style={estilos.nenhum}>Nenhum caminhão encontrado.</Text>
-        : lista.map((c) => <CartaoNaLista key={c.id} caminhao={c} mostrarMotorista={mostrarMotorista} />)}
+        : lista.map((c) => <CartaoNaLista key={c.id} caminhao={c} />)}
     </>
   )
 }
 
-function CartaoNaLista({ caminhao, mostrarMotorista }: { caminhao: CaminhaoNaLista; mostrarMotorista: boolean }) {
+function CartaoNaLista({ caminhao }: { caminhao: CaminhaoNaLista }) {
   const item = caminhao.itemMaisUrgente
   return (
     <Pressable
@@ -132,8 +126,7 @@ function CartaoNaLista({ caminhao, mostrarMotorista }: { caminhao: CaminhaoNaLis
       <View>
         <Text style={estilos.modelo}>{caminhao.fabricante} {caminhao.modelo.nome}, {caminhao.geracao.nome}</Text>
         <Text style={estilos.detalhe}>
-          {formatKm(caminhao.kmAtual)}
-          {mostrarMotorista && <> · {caminhao.motoristaAtual ? caminhao.motoristaAtual.nome : 'Sem motorista'}</>}
+          {formatKm(caminhao.kmAtual)} · {caminhao.motoristaAtual ? caminhao.motoristaAtual.nome : 'Sem motorista'}
         </Text>
       </View>
       <View style={estilos.divisoria} />

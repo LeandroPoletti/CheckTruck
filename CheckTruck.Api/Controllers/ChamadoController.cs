@@ -8,12 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace CheckTruck.Api.Controllers;
 
 /// <summary>
-/// Chamados: quem está com o caminhão conta o problema e o mecânico vai ver. Só na conta Frota.
+/// Chamados: quem está com o caminhão conta o problema e o mecânico vai ver.
 /// Abrir chamados: abrir, editar e excluir os próprios enquanto pendentes. Atender chamados: ver todos, atender e resolver.
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-[SomenteFrota]
 [ExigeUmaDasPermissoes(Permissao.AbrirChamados | Permissao.AtenderChamados)]
 public class ChamadoController(ServicoChamado servicoChamado, ServicoCelular servicoCelular) : CheckTruckController
 {

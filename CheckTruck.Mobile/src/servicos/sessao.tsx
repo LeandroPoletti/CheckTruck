@@ -10,10 +10,9 @@ export type Usuario = {
   email: string
   cargo: string
   permissoes: string[]
-  /** Admin e Gestor (e o Autônomo, que é o dono): podem tudo, inclusive corrigir o km. */
+  /** Admin e Gestor: podem tudo, inclusive corrigir o km. */
   cuidaDosAcessos: boolean
   empresa: string | null
-  tipoConta: 'Frota' | 'Autonomo' | null
 }
 
 /** Chama a API com o token de quem está logado. */
@@ -24,8 +23,6 @@ type Sessao = {
   carregando: boolean
   usuario: Usuario | null
   entrar(email: string, senha: string): Promise<void>
-  /** Lê de novo quem está logado (ex.: depois de o Autônomo virar Frota). */
-  recarregar(): Promise<void>
   sair(): Promise<void>
   chamar: Chamar
 }
@@ -122,14 +119,10 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
     }
   }, [comRenovacao, sair])
 
-  const recarregar = useCallback(async () => {
-    setUsuario(await chamar<Usuario>('/api/Usuario/me'))
-  }, [chamar])
-
   // As funções não mudam (nem quando o token é renovado): as telas podem usá-las para recarregar sem repetir à toa
   const sessao = useMemo(
-    () => ({ carregando, usuario, entrar, recarregar, sair, chamar }),
-    [carregando, usuario, entrar, recarregar, sair, chamar],
+    () => ({ carregando, usuario, entrar, sair, chamar }),
+    [carregando, usuario, entrar, sair, chamar],
   )
 
   return <SessaoContext.Provider value={sessao}>{children}</SessaoContext.Provider>

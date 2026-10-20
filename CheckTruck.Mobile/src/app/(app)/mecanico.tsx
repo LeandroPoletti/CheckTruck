@@ -15,13 +15,12 @@ import { cores } from '@/tema'
 type Erros = { nome?: string; funcao?: string }
 
 // Cadastrar (sem id) ou editar um mecânico, igual à janela do web: nome e função (ex.: Marco Rueda / Borracheiro),
-// sem login. No Autônomo é a oficina ou o mecânico onde ele faz as trocas (ex.: Oficina do Zé / Oficina).
+// sem login.
 // Editando: Ativo (o inativo sai da lista da OS) e Excluir (a API recusa se ele já tem OS).
 export default function JanelaDoMecanico() {
   const { id } = useLocalSearchParams<{ id?: string }>()
   const editando = !!id
-  const { chamar, usuario } = useSessao()
-  const autonomo = usuario?.tipoConta === 'Autonomo'
+  const { chamar } = useSessao()
   const [carregado, setCarregado] = useState(!editando)
   const [nome, setNome] = useState('')
   const [funcao, setFuncao] = useState('')
@@ -48,10 +47,8 @@ export default function JanelaDoMecanico() {
 
   async function salvar() {
     const e: Erros = {}
-    if (!nome.trim()) e.nome = autonomo ? 'Informe o nome.' : 'Informe o nome do mecânico.'
-    if (!funcao.trim()) {
-      e.funcao = autonomo ? 'Informe a função (ex.: oficina, mecânico, borracheiro).' : 'Informe a função (ex.: mecânico, borracheiro).'
-    }
+    if (!nome.trim()) e.nome = 'Informe o nome do mecânico.'
+    if (!funcao.trim()) e.funcao = 'Informe a função (ex.: mecânico, borracheiro).'
     setErros(e)
     setErroApi('')
     if (e.nome || e.funcao) return
@@ -79,9 +76,7 @@ export default function JanelaDoMecanico() {
     }
   }
 
-  const titulo = autonomo
-    ? (editando ? 'Editar oficina ou mecânico' : 'Oficina ou mecânico')
-    : (editando ? 'Editar mecânico' : 'Novo mecânico')
+  const titulo = editando ? 'Editar mecânico' : 'Novo mecânico'
 
   return (
     <SafeAreaView style={estilos.tela}>
@@ -96,7 +91,7 @@ export default function JanelaDoMecanico() {
                 rotulo="Nome"
                 value={nome}
                 onChangeText={(t) => { setNome(t); setErros((e) => ({ ...e, nome: undefined })) }}
-                placeholder={autonomo ? 'Oficina do Zé' : 'Marco Rueda'}
+                placeholder="Marco Rueda"
                 maxLength={150}
                 erro={erros.nome}
               />
@@ -104,7 +99,7 @@ export default function JanelaDoMecanico() {
                 rotulo="Função"
                 value={funcao}
                 onChangeText={(t) => { setFuncao(t); setErros((e) => ({ ...e, funcao: undefined })) }}
-                placeholder={autonomo ? 'Oficina' : 'Borracheiro'}
+                placeholder="Borracheiro"
                 maxLength={100}
                 erro={erros.funcao}
               />

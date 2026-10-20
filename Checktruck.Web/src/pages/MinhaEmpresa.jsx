@@ -1,40 +1,17 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { PageHeader, Card, Carregando, ErroCarregamento } from '../components/Layout'
-import { Button, MensagemErro } from '../components/ui/Form'
 import { empresaService } from '../services'
 import { useCarga } from '../hooks/useCarga'
-import { recarregarUsuario } from '../services/sessao'
-import { TIPOS_CONTA, formatDocumento } from '../data/acesso'
+import { formatDocumento } from '../data/acesso'
 
-// Dados da conta. No Autônomo, o botão Virar Frota (só Admin e Gestor chegam nesta tela).
+// Dados da empresa no CheckTruck (só Admin e Gestor chegam nesta tela)
 export default function MinhaEmpresa() {
-  const navigate = useNavigate()
   const { dados: empresa, carregando, erro, tentarNovamente } = useCarga(() => empresaService.obterMinha())
-  const [confirmando, setConfirmando] = useState(false)
-  const [salvando, setSalvando] = useState(false)
-  const [erroAcao, setErroAcao] = useState(null)
-
-  async function virarFrota() {
-    setSalvando(true)
-    setErroAcao(null)
-    try {
-      await empresaService.virarFrota()
-      await recarregarUsuario() // a sessão passa a ser Frota: o menu ganha Chamados e Acesso
-      navigate(0) // recarrega a tela para o menu ler a sessão nova
-    } catch (e) {
-      setErroAcao(e.message)
-    } finally {
-      setSalvando(false)
-    }
-  }
 
   if (carregando) return <Carregando />
   if (erro) return <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />
 
-  const autonomo = empresa.tipoConta === 'Autonomo'
-  // O documento é o da criação da conta: quem virou Frota continua com o CPF
-  const nomeDocumento = (empresa.documento?.length ?? (autonomo ? 11 : 14)) === 14 ? 'CNPJ' : 'CPF'
+  // O CNPJ; nas contas antigas de uma pessoa só, o CPF dela
+  const nomeDocumento = empresa.documento?.length === 11 ? 'CPF' : 'CNPJ'
 
   return (
     <>
@@ -43,30 +20,9 @@ export default function MinhaEmpresa() {
       <Card className="max-w-2xl p-6">
         <div className="grid grid-cols-3 gap-4">
           <Dado label="Nome" valor={empresa.nome} />
-          <Dado label="Tipo de conta" valor={TIPOS_CONTA[empresa.tipoConta]} />
           <Dado label={nomeDocumento} valor={empresa.documento ? formatDocumento(empresa.documento) : '—'} />
         </div>
       </Card>
-
-      {autonomo && (
-        <Card className="mt-5 max-w-2xl p-6">
-          <h3 className="font-semibold text-stone-900">Virar Frota</h3>
-          <p className="mt-1 text-sm text-stone-500">
-            Contratou motorista ou vai ter equipe? Na Frota você cadastra acessos (motoristas, mecânicos, gestor), cada
-            um com o que pode fazer, e os motoristas abrem chamados. Seus caminhões, OS e intervalos continuam iguais.
-            Não dá para voltar a Autônomo.
-          </p>
-          <MensagemErro className="mt-3">{erroAcao}</MensagemErro>
-          {confirmando ? (
-            <div className="mt-4 flex gap-2">
-              <Button onClick={virarFrota} disabled={salvando}>{salvando ? 'Mudando…' : 'Sim, virar Frota'}</Button>
-              <Button variant="secondary" onClick={() => setConfirmando(false)} disabled={salvando}>Cancelar</Button>
-            </div>
-          ) : (
-            <Button className="mt-4" onClick={() => setConfirmando(true)}>Virar Frota</Button>
-          )}
-        </Card>
-      )}
     </>
   )
 }

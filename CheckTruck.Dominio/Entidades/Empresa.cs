@@ -1,4 +1,3 @@
-using CheckTruck.Dominio.Enums;
 using CheckTruck.Dominio.Interfaces;
 
 namespace CheckTruck.Dominio.Entidades;
@@ -11,12 +10,11 @@ public class Empresa : EntidadeBanco
 {
     public long Id { get; set; }
 
-    /// <summary>Frota: nome da empresa. Autônomo: nome da pessoa.</summary>
     public string Nome { get; set; } = "";
 
-    public TipoConta TipoConta { get; set; }
-
-    /// <summary>Sem máscara: CNPJ na frota, CPF no autônomo. Não repete. A empresa do TCC fica sem.</summary>
+    /// <summary>
+    /// Sem máscara: o CNPJ (nas contas antigas de uma pessoa só, o CPF dela). Não repete. A empresa do TCC fica sem.
+    /// </summary>
     public string? Documento { get; set; }
 
     /// <summary>Quando o dono do sistema desativou a empresa (ninguém dela entra). null = ativa.</summary>

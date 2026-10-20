@@ -22,11 +22,6 @@ export const ehDonoDoSistema = (usuario) => usuario?.cargo === DONO_DO_SISTEMA.i
 // Item do catálogo: o do sistema só o dono do sistema muda; o da empresa, só a empresa
 export const podeMexerNoItem = (usuario, item) => item.doSistema === ehDonoDoSistema(usuario)
 
-// Tipo de conta da empresa (nomes do enum TipoConta da API). O Autônomo faz tudo sozinho: um acesso só,
-// sem chamados e sem motorista (é ele). Pode virar Frota em Minha empresa.
-export const TIPOS_CONTA = { Frota: 'Frota', Autonomo: 'Autônomo' }
-export const ehAutonomo = (usuario) => usuario?.tipoConta === 'Autonomo'
-
 export const PERMISSOES = [
   { id: 'VerFrota', nome: 'Ver frota', descricao: 'Dashboard e veículos' },
   { id: 'Veiculos', nome: 'Veículos', descricao: 'Cadastrar e editar veículos' },

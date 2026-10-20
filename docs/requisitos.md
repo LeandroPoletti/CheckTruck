@@ -16,7 +16,7 @@ como ele é hoje, mais os que surgiram no desenvolvimento. **Situação:** ✅ f
 | RF-07 | Dashboard com o estado da frota (ok, atenção, crítico) | ✅ | No site |
 | RF-08 | Listar as trocas próximas ou vencidas de um caminhão | ✅ | Situação do caminhão, no site e no app |
 | RF-09 | Consultar os intervalos de troca por geração e por caminhão | ✅ | Tela Intervalos, no site e no app |
-| RF-10 | Abrir, atender e resolver chamados | ✅ | Novo. Só na conta Frota |
+| RF-10 | Abrir, atender e resolver chamados | ✅ | Novo |
 | RF-11 | Cadastrar as empresas clientes com o login do Admin de cada uma, desativar e ativar | ✅ | Novo. Multiempresa. Só o dono do sistema; não existe criar conta |
 | RF-12 | Cadastrar acessos, cargos e permissões; ativar e desativar | ✅ | Novo. Só Admin e Gestor |
 | RF-13 | Manter o catálogo (país, fabricante, modelo, geração, potências) e os tipos de manutenção | ✅ | Novo. Do sistema (dono do sistema) e da empresa |
@@ -60,7 +60,7 @@ como ele é hoje, mais os que surgiram no desenvolvimento. **Situação:** ✅ f
 | RN-14 | **Aviso de chamado novo** para quem pode atender na mesma empresa, menos quem abriu; se o aviso falhar, o chamado continua aberto | `ServicoCelular` | `CelularTests` |
 | RN-15 | **Dados separados por empresa:** a empresa nunca vem do front; o banco filtra todas as consultas e alterações pela empresa de quem está logado | `Context` (filtro global) | — |
 | RN-16 | **Catálogo do sistema e da empresa:** o do sistema só o dono do sistema muda; o da empresa só ela vê. Nomes não repetem; não se exclui o que está em uso | `ServicoCatalogo` e filhos | — |
-| RN-17 | **Acessos:** só Admin e Gestor cadastram, editam e desativam; ninguém tira o próprio cargo de gestão; CPF único na empresa; o Autônomo tem um acesso só | `ServicoUsuario` | `DocumentosTests` (CPF e CNPJ) |
+| RN-17 | **Acessos:** só Admin e Gestor cadastram, editam e desativam; ninguém tira o próprio cargo de gestão; CPF único na empresa | `ServicoUsuario` | `DocumentosTests` (CPF e CNPJ) |
 | RN-18 | **Valores aceitos:** nenhum número negativo; anos de 1900 até o ano que vem, e o ano modelo é o de fabricação ou o seguinte; Renavam opcional, com 11 números | `ServicoVeiculo` e demais serviços | `VeiculoTests` |
 | RN-19 | **Empresas:** só o dono do sistema cadastra, sempre com o Admin dela; CNPJ válido e que não repete; empresa desativada não entra nem renova o login, e os dados ficam guardados | `ServicoEmpresa`, filtros de acesso, `ConfirmacaoUsuarioAtivo` | `EmpresaTests` |
 

@@ -10,13 +10,12 @@ import { formatKm, contemBusca, nomeDoModelo, nomeDoCaminhao, TRACOES } from '..
 import NovoVeiculoModal from '../components/modals/NovoVeiculoModal'
 import { veiculoService } from '../services'
 import { obterUsuario } from '../services/sessao'
-import { pode, ehAutonomo } from '../data/acesso'
+import { pode } from '../data/acesso'
 
 export default function Veiculos() {
   const navigate = useNavigate()
   const usuario = obterUsuario()
   const podeCadastrar = pode(usuario, 'Veiculos')
-  const autonomo = ehAutonomo(usuario) // sem motorista: é o próprio dono
   // Uma request: a API devolve cada veículo com fabricante, modelo, geração, potência, motorista e situação já calculada
   const { dados: veiculos = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => veiculoService.listarSituacao())
   const [busca, setBusca] = useState('')
@@ -59,7 +58,7 @@ export default function Veiculos() {
       />
 
       <div className="mb-5 flex gap-3">
-        <CampoBusca value={busca} onChange={setBusca} placeholder={autonomo ? 'Buscar por placa, chassi ou modelo' : 'Buscar por placa, chassi, motorista ou modelo'} className="flex-1" />
+        <CampoBusca value={busca} onChange={setBusca} placeholder="Buscar por placa, chassi, motorista ou modelo" className="flex-1" />
         <Select value={geracaoFiltro} onChange={(e) => setGeracaoFiltro(e.target.value)} className="w-72">
           <option value="todas">Geração: todas</option>
           {geracoes.map((g) => (
@@ -100,7 +99,7 @@ export default function Veiculos() {
               <BarraDeUso percentual={item?.percentualUsado} status={status} />
 
               <div className="mt-4 flex items-center justify-between border-t border-stone-100 pt-3 text-sm">
-                <span className="text-stone-600">{autonomo ? '' : v.motoristaNome ?? 'Sem motorista'}</span>
+                <span className="text-stone-600">{v.motoristaNome ?? 'Sem motorista'}</span>
                 <button
                   onClick={() => navigate(`/veiculos/${v.id}`)}
                   className="font-semibold text-brand-700 hover:text-brand-900"

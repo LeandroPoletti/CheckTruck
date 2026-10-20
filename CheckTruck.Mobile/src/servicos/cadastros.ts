@@ -1,7 +1,7 @@
 import type { Chamar } from './sessao'
 
-// Cadastros que a OS, o caminhão e os intervalos usam: tipos de manutenção, mecânicos (no Autônomo, "oficinas e
-// mecânicos"), motoristas e o catálogo (fabricante → modelo → geração, com as potências).
+// Cadastros que a OS, o caminhão e os intervalos usam: tipos de manutenção, mecânicos, motoristas e o catálogo
+// (fabricante → modelo → geração, com as potências).
 // Ver: estar logado. Cadastrar, editar e excluir: permissão Cadastros.
 
 export type TipoDeManutencao = {
@@ -30,14 +30,14 @@ export const salvarTipo = (chamar: Chamar, tipo: NovoTipo, id?: number) =>
 /** A API recusa quando o tipo já tem OS lançada ou intervalo cadastrado. */
 export const excluirTipo = (chamar: Chamar, id: number) => chamar<void>(`/api/TipoManutencao/${id}`, { metodo: 'DELETE' })
 
-/** Todos, ativos e inativos (tela Oficinas e mecânicos). */
+/** Todos, ativos e inativos (tela Mecânicos). */
 export const listarMecanicos = (chamar: Chamar) => chamar<Mecanico[]>('/api/Mecanico')
 export const mecanico = (chamar: Chamar, id: number) => chamar<Mecanico>(`/api/Mecanico/${id}`)
 
 export const mecanicosAtivos = (chamar: Chamar) =>
   chamar<Mecanico[]>(`/api/Mecanico?$filter=${encodeURIComponent('Ativo eq true')}`)
 
-/** Cria (sem id) ou muda um mecânico (no Autônomo, a oficina ou o mecânico). */
+/** Cria (sem id) ou muda um mecânico. */
 export const salvarMecanico = (chamar: Chamar, { nome, funcao, ativo }: Omit<Mecanico, 'id'>, id?: number) =>
   chamar<Mecanico>(id ? `/api/Mecanico/${id}` : '/api/Mecanico', {
     metodo: id ? 'PUT' : 'POST',
@@ -47,7 +47,7 @@ export const salvarMecanico = (chamar: Chamar, { nome, funcao, ativo }: Omit<Mec
 /** A API recusa quando já tem OS lançada com ele: aí é desativar. */
 export const excluirMecanico = (chamar: Chamar, id: number) => chamar<void>(`/api/Mecanico/${id}`, { metodo: 'DELETE' })
 
-/** Motoristas ativos, para dizer quem estava com o caminhão (só na Frota). */
+/** Motoristas ativos, para dizer quem estava com o caminhão. */
 export const motoristasAtivos = (chamar: Chamar) => chamar<Motorista[]>('/api/Usuario/motoristas')
 
 // Catálogo: o do sistema todas as empresas veem e só o dono do sistema muda; o que a empresa cadastra (doSistema

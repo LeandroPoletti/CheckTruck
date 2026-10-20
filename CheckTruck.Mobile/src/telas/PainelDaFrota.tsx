@@ -4,15 +4,14 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { router, useFocusEffect } from 'expo-router'
 import { useSessao, type Usuario } from '@/servicos/sessao'
 import { quandoTocarNoAvisoDeChamado } from '@/servicos/avisos'
-import { caminhoesDaFrota, situacaoDoCaminhao, type Caminhao, type CaminhaoNaLista } from '@/servicos/caminhoes'
+import { caminhoesDaFrota, type CaminhaoNaLista } from '@/servicos/caminhoes'
 import { listarChamados, type Chamado } from '@/servicos/chamados'
-import { kmDaMaiorOs, listarOrdens, type OrdemDeServico } from '@/servicos/ordens'
+import { listarOrdens, type OrdemDeServico } from '@/servicos/ordens'
 import Abas, { type DadosDaAba } from '@/componentes/Abas'
 import Atalho from '@/componentes/Atalho'
 import Botao from '@/componentes/Botao'
 import MensagemErro from '@/componentes/MensagemErro'
 import Saudacao from '@/componentes/Saudacao'
-import SituacaoDoCaminhao from '@/componentes/SituacaoDoCaminhao'
 import CaminhoesDaFrota from './CaminhoesDaFrota'
 import ChamadosDaFrota from './ChamadosDaFrota'
 import OrdensDaFrota from './OrdensDaFrota'
@@ -20,20 +19,18 @@ import { cores } from '@/tema'
 
 type Aba = 'caminhoes' | 'chamados' | 'ordens'
 
-// Tela de quem cuida da frota (mecânico, chefe de manutenção, gestor...) e do Autônomo. Mostra o que o acesso libera,
-// igual ao web: Ver frota mostra os caminhões e as ordens de serviço, e Atender chamados (só na Frota) mostra os
-// chamados. Com mais de uma, troca nas abas de cima. O Autônomo com um caminhão só já vê a situação dele, sem a lista.
+// Tela de quem cuida da frota (mecânico, chefe de manutenção, gestor...). Mostra o que o acesso libera, igual ao web:
+// Ver frota mostra os caminhões e as ordens de serviço, e Atender chamados mostra os chamados. Com mais de uma, troca
+// nas abas de cima.
 // No fim da tela, os avisos de troca (Ver frota), os cadastros (permissão Cadastros) e Minha empresa (Admin e Gestor).
 // Recarrega sempre que a tela volta a aparecer (ex.: depois de resolver um chamado) e ao puxar para baixo.
 // Tocar no aviso de chamado novo volta para cá, na aba Chamados, já com o chamado novo.
 export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
   const { chamar, sair } = useSessao()
-  const autonomo = usuario.tipoConta === 'Autonomo'
   const verFrota = usuario.permissoes.includes('VerFrota')
-  const atender = usuario.tipoConta === 'Frota' && usuario.permissoes.includes('AtenderChamados')
+  const atender = usuario.permissoes.includes('AtenderChamados')
   const [aba, setAba] = useState<Aba>(verFrota ? 'caminhoes' : 'chamados')
   const [caminhoes, setCaminhoes] = useState<CaminhaoNaLista[] | null>(null)
-  const [unico, setUnico] = useState<Caminhao | null>(null)
   const [chamados, setChamados] = useState<Chamado[] | null>(null)
   const [ordens, setOrdens] = useState<OrdemDeServico[] | null>(null)
   const [erro, setErro] = useState('')
@@ -46,16 +43,14 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
         atender ? listarChamados(chamar) : Promise.resolve([]),
         verFrota ? listarOrdens(chamar) : Promise.resolve([]),
       ])
-      const so = autonomo && frota.length === 1 && frota[0].ativo ? await situacaoDoCaminhao(chamar, frota[0].id) : null
       setCaminhoes(frota)
-      setUnico(so)
       setChamados(lista)
       setOrdens(os)
       setErro('')
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Não foi possível carregar.')
     }
-  }, [chamar, autonomo, verFrota, atender])
+  }, [chamar, verFrota, atender])
 
   useFocusEffect(useCallback(() => { carregar() }, [carregar]))
 
@@ -76,7 +71,7 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
 
   const pendentes = chamados?.filter((c) => c.status === 'Pendente').length ?? 0
   const abas: DadosDaAba<Aba>[] = [
-    ...(verFrota ? [{ id: 'caminhoes' as const, titulo: unico ? 'Caminhão' : 'Caminhões' }] : []),
+    ...(verFrota ? [{ id: 'caminhoes' as const, titulo: 'Caminhões' }] : []),
     ...(atender ? [{ id: 'chamados' as const, titulo: 'Chamados', contador: pendentes }] : []),
     ...(verFrota ? [{ id: 'ordens' as const, titulo: 'OS' }] : []),
   ]
@@ -104,41 +99,9 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
             <ActivityIndicator style={estilos.carregando} color={cores.marca700} />
           )}
 
-          {aba === 'caminhoes' && caminhoes && (unico ? (
-            <>
-              <SituacaoDoCaminhao
-                caminhao={unico}
-                podeAtualizarKm={usuario.permissoes.includes('AtualizarKm')}
-                mostrarMotorista={false}
-                falarComOficina
-                podeLancarOS={usuario.permissoes.includes('OrdemServico')}
-                kmMinimoParaCorrigir={
-                  usuario.cuidaDosAcessos ? kmDaMaiorOs((ordens ?? []).filter((os) => os.veiculo?.id === unico.id)) : undefined
-                }
-              />
-              {usuario.permissoes.includes('Intervalos') && (
-                <Atalho
-                  icone="sliders"
-                  titulo="Intervalos de troca"
-                  onPress={() => router.push({ pathname: '/intervalos', params: { id: unico.id } })}
-                />
-              )}
-              <Atalho
-                icone="clock"
-                titulo="Histórico e dados do caminhão"
-                onPress={() => router.push({ pathname: '/caminhao/[id]', params: { id: unico.id } })}
-              />
-              {usuario.permissoes.includes('Veiculos') && (
-                <Atalho icone="plus" titulo="Cadastrar outro caminhão" onPress={() => router.push('/cadastro-caminhao')} />
-              )}
-            </>
-          ) : (
-            <CaminhoesDaFrota
-              caminhoes={caminhoes}
-              mostrarMotorista={!autonomo}
-              podeCadastrar={usuario.permissoes.includes('Veiculos')}
-            />
-          ))}
+          {aba === 'caminhoes' && caminhoes && (
+            <CaminhoesDaFrota caminhoes={caminhoes} podeCadastrar={usuario.permissoes.includes('Veiculos')} />
+          )}
           {aba === 'chamados' && chamados && (
             <ChamadosDaFrota chamados={chamados} usuario={usuario} aoMudar={carregar} />
           )}
@@ -149,11 +112,7 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
               {verFrota && <Atalho icone="bell" titulo="Avisos de troca" onPress={() => router.push('/avisos')} />}
               {usuario.permissoes.includes('Cadastros') && (
                 <>
-                  <Atalho
-                    icone="tool"
-                    titulo={autonomo ? 'Oficinas e mecânicos' : 'Mecânicos'}
-                    onPress={() => router.push('/mecanicos')}
-                  />
+                  <Atalho icone="tool" titulo="Mecânicos" onPress={() => router.push('/mecanicos')} />
                   <Atalho icone="list" titulo="Tipos de manutenção" onPress={() => router.push('/tipos-manutencao')} />
                   <Atalho icone="book-open" titulo="Catálogo" onPress={() => router.push('/catalogo')} />
                 </>

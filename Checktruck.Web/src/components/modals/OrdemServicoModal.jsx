@@ -6,13 +6,12 @@ import { formatKm, hoje, ANO_MINIMO } from '../../data/domain'
 import { ordemServicoService, tipoManutencaoService, mecanicoService, usuarioService, veiculoService, filtro } from '../../services'
 import { useCarga } from '../../hooks/useCarga'
 import { obterUsuario } from '../../services/sessao'
-import { pode, ehAutonomo } from '../../data/acesso'
+import { pode } from '../../data/acesso'
 import { ORIGENS_INTERVALO } from '../../data/intervalos'
 
 const porNome = (a, b) => a.nome.localeCompare(b.nome)
 
 // Lançar ou corrigir uma ordem de serviço: um ou mais itens trocados e um ou mais mecânicos.
-// No Autônomo não tem motorista (é o dono) e o mecânico aparece como "oficina ou mecânico".
 //   veiculo  → lançar no caminhão já escolhido (atalho na tela do caminhão)
 //   registro → corrigir uma OS (o caminhão não muda; "lançada por" continua o original)
 //   nenhum   → lançar escolhendo a placa (tela Ordens de serviço)
@@ -21,7 +20,6 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
   const escolhePlaca = !veiculo && !corrigindo
   const usuario = obterUsuario()
   const podeCadastrarMecanico = pode(usuario, 'Cadastros')
-  const autonomo = ehAutonomo(usuario)
 
   // Listas do formulário. Na correção, os mecânicos e o motorista da OS entram mesmo se já estiverem inativos.
   const listas = useCarga(async () => {
@@ -98,7 +96,7 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
     const km = Number(form.kmNaTroca)
     if (!veiculoId) { setErro('Escolha o caminhão.'); return }
     if (itens.length === 0) { setErro('Escolha pelo menos um item trocado.'); return }
-    if (form.mecanicoIds.length === 0) { setErro(autonomo ? 'Escolha pelo menos uma oficina ou mecânico.' : 'Escolha pelo menos um mecânico.'); return }
+    if (form.mecanicoIds.length === 0) { setErro('Escolha pelo menos um mecânico.'); return }
     // OS antiga pode ter km menor que o atual; só não aceita km inválido
     if (form.kmNaTroca === '' || !Number.isInteger(km) || km < 0) { setErro('Informe o km do caminhão na troca (sem negativo).'); return }
     // A troca já foi feita: a data vai de 1900 até hoje
@@ -199,36 +197,33 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
           )}
         </Field>
 
-        <Field label={autonomo ? 'Oficina ou mecânico' : 'Mecânicos'} required group hint="Pode escolher mais de um. Quem fez o quê, se precisar, vai nas observações.">
+        <Field label="Mecânicos" required group hint="Pode escolher mais de um. Quem fez o quê, se precisar, vai nas observações.">
           <SelecaoMultipla
             opcoes={mecanicos.map((m) => ({ id: m.id, nome: `${m.nome} (${m.funcao})` }))}
             selecionados={form.mecanicoIds}
             onChange={(ids) => set('mecanicoIds', ids)}
-            placeholder={autonomo ? 'Escolha onde ou com quem fez a troca' : 'Escolha quem fez a troca'}
+            placeholder="Escolha quem fez a troca"
           />
           {!listas.carregando && mecanicos.length === 0 && (
             <p className="mt-1.5 text-xs text-amber-600">
-              {autonomo ? 'Nada cadastrado. Cadastre a oficina ou o mecânico em Oficinas e mecânicos.'
-                : podeCadastrarMecanico ? 'Nenhum mecânico cadastrado. Cadastre em Cadastros → Mecânicos.' : 'Nenhum mecânico cadastrado. Peça para quem cuida dos cadastros.'}
+              {podeCadastrarMecanico ? 'Nenhum mecânico cadastrado. Cadastre em Cadastros → Mecânicos.' : 'Nenhum mecânico cadastrado. Peça para quem cuida dos cadastros.'}
             </p>
           )}
         </Field>
 
-        {!autonomo && (
-          <Field
-            label="Motorista"
-            hint={corrigindo
-              ? 'Quem estava com o caminhão. Corrigir a OS não muda o motorista atual do caminhão.'
-              : 'Quem estava com o caminhão. Se escolher alguém, ele vira o motorista atual do caminhão.'}
-          >
-            <Select value={motoristaId} onChange={(e) => set('motoristaId', e.target.value)}>
-              <option value="">Sem motorista</option>
-              {motoristas.map((m) => (
-                <option key={m.id} value={m.id}>{m.nome}</option>
-              ))}
-            </Select>
-          </Field>
-        )}
+        <Field
+          label="Motorista"
+          hint={corrigindo
+            ? 'Quem estava com o caminhão. Corrigir a OS não muda o motorista atual do caminhão.'
+            : 'Quem estava com o caminhão. Se escolher alguém, ele vira o motorista atual do caminhão.'}
+        >
+          <Select value={motoristaId} onChange={(e) => set('motoristaId', e.target.value)}>
+            <option value="">Sem motorista</option>
+            {motoristas.map((m) => (
+              <option key={m.id} value={m.id}>{m.nome}</option>
+            ))}
+          </Select>
+        </Field>
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Km na troca" required>

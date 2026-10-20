@@ -2,12 +2,11 @@
 // O App monta as rotas e o menu a partir desta lista (item sem label não aparece no menu).
 // Itens com o mesmo grupo, em sequência, viram um grupo que abre e fecha no menu.
 // daEmpresa: a tela mostra dados da empresa e não abre para o dono do sistema, que não é de nenhuma.
-// soFrota: a tela não abre na conta Autônomo (um acesso só e sem chamados). labelAutonomo: nome no menu do Autônomo.
 import {
   LayoutDashboard, Truck, ShieldCheck, LibraryBig, Clock, MessageSquareWarning, ClipboardList,
   Globe, Factory, Layers, Boxes, Wrench, HardHat, Building2,
 } from 'lucide-react'
-import { GESTAO, DONO, pode, ehDonoDoSistema, ehAutonomo } from './data/acesso'
+import { GESTAO, DONO, pode, ehDonoDoSistema } from './data/acesso'
 import Empresas from './pages/Empresas'
 import Dashboard from './pages/Dashboard'
 import Veiculos from './pages/Veiculos'
@@ -37,7 +36,7 @@ export const PAGINAS = [
   { path: '/ordens-servico', label: 'Ordens de serviço', icon: ClipboardList, grupo: 'MANUTENÇÃO', permissao: 'VerFrota', Pagina: OrdensServico },
   {
     path: '/chamados', label: 'Chamados', icon: MessageSquareWarning, grupo: 'MANUTENÇÃO',
-    permissao: ['AbrirChamados', 'AtenderChamados'], soFrota: true, Pagina: Chamados,
+    permissao: ['AbrirChamados', 'AtenderChamados'], Pagina: Chamados,
   },
   { path: '/intervalos', label: 'Intervalos', icon: Clock, grupo: 'MANUTENÇÃO', permissao: 'Intervalos', Pagina: Intervalos },
 
@@ -47,24 +46,20 @@ export const PAGINAS = [
   { path: '/geracoes', label: 'Gerações', icon: Layers, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Geracoes },
   { path: '/tipos-manutencao', label: 'Tipos de manutenção', icon: Wrench, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: TiposManutencao },
   {
-    path: '/mecanicos', label: 'Mecânicos', labelAutonomo: 'Oficinas e mecânicos', icon: HardHat, grupo: 'CADASTROS',
+    path: '/mecanicos', label: 'Mecânicos', icon: HardHat, grupo: 'CADASTROS',
     permissao: 'Cadastros', daEmpresa: true, Pagina: Mecanicos,
   },
 
-  { path: '/acesso', label: 'Acesso', icon: ShieldCheck, permissao: GESTAO, soFrota: true, Pagina: Acesso },
+  { path: '/acesso', label: 'Acesso', icon: ShieldCheck, permissao: GESTAO, Pagina: Acesso },
   { path: '/minha-empresa', label: 'Minha empresa', icon: Building2, permissao: GESTAO, Pagina: MinhaEmpresa },
 ]
 
-// A pessoa tem a permissão da tela, é de uma empresa (se a tela é de dados da empresa) e é Frota (se a tela é só da Frota)
+// A pessoa tem a permissão da tela e é de uma empresa (se a tela é de dados da empresa)
 export const podeAbrir = (usuario, pagina) =>
-  pode(usuario, pagina.permissao)
-  && !(pagina.daEmpresa && ehDonoDoSistema(usuario))
-  && !(pagina.soFrota && ehAutonomo(usuario))
+  pode(usuario, pagina.permissao) && !(pagina.daEmpresa && ehDonoDoSistema(usuario))
 
-// Itens do menu que a pessoa pode usar (no Autônomo, com o nome do Autônomo quando tem)
-export const itensDoMenu = (usuario) => PAGINAS
-  .filter((p) => p.label && podeAbrir(usuario, p))
-  .map((p) => (p.labelAutonomo && ehAutonomo(usuario) ? { ...p, label: p.labelAutonomo } : p))
+// Itens do menu que a pessoa pode usar
+export const itensDoMenu = (usuario) => PAGINAS.filter((p) => p.label && podeAbrir(usuario, p))
 
 // Primeira tela do menu que a pessoa pode usar (toda permissão abre pelo menos uma tela)
 export const paginaInicial = (usuario) => itensDoMenu(usuario)[0]?.path ?? '/dashboard'
