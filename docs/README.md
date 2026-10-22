@@ -9,7 +9,7 @@ telas e rotas da API. Para instalar e rodar, veja o [README principal](../README
 | [Banco de dados](banco-de-dados.md) | Diagramas ER (gerados do modelo do EF), separação por empresa e restrições |
 | [Domínio](dominio.md) | Diagramas de classes das entidades e dos serviços, e os enums |
 | [Casos de uso](casos-de-uso.md) | Casos de uso por perfil, casos de uso × permissões e o antes e depois |
-| [Fluxos](fluxos.md) | Diagramas de sequência: situação do caminhão, lançar OS, chamado com aviso, login e renovação, km e avisos de troca |
+| [Fluxos](fluxos.md) | Diagramas de sequência: situação do caminhão, lançar OS, chamado com aviso, login e renovação, cadastro de empresa, km e avisos de troca |
 | [Requisitos](requisitos.md) | Requisitos funcionais e não funcionais e regras de negócio, com a situação de cada um |
 | [Telas](telas.md) | Navegação do site e do app e quem vê cada tela |
 | [API](api.md) | Todas as rotas, com a permissão de cada uma |
@@ -37,4 +37,4 @@ O sistema cresceu depois do documento. Para atualizá-lo:
 | Alerta 5.000 km antes | 10% do ciclo (no mínimo 5.000 km) ou 30 dias (RN-08) |
 | Rotas em inglês (`/api/vehicles`...) | Rotas em português ([API](api.md)) |
 | Seed com os intervalos oficiais do Volvo FH | Catálogo inicial com 5 marcas e 46 gerações; intervalos de fábrica cadastrados pelo dono do sistema |
-| — | Chamados, avisos no celular, histórico de km, testes automáticos e CI, renovação do login |
+| — | Tela Empresas do dono do sistema (cadastrar, desativar e senha nova do Admin), chamados, avisos no celular, histórico de km, testes automáticos (inclusive da separação entre empresas) e CI, renovação do login |
