@@ -22,7 +22,8 @@ diagramas) está em [`docs/`](docs/README.md).
 CheckTruck.Api/         controllers, DTOs, filtros de acesso (quem pode o quê) e o envio dos avisos ao celular
 CheckTruck.Dominio/     entidades, enums e as regras do negócio (serviços)
 CheckTruck.Repositorio/ Entity Framework: contexto, configuração das tabelas e migrations
-CheckTruck.Testes/      testes das regras do Dominio (xUnit), com um banco de mentira na memória
+CheckTruck.Testes/      testes das regras do Dominio (xUnit, com um banco de mentira na memória) e da separação
+                        entre empresas (com o Context de verdade, num SQLite na memória)
 CheckTruck.Mobile/      app do celular (Expo + TypeScript): mesma API e mesma conta do web
   src/app/              telas (cada arquivo é uma rota do Expo Router)
   src/telas/            tela inicial de cada perfil (motorista e frota, e o aviso de quem usa só o site)

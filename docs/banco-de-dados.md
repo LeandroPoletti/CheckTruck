@@ -55,7 +55,9 @@ Todos os clientes ficam no mesmo banco, e a coluna `EmpresaId` diz de quem é ca
 
 A empresa **nunca vem do site ou do app**. O `Context` do EF grava a empresa de quem está logado em todo
 registro novo, filtra toda consulta por ela (filtro global) e põe a empresa no WHERE de todo UPDATE e DELETE.
-Assim, um cliente não vê nem altera os dados de outro, mesmo que mande o id de um registro alheio.
+Assim, um cliente não vê nem altera os dados de outro, mesmo que mande o id de um registro alheio. Os testes
+`SeparacaoEntreEmpresasTests` provam isso no banco (SQLite na memória, com o mesmo `Context`): consulta, busca pelo
+id, UPDATE e DELETE com o id de outra empresa, registro novo, catálogo e acessos.
 
 ## Catálogo e intervalos
 

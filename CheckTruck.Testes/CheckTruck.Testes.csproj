@@ -9,6 +9,9 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.8" />
+    <!-- O SQLite que vem com o EF (2.1.11) tem uma falha conhecida (CVE-2025-6965): usa o SQLite corrigido -->
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.50.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
@@ -20,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CheckTruck.Dominio\CheckTruck.Dominio.csproj" />
+    <ProjectReference Include="..\CheckTruck.Repositorio\CheckTruck.Repositorio.csproj" />
   </ItemGroup>
 
 </Project>
