@@ -32,7 +32,6 @@ export default function AtualizarKmModal({ onClose, veiculo, onSalvo }) {
   return (
     <Modal
       onClose={onClose}
-      eyebrow={`PUT /api/Veiculo/${veiculo.id}/kilometragem`}
       title="Atualizar quilometragem"
       subtitle={veiculo.placa}
       width="max-w-sm"

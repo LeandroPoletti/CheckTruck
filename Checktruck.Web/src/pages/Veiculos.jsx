@@ -5,6 +5,7 @@ import { useCarga } from '../hooks/useCarga'
 import { StatusBadge, PlacaBadge } from '../components/ui/Badges'
 import { BarraDeUso } from '../components/ui/BarraDeUso'
 import { Button, Select, CampoBusca } from '../components/ui/Form'
+import { BotaoLinha } from '../components/ui/AcoesLinha'
 import { Plus } from 'lucide-react'
 import { formatKm, contemBusca, nomeDoModelo, nomeDoCaminhao, TRACOES } from '../data/domain'
 import NovoVeiculoModal from '../components/modals/NovoVeiculoModal'
@@ -100,12 +101,7 @@ export default function Veiculos() {
 
               <div className="mt-4 flex items-center justify-between border-t border-stone-100 pt-3 text-sm">
                 <span className="text-stone-600">{v.motoristaNome ?? 'Sem motorista'}</span>
-                <button
-                  onClick={() => navigate(`/veiculos/${v.id}`)}
-                  className="font-semibold text-brand-700 hover:text-brand-900"
-                >
-                  Detalhes
-                </button>
+                <BotaoLinha onClick={() => navigate(`/veiculos/${v.id}`)}>Detalhes</BotaoLinha>
               </div>
             </Card>
           )

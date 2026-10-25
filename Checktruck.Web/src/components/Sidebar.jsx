@@ -3,6 +3,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { ChevronDown, LogOut } from 'lucide-react'
 import { sair } from '../services/sessao'
 import { nomeCargo } from '../data/acesso'
+import Logo from './marca/Logo'
 
 // Junta os itens em blocos, na ordem de paginas.jsx: item solto (sem grupo) ou grupo com os itens dele
 function montarBlocos(itens) {
@@ -46,36 +47,33 @@ export default function Sidebar({ usuario, itens }) {
   }
 
   return (
-    <aside className="flex h-screen w-60 shrink-0 flex-col bg-brand-900 text-brand-50">
-      <div className="px-5 pt-6 pb-5">
-        <div className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-brand-400" />
-          <span className="text-[15px] font-bold text-white">CheckTruck</span>
+    <aside className="flex h-screen w-64 shrink-0 flex-col bg-brand-900 text-brand-50">
+      <div className="px-4 pt-6 pb-4">
+        <Logo tamanho={36} className="px-1.5 text-[22px] text-white" />
+        <div className="mt-5 rounded-xl bg-white/[.07] px-3 py-2.5">
+          {usuario.empresa && <p className="truncate text-[15px] font-semibold text-white" title={usuario.empresa}>{usuario.empresa}</p>}
+          <p className="text-sm text-brand-200">{nomeCargo(usuario.cargo)}</p>
         </div>
-        {usuario.empresa && <p className="mt-1.5 truncate text-sm font-semibold text-brand-100" title={usuario.empresa}>{usuario.empresa}</p>}
-        <p className="mt-0.5 text-[10px] font-semibold tracking-widest text-brand-300">
-          {nomeCargo(usuario.cargo).toUpperCase()}
-        </p>
       </div>
 
-      <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 pb-4">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-4 pb-4">
         {montarBlocos(itens).map((bloco) => {
           if (!bloco.grupo) return <ItemMenu key={bloco.item.path} item={bloco.item} />
 
           const aberto = abertos.has(bloco.grupo)
           return (
-            <div key={bloco.grupo} className="pt-2">
+            <div key={bloco.grupo} className="pt-3">
               <button
                 type="button"
                 onClick={() => alternar(bloco.grupo)}
                 aria-expanded={aberto}
-                className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-[10px] font-semibold tracking-widest text-brand-300 transition hover:bg-brand-800 hover:text-white"
+                className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-sm font-semibold text-brand-300 transition hover:bg-brand-800 hover:text-white"
               >
                 {bloco.grupo}
-                <ChevronDown size={14} className={`transition-transform ${aberto ? 'rotate-180' : ''}`} />
+                <ChevronDown size={16} className={`transition-transform ${aberto ? 'rotate-180' : ''}`} />
               </button>
               {aberto && (
-                <div className="space-y-0.5 pl-3">
+                <div className="mt-1 space-y-1">
                   {bloco.itens.map((item) => <ItemMenu key={item.path} item={item} />)}
                 </div>
               )}
@@ -84,14 +82,16 @@ export default function Sidebar({ usuario, itens }) {
         })}
       </nav>
 
-      <div className="border-t border-brand-800 px-5 py-4">
-        <p className="text-sm font-semibold text-white leading-tight">{usuario.nome}</p>
-        <p className="text-xs text-brand-300 truncate">{usuario.email}</p>
+      <div className="flex items-center justify-between gap-2 border-t border-white/10 px-5 py-4">
+        <div className="min-w-0">
+          <p className="truncate text-[15px] font-semibold leading-tight text-white">{usuario.nome}</p>
+          <p className="truncate text-xs text-brand-300">{usuario.email}</p>
+        </div>
         <button
           onClick={logout}
-          className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-brand-300 hover:text-white transition"
+          className="flex shrink-0 items-center gap-1.5 rounded-lg border border-white/25 px-2.5 py-1.5 text-sm font-semibold text-brand-50 transition hover:bg-white/10"
         >
-          <LogOut size={13} /> Sair
+          <LogOut size={15} /> Sair
         </button>
       </div>
     </aside>
@@ -103,14 +103,14 @@ function ItemMenu({ item: { path, label, icon: Icon } }) {
     <NavLink
       to={path}
       className={({ isActive }) =>
-        `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition ${
+        `relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] transition ${
           isActive
-            ? 'bg-brand-700 text-white font-semibold'
-            : 'text-brand-100/80 hover:bg-brand-800 hover:text-white'
+            ? 'bg-white/[.12] font-semibold text-white before:absolute before:-left-4 before:top-2 before:bottom-2 before:w-[5px] before:rounded-r before:bg-faixa'
+            : 'text-brand-100/85 hover:bg-brand-800 hover:text-white'
         }`
       }
     >
-      <Icon size={16} strokeWidth={2.2} />
+      <Icon size={19} strokeWidth={2.1} />
       {label}
     </NavLink>
   )

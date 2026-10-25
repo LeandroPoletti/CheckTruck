@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
 import { Card } from './Layout'
+import { Button } from './ui/Form'
 import { StatusBadge, PlacaBadge, SeloPrimeiraTroca } from './ui/Badges'
 import { BarraDeUso } from './ui/BarraDeUso'
 import {
@@ -11,9 +12,9 @@ export function VeiculoNaoEncontrado({ backTo }) {
   const navigate = useNavigate()
   return (
     <div>
-      <button onClick={() => navigate(backTo)} className="mb-4 flex items-center gap-1 text-sm text-brand-700">
+      <Button variant="secondary" size="sm" onClick={() => navigate(backTo)} className="mb-4">
         <ChevronLeft size={16} /> Voltar
-      </button>
+      </Button>
       <p className="text-stone-500">Veículo não encontrado.</p>
     </div>
   )
@@ -39,19 +40,16 @@ export default function VeiculoDetalhePanel({ veiculo, situacao, ordens, histori
 
   return (
     <>
-      <button
-        onClick={() => navigate(backTo)}
-        className="mb-4 flex items-center gap-1 text-sm font-medium text-brand-700 hover:text-brand-900"
-      >
+      <Button variant="secondary" size="sm" onClick={() => navigate(backTo)} className="mb-4">
         <ChevronLeft size={16} /> Veículos
-      </button>
+      </Button>
 
       <Card className="mb-6 p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
               <PlacaBadge placa={veiculo.placa} size="lg" />
-              <h1 className="text-xl font-bold text-stone-900">{nomeDoCaminhao(situacao)} cv</h1>
+              <h1 className="text-2xl font-extrabold text-stone-900">{nomeDoCaminhao(situacao)} cv</h1>
               <StatusBadge status={situacao.status} />
             </div>
             <p className="mt-1.5 text-sm text-stone-500">{detalhes.filter(Boolean).join(' · ')}</p>
@@ -69,7 +67,7 @@ export default function VeiculoDetalhePanel({ veiculo, situacao, ordens, histori
 
       <div className="grid grid-cols-2 gap-6">
         <Card className="p-5">
-          <h3 className="mb-4 font-semibold text-stone-900">Situação por tipo</h3>
+          <h3 className="mb-4 text-xl font-bold text-stone-900">Situação por tipo</h3>
           {situacao.itens.length === 0 ? (
             <p className="py-6 text-center text-sm text-stone-400">Nenhum item com intervalo para acompanhar.</p>
           ) : (
@@ -80,7 +78,7 @@ export default function VeiculoDetalhePanel({ veiculo, situacao, ordens, histori
                   <div key={s.tipoId}>
                     <div className="flex items-center justify-between gap-3 text-sm">
                       <span className="font-medium text-stone-800">
-                        {s.tipoNome} {s.isPrimeiraTroca && <span className="text-[10px] font-semibold text-amber-600">1ª TROCA</span>}
+                        {s.tipoNome} {s.isPrimeiraTroca && <span className="text-xs font-semibold text-amber-700">1ª troca</span>}
                       </span>
                       <span className={`text-right text-xs font-semibold ${textColor}`}>
                         {textoKm(s.kmRestante)}
@@ -96,7 +94,7 @@ export default function VeiculoDetalhePanel({ veiculo, situacao, ordens, histori
         </Card>
 
         <Card className="p-5">
-          <h3 className="mb-4 font-semibold text-stone-900">Histórico de manutenções</h3>
+          <h3 className="mb-4 text-xl font-bold text-stone-900">Histórico de manutenções</h3>
           {historico.length === 0 ? (
             <p className="py-6 text-center text-sm text-stone-400">Nenhuma manutenção registrada ainda.</p>
           ) : (
@@ -132,7 +130,7 @@ export default function VeiculoDetalhePanel({ veiculo, situacao, ordens, histori
         </Card>
 
         <Card className="col-span-2 p-5">
-          <h3 className="mb-4 font-semibold text-stone-900">Histórico de km</h3>
+          <h3 className="mb-4 text-xl font-bold text-stone-900">Histórico de km</h3>
           {historicoKm.length === 0 ? (
             <p className="py-6 text-center text-sm text-stone-400">Nenhuma mudança de km registrada ainda.</p>
           ) : (
@@ -181,7 +179,7 @@ const textoKm = (kmRestante) => (kmRestante > 0 ? `faltam ${formatKm(kmRestante)
 function Info({ label, value }) {
   return (
     <div>
-      <p className="text-xs font-semibold tracking-wide text-stone-400">{label.toUpperCase()}</p>
+      <p className="text-sm text-stone-500">{label}</p>
       <p className="mt-0.5 font-semibold text-stone-900">{value}</p>
     </div>
   )

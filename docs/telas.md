@@ -102,7 +102,15 @@ sistema** (empresas e catálogo do sistema).
 
 ## Visual
 
-- Mesma paleta verde no site e no app; títulos em Barlow Semi Condensed (fonte de placa de estrada) e texto em Inter.
-- Status em cores: verde (ok), amarelo (atenção) e vermelho (crítico). No app, a placa aparece no padrão Mercosul.
-- Pensado para quem tem pouca prática com celular: botões com cara de botão, textos curtos e simples, e cada
-  ação no lugar onde a pessoa procura.
+- O verde das placas de estrada, com o amarelo da faixa do meio da estrada nos detalhes (no menu do site, a faixa
+  amarela marca a tela aberta).
+- Logo própria: uma placa verde de estrada com o "visto" desenhado como uma estrada (também no ícone da aba do
+  navegador).
+- Desenhos: o caminhão na estrada no login e no dashboard do site, e a estrada vazia nas telas sem nada cadastrado.
+- Letras: no site, títulos e números grandes em Overpass (feita a partir da letra das placas de estrada); no app,
+  títulos em Barlow Semi Condensed. O texto é Inter nos dois.
+- Status em cores: verde (ok), amarelo (atenção) e vermelho (crítico). A placa do caminhão aparece no padrão
+  Mercosul, no site e no app.
+- Pensado para quem tem pouca prática com computador e celular: letras maiores, botões com cara de botão (com
+  sombra embaixo, inclusive Editar e Excluir nas tabelas), textos curtos e simples, sem nada em maiúsculas, e
+  cada ação no lugar onde a pessoa procura.

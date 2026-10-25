@@ -64,7 +64,7 @@ export default function OrdensServico() {
           action={ordens.length === 0 && podeMexer && <Button onClick={() => setModal({ registro: null })}>Lançar OS</Button>}
         />
       ) : (
-        <Tabela colunas={['OS', 'CAMINHÃO', 'SERVIÇO', 'KM', 'MECÂNICOS', 'LANÇADA', podeMexer && '']}>
+        <Tabela colunas={['OS', 'Caminhão', 'Serviço', 'Km', 'Mecânicos', 'Lançada', podeMexer && '']}>
           {filtradas.map((o) => (
             <tr key={o.id} className="align-top">
               <td className="px-5 py-3.5">

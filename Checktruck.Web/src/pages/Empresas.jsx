@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Abas, Tabela, Carregando, ErroCarregamento, EmptyState } from '../components/Layout'
 import { Button } from '../components/ui/Form'
+import { BotaoLinha } from '../components/ui/AcoesLinha'
 import EmpresaModal from '../components/modals/EmpresaModal'
 import SenhaDoAdminModal from '../components/modals/SenhaDoAdminModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
@@ -62,7 +63,7 @@ export default function Empresas() {
           subtitle={aba === 'ativas' ? 'Cadastre a primeira empresa cliente.' : 'Empresa desativada aparece aqui.'}
         />
       ) : (
-        <Tabela colunas={['EMPRESA', 'ADMIN', aba === 'desativadas' && 'DESATIVADA EM', '']}>
+        <Tabela colunas={['Empresa', 'Admin', aba === 'desativadas' && 'Desativada em', '']}>
           {lista.map((e) => (
             <tr key={e.id}>
               <td className="px-5 py-3.5">
@@ -80,20 +81,12 @@ export default function Empresas() {
               </td>
               {aba === 'desativadas' && <td className="px-5 py-3.5 text-stone-600">{formatData(e.desativadaEm)}</td>}
               <td className="px-5 py-3.5">
-                <div className="flex justify-end gap-3 text-xs font-semibold">
-                  {e.admins.length > 0 && (
-                    <button onClick={() => setTrocandoSenha(e)} className="text-brand-700 hover:underline">
-                      Nova senha
-                    </button>
-                  )}
+                <div className="flex justify-end gap-2">
+                  {e.admins.length > 0 && <BotaoLinha onClick={() => setTrocandoSenha(e)}>Nova senha</BotaoLinha>}
                   {e.ativa ? (
-                    <button onClick={() => setDesativando(e)} className="text-red-600 hover:underline">
-                      Desativar
-                    </button>
+                    <BotaoLinha perigo onClick={() => setDesativando(e)}>Desativar</BotaoLinha>
                   ) : (
-                    <button onClick={() => ativar(e)} className="text-brand-700 hover:underline">
-                      Ativar
-                    </button>
+                    <BotaoLinha onClick={() => ativar(e)}>Ativar</BotaoLinha>
                   )}
                 </div>
               </td>

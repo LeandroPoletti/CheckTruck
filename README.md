@@ -35,6 +35,7 @@ Checktruck.Web/         front (React)
   src/pages/            uma tela por arquivo
   src/components/       menu, modais e peças das telas (Layout.jsx: título, cartão, abas e tabela)
   src/components/ui/    campos, botões, mensagem de erro, etiquetas e a barra de uso do intervalo
+  src/components/marca/ a logo e os desenhos (o caminhão na estrada e a estrada vazia)
   src/hooks/useCarga.js carregar dados da API numa tela (carregando, erro, tentar de novo e recarregar)
   src/services/         chamadas da API e conversão dos dados
 docs/                   documentação técnica com os diagramas
@@ -176,7 +177,7 @@ geração) tem dois tipos de item:
 - **Do sistema:** todas as empresas veem, e só o **dono do sistema** muda. Na tela aparece "Do sistema" no lugar
   de Editar e Excluir.
 - **Da empresa:** o que a empresa cadastra (ex.: um fabricante que falta ou o plano de troca dela). Só ela vê e
-  muda, e aparece com a marca **DA EMPRESA**.
+  muda, e aparece com a marca **Da empresa**.
 
 Como funciona: essas tabelas têm a coluna `EmpresaId`, que o front nunca manda. O `Context` grava nela a
 empresa de quem está logado (no catálogo, o dono do sistema grava sem empresa) e filtra todas as consultas

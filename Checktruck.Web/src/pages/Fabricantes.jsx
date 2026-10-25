@@ -41,7 +41,7 @@ export default function Fabricantes() {
           action={fabricantes.length === 0 && <Button onClick={() => setModal({ registro: null })}>Cadastrar fabricante</Button>}
         />
       ) : (
-        <Tabela colunas={['NOME', 'PAÍS DE ORIGEM', '']}>
+        <Tabela colunas={['Nome', 'País de origem', '']}>
           {filtrados.map((f) => (
             <tr key={f.id}>
               <td className="px-5 py-3.5 font-semibold text-stone-800">{f.nome}</td>

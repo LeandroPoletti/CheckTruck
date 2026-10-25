@@ -29,24 +29,24 @@ export const PAGINAS = [
 
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, permissao: 'VerFrota', Pagina: Dashboard },
 
-  { path: '/veiculos', label: 'Veículos', icon: Truck, grupo: 'FROTA', permissao: 'VerFrota', Pagina: Veiculos },
+  { path: '/veiculos', label: 'Veículos', icon: Truck, grupo: 'Frota', permissao: 'VerFrota', Pagina: Veiculos },
   { path: '/veiculos/:id', permissao: 'VerFrota', Pagina: VeiculoDetalhe },
-  { path: '/catalogo', label: 'Catálogo', icon: LibraryBig, grupo: 'FROTA', permissao: 'Cadastros', Pagina: Catalogo },
+  { path: '/catalogo', label: 'Catálogo', icon: LibraryBig, grupo: 'Frota', permissao: 'Cadastros', Pagina: Catalogo },
 
-  { path: '/ordens-servico', label: 'Ordens de serviço', icon: ClipboardList, grupo: 'MANUTENÇÃO', permissao: 'VerFrota', Pagina: OrdensServico },
+  { path: '/ordens-servico', label: 'Ordens de serviço', icon: ClipboardList, grupo: 'Manutenção', permissao: 'VerFrota', Pagina: OrdensServico },
   {
-    path: '/chamados', label: 'Chamados', icon: MessageSquareWarning, grupo: 'MANUTENÇÃO',
+    path: '/chamados', label: 'Chamados', icon: MessageSquareWarning, grupo: 'Manutenção',
     permissao: ['AbrirChamados', 'AtenderChamados'], Pagina: Chamados,
   },
-  { path: '/intervalos', label: 'Intervalos', icon: Clock, grupo: 'MANUTENÇÃO', permissao: 'Intervalos', Pagina: Intervalos },
+  { path: '/intervalos', label: 'Intervalos', icon: Clock, grupo: 'Manutenção', permissao: 'Intervalos', Pagina: Intervalos },
 
-  { path: '/paises', label: 'Países', icon: Globe, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Paises },
-  { path: '/fabricantes', label: 'Fabricantes', icon: Factory, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Fabricantes },
-  { path: '/modelos', label: 'Modelos', icon: Boxes, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Modelos },
-  { path: '/geracoes', label: 'Gerações', icon: Layers, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: Geracoes },
-  { path: '/tipos-manutencao', label: 'Tipos de manutenção', icon: Wrench, grupo: 'CADASTROS', permissao: 'Cadastros', Pagina: TiposManutencao },
+  { path: '/paises', label: 'Países', icon: Globe, grupo: 'Cadastros', permissao: 'Cadastros', Pagina: Paises },
+  { path: '/fabricantes', label: 'Fabricantes', icon: Factory, grupo: 'Cadastros', permissao: 'Cadastros', Pagina: Fabricantes },
+  { path: '/modelos', label: 'Modelos', icon: Boxes, grupo: 'Cadastros', permissao: 'Cadastros', Pagina: Modelos },
+  { path: '/geracoes', label: 'Gerações', icon: Layers, grupo: 'Cadastros', permissao: 'Cadastros', Pagina: Geracoes },
+  { path: '/tipos-manutencao', label: 'Tipos de manutenção', icon: Wrench, grupo: 'Cadastros', permissao: 'Cadastros', Pagina: TiposManutencao },
   {
-    path: '/mecanicos', label: 'Mecânicos', icon: HardHat, grupo: 'CADASTROS',
+    path: '/mecanicos', label: 'Mecânicos', icon: HardHat, grupo: 'Cadastros',
     permissao: 'Cadastros', daEmpresa: true, Pagina: Mecanicos,
   },
 

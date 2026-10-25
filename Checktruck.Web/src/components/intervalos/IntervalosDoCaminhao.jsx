@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Tabela, EmptyState, ErroCarregamento } from '../Layout'
 import { Select } from '../ui/Form'
 import { OrigemIntervaloBadge } from '../ui/Badges'
-import AcoesLinha from '../ui/AcoesLinha'
+import AcoesLinha, { BotaoLinha } from '../ui/AcoesLinha'
 import IntervaloModal from '../modals/IntervaloModal'
 import ConfirmarExclusaoModal from '../modals/ConfirmarExclusaoModal'
 import { intervaloVeiculoService } from '../../services'
@@ -34,7 +34,7 @@ export default function IntervalosDoCaminhao({ veiculos, tipos, veiculoId, onVei
 
       {erro && <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />}
 
-      <Tabela colunas={['ITEM', 'INTERVALO', 'PRAZO', 'ORIGEM', '']}>
+      <Tabela colunas={['Item', 'Intervalo', 'Prazo', 'Origem', '']}>
         {carregando && (
           <tr><td colSpan={5} className="px-5 py-8 text-center text-sm text-stone-400">Carregando intervalos do caminhão…</td></tr>
         )}
@@ -53,9 +53,7 @@ export default function IntervalosDoCaminhao({ veiculos, tipos, veiculoId, onVei
                 {proprio ? (
                   <AcoesLinha onEditar={() => setModal(l)} onExcluir={() => setExcluindo(l)} />
                 ) : (
-                  <button onClick={() => setModal(l)} className="whitespace-nowrap text-xs font-semibold text-brand-700 hover:text-brand-900">
-                    Definir pro caminhão
-                  </button>
+                  <BotaoLinha onClick={() => setModal(l)}>Definir pro caminhão</BotaoLinha>
                 )}
               </td>
             </tr>

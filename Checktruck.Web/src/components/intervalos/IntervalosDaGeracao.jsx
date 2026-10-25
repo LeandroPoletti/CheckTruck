@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Tabela, EmptyState, ErroCarregamento } from '../Layout'
 import { Select } from '../ui/Form'
 import { OrigemIntervaloBadge } from '../ui/Badges'
-import AcoesLinha from '../ui/AcoesLinha'
+import AcoesLinha, { BotaoLinha } from '../ui/AcoesLinha'
 import IntervaloModal from '../modals/IntervaloModal'
 import ConfirmarExclusaoModal from '../modals/ConfirmarExclusaoModal'
 import { intervaloService } from '../../services'
@@ -44,7 +44,7 @@ export default function IntervalosDaGeracao({ geracoes, tipos, geracaoId, onGera
 
       {erro && <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />}
 
-      <Tabela colunas={['ITEM', 'INTERVALO', '1ª TROCA', 'PRAZO', 'ORIGEM', '']}>
+      <Tabela colunas={['Item', 'Intervalo', '1ª troca', 'Prazo', 'Origem', '']}>
         {carregando && (
           <tr><td colSpan={6} className="px-5 py-8 text-center text-sm text-stone-400">Carregando intervalos da geração…</td></tr>
         )}
@@ -68,9 +68,7 @@ export default function IntervalosDaGeracao({ geracoes, tipos, geracaoId, onGera
                 {proprio ? (
                   <AcoesLinha onEditar={() => setModal(l)} onExcluir={() => setExcluindo(l)} />
                 ) : (
-                  <button onClick={() => setModal(l)} className="whitespace-nowrap text-xs font-semibold text-brand-700 hover:text-brand-900">
-                    {dono ? 'Definir de fábrica' : 'Definir pra empresa'}
-                  </button>
+                  <BotaoLinha onClick={() => setModal(l)}>{dono ? 'Definir de fábrica' : 'Definir pra empresa'}</BotaoLinha>
                 )}
               </td>
             </tr>
@@ -79,7 +77,7 @@ export default function IntervalosDaGeracao({ geracoes, tipos, geracaoId, onGera
       </Tabela>
 
       <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
-        <span className="mr-1 rounded-full bg-amber-100 px-1.5 py-0.5 font-semibold text-amber-700">1ª TROCA</span>
+        <span className="mr-1 rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-700">1ª troca</span>
         Quando o registro de manutenção marca primeira troca, o sistema usa o intervalo de
         amaciamento em vez do padrão. Ex.: Volvo FH 4/5 zero km, câmbio com 200.000 km e diferencial Meritor com 10.000 km.
       </div>

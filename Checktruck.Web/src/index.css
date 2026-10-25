@@ -1,22 +1,35 @@
 @import "tailwindcss";
 
 @theme {
+  /* Inter no texto; Overpass (desenhada a partir da letra das placas de estrada) nos títulos e números grandes;
+     Barlow Semi Condensed nas letras da placa do caminhão, igual ao app */
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-titulo: "Overpass", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-placa: "Barlow Semi Condensed", "Inter", ui-sans-serif, sans-serif;
 
-  --color-brand-900: #1c3829;
-  --color-brand-800: #234433;
-  --color-brand-700: #2c5440;
-  --color-brand-600: #386b52;
-  --color-brand-500: #46825f;
-  --color-brand-400: #6b9c7f;
-  --color-brand-300: #90b69f;
-  --color-brand-200: #b6d0c0;
-  --color-brand-100: #dbeae0;
-  --color-brand-50: #eef5f0;
+  /* Letras pequenas um pouco maiores que o padrão do Tailwind (12 e 14px), para ler sem esforço */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.15rem;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.4rem;
 
-  --color-mist-50: #f2f6f3;
-  --color-mist-100: #e6efe8;
+  /* Verde das placas de estrada */
+  --color-brand-900: #073823;
+  --color-brand-800: #0a4a2e;
+  --color-brand-700: #0f6b42;
+  --color-brand-600: #1c8352;
+  --color-brand-500: #339966;
+  --color-brand-400: #5fb38a;
+  --color-brand-300: #94cdb0;
+  --color-brand-200: #c0e1cf;
+  --color-brand-100: #e0f1e7;
+  --color-brand-50: #f0f9f3;
+
+  /* Amarelo da faixa do meio da estrada: marca a tela aberta no menu e a faixa dos desenhos */
+  --color-faixa: #f2c230;
+
+  --color-mist-50: #edf2ee;
+  --color-mist-100: #e1e9e3;
 }
 
 html, body, #root {
@@ -28,8 +41,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-.font-mono-label {
-  font-family: var(--font-mono);
+h1, h2, h3 {
+  font-family: var(--font-titulo);
 }
 
 ::selection {

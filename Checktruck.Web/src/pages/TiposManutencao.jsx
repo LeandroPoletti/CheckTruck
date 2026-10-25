@@ -41,7 +41,7 @@ export default function TiposManutencao() {
           action={tipos.length === 0 && <Button onClick={() => setModal({ registro: null })}>Cadastrar tipo</Button>}
         />
       ) : (
-        <Tabela colunas={['NOME', 'COMPONENTE', 'DESCRIÇÃO', '']}>
+        <Tabela colunas={['Nome', 'Componente', 'Descrição', '']}>
           {filtrados.map((t) => (
             <tr key={t.id}>
               <td className="px-5 py-3.5 font-semibold text-stone-800">{t.nome}</td>

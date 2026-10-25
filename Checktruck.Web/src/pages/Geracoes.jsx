@@ -56,7 +56,7 @@ export default function Geracoes() {
           action={geracoes.length === 0 && <Button onClick={() => setModal({ registro: null })}>Cadastrar geração</Button>}
         />
       ) : (
-        <Tabela colunas={['GERAÇÃO', 'MODELO', 'ANOS', 'NORMA', 'MOTOR · CÂMBIO', 'POTÊNCIAS (CV)', '']}>
+        <Tabela colunas={['Geração', 'Modelo', 'Anos', 'Norma', 'Motor · câmbio', 'Potências (cv)', '']}>
           {filtradas.map((g) => (
             <tr key={g.id} className="align-top">
               <td className="px-5 py-3.5 font-semibold text-stone-800">{g.nome}</td>

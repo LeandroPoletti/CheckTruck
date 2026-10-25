@@ -40,7 +40,7 @@ export default function Paises() {
           action={paises.length === 0 && <Button onClick={() => setModal({ registro: null })}>Cadastrar país</Button>}
         />
       ) : (
-        <Tabela colunas={['NOME', '']}>
+        <Tabela colunas={['Nome', '']}>
           {filtrados.map((p) => (
             <tr key={p.id}>
               <td className="px-5 py-3.5 font-semibold text-stone-800">{p.nome}</td>

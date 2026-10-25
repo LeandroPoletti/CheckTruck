@@ -36,7 +36,6 @@ export default function FabricanteModal({ onClose, registro, onSalvo }) {
   return (
     <Modal
       onClose={onClose}
-      eyebrow={registro ? 'PUT /api/Fabricante/{id}' : 'POST /api/Fabricante'}
       title={registro ? 'Editar fabricante' : 'Novo fabricante'}
       width="max-w-md"
       footer={

@@ -32,7 +32,7 @@ export default function Login() {
 
   return (
     <TelaPublica abaixo={<ContasDeDemonstracao onEscolher={(d) => { setEmail(d.email); setSenha(d.senha); setError('') }} />}>
-      <h2 className="text-lg font-bold text-stone-900">Entrar</h2>
+      <h2 className="text-[28px] font-extrabold text-stone-900">Entrar</h2>
       <p className="mt-1 text-sm text-stone-500">
         Use o e-mail e a senha cadastrados pelo admin ou pelo gestor.
       </p>
@@ -67,19 +67,15 @@ export default function Login() {
       <p className="mt-5 text-center text-sm text-stone-500">
         Não tem acesso? Peça ao gestor da sua empresa.
       </p>
-
-      <p className="mt-3 text-center text-xs text-stone-400">
-        Bearer Token · <span className="font-mono-label">POST /api/Auth/login</span>
-      </p>
     </TelaPublica>
   )
 }
 
 function ContasDeDemonstracao({ onEscolher }) {
   return (
-    <div className="mt-6 rounded-xl border border-brand-800 bg-brand-800/40 px-4 py-3">
-      <p className="mb-2 text-[11px] font-semibold tracking-wide text-brand-300">
-        CONTAS DE DEMONSTRAÇÃO
+    <div className="mt-5 rounded-2xl border border-stone-200 bg-white/60 px-4 py-3.5">
+      <p className="mb-2 text-sm font-semibold text-stone-600">
+        Contas de demonstração
       </p>
       <div className="space-y-1.5">
         {DEMO.map((d) => (
@@ -87,10 +83,10 @@ function ContasDeDemonstracao({ onEscolher }) {
             type="button"
             key={d.email}
             onClick={() => onEscolher(d)}
-            className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-xs text-brand-100 hover:bg-brand-800"
+            className="flex w-full items-center justify-between rounded-lg border border-stone-200 bg-white px-3 py-2 text-left text-sm text-stone-700 transition hover:border-brand-300 hover:bg-brand-50"
           >
             <span className="font-semibold">{d.cargo}</span>
-            <span className="font-mono-label text-brand-300">{d.email}</span>
+            <span className="text-stone-500">{d.email}</span>
           </button>
         ))}
       </div>

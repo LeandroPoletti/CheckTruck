@@ -35,7 +35,6 @@ export default function CorrigirKmModal({ veiculo, kmMaiorOs, onClose, onSalvo }
   return (
     <Modal
       onClose={onClose}
-      eyebrow={`PUT /api/Veiculo/${veiculo.id}/corrigir-km`}
       title="Corrigir km"
       subtitle={`${veiculo.placa} · hoje com ${formatKm(veiculo.kmAtual)}`}
       width="max-w-md"

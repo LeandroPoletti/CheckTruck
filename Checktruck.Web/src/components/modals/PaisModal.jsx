@@ -28,7 +28,6 @@ export default function PaisModal({ onClose, registro, onSalvo }) {
   return (
     <Modal
       onClose={onClose}
-      eyebrow={registro ? 'PUT /api/Pais/{id}' : 'POST /api/Pais'}
       title={registro ? 'Editar país' : 'Novo país'}
       width="max-w-md"
       footer={

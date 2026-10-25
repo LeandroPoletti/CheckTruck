@@ -119,7 +119,6 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
   return (
     <Drawer
       onClose={onClose}
-      eyebrow={veiculoParaEditar ? 'PUT /api/Veiculo/{id}' : 'POST /api/Veiculo'}
       title={veiculoParaEditar ? 'Editar veículo' : 'Novo veículo'}
       footer={
         <>
@@ -135,7 +134,7 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
         {carregando && <p className="text-sm text-stone-400">Carregando catálogo e motoristas…</p>}
         <MensagemErro>{erroCarga}</MensagemErro>
         <div>
-          <p className="mb-3 text-xs font-bold tracking-wide text-brand-700">1 · MODELO</p>
+          <p className="mb-3 font-titulo text-base font-bold text-brand-700">1 · Modelo</p>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Fabricante">
               <Select value={form.fabricanteId} onChange={(e) => set('fabricanteId', e.target.value)}>
@@ -179,7 +178,7 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
         </div>
 
         <div>
-          <p className="mb-3 text-xs font-bold tracking-wide text-brand-700">2 · IDENTIFICAÇÃO</p>
+          <p className="mb-3 font-titulo text-base font-bold text-brand-700">2 · Identificação</p>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Placa" required error={errors.placa}>
               <Input value={form.placa} onChange={(e) => set('placa', formatarPlaca(e.target.value))} placeholder="ABC-1D23" error={errors.placa} />
@@ -203,7 +202,7 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
         </div>
 
         <div>
-          <p className="mb-3 text-xs font-bold tracking-wide text-brand-700">3 · VÍNCULOS</p>
+          <p className="mb-3 font-titulo text-base font-bold text-brand-700">3 · Vínculos</p>
           <Field label="Motorista atual (opcional)" hint="Também muda quando uma OS é lançada com motorista.">
             <div className="flex items-center gap-3">
               <Select className="flex-1" value={form.motoristaId} onChange={(e) => set('motoristaId', e.target.value)}>

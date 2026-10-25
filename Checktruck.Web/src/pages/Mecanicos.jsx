@@ -47,7 +47,7 @@ export default function Mecanicos() {
           )}
         />
       ) : (
-        <Tabela colunas={['NOME', 'FUNÇÃO', 'SITUAÇÃO', '']}>
+        <Tabela colunas={['Nome', 'Função', 'Situação', '']}>
           {filtrados.map((m) => (
             <tr key={m.id}>
               <td className={`px-5 py-3.5 font-semibold ${m.ativo ? 'text-stone-800' : 'text-stone-400'}`}>{m.nome}</td>

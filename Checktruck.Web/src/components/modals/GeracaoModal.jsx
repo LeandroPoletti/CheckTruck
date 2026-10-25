@@ -82,7 +82,6 @@ export default function GeracaoModal({ registro, valoresIniciais, onClose, onSal
   return (
     <Modal
       onClose={onClose}
-      eyebrow={registro ? 'PUT /api/Geracao/{id}' : 'POST /api/Geracao'}
       title={registro ? 'Editar geração' : 'Nova geração'}
       subtitle="Época do modelo no Brasil e as potências em que foi vendida."
       width="max-w-lg"

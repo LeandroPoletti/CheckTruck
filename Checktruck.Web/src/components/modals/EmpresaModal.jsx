@@ -6,7 +6,7 @@ import { REGRAS_DA_SENHA } from '../../data/acesso'
 
 const VAZIO = { nomeEmpresa: '', cnpj: '', nome: '', cpf: '', email: '', senha: '', confirmar: '' }
 
-const titulo = 'mb-2 text-[11px] font-semibold tracking-wide text-brand-800/70'
+const titulo = 'mb-2 font-titulo text-base font-bold text-brand-700'
 
 // Empresa nova com o Admin dela (o dono da empresa: pode tudo e cadastra a equipe em Acesso).
 // Depois de cadastrar, mostra o login que o dono do sistema passa para ele.
@@ -77,7 +77,7 @@ export default function EmpresaModal({ onClose, onSalvo }) {
     >
       <div className="space-y-4">
         <div>
-          <p className={titulo}>EMPRESA</p>
+          <p className={titulo}>Empresa</p>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Nome da empresa" required>
               <Input value={form.nomeEmpresa} onChange={(e) => set('nomeEmpresa', e.target.value)} placeholder="Transportadora Exemplo" />
@@ -90,7 +90,7 @@ export default function EmpresaModal({ onClose, onSalvo }) {
 
         <div className="space-y-4">
           <div>
-            <p className={titulo}>ADMIN DA EMPRESA</p>
+            <p className={titulo}>Admin da empresa</p>
             <p className="text-xs text-stone-500">O dono da empresa: pode tudo e cadastra a equipe dele.</p>
           </div>
           <div className="grid grid-cols-2 gap-3">

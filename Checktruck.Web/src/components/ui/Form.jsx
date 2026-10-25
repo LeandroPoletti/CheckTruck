@@ -8,20 +8,20 @@ export function Field({ label, required, hint, error, group = false, children, c
   return (
     <Elemento className={`block ${className}`}>
       {label && (
-        <span className="block text-[11px] font-semibold tracking-wide text-brand-800/70 mb-1.5">
+        <span className="mb-1.5 block text-sm font-semibold text-stone-700">
           {label}
           {required && <span className="text-red-500"> *</span>}
         </span>
       )}
       {children}
-      {hint && !error && <span className="block text-xs text-stone-400 mt-1">{hint}</span>}
-      {error && <span className="block text-xs text-red-600 mt-1">{error}</span>}
+      {hint && !error && <span className="mt-1 block text-xs text-stone-500">{hint}</span>}
+      {error && <span className="mt-1 block text-xs font-medium text-red-600">{error}</span>}
     </Elemento>
   )
 }
 
 const inputBase =
-  'rounded-lg border bg-white px-3 py-2 text-sm text-stone-800 placeholder:text-stone-400 outline-none transition focus:ring-2 focus:ring-brand-300 disabled:bg-stone-50 disabled:text-stone-500'
+  'rounded-lg border bg-white px-3 py-2.5 text-sm text-stone-800 placeholder:text-stone-400 outline-none transition focus:ring-2 focus:ring-brand-300 disabled:bg-stone-50 disabled:text-stone-500'
 
 // Os campos ocupam a largura toda, a não ser que a tela passe uma largura (w-56, w-64...).
 // Com as duas classes juntas o w-full sempre ganharia, e o filtro espremia a busca ao lado.
@@ -76,21 +76,22 @@ export function Toggle({ checked, onChange, label, disabled = false }) {
   )
 }
 
+// Os botões têm uma sombra embaixo (parecem uma tecla) para ninguém confundir com texto; ao clicar, "afundam"
 export function Button({ variant = 'primary', size = 'md', className = '', children, ...props }) {
   const variants = {
-    primary: 'bg-brand-700 text-white hover:bg-brand-800 disabled:bg-stone-300',
-    secondary: 'bg-white text-stone-700 border border-stone-300 hover:bg-stone-50',
-    ghost: 'bg-transparent text-brand-800 hover:bg-brand-50',
-    danger: 'bg-red-600 text-white hover:bg-red-700',
+    primary: 'bg-brand-700 text-white shadow-[0_3px_0_var(--color-brand-900)] hover:bg-brand-800 disabled:bg-stone-300 disabled:shadow-none',
+    secondary: 'border border-stone-300 bg-white text-stone-800 shadow-[0_3px_0_var(--color-stone-300)] hover:bg-stone-50',
+    danger: 'bg-red-600 text-white shadow-[0_3px_0_var(--color-red-800)] hover:bg-red-700',
+    dangerLight: 'border border-red-200 bg-white text-red-700 shadow-[0_3px_0_var(--color-red-200)] hover:bg-red-50',
   }
   const sizes = {
-    sm: 'px-3 py-1.5 text-xs',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-5 py-2.5 text-sm',
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2.5 text-sm',
+    lg: 'px-5 py-3 text-base',
   }
   return (
     <button
-      className={`inline-flex items-center justify-center gap-1.5 rounded-lg font-semibold transition disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg font-semibold transition active:translate-y-0.5 active:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:cursor-not-allowed disabled:active:translate-y-0 ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     >
       {children}
@@ -101,7 +102,7 @@ export function Button({ variant = 'primary', size = 'md', className = '', child
 // Erro do formulário ou da ação (ex.: o que a API respondeu). Sem mensagem, não mostra nada.
 export function MensagemErro({ className = '', children }) {
   if (!children) return null
-  return <p className={`rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ${className}`}>{children}</p>
+  return <p className={`rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700 ${className}`}>{children}</p>
 }
 
 // Campo de busca das listas. Clicar na lupa põe o cursor no campo; onChange recebe o texto digitado.
@@ -115,9 +116,9 @@ export function CampoBusca({ value, onChange, placeholder, className = '' }) {
         aria-label="Buscar"
         className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 transition hover:text-stone-600"
       >
-        <Search size={16} />
+        <Search size={18} />
       </button>
-      <Input ref={campo} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="pl-9" />
+      <Input ref={campo} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="pl-10" />
     </div>
   )
 }

@@ -36,7 +36,6 @@ export default function ModeloModal({ registro, valoresIniciais, onClose, onSalv
   return (
     <Modal
       onClose={onClose}
-      eyebrow={registro ? 'PUT /api/Modelo/{id}' : 'POST /api/Modelo'}
       title={registro ? 'Editar modelo' : 'Novo modelo'}
       subtitle="A linha do fabricante. As épocas (anos, motor, potências) ficam nas gerações."
       width="max-w-md"

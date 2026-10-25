@@ -30,7 +30,7 @@ export default function MinhaEmpresa() {
 function Dado({ label, valor }) {
   return (
     <div>
-      <p className="text-[11px] font-semibold tracking-wide text-stone-400">{label.toUpperCase()}</p>
+      <p className="text-sm text-stone-500">{label}</p>
       <p className="mt-1 text-sm font-semibold text-stone-800">{valor}</p>
     </div>
   )

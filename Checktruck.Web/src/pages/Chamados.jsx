@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react'
 import { PageHeader, Abas, Card, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
 import { ChamadoStatusBadge, UrgenciaBadge, PlacaBadge } from '../components/ui/Badges'
 import { Button } from '../components/ui/Form'
+import AcoesLinha from '../components/ui/AcoesLinha'
 import ChamadoModal from '../components/modals/ChamadoModal'
 import ResolverChamadoModal from '../components/modals/ResolverChamadoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
@@ -104,7 +105,7 @@ export default function Chamados() {
                   </div>
                 </div>
 
-                <div className="flex shrink-0 flex-col items-end gap-2 text-xs font-semibold">
+                <div className="flex shrink-0 flex-col items-end gap-2">
                   {podeAtender && c.status === 'Pendente' && (
                     <div className="flex gap-2">
                       {c.atendidoPorId !== eu.id && (
@@ -113,12 +114,7 @@ export default function Chamados() {
                       <Button size="sm" onClick={() => setResolvendo(c)}>Resolver</Button>
                     </div>
                   )}
-                  {podeAlterar(c) && (
-                    <div className="flex gap-3">
-                      <button onClick={() => setEditando({ chamado: c })} className="text-brand-700 hover:underline">Editar</button>
-                      <button onClick={() => setExcluindo(c)} className="text-red-600 hover:underline">Excluir</button>
-                    </div>
-                  )}
+                  {podeAlterar(c) && <AcoesLinha onEditar={() => setEditando({ chamado: c })} onExcluir={() => setExcluindo(c)} />}
                 </div>
               </div>
             </Card>

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Card, Carregando, ErroCarregamento } from '../components/Layout'
 import { Button } from '../components/ui/Form'
+import { BotaoLinha } from '../components/ui/AcoesLinha'
 import { fabricanteService, modeloService, geracaoService, veiculoService, intervaloService } from '../services'
 import { useCarga } from '../hooks/useCarga'
 import FabricanteModal from '../components/modals/FabricanteModal'
@@ -15,7 +16,7 @@ const porNome = (a, b) => a.nome.localeCompare(b.nome)
 const quantos = (n, um, varios) => `${n} ${n === 1 ? um : varios}`
 
 // Fabricante → modelo → gerações (com anos, norma, motor, câmbio e potências), usados no cadastro de veículos.
-// Aparece o catálogo do sistema e o que a empresa cadastrou (marcado com DA EMPRESA).
+// Aparece o catálogo do sistema e o que a empresa cadastrou (marcado com "Da empresa").
 export default function Catalogo() {
   const usuario = obterUsuario()
   // A contagem de caminhões por geração só aparece para quem vê a frota
@@ -60,13 +61,13 @@ export default function Catalogo() {
         title="Catálogo"
         subtitle={ehDonoDoSistema(usuario)
           ? 'Catálogo do sistema: fabricante → modelo → geração → potência. Todas as empresas veem.'
-          : 'Fabricante → modelo → geração → potência. O que a sua empresa cadastra aparece com DA EMPRESA e só ela vê.'}
+          : 'Fabricante → modelo → geração → potência. O que a sua empresa cadastra aparece com a marca "Da empresa" e só ela vê.'}
         action={<Button onClick={() => setModal('geracao')}><Plus size={16} /> Nova geração</Button>}
       />
 
       <div className="grid grid-cols-4 gap-5">
         <Card className="p-4">
-          <p className="mb-3 text-xs font-bold tracking-wide text-stone-400">FABRICANTE</p>
+          <p className="mb-3 text-sm font-semibold text-stone-500">Fabricante</p>
           <div className="space-y-1">
             {fabricantes.map((f) => (
               <ItemColuna
@@ -83,7 +84,7 @@ export default function Catalogo() {
         </Card>
 
         <Card className="p-4">
-          <p className="mb-3 text-xs font-bold tracking-wide text-stone-400">MODELO · {fabricante?.nome?.toUpperCase() ?? '—'}</p>
+          <p className="mb-3 text-sm font-semibold text-stone-500">Modelo · {fabricante?.nome ?? '—'}</p>
           <div className="space-y-1">
             {modelosDoFabricante.length === 0 && <p className="px-3 py-4 text-sm text-stone-400">Nenhum modelo cadastrado.</p>}
             {modelosDoFabricante.map((m) => (
@@ -102,13 +103,11 @@ export default function Catalogo() {
 
         <Card className="col-span-2 p-4">
           <div className="mb-3 flex items-center justify-between">
-            <p className="text-xs font-bold tracking-wide text-stone-400">
-              GERAÇÕES · {modelo ? `${fabricante.nome} ${modelo.nome}`.toUpperCase() : '—'}
+            <p className="text-sm font-semibold text-stone-500">
+              Gerações · {modelo ? `${fabricante.nome} ${modelo.nome}` : '—'}
             </p>
             {modelo && (
-              <button onClick={() => setModal('geracao')} className="text-xs font-semibold text-brand-600 hover:text-brand-800">
-                + Geração
-              </button>
+              <BotaoLinha onClick={() => setModal('geracao')}>+ Geração</BotaoLinha>
             )}
           </div>
           <div className="space-y-3">
@@ -181,12 +180,12 @@ function ItemColuna({ ativo, onClick, titulo, daEmpresa, detalhe }) {
 
 // Item que a empresa cadastrou (só ela vê)
 function SeloDaEmpresa() {
-  return <span className="ml-1.5 rounded-full bg-brand-500 px-1.5 py-0.5 align-middle text-[10px] font-semibold text-white">DA EMPRESA</span>
+  return <span className="ml-1.5 rounded-full bg-brand-500 px-2 py-0.5 align-middle text-xs font-semibold text-white">Da empresa</span>
 }
 
 function BotaoNovo({ onClick, children }) {
   return (
-    <button onClick={onClick} className="mt-1 w-full rounded-lg px-3 py-2 text-left text-sm text-brand-600 hover:bg-brand-50">
+    <button onClick={onClick} className="mt-2 w-full rounded-lg border border-dashed border-brand-300 px-3 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-50">
       {children}
     </button>
   )

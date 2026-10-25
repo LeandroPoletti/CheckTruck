@@ -133,7 +133,6 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
   return (
     <Modal
       onClose={onClose}
-      eyebrow={corrigindo ? `PUT /api/OrdemServico/${registro.id}` : 'POST /api/OrdemServico'}
       title={corrigindo ? `Corrigir OS nº ${registro.id}` : 'Lançar ordem de serviço'}
       subtitle={corrigindo ? registro.placa : veiculo?.placa ?? 'Escolha o caminhão'}
       width="max-w-xl"

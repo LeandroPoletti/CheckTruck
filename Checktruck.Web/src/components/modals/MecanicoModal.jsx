@@ -33,7 +33,6 @@ export default function MecanicoModal({ onClose, registro, onSalvo }) {
   return (
     <Modal
       onClose={onClose}
-      eyebrow={registro ? 'PUT /api/Mecanico/{id}' : 'POST /api/Mecanico'}
       title={registro ? 'Editar mecânico' : 'Novo mecânico'}
       width="max-w-md"
       footer={

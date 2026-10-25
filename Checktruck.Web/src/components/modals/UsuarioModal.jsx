@@ -119,7 +119,7 @@ export default function UsuarioModal({ usuario, onClose, onSalvo }) {
         </div>
 
         <div>
-          <p className="mb-2 text-[11px] font-semibold tracking-wide text-brand-800/70">PERMISSÕES</p>
+          <p className="mb-2 text-sm font-semibold text-stone-700">Permissões</p>
           {gestao ? (
             <p className="rounded-lg bg-brand-50 px-3 py-2.5 text-sm text-brand-800">
               Admin e Gestor podem tudo e cuidam dos acessos.

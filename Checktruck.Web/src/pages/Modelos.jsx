@@ -58,7 +58,7 @@ export default function Modelos() {
           action={modelos.length === 0 && <Button onClick={() => setModal({ registro: null })}>Cadastrar modelo</Button>}
         />
       ) : (
-        <Tabela colunas={['MODELO', 'FABRICANTE', 'GERAÇÕES', '']}>
+        <Tabela colunas={['Modelo', 'Fabricante', 'Gerações', '']}>
           {filtrados.map((m) => {
             const doModelo = geracoesDoModelo(m.id)
             return (

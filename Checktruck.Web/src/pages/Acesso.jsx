@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Abas, Tabela, Carregando, ErroCarregamento, EmptyState } from '../components/Layout'
 import { Button } from '../components/ui/Form'
+import { BotaoLinha } from '../components/ui/AcoesLinha'
 import UsuarioModal from '../components/modals/UsuarioModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { usuarioService } from '../services'
@@ -60,7 +61,7 @@ export default function Acesso() {
           subtitle={aba === 'ativos' ? 'Cadastre quem vai entrar no sistema.' : 'Quem for desativado aparece aqui.'}
         />
       ) : (
-        <Tabela colunas={['NOME', 'CPF', 'CARGO', 'PERMISSÕES', '']}>
+        <Tabela colunas={['Nome', 'CPF', 'Cargo', 'Permissões', '']}>
           {lista.map((u) => (
             <tr key={u.id}>
               <td className="px-5 py-3.5">
@@ -73,20 +74,12 @@ export default function Acesso() {
                 {u.cuidaDosAcessos ? 'Todas' : `${u.permissoes.length} de ${PERMISSOES.length}`}
               </td>
               <td className="px-5 py-3.5">
-                <div className="flex justify-end gap-3 text-xs font-semibold">
-                  <button onClick={() => setEditando({ usuario: u })} className="text-brand-700 hover:underline">
-                    Editar
-                  </button>
+                <div className="flex justify-end gap-2">
+                  <BotaoLinha onClick={() => setEditando({ usuario: u })}>Editar</BotaoLinha>
                   {u.ativo && !u.adminDoSistema && u.id !== eu.id && (
-                    <button onClick={() => setDesativando(u)} className="text-red-600 hover:underline">
-                      Desativar
-                    </button>
+                    <BotaoLinha perigo onClick={() => setDesativando(u)}>Desativar</BotaoLinha>
                   )}
-                  {!u.ativo && (
-                    <button onClick={() => ativar(u)} className="text-brand-700 hover:underline">
-                      Ativar
-                    </button>
-                  )}
+                  {!u.ativo && <BotaoLinha onClick={() => ativar(u)}>Ativar</BotaoLinha>}
                 </div>
               </td>
             </tr>
