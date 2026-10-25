@@ -2,13 +2,13 @@ import { useCallback, useState } from 'react'
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router, useFocusEffect } from 'expo-router'
-import { Feather } from '@expo/vector-icons'
 import { useSessao, type Usuario } from '@/servicos/sessao'
 import { meusCaminhoes, type Caminhao } from '@/servicos/caminhoes'
 import { listarChamados, type Chamado } from '@/servicos/chamados'
 import Atalho from '@/componentes/Atalho'
 import Botao from '@/componentes/Botao'
 import CartaoDoChamado from '@/componentes/CartaoDoChamado'
+import CartaoVazio from '@/componentes/CartaoVazio'
 import MensagemErro from '@/componentes/MensagemErro'
 import Saudacao from '@/componentes/Saudacao'
 import SituacaoDoCaminhao from '@/componentes/SituacaoDoCaminhao'
@@ -111,15 +111,10 @@ export default function PainelDoMotorista({ usuario }: { usuario: Usuario }) {
 
 function SemCaminhao() {
   return (
-    <View style={estilos.cartao}>
-      <View style={estilos.iconeVazio}>
-        <Feather name="truck" size={24} color={cores.textoFraco} />
-      </View>
-      <Text style={estilos.vazioTitulo}>Nenhum caminhão está com você</Text>
-      <Text style={estilos.vazioTexto}>
-        Peça ao gestor para colocar seu nome no caminhão. Depois, puxe a tela para baixo para atualizar.
-      </Text>
-    </View>
+    <CartaoVazio
+      titulo="Nenhum caminhão está com você"
+      texto="Peça ao gestor para colocar seu nome no caminhão. Depois, puxe a tela para baixo para atualizar."
+    />
   )
 }
 
@@ -134,10 +129,6 @@ const estilos = StyleSheet.create({
   placaOpcaoEscolhida: { backgroundColor: cores.marca700, borderColor: cores.marca700 },
   placaOpcaoTexto: { fontFamily: fontes.subtitulo, fontSize: 16, color: cores.texto, letterSpacing: 0.5 },
   placaOpcaoTextoEscolhida: { color: cores.branco },
-  cartao: { backgroundColor: cores.branco, borderRadius: 20, padding: 20, gap: 14 },
   secao: { fontFamily: fontes.subtitulo, fontSize: 22, color: cores.texto, marginTop: 6 },
   vazio: { fontFamily: fontes.texto, fontSize: 14, color: cores.textoFraco, textAlign: 'center', paddingVertical: 8 },
-  iconeVazio: { width: 48, height: 48, borderRadius: 14, backgroundColor: cores.fundo, alignItems: 'center', justifyContent: 'center' },
-  vazioTitulo: { fontFamily: fontes.subtitulo, fontSize: 22, color: cores.texto },
-  vazioTexto: { fontFamily: fontes.texto, fontSize: 14, lineHeight: 20, color: cores.textoFraco },
 })

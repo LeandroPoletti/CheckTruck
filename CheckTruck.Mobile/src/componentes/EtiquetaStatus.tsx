@@ -1,20 +1,20 @@
-import { StyleSheet, Text } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
+import { Feather } from '@expo/vector-icons'
 import { coresDoStatus, fontes } from '@/tema'
 import type { Status } from '@/servicos/caminhoes'
 
-// OK, Atenção ou Crítico, com a cor do status
+// OK (com o visto), Atenção ou Crítico (com o triângulo), na cor do status, igual ao site
 export default function EtiquetaStatus({ status }: { status: Status }) {
   const cor = coresDoStatus[status]
-  return <Text style={[estilos.etiqueta, { color: cor.texto, backgroundColor: cor.fundo }]}>{cor.nome}</Text>
+  return (
+    <View style={[estilos.etiqueta, { backgroundColor: cor.fundo }]}>
+      <Feather name={status === 'ok' ? 'check-circle' : 'alert-triangle'} size={13} color={cor.texto} />
+      <Text style={[estilos.texto, { color: cor.texto }]}>{cor.nome}</Text>
+    </View>
+  )
 }
 
 const estilos = StyleSheet.create({
-  etiqueta: {
-    fontFamily: fontes.textoForte,
-    fontSize: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
+  etiqueta: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingLeft: 8, paddingRight: 10, paddingVertical: 3, borderRadius: 999 },
+  texto: { fontFamily: fontes.textoForte, fontSize: 13 },
 })

@@ -10,7 +10,9 @@ import { API_URL } from '@/servicos/api'
 import Botao from '@/componentes/Botao'
 import Campo from '@/componentes/Campo'
 import Carregando from '@/componentes/Carregando'
+import { Caminhao } from '@/componentes/Desenhos'
 import FaixaDaEstrada from '@/componentes/FaixaDaEstrada'
+import { Simbolo } from '@/componentes/Logo'
 import MensagemErro from '@/componentes/MensagemErro'
 import { cores, fontes } from '@/tema'
 
@@ -52,13 +54,19 @@ export default function Login() {
   return (
     <KeyboardAvoidingView style={estilos.tela} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={estilos.rolagem} keyboardShouldPersistTaps="handled" bounces={false}>
-        <View style={[estilos.marca, { paddingTop: margens.top + 32 }]}>
-          <View style={estilos.icone}>
-            <Feather name="truck" size={22} color={cores.marca100} />
-          </View>
+        <View style={[estilos.marca, { paddingTop: margens.top + 28 }]}>
+          <Simbolo tamanho={60} />
           <Text style={estilos.nome}>CheckTruck</Text>
           <FaixaDaEstrada />
           <Text style={estilos.descricao}>Manutenção preventiva da frota, na palma da mão.</Text>
+
+          {/* O caminhão na estrada, de ponta a ponta da tela, logo acima do formulário */}
+          <View style={estilos.chao} accessible={false}>
+            <View style={estilos.caminhao}><Caminhao largura={250} /></View>
+            <View style={estilos.estrada}>
+              {Array.from({ length: 8 }, (_, i) => <View key={i} style={estilos.tracoDaEstrada} />)}
+            </View>
+          </View>
         </View>
 
         <Animated.View
@@ -112,10 +120,13 @@ export default function Login() {
           <Botao titulo="Entrar" onPress={aoEntrar} ocupado={entrando} />
           <Text style={estilos.semAcesso}>Não tem acesso? Peça ao gestor da sua empresa.</Text>
 
-          <View style={estilos.servidor}>
-            <View style={estilos.pontoServidor} />
-            <Text style={estilos.servidorTexto} numberOfLines={1}>Servidor: {API_URL}</Text>
-          </View>
+          {/* Para quem está testando (Expo Go): a qual servidor o app está ligado. No app instalado não aparece */}
+          {__DEV__ && (
+            <View style={estilos.servidor}>
+              <View style={estilos.pontoServidor} />
+              <Text style={estilos.servidorTexto} numberOfLines={1}>Servidor: {API_URL}</Text>
+            </View>
+          )}
         </Animated.View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -124,19 +135,14 @@ export default function Login() {
 
 const estilos = StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.marca900 },
-  rolagem: { flexGrow: 1, justifyContent: 'space-between' },
-  marca: { paddingHorizontal: 28, paddingBottom: 36, gap: 14 },
-  icone: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: cores.marca700,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
-  },
-  nome: { fontFamily: fontes.titulo, fontSize: 44, lineHeight: 46, color: cores.branco, letterSpacing: -0.5 },
-  descricao: { fontFamily: fontes.texto, fontSize: 15, lineHeight: 22, color: cores.marca200, maxWidth: 280 },
+  rolagem: { flexGrow: 1 },
+  marca: { flexGrow: 1, paddingHorizontal: 28, gap: 14 },
+  nome: { fontFamily: fontes.titulo, fontSize: 44, lineHeight: 50, color: cores.branco, letterSpacing: -0.5, marginTop: 4 },
+  descricao: { fontFamily: fontes.texto, fontSize: 16, lineHeight: 23, color: cores.marca200, maxWidth: 290 },
+  chao: { marginTop: 'auto', marginHorizontal: -28, paddingTop: 12 },
+  caminhao: { alignItems: 'flex-end', paddingRight: 8, marginBottom: -2 },
+  estrada: { height: 18, backgroundColor: '#0b2e1e', flexDirection: 'row', alignItems: 'center', gap: 24, paddingLeft: 10, overflow: 'hidden', marginBottom: 16 },
+  tracoDaEstrada: { width: 34, height: 4, borderRadius: 2, backgroundColor: cores.faixa },
   painel: {
     backgroundColor: cores.branco,
     borderTopLeftRadius: 28,

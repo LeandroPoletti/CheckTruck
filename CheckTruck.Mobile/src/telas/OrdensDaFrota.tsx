@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text } from 'react-native'
 import { router } from 'expo-router'
 import type { Usuario } from '@/servicos/sessao'
 import { maisNovaPrimeiro, type OrdemDeServico } from '@/servicos/ordens'
 import Botao from '@/componentes/Botao'
 import CampoDeBusca from '@/componentes/CampoDeBusca'
 import CartaoDaOrdem from '@/componentes/CartaoDaOrdem'
+import CartaoVazio from '@/componentes/CartaoVazio'
 import { cores, fontes } from '@/tema'
 
 // Pela placa (com ou sem hífen) ou pelo número da OS
@@ -26,12 +27,10 @@ export default function OrdensDaFrota({ ordens, usuario }: { ordens: OrdemDeServ
       {podeLancar && <Botao titulo="Lançar OS" icone="plus" onPress={() => router.push('/lancar-os')} />}
 
       {ordens.length === 0 ? (
-        <View style={estilos.cartaoVazio}>
-          <Text style={estilos.vazioTitulo}>Nenhuma OS lançada</Text>
-          <Text style={estilos.vazioTexto}>
-            {podeLancar ? 'Use "Lançar OS" para registrar uma troca feita no caminhão.' : 'As trocas lançadas no site aparecem aqui.'}
-          </Text>
-        </View>
+        <CartaoVazio
+          titulo="Nenhuma OS lançada"
+          texto={podeLancar ? 'Use "Lançar OS" para registrar uma troca feita no caminhão.' : 'As trocas lançadas no site aparecem aqui.'}
+        />
       ) : (
         <>
           <CampoDeBusca valor={busca} aoMudar={setBusca} placeholder="Buscar por placa ou nº da OS" />
@@ -46,7 +45,4 @@ export default function OrdensDaFrota({ ordens, usuario }: { ordens: OrdemDeServ
 
 const estilos = StyleSheet.create({
   nenhuma: { fontFamily: fontes.texto, fontSize: 14, color: cores.textoFraco, textAlign: 'center', paddingVertical: 16 },
-  cartaoVazio: { backgroundColor: cores.branco, borderRadius: 20, padding: 20, gap: 8 },
-  vazioTitulo: { fontFamily: fontes.subtitulo, fontSize: 22, color: cores.texto },
-  vazioTexto: { fontFamily: fontes.texto, fontSize: 14, lineHeight: 20, color: cores.textoFraco },
 })

@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native'
 import { cores } from '@/tema'
 
-// A faixa tracejada do meio da estrada, sumindo ao longe: a marca visual do app
+// A faixa amarela tracejada do meio da estrada, sumindo ao longe: a marca visual do app (e do site)
 export default function FaixaDaEstrada() {
   return (
     <View style={estilos.faixa} accessible={false}>
@@ -14,5 +14,5 @@ export default function FaixaDaEstrada() {
 
 const estilos = StyleSheet.create({
   faixa: { flexDirection: 'row', gap: 8 },
-  traco: { width: 22, height: 4, borderRadius: 2, backgroundColor: cores.marca500 },
+  traco: { width: 24, height: 5, borderRadius: 2.5, backgroundColor: cores.faixa },
 })

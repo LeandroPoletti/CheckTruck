@@ -37,14 +37,15 @@ export default function Botao({ titulo, onPress, tipo = 'principal', icone, ocup
   )
 }
 
+// A borda grossa embaixo faz o botão parecer uma tecla (igual ao site); ao apertar, ele "afunda" um pouco
 const estilos = StyleSheet.create({
-  botao: { minHeight: 52, borderRadius: 14, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 18 },
-  principal: { backgroundColor: cores.marca700 },
-  principalApertado: { backgroundColor: cores.marca800 },
-  discreto: { borderWidth: 1, borderColor: cores.borda, backgroundColor: cores.branco },
-  discretoApertado: { backgroundColor: cores.fundo },
-  perigo: { backgroundColor: cores.erroTexto },
-  perigoApertado: { backgroundColor: cores.erroEscuro },
+  botao: { minHeight: 52, borderRadius: 14, borderBottomWidth: 4, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 18 },
+  principal: { backgroundColor: cores.marca700, borderBottomColor: cores.marca900 },
+  principalApertado: { backgroundColor: cores.marca800, transform: [{ translateY: 2 }] },
+  discreto: { borderWidth: 1.5, borderBottomWidth: 4, borderColor: cores.borda, borderBottomColor: '#d6d3d1', backgroundColor: cores.branco },
+  discretoApertado: { backgroundColor: cores.fundo, transform: [{ translateY: 2 }] },
+  perigo: { backgroundColor: cores.erroTexto, borderBottomColor: '#7f1d1d' },
+  perigoApertado: { backgroundColor: cores.erroEscuro, transform: [{ translateY: 2 }] },
   conteudo: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   texto: { fontFamily: fontes.textoForte, fontSize: 16 },
 })

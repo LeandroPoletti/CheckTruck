@@ -31,6 +31,6 @@ const estilos = StyleSheet.create({
   faixaPequena: { paddingVertical: 1 },
   brasil: { color: cores.branco, fontFamily: fontes.textoForte, fontSize: 9, letterSpacing: 2 },
   brasilPequeno: { fontSize: 6, letterSpacing: 1.5 },
-  letras: { fontFamily: fontes.titulo, fontSize: 34, lineHeight: 40, color: cores.texto, paddingHorizontal: 14, letterSpacing: 1 },
+  letras: { fontFamily: fontes.placa, fontSize: 34, lineHeight: 40, color: cores.texto, paddingHorizontal: 14, letterSpacing: 1 },
   letrasPequenas: { fontSize: 20, lineHeight: 24, paddingHorizontal: 8 },
 })

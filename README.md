@@ -111,8 +111,8 @@ dotnet test CheckTruck.slnx
 
 4. Leia o QR code: no iPhone, com a câmera; no Android, pelo Expo Go.
 
-O app procura a API no mesmo PC que roda o `expo start`, na porta 5202 (o endereço aparece embaixo da tela de
-login). Para outro endereço (túnel ou servidor), crie `CheckTruck.Mobile/.env` com `EXPO_PUBLIC_API_URL=https://...`
+O app procura a API no mesmo PC que roda o `expo start`, na porta 5202 (no Expo Go, o endereço aparece embaixo
+da tela de login; no app instalado, não). Para outro endereço (túnel ou servidor), crie `CheckTruck.Mobile/.env` com `EXPO_PUBLIC_API_URL=https://...`
 e rode `npx expo start --clear` (sem o `--clear`, o app continua com o endereço antigo).
 
 O aviso de chamado novo precisa do projeto no Expo (uma vez só): na pasta `CheckTruck.Mobile`, rode

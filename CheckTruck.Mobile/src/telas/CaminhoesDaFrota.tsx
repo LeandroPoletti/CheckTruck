@@ -7,6 +7,7 @@ import { formatKm, textoDias, textoKmRestante } from '@/dados/formato'
 import Botao from '@/componentes/Botao'
 import CampoDeBusca from '@/componentes/CampoDeBusca'
 import EtiquetaStatus from '@/componentes/EtiquetaStatus'
+import CartaoVazio from '@/componentes/CartaoVazio'
 import Placa from '@/componentes/Placa'
 import { cores, coresDoStatus, fontes } from '@/tema'
 
@@ -64,12 +65,10 @@ export default function CaminhoesDaFrota({ caminhoes, podeCadastrar }: Props) {
     return (
       <>
         {cadastrar}
-        <View style={estilos.cartaoVazio}>
-          <Text style={estilos.vazioTitulo}>Nenhum caminhão ativo</Text>
-          <Text style={estilos.vazioTexto}>
-            {podeCadastrar ? 'Use "Cadastrar caminhão" para começar.' : 'Os caminhões cadastrados no site aparecem aqui.'}
-          </Text>
-        </View>
+        <CartaoVazio
+          titulo="Nenhum caminhão ativo"
+          texto={podeCadastrar ? 'Use "Cadastrar caminhão" para começar.' : 'Os caminhões cadastrados no site aparecem aqui.'}
+        />
       </>
     )
   }
@@ -115,7 +114,11 @@ function CartaoNaLista({ caminhao }: { caminhao: CaminhaoNaLista }) {
   return (
     <Pressable
       onPress={() => router.push({ pathname: '/caminhao/[id]', params: { id: caminhao.id } })}
-      style={({ pressed }) => [estilos.cartao, pressed && estilos.cartaoApertado]}
+      style={({ pressed }) => [
+        estilos.cartao,
+        { borderLeftColor: caminhao.ativo ? coresDoStatus[caminhao.status].barra : cores.borda },
+        pressed && estilos.cartaoApertado,
+      ]}
       accessibilityRole="button"
       accessibilityLabel={`Caminhão ${caminhao.placa}`}
     >
@@ -154,14 +157,14 @@ const estilos = StyleSheet.create({
   filtroTexto: { fontFamily: fontes.textoMedio, fontSize: 14, color: cores.texto },
   filtroTextoEscolhido: { color: cores.branco },
   nenhum: { fontFamily: fontes.texto, fontSize: 14, color: cores.textoFraco, textAlign: 'center', paddingVertical: 16 },
-  cartao: { backgroundColor: cores.branco, borderRadius: 20, padding: 16, gap: 10 },
+  cartao: { backgroundColor: cores.branco, borderRadius: 20, borderLeftWidth: 6, padding: 16, gap: 10 },
   cartaoApertado: { backgroundColor: cores.marca50 },
   linha: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
-  modelo: { fontFamily: fontes.textoForte, fontSize: 15, color: cores.texto },
-  detalhe: { fontFamily: fontes.texto, fontSize: 13, color: cores.textoFraco, marginTop: 2 },
+  modelo: { fontFamily: fontes.textoForte, fontSize: 16, color: cores.texto },
+  detalhe: { fontFamily: fontes.texto, fontSize: 14, color: cores.textoFraco, marginTop: 2 },
   divisoria: { height: 1, backgroundColor: cores.borda },
   urgente: { flex: 1 },
-  urgenteNome: { fontFamily: fontes.textoForte, fontSize: 14, color: cores.texto },
+  urgenteNome: { fontFamily: fontes.textoForte, fontSize: 15, color: cores.texto },
   desativado: {
     fontFamily: fontes.textoForte,
     fontSize: 12,
@@ -172,7 +175,4 @@ const estilos = StyleSheet.create({
     color: cores.textoMedio,
     backgroundColor: cores.borda,
   },
-  cartaoVazio: { backgroundColor: cores.branco, borderRadius: 20, padding: 20, gap: 8 },
-  vazioTitulo: { fontFamily: fontes.subtitulo, fontSize: 22, color: cores.texto },
-  vazioTexto: { fontFamily: fontes.texto, fontSize: 14, lineHeight: 20, color: cores.textoFraco },
 })

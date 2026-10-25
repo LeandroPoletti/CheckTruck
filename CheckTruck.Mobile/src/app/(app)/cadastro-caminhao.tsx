@@ -176,7 +176,7 @@ export default function CadastroCaminhao() {
 
           {listas && (
             <>
-              <Text style={estilos.etapa}>1 · MODELO</Text>
+              <Text style={estilos.etapa}>1 · Modelo</Text>
               <Grupo rotulo="Fabricante">
                 <Escolha opcoes={listas.fabricantes} escolhidos={form.fabricanteId ? [form.fabricanteId] : []} aoTocar={(v) => mudar('fabricanteId', v)} />
               </Grupo>
@@ -218,7 +218,7 @@ export default function CadastroCaminhao() {
                 intervalos recomendados.
               </Text>
 
-              <Text style={estilos.etapa}>2 · IDENTIFICAÇÃO</Text>
+              <Text style={estilos.etapa}>2 · Identificação</Text>
               <Campo
                 rotulo="Placa"
                 value={form.placa}
@@ -282,7 +282,7 @@ export default function CadastroCaminhao() {
                 erro={erros.kmAtual}
               />
 
-              <Text style={estilos.etapa}>3 · VÍNCULOS</Text>
+              <Text style={estilos.etapa}>3 · Vínculos</Text>
               <Grupo rotulo="Motorista atual">
                 <Escolha
                   opcoes={[{ id: '', nome: 'Sem motorista' }, ...listas.motoristas]}
@@ -321,7 +321,7 @@ function Grupo({ rotulo, erro, children }: { rotulo: string; erro?: string; chil
 const estilos = StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.branco },
   conteudo: { padding: 24, gap: 20 },
-  etapa: { fontFamily: fontes.textoForte, fontSize: 12, letterSpacing: 1, color: cores.marca700, marginTop: 4 },
+  etapa: { fontFamily: fontes.textoForte, fontSize: 16, color: cores.marca700, marginTop: 4 }, // Inter: a Overpass desenha errado o "·"
   grupo: { gap: 10 },
   rotulo: { fontFamily: fontes.textoMedio, fontSize: 13, color: cores.textoMedio },
   dica: { fontFamily: fontes.texto, fontSize: 12, lineHeight: 17, color: cores.textoFraco },

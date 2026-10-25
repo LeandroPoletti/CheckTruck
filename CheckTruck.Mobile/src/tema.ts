@@ -1,18 +1,20 @@
-// Cores do app: as mesmas do web (verde da marca e os cinzas "stone" do Tailwind)
+// Cores do app: as mesmas do site (o verde das placas de estrada e os cinzas "stone" do Tailwind)
 export const cores = {
-  marca900: '#1c3829',
-  marca800: '#234433',
-  marca700: '#2c5440',
-  marca500: '#46825f',
-  marca300: '#90b69f',
-  marca200: '#b6d0c0',
-  marca100: '#dbeae0',
-  marca50: '#eef5f0',
+  marca900: '#073823',
+  marca800: '#0a4a2e',
+  marca700: '#0f6b42',
+  marca500: '#339966',
+  marca300: '#94cdb0',
+  marca200: '#c0e1cf',
+  marca100: '#e0f1e7',
+  marca50: '#f0f9f3',
+  /** Amarelo da faixa do meio da estrada (a faixa do topo das telas e a dos desenhos) */
+  faixa: '#f2c230',
   texto: '#1c1917',
   textoMedio: '#57534e',
   textoFraco: '#78716c',
   borda: '#e7e5e4',
-  fundo: '#f5f5f4',
+  fundo: '#edf2ee',
   branco: '#ffffff',
   erroTexto: '#b91c1c',
   erroEscuro: '#991b1b',
@@ -26,10 +28,12 @@ export const coresDoStatus = {
   critico: { nome: 'Crítico', texto: '#b91c1c', fundo: '#fef2f2', barra: '#ef4444' },
 }
 
-// Barlow Semi Condensed (desenhada a partir das placas de estrada) nos títulos; Inter (a do web) no resto
+// Iguais às do site: Overpass (desenhada a partir da letra das placas de estrada) nos títulos e números grandes,
+// Inter no resto e Barlow Semi Condensed nas letras da placa do caminhão
 export const fontes = {
-  titulo: 'BarlowSemiCondensed_700Bold',
-  subtitulo: 'BarlowSemiCondensed_600SemiBold',
+  titulo: 'Overpass_800ExtraBold',
+  subtitulo: 'Overpass_700Bold',
+  placa: 'BarlowSemiCondensed_700Bold',
   texto: 'Inter_400Regular',
   textoMedio: 'Inter_500Medium',
   textoForte: 'Inter_600SemiBold',
