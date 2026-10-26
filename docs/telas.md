@@ -22,6 +22,7 @@ flowchart LR
     menu --> cad["Países · Fabricantes · Modelos<br/>Gerações · Tipos de manutenção · Mecânicos"]
     menu --> acesso["Acesso"]
     menu --> emp["Minha empresa"]
+    menu --> cor["Cor<br/>(no fim do menu, ao lado de Sair)"]
 ```
 
 | Grupo do menu | Tela | Precisa de |
@@ -40,6 +41,9 @@ flowchart LR
 
 Os botões dentro das telas também seguem as permissões: Atualizar km (Atualizar km), Corrigir km (Admin e
 Gestor), Editar (Veículos), Lançar OS (Ordem de serviço).
+
+No fim do menu, embaixo do nome de quem entrou, ficam **Cor** (todo mundo: abre a janela para escolher a cor do
+sistema) e **Sair**.
 
 Não tem tela de criar conta: a tela Entrar diz para pedir o acesso ao gestor da empresa. Na tela **Empresas** o
 dono do sistema cadastra a empresa com o Admin dela (e vê o login para passar ao dono da empresa), define uma senha
@@ -61,6 +65,7 @@ flowchart TB
     mot --> km["Atualizar km"]
     mot --> abrir["Abrir chamado"]
     mot --> avisos["Avisos de troca"]
+    mot --> cor["Cor do app"]
 
     frota --> det["Caminhão<br/>situação · OS · histórico de km"]
     det --> km
@@ -78,6 +83,7 @@ flowchart TB
     atalhos --> tipos["Tipos de manutenção"]
     atalhos --> catalogo["Catálogo → modelos → gerações"]
     atalhos --> emp["Minha empresa"]
+    atalhos --> cor
 ```
 
 | Tela (arquivo em `src/app`) | O que faz | Quem vê |
@@ -96,6 +102,7 @@ flowchart TB
 | `(app)/catalogo`, `modelos`, `geracoes`, `fabricante`, `modelo`, `geracao` | Catálogo, um nível por vez | Cadastros |
 | `(app)/avisos` | Avisos de troca: se estão ligados, os próximos e um aviso de teste | Motorista e Ver frota |
 | `(app)/minha-empresa` | Dados da empresa | Admin e Gestor |
+| `(app)/cor` | Cor do app: verde, azul, amarelo ou preto (a mesma do site) | Motorista, Ver frota ou Atender chamados |
 
 Ficam só no site: o **dashboard**, os **acessos** (cadastrar pessoas e permissões) e as telas do **dono do
 sistema** (empresas e catálogo do sistema).
@@ -104,8 +111,14 @@ sistema** (empresas e catálogo do sistema).
 
 - O verde das placas de estrada, com o amarelo da faixa do meio da estrada nos detalhes (no menu do site, a faixa
   amarela marca a tela aberta).
-- Logo própria: uma placa verde de estrada com o "visto" desenhado como uma estrada. Aparece no menu do site, no
-  topo da tela inicial do app, nos dois logins, no ícone da aba do navegador e no ícone do app no celular.
+- Quatro cores para escolher: verde (o padrão), azul (da placa Mercosul), amarelo (das placas de advertência: no
+  site, o menu em grafite com a logo e a tela aberta em amarelo; no app, o topo amarelo com a letra escura) e preto.
+  Cada pessoa escolhe a dela (Cor, no menu do site; Cor do app, no fim da tela inicial do app), que fica na conta e
+  vale no site e no app. Muda só o que é colorido (topo, menu, botões, logo e desenhos): o fundo continua claro, e as
+  cores do status são as mesmas em todas.
+- Logo própria: uma placa de estrada com o "visto" desenhado como uma estrada. Aparece no menu do site, no topo da
+  tela inicial do app e nos dois logins, na cor escolhida, e no ícone da aba do navegador e no ícone do app no
+  celular, sempre em verde.
 - Desenhos: o caminhão na estrada no login (site e app) e no dashboard do site, e a estrada vazia nas telas sem
   nada cadastrado.
 - Letras iguais no site e no app: títulos e números grandes em Overpass (feita a partir da letra das placas de

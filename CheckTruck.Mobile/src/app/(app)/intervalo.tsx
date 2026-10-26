@@ -11,7 +11,7 @@ import CabecalhoDoModal from '@/componentes/CabecalhoDoModal'
 import Campo from '@/componentes/Campo'
 import ConfirmarExclusao from '@/componentes/ConfirmarExclusao'
 import MensagemErro from '@/componentes/MensagemErro'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 type Form = { intervaloKm: string; intervaloKmPrimeira: string; intervaloMeses: string; fonte: string; observacao: string }
 type Erros = Partial<Record<'intervaloKm' | 'intervaloMeses', string>>
@@ -208,7 +208,7 @@ export default function JanelaDoIntervalo() {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.branco },
   conteudo: { padding: 24, gap: 20 },
   item: { backgroundColor: cores.fundo, borderRadius: 16, padding: 16, gap: 4 },
@@ -217,4 +217,4 @@ const estilos = StyleSheet.create({
   itemHoje: { fontFamily: fontes.texto, fontSize: 14, color: cores.textoMedio },
   aviso: { backgroundColor: cores.marca50, borderRadius: 12, padding: 12 },
   avisoTexto: { fontFamily: fontes.texto, fontSize: 13, lineHeight: 19, color: cores.marca700 },
-})
+}))

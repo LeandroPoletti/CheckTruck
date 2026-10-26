@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native'
-import { cores } from '@/tema'
+import { comTema, cores } from '@/tema'
 
 // A faixa amarela tracejada do meio da estrada, sumindo ao longe: a marca visual do app (e do site)
 export default function FaixaDaEstrada() {
@@ -12,7 +12,7 @@ export default function FaixaDaEstrada() {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   faixa: { flexDirection: 'row', gap: 8 },
   traco: { width: 24, height: 5, borderRadius: 2.5, backgroundColor: cores.faixa },
-})
+}))

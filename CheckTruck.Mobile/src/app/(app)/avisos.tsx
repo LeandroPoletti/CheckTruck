@@ -10,7 +10,7 @@ import { HORA_DO_AVISO, planejarAvisos, type Aviso } from '@/dados/avisos'
 import Botao from '@/componentes/Botao'
 import MensagemErro from '@/componentes/MensagemErro'
 import TelaComTopo from '@/componentes/TelaComTopo'
-import { cores, coresDoStatus, fontes } from '@/tema'
+import { comTema, cores, coresDoStatus, fontes } from '@/tema'
 
 const doisDigitos = (n: number) => String(n).padStart(2, '0')
 
@@ -129,7 +129,7 @@ export default function Avisos() {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   conteudo: { padding: 20, paddingBottom: 40, gap: 14 },
   explicacao: { fontFamily: fontes.texto, fontSize: 13, lineHeight: 19, color: cores.textoMedio },
   carregando: { marginTop: 40 },
@@ -144,4 +144,4 @@ const estilos = StyleSheet.create({
   aviso: { paddingVertical: 14, gap: 4 },
   avisoComBorda: { borderTopWidth: 1, borderTopColor: cores.borda },
   quando: { fontFamily: fontes.textoForte, fontSize: 13, color: cores.marca700 },
-})
+}))

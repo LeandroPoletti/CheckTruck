@@ -13,7 +13,7 @@ import CartaoDaOrdem from '@/componentes/CartaoDaOrdem'
 import MensagemErro from '@/componentes/MensagemErro'
 import SituacaoDoCaminhao from '@/componentes/SituacaoDoCaminhao'
 import TelaComTopo from '@/componentes/TelaComTopo'
-import { cores, coresDoStatus, fontes } from '@/tema'
+import { comTema, cores, coresDoStatus, fontes } from '@/tema'
 
 type Dados = { caminhao: Caminhao; ordens: OrdemDeServico[]; historico: RegistroDeKm[] }
 
@@ -146,7 +146,7 @@ function LinhaDoKm({ registro: h, primeira }: { registro: RegistroDeKm; primeira
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   conteudo: { padding: 20, paddingBottom: 40, gap: 14 },
   bloco: { gap: 10 },
   carregando: { marginTop: 40 },
@@ -163,4 +163,4 @@ const estilos = StyleSheet.create({
   meta: { fontFamily: fontes.texto, fontSize: 12, color: cores.textoFraco },
   kmTexto: { fontFamily: fontes.textoMedio, fontSize: 14, color: cores.texto },
   detalhe: { fontFamily: fontes.texto, fontSize: 13, lineHeight: 18, color: cores.textoMedio },
-})
+}))

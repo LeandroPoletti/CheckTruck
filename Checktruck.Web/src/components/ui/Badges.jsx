@@ -13,7 +13,7 @@ function Etiqueta({ opcoes, valor, padrao }) {
 }
 
 const STATUS = {
-  ok: { label: 'OK', cls: 'bg-brand-50 text-brand-700 border-brand-200', icone: CircleCheck },
+  ok: { label: 'OK', cls: 'bg-ok-50 text-ok-700 border-ok-200', icone: CircleCheck },
   atencao: { label: 'Atenção', cls: 'bg-amber-50 text-amber-700 border-amber-300', icone: TriangleAlert },
   critico: { label: 'Crítico', cls: 'bg-red-50 text-red-700 border-red-300', icone: TriangleAlert },
 }
@@ -23,7 +23,7 @@ export function StatusBadge({ status }) {
 }
 
 const ATIVO = {
-  ativo: { label: 'Ativo', cls: 'bg-brand-50 text-brand-700 border-brand-200' },
+  ativo: { label: 'Ativo', cls: 'bg-ok-50 text-ok-700 border-ok-200' },
   inativo: { label: 'Inativo', cls: 'bg-stone-50 text-stone-500 border-stone-300' },
 }
 

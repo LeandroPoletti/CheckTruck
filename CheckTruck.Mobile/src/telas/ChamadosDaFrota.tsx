@@ -6,7 +6,7 @@ import { atenderChamado, type Chamado } from '@/servicos/chamados'
 import Botao from '@/componentes/Botao'
 import CartaoDoChamado from '@/componentes/CartaoDoChamado'
 import MensagemErro from '@/componentes/MensagemErro'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 const CONCLUIDOS_NA_TELA = 10
 
@@ -84,9 +84,9 @@ export default function ChamadosDaFrota({ chamados, usuario, aoMudar }: Props) {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   secao: { fontFamily: fontes.subtitulo, fontSize: 22, color: cores.texto, marginTop: 6 },
   vazio: { fontFamily: fontes.texto, fontSize: 14, color: cores.textoFraco, textAlign: 'center', paddingVertical: 8 },
   botoes: { flexDirection: 'row', gap: 10, marginTop: 8 },
   botao: { flex: 1 },
-})
+}))

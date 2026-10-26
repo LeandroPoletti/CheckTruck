@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { router } from 'expo-router'
 import { Feather } from '@expo/vector-icons'
 import Placa from './Placa'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 // Título das janelas que sobem por cima (Atualizar km, Abrir chamado...), com a placa (quando já tem) e o X para fechar.
 // Título comprido quebra a linha em vez de empurrar o X para fora da tela.
@@ -20,8 +20,8 @@ export default function CabecalhoDoModal({ titulo, placa }: { titulo: string; pl
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   cabecalho: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 },
   textos: { flexShrink: 1, gap: 12 },
   titulo: { fontFamily: fontes.titulo, fontSize: 30, color: cores.texto },
-})
+}))

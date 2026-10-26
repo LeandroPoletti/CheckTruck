@@ -100,10 +100,14 @@ export const chamadoService = {
 
 // Acessos (login, cargo e permissões). Listar, criar e editar: só Admin e Gestor.
 export const usuarioService = {
-  // Quem está logado, com cargo, permissões e empresa
+  // Quem está logado, com cargo, permissões, empresa e o tema de cor
   async obterMe() {
     const { data } = await api.get('/api/Usuario/me')
     return m.usuarioLogadoFromApi(data)
+  },
+  // O tema de cor de quem está logado (Verde, Azul, Amarelo ou Preto): vale no site e no app
+  async alterarTema(tema) {
+    await api.put('/api/Usuario/me/tema', JSON.stringify(tema), { headers: { 'Content-Type': 'application/json' } })
   },
   async listar() {
     const { data } = await api.get('/api/Usuario')

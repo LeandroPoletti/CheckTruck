@@ -9,7 +9,7 @@ import Botao from '@/componentes/Botao'
 import CabecalhoDoModal from '@/componentes/CabecalhoDoModal'
 import Campo from '@/componentes/Campo'
 import MensagemErro from '@/componentes/MensagemErro'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 // Só Admin e Gestor: corrige um km digitado errado (ex.: um zero a mais), igual ao web.
 // Pode baixar o km, mas não para menos que o km da maior OS do caminhão (minimo).
@@ -80,7 +80,7 @@ export default function CorrigirKm() {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.branco },
   conteudo: { padding: 24, gap: 20 },
   registrado: { backgroundColor: cores.fundo, borderRadius: 16, padding: 16, gap: 2 },
@@ -88,4 +88,4 @@ const estilos = StyleSheet.create({
   km: { fontFamily: fontes.titulo, fontSize: 30, color: cores.texto },
   aviso: { backgroundColor: cores.marca50, borderRadius: 12, padding: 12 },
   avisoTexto: { fontFamily: fontes.texto, fontSize: 13, lineHeight: 19, color: cores.marca700 },
-})
+}))

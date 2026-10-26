@@ -21,7 +21,8 @@ cadastra o resto da equipe (`POST /api/Usuario`).
 |---|---|---|---|
 | POST | `/api/Auth/login` | Entra; devolve `accessToken` (1 hora) e `refreshToken` (14 dias) | Público |
 | POST | `/api/Auth/renovar` | Troca o `refreshToken` por tokens novos, sem a senha | Público (com a chave) |
-| GET | `/api/Usuario/me` | Quem está logado: cargo, permissões e empresa | — |
+| GET | `/api/Usuario/me` | Quem está logado: cargo, permissões, empresa e tema de cor | — |
+| PUT | `/api/Usuario/me/tema` | Troca a cor de quem está logado (corpo: `"Verde"`, `"Azul"`, `"Amarelo"` ou `"Preto"`); vale no site e no app | — |
 
 ## Empresas
 

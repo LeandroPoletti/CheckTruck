@@ -7,10 +7,10 @@ import { Overpass_800ExtraBold } from '@expo-google-fonts/overpass/800ExtraBold'
 import { Inter_400Regular } from '@expo-google-fonts/inter/400Regular'
 import { Inter_500Medium } from '@expo-google-fonts/inter/500Medium'
 import { Inter_600SemiBold } from '@expo-google-fonts/inter/600SemiBold'
-import { SessaoProvider } from '@/servicos/sessao'
+import { SessaoProvider, useSessao } from '@/servicos/sessao'
 import { prepararAvisos } from '@/servicos/avisos'
 import Carregando from '@/componentes/Carregando'
-import { cores } from '@/tema'
+import { aplicarTema, cores } from '@/tema'
 
 prepararAvisos()
 
@@ -30,8 +30,19 @@ export default function Raiz() {
 
   return (
     <SessaoProvider>
-      <StatusBar style="light" />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: cores.marca900 } }} />
+      <Navegacao />
     </SessaoProvider>
+  )
+}
+
+// As telas, na cor do tema de quem está logado. Ao trocar o tema, as telas abrem de novo (a partir da inicial) já
+// com as cores novas
+function Navegacao() {
+  const tema = aplicarTema(useSessao().tema)
+  return (
+    <>
+      <StatusBar style={tema === 'Amarelo' ? 'dark' : 'light'} />
+      <Stack key={tema} screenOptions={{ headerShown: false, contentStyle: { backgroundColor: cores.topo } }} />
+    </>
   )
 }

@@ -7,7 +7,7 @@ import Botao from '@/componentes/Botao'
 import CampoDeBusca from '@/componentes/CampoDeBusca'
 import CartaoDaOrdem from '@/componentes/CartaoDaOrdem'
 import CartaoVazio from '@/componentes/CartaoVazio'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 // Pela placa (com ou sem hífen) ou pelo número da OS
 function combina(os: OrdemDeServico, busca: string) {
@@ -43,6 +43,6 @@ export default function OrdensDaFrota({ ordens, usuario }: { ordens: OrdemDeServ
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   nenhuma: { fontFamily: fontes.texto, fontSize: 14, color: cores.textoFraco, textAlign: 'center', paddingVertical: 16 },
-})
+}))

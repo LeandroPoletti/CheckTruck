@@ -94,6 +94,7 @@ classDiagram
         +Cargo Cargo
         +Permissao Permissoes
         +bool Ativo
+        +TemaDeCor Tema
         +Pode(Permissao) bool
     }
     class Celular {
@@ -189,6 +190,7 @@ classDiagram
 | `TipoOcorrencia` | RuidoMotor, Freios, PneuSuspensao, EletricaPainel, Vazamento, ArCondicionado, PreventivaVencida, Outro |
 | `UrgenciaChamado` | Baixa, Media, Alta (aparece como "Urgente") |
 | `StatusChamado` | Pendente, Concluido |
+| `TemaDeCor` | Verde, Azul, Amarelo, Preto (a cor do site e do app de cada pessoa; Verde é o padrão) |
 
 `Permissao` é um enum de bits: as permissões de uma pessoa ficam num número só (ex.: VerFrota + AtualizarKm =
 1 + 4 = 5). Admin e Gestor têm todas, sem precisar marcar.
@@ -269,7 +271,7 @@ classDiagram
     }
     class ServicoUsuario {
         +CriarAsync() AtualizarAsync()
-        +AlterarAtivoAsync()
+        +AlterarAtivoAsync() AlterarTemaAsync()
         +ListarMotoristasAtivos()
         +DefinirSenhaDoAdminAsync()
     }

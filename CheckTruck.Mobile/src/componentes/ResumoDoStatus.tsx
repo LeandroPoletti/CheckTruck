@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 import type { ItemDeTroca } from '@/servicos/caminhoes'
-import { coresDoStatus, fontes } from '@/tema'
+import { comTema, coresDoStatus, fontes } from '@/tema'
 
 // Faixa com o resumo do caminhão: quantas trocas venceram ou estão chegando.
 // Quem leva o caminhão na oficina (o motorista) é orientado a falar com ela; quem cuida da frota, a programar a troca.
@@ -36,9 +36,9 @@ export default function ResumoDoStatus({ itens, falarComOficina }: { itens: Item
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   resumo: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 16, padding: 16 },
   textos: { flex: 1, gap: 2 },
   titulo: { fontFamily: fontes.textoForte, fontSize: 15 },
   texto: { fontFamily: fontes.texto, fontSize: 13 },
-})
+}))

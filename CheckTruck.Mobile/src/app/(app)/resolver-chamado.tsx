@@ -9,7 +9,7 @@ import Botao from '@/componentes/Botao'
 import CabecalhoDoModal from '@/componentes/CabecalhoDoModal'
 import Campo from '@/componentes/Campo'
 import MensagemErro from '@/componentes/MensagemErro'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 // Concluir o chamado contando o que foi feito (obrigatório: fica no histórico do caminhão), igual ao web.
 export default function ResolverChamado() {
@@ -63,10 +63,10 @@ export default function ResolverChamado() {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.branco },
   conteudo: { padding: 24, gap: 22 },
   problema: { backgroundColor: cores.fundo, borderRadius: 16, padding: 16, gap: 4 },
   tipo: { fontFamily: fontes.textoForte, fontSize: 15, color: cores.texto },
   descricao: { fontFamily: fontes.texto, fontSize: 14, lineHeight: 20, color: cores.textoMedio },
-})
+}))

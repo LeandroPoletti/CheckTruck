@@ -16,7 +16,7 @@ import MensagemErro from '@/componentes/MensagemErro'
 import Pilula from '@/componentes/Pilula'
 import Placa from '@/componentes/Placa'
 import TelaComTopo from '@/componentes/TelaComTopo'
-import { cores, coresDoStatus, fontes } from '@/tema'
+import { comTema, cores, coresDoStatus, fontes } from '@/tema'
 
 type Aba = Alvo['tipo']
 type Dados = { caminhao: CaminhaoDoIntervalo; tipos: TipoDeManutencao[]; doCaminhao: IntervalosDoItem[]; daGeracao: IntervalosDoItem[] }
@@ -167,20 +167,20 @@ function LinhaDoIntervalo({ tipo, emOrdem, minhaOrigem, primeira, onPress }: Pro
 }
 
 // De onde vem o intervalo que vale, com as cores do web (o do caminhão é o mais forte)
-const CORES_DA_ORIGEM: Record<Origem | 'nenhum', { texto: string; fundo: string }> = {
+const CORES_DA_ORIGEM = comTema((): Record<Origem | 'nenhum', { texto: string; fundo: string }> => ({
   caminhao: { texto: cores.branco, fundo: cores.marca700 },
   empresa: { texto: cores.branco, fundo: cores.marca500 },
   fabrica: { texto: cores.marca700, fundo: cores.marca100 },
   padrao: { texto: cores.textoMedio, fundo: cores.fundo },
   nenhum: { texto: coresDoStatus.atencao.texto, fundo: coresDoStatus.atencao.fundo },
-}
+}))
 
 function EtiquetaDaOrigem({ origem }: { origem?: Origem }) {
   const nome = origem ? ORIGENS_INTERVALO[origem] : 'não acompanhado'
   return <Etiqueta texto={nome[0].toUpperCase() + nome.slice(1)} cor={CORES_DA_ORIGEM[origem ?? 'nenhum']} />
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   conteudo: { padding: 20, paddingBottom: 40, gap: 14 },
   explicacao: { fontFamily: fontes.texto, fontSize: 13, lineHeight: 19, color: cores.textoMedio },
   bloco: { gap: 10 },
@@ -198,4 +198,4 @@ const estilos = StyleSheet.create({
   aviso: { backgroundColor: coresDoStatus.atencao.fundo, borderRadius: 14, padding: 14 },
   avisoTexto: { fontFamily: fontes.texto, fontSize: 12, lineHeight: 18, color: coresDoStatus.atencao.texto },
   avisoForte: { fontFamily: fontes.textoForte },
-})
+}))

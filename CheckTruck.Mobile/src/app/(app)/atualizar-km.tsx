@@ -9,7 +9,7 @@ import Botao from '@/componentes/Botao'
 import CabecalhoDoModal from '@/componentes/CabecalhoDoModal'
 import Campo from '@/componentes/Campo'
 import MensagemErro from '@/componentes/MensagemErro'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 // Quem está com o caminhão (ou tem Atualizar km) digita o km do painel. O km só sobe; se o registrado está errado,
 // quem corrige é o gestor no web.
@@ -72,11 +72,11 @@ export default function AtualizarKm() {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.branco },
   conteudo: { padding: 24, gap: 20 },
   registrado: { backgroundColor: cores.fundo, borderRadius: 16, padding: 16, gap: 2 },
   rotulo: { fontFamily: fontes.textoMedio, fontSize: 13, color: cores.textoMedio },
   km: { fontFamily: fontes.titulo, fontSize: 30, color: cores.texto },
   rodou: { fontFamily: fontes.textoMedio, fontSize: 14, color: cores.marca700, marginTop: -8 },
-})
+}))

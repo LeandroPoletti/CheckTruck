@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 type Props = TextInputProps & {
   rotulo: string
@@ -36,7 +36,7 @@ export default function Campo({ rotulo, acessorio, linhas, dica, erro, onFocus, 
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   campo: { gap: 8 },
   rotulo: { fontFamily: fontes.textoMedio, fontSize: 13, color: cores.textoMedio },
   caixa: {
@@ -54,4 +54,4 @@ const estilos = StyleSheet.create({
   dica: { fontFamily: fontes.texto, fontSize: 12, lineHeight: 17, color: cores.textoFraco },
   erro: { color: cores.erroTexto },
   entrada: { flex: 1, minHeight: 48, fontFamily: fontes.texto, fontSize: 16, color: cores.texto },
-})
+}))

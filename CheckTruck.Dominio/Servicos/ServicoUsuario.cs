@@ -195,6 +195,26 @@ public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usu
         return Concluir(await userManager.UpdateAsync(usuario)) ? usuario : null;
     }
 
+    /// <summary>Troca a cor de quem está logado (vale no site e no app). Qualquer um pode, até o dono do sistema.</summary>
+    public async Task<bool> AlterarTemaAsync(TemaDeCor tema)
+    {
+        if (!Enum.IsDefined(tema))
+        {
+            Mensagens.Add("Escolha uma cor válida.");
+            return false;
+        }
+
+        var usuario = await userManager.FindByIdAsync(usuarioLogado.Usuario!.Id);
+        if (usuario is null)
+        {
+            Mensagens.Add("Acesso não encontrado.");
+            return false;
+        }
+
+        usuario.Tema = tema;
+        return Concluir(await userManager.UpdateAsync(usuario));
+    }
+
     // Limpa os campos e confere nome, e-mail, cargo, CPF e permissões
     private void Preparar(Usuario usuario, bool adminDoSistema)
     {

@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { Feather } from '@expo/vector-icons'
 import FaixaDaEstrada from './FaixaDaEstrada'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 type Props = {
   titulo: string
@@ -23,11 +23,11 @@ export default function TelaComTopo({ titulo, subtitulo, aoEditar, children }: P
       <View style={estilos.cabecalho}>
         <View style={estilos.topo}>
           <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button" accessibilityLabel="Voltar" style={estilos.voltar}>
-            <Feather name="arrow-left" size={20} color={cores.marca200} />
+            <Feather name="arrow-left" size={20} color={cores.sobreTopo2} />
           </Pressable>
           {aoEditar && (
             <Pressable onPress={aoEditar} hitSlop={12} accessibilityRole="button" style={estilos.editar}>
-              <Feather name="edit-2" size={16} color={cores.marca200} />
+              <Feather name="edit-2" size={16} color={cores.sobreTopo2} />
               <Text style={estilos.editarTexto}>Editar</Text>
             </Pressable>
           )}
@@ -41,11 +41,11 @@ export default function TelaComTopo({ titulo, subtitulo, aoEditar, children }: P
   )
 }
 
-const estilos = StyleSheet.create({
-  tela: { flex: 1, backgroundColor: cores.marca900 },
+const estilos = comTema(() => StyleSheet.create({
+  tela: { flex: 1, backgroundColor: cores.topo },
   cabecalho: { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 40, gap: 12 },
   topo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  voltar: { alignSelf: 'flex-start', padding: 8, borderRadius: 999, backgroundColor: cores.marca800 },
+  voltar: { alignSelf: 'flex-start', padding: 8, borderRadius: 999, backgroundColor: cores.topoForte },
   editar: {
     alignSelf: 'flex-start',
     flexDirection: 'row',
@@ -54,10 +54,10 @@ const estilos = StyleSheet.create({
     padding: 8,
     paddingHorizontal: 14,
     borderRadius: 999,
-    backgroundColor: cores.marca800,
+    backgroundColor: cores.topoForte,
   },
-  editarTexto: { fontFamily: fontes.textoForte, fontSize: 14, color: cores.marca200 },
-  titulo: { fontFamily: fontes.titulo, fontSize: 32, lineHeight: 36, color: cores.branco },
-  subtitulo: { fontFamily: fontes.texto, fontSize: 14, color: cores.marca200 },
+  editarTexto: { fontFamily: fontes.textoForte, fontSize: 14, color: cores.sobreTopo2 },
+  titulo: { fontFamily: fontes.titulo, fontSize: 32, lineHeight: 36, color: cores.sobreTopo },
+  subtitulo: { fontFamily: fontes.texto, fontSize: 14, color: cores.sobreTopo2 },
   corpo: { flex: 1, backgroundColor: cores.fundo, borderTopLeftRadius: 28, borderTopRightRadius: 28, marginTop: -20, overflow: 'hidden' },
-})
+}))

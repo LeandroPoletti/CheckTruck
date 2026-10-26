@@ -1,19 +1,20 @@
 import Logo from '../../components/marca/Logo'
 import { Caminhao } from '../../components/marca/Desenhos'
 
-// Moldura da tela de quem ainda não entrou (login): à esquerda a marca e o caminhão na estrada, à direita o cartão.
+// Moldura da tela de quem ainda não entrou (login): à esquerda a marca e o caminhão na estrada (na cor do último
+// tema usado), à direita o cartão.
 // abaixo: o que fica embaixo do cartão (ex.: contas de demonstração).
 export default function TelaPublica({ children, abaixo }) {
   return (
     <div className="flex min-h-screen bg-mist-50">
-      <section className="relative hidden w-[46%] max-w-[680px] flex-col overflow-hidden bg-brand-900 lg:flex">
+      <section className="relative hidden w-[46%] max-w-[680px] flex-col overflow-hidden bg-topo text-sobre-topo lg:flex">
         <div className="px-14 pt-16">
-          <h1><Logo tamanho={60} className="gap-4 text-[46px] text-white" /></h1>
-          <p className="mt-4 max-w-sm text-lg text-brand-200">Controle de manutenção preventiva</p>
+          <h1><Logo tamanho={60} className="gap-4 text-[46px]" /></h1>
+          <p className="mt-4 max-w-sm text-lg text-sobre-topo-2">Controle de manutenção preventiva</p>
         </div>
         <div className="mt-auto">
           <Caminhao largura={460} fundo="escuro" estrada={false} className="ml-14 -mb-1" />
-          <div className="h-8 bg-[#0b2e1e] pt-3">
+          <div className="h-8 bg-[var(--asfalto-no-topo)] pt-3">
             <div className="h-1 bg-[repeating-linear-gradient(90deg,var(--color-faixa)_0_46px,transparent_46px_78px)]" />
           </div>
           <div className="h-12" />

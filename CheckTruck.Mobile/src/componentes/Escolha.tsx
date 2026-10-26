@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 type Opcao<T> = { id: T; nome: string }
 
@@ -33,10 +33,10 @@ export default function Escolha<T extends string | number>({ opcoes, escolhidos,
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   opcoes: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   opcao: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 999, backgroundColor: cores.fundo },
   escolhida: { backgroundColor: cores.marca700 },
   texto: { fontFamily: fontes.textoMedio, fontSize: 14, color: cores.texto },
   textoEscolhido: { color: cores.branco },
-})
+}))

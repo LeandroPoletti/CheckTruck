@@ -4,7 +4,7 @@ import type { CaminhaoNaLista } from '@/servicos/caminhoes'
 import { formatKm } from '@/dados/formato'
 import Botao from './Botao'
 import Placa from './Placa'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 type Props = {
   caminhao: CaminhaoNaLista
@@ -75,11 +75,11 @@ export default function CartaoDoCaminhao(
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   cartao: { backgroundColor: cores.branco, borderRadius: 20, padding: 20, gap: 14 },
   modelo: { fontFamily: fontes.textoForte, fontSize: 17, color: cores.texto },
   detalhe: { fontFamily: fontes.texto, fontSize: 14, color: cores.textoFraco, marginTop: 2 },
   divisoria: { height: 1, backgroundColor: cores.borda },
   rotulo: { fontFamily: fontes.textoMedio, fontSize: 13, color: cores.textoMedio },
   km: { fontFamily: fontes.titulo, fontSize: 34, lineHeight: 38, color: cores.texto, marginTop: 2 },
-})
+}))

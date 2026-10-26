@@ -1,4 +1,4 @@
-const CORES = { critico: 'bg-red-500', atencao: 'bg-amber-500', ok: 'bg-brand-600' }
+const CORES = { critico: 'bg-red-500', atencao: 'bg-amber-500', ok: 'bg-ok-600' }
 
 // Quanto do ciclo de troca já foi rodado (barra cheia = na hora de trocar). A cor segue o status do item.
 // Sem percentual (caminhão sem item acompanhado), a barra fica vazia.

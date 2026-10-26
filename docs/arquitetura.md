@@ -84,7 +84,7 @@ flowchart TB
 | `CheckTruck.Api` | Recebe os pedidos HTTP, confere o login e as permissões, converte DTO ↔ entidade e devolve os erros num formato só (ProblemDetails, com a mensagem em `detail`). Também manda o push pelo Expo. | Repositorio (e, por ele, Dominio) |
 | `CheckTruck.Dominio` | Entidades, enums e **todas as regras**: cálculo da próxima troca e do status, ordem dos intervalos, km que só sobe, chamados, acessos. Não conhece banco nem HTTP: fala com eles por interfaces. | — |
 | `CheckTruck.Repositorio` | Entity Framework Core com PostgreSQL: contexto, configuração das tabelas, migrations, catálogo inicial e o filtro por empresa. | Dominio |
-| `CheckTruck.Testes` | 126 testes automáticos (xUnit): as regras do Dominio, com um repositório em memória no lugar do banco, e a separação entre empresas, com o `Context` de verdade num SQLite na memória. | Dominio e Repositorio |
+| `CheckTruck.Testes` | 129 testes automáticos (xUnit): as regras do Dominio, com um repositório em memória no lugar do banco, e a separação entre empresas, com o `Context` de verdade num SQLite na memória. | Dominio e Repositorio |
 
 O Dominio fica no centro e não depende de ninguém: as interfaces (`IRepositorioCrud`, `IUsuarioLogado`,
 `IEnviadorDeAvisos`) são dele, e a Api e o Repositorio as implementam (inversão de dependência). Por isso as
@@ -163,8 +163,8 @@ Os passos estão no [README](../README.md#como-rodar).
 
 ## Qualidade
 
-- **Testes automáticos:** 126 casos (xUnit) cobrindo intervalos padrão, regras de alerta, situação do caminhão,
-  OS, motorista, veículo, aviso de chamado no celular, empresas, CPF, CNPJ e placa.
+- **Testes automáticos:** 129 casos (xUnit) cobrindo intervalos padrão, regras de alerta, situação do caminhão,
+  OS, motorista, veículo, aviso de chamado no celular, empresas, CPF, CNPJ, placa e a cor de cada conta.
 - **Separação entre empresas testada no banco:** com o `Context` de verdade (SQLite na memória), duas empresas e
   o catálogo do sistema, os testes provam que uma empresa não vê, não altera e não exclui o que é da outra (nem
   mandando o id), que o registro novo fica sempre com a empresa de quem está logado, que o item do sistema só o

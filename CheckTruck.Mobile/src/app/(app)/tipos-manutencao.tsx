@@ -12,7 +12,7 @@ import LinhaTocavel from '@/componentes/LinhaTocavel'
 import MensagemErro from '@/componentes/MensagemErro'
 import Pilula from '@/componentes/Pilula'
 import TelaComTopo from '@/componentes/TelaComTopo'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 const componente = (t: TipoDeManutencao) => COMPONENTES[t.componente] ?? String(t.componente)
 
@@ -89,7 +89,7 @@ export default function TiposDeManutencao() {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   conteudo: { padding: 20, paddingBottom: 40, gap: 14 },
   bloco: { gap: 10 },
   carregando: { marginTop: 40 },
@@ -98,4 +98,4 @@ const estilos = StyleSheet.create({
   topo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   nome: { flex: 1, fontFamily: fontes.textoForte, fontSize: 15, color: cores.texto },
   meta: { fontFamily: fontes.texto, fontSize: 13, lineHeight: 18, color: cores.textoMedio },
-})
+}))

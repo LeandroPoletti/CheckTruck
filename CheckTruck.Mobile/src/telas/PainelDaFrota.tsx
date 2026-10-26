@@ -15,7 +15,7 @@ import Saudacao from '@/componentes/Saudacao'
 import CaminhoesDaFrota from './CaminhoesDaFrota'
 import ChamadosDaFrota from './ChamadosDaFrota'
 import OrdensDaFrota from './OrdensDaFrota'
-import { cores } from '@/tema'
+import { comTema, cores } from '@/tema'
 
 type Aba = 'caminhoes' | 'chamados' | 'ordens'
 
@@ -120,6 +120,7 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
               {usuario.cuidaDosAcessos && (
                 <Atalho icone="briefcase" titulo="Minha empresa" onPress={() => router.push('/minha-empresa')} />
               )}
+              <Atalho icone="droplet" titulo="Cor do app" onPress={() => router.push('/cor')} />
             </>
           )}
         </ScrollView>
@@ -128,10 +129,10 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
   )
 }
 
-const estilos = StyleSheet.create({
-  tela: { flex: 1, backgroundColor: cores.marca900 },
+const estilos = comTema(() => StyleSheet.create({
+  tela: { flex: 1, backgroundColor: cores.topo },
   corpo: { flex: 1, backgroundColor: cores.fundo, borderTopLeftRadius: 28, borderTopRightRadius: 28, marginTop: -20, overflow: 'hidden' },
   conteudo: { padding: 20, paddingBottom: 40, gap: 14 },
   bloco: { gap: 10 },
   carregando: { marginTop: 40 },
-})
+}))

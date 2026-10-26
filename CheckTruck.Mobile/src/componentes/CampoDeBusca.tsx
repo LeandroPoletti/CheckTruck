@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, TextInput, View, type TextInputProps } from 'react-native'
 import { Feather } from '@expo/vector-icons'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 type Props = {
   valor: string
@@ -34,7 +34,7 @@ export default function CampoDeBusca({ valor, aoMudar, placeholder, autoCapitali
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   busca: {
     minHeight: 50,
     flexDirection: 'row',
@@ -45,4 +45,4 @@ const estilos = StyleSheet.create({
     paddingHorizontal: 14,
   },
   entrada: { flex: 1, minHeight: 48, fontFamily: fontes.texto, fontSize: 15, color: cores.texto },
-})
+}))

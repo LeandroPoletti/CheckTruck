@@ -25,6 +25,7 @@ como ele é hoje, mais os que surgiram no desenvolvimento. **Situação:** ✅ f
 | RF-16 | Avisar no celular as trocas vencidas ou chegando | ✅ | Novo. O próprio celular agenda |
 | RF-17 | Avisar no celular, na hora, quem atende chamados quando um chamado é aberto | ✅ | Novo. Push do Expo; no Android só com versão própria do app |
 | RF-18 | Cadastrar mecânicos e oficinas que fazem as trocas | ✅ | Novo. Só cadastro, sem login |
+| RF-19 | Cada pessoa escolher a cor do sistema (verde, azul, amarelo ou preto) | ✅ | Novo. Fica na conta e vale no site e no app; o padrão é o verde |
 
 ## Requisitos não funcionais
 
@@ -37,7 +38,7 @@ como ele é hoje, mais os que surgiram no desenvolvimento. **Situação:** ✅ f
 | RNF-05 | Escalabilidade | 🟡 | Um banco para todas as empresas (multiempresa); ainda não foi publicada nem testada com carga |
 | RNF-06 | Integridade dos dados em camadas | ✅ | Banco (chaves, únicos, obrigatórios) + API (todas as regras) + telas (avisam antes de enviar) |
 | RNF-07 | API documentada | 🟡 | Scalar em `/docs` em desenvolvimento e a lista de rotas em [api.md](api.md); falta publicar |
-| RNF-08 | Testes automáticos e integração contínua | ✅ | Novo. 126 testes (xUnit) e GitHub Actions a cada push |
+| RNF-08 | Testes automáticos e integração contínua | ✅ | Novo. 129 testes (xUnit) e GitHub Actions a cada push |
 | RNF-09 | Fácil para quem tem pouca prática com celular | ✅ | Novo. Botões grandes, textos simples, ações onde se procura |
 
 ## Regras de negócio

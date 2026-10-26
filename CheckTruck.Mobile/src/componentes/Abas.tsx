@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { cores, coresDoStatus, fontes } from '@/tema'
+import { comTema, cores, coresDoStatus, fontes } from '@/tema'
 
 export type DadosDaAba<T> = { id: T; titulo: string; contador?: number }
 
@@ -32,7 +32,7 @@ function BotaoDaAba<T extends string>(
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   abas: { flexDirection: 'row', backgroundColor: cores.branco, borderRadius: 16, padding: 4, gap: 4 },
   aba: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 11, borderRadius: 12 },
   abaEscolhida: { backgroundColor: cores.marca700 },
@@ -51,4 +51,4 @@ const estilos = StyleSheet.create({
     backgroundColor: coresDoStatus.atencao.fundo,
   },
   contadorEscolhido: { color: cores.marca700, backgroundColor: cores.branco },
-})
+}))

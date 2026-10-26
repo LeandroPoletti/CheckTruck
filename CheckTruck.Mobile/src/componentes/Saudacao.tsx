@@ -4,7 +4,7 @@ import type { Usuario } from '@/servicos/sessao'
 import { nomeCargo } from '@/dados/cargos'
 import FaixaDaEstrada from './FaixaDaEstrada'
 import Logo from './Logo'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 // Topo verde das telas de quem entrou: a logo, o nome, o cargo, a empresa e a faixa da estrada.
 // Com aoSair, mostra o botão de sair no canto.
@@ -15,7 +15,7 @@ export default function Saudacao({ usuario, aoSair }: { usuario: Usuario; aoSair
         <Logo />
         {aoSair && (
           <Pressable onPress={aoSair} hitSlop={12} accessibilityRole="button" accessibilityLabel="Sair" style={estilos.sair}>
-            <Feather name="log-out" size={20} color={cores.marca200} />
+            <Feather name="log-out" size={20} color={cores.sobreTopo2} />
           </Pressable>
         )}
       </View>
@@ -29,11 +29,11 @@ export default function Saudacao({ usuario, aoSair }: { usuario: Usuario; aoSair
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   cabecalho: { paddingHorizontal: 24, paddingTop: 12, paddingBottom: 40, gap: 12 },
   linha: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44 },
-  ola: { fontFamily: fontes.titulo, fontSize: 36, lineHeight: 42, color: cores.branco, marginTop: 4 },
-  sair: { padding: 10, borderRadius: 12, backgroundColor: cores.marca800 },
+  ola: { fontFamily: fontes.titulo, fontSize: 36, lineHeight: 42, color: cores.sobreTopo, marginTop: 4 },
+  sair: { padding: 10, borderRadius: 12, backgroundColor: cores.topoForte },
   quem: { flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
   cargo: {
     fontFamily: fontes.textoForte,
@@ -45,5 +45,5 @@ const estilos = StyleSheet.create({
     borderRadius: 999,
     overflow: 'hidden',
   },
-  empresa: { flexShrink: 1, fontFamily: fontes.texto, fontSize: 14, color: cores.marca200 },
-})
+  empresa: { flexShrink: 1, fontFamily: fontes.texto, fontSize: 14, color: cores.sobreTopo2 },
+}))

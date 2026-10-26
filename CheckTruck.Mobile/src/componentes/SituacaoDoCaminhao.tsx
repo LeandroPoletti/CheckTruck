@@ -3,7 +3,7 @@ import type { Caminhao } from '@/servicos/caminhoes'
 import CartaoDoCaminhao from './CartaoDoCaminhao'
 import ListaDeTrocas from './ListaDeTrocas'
 import ResumoDoStatus from './ResumoDoStatus'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 type Props = {
   caminhao: Caminhao
@@ -38,6 +38,6 @@ export default function SituacaoDoCaminhao(
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   secao: { fontFamily: fontes.subtitulo, fontSize: 22, color: cores.texto, marginTop: 6 },
-})
+}))

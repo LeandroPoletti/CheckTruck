@@ -1,5 +1,5 @@
 import { StyleSheet, Switch, Text, View } from 'react-native'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 type Props = { titulo: string; dica?: string; valor: boolean; aoMudar(valor: boolean): void }
 
@@ -22,9 +22,9 @@ export default function Chave({ titulo, dica, valor, aoMudar }: Props) {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   faixa: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: cores.fundo, borderRadius: 16, padding: 14 },
   textos: { flex: 1, gap: 2 },
   titulo: { fontFamily: fontes.textoForte, fontSize: 15, color: cores.texto },
   dica: { fontFamily: fontes.texto, fontSize: 12, lineHeight: 17, color: cores.textoFraco },
-})
+}))

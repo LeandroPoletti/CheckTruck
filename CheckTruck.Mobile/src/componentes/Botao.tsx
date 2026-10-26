@@ -1,6 +1,6 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
 import { Feather } from '@expo/vector-icons'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 type Props = {
   titulo: string
@@ -38,7 +38,7 @@ export default function Botao({ titulo, onPress, tipo = 'principal', icone, ocup
 }
 
 // A borda grossa embaixo faz o botão parecer uma tecla (igual ao site); ao apertar, ele "afunda" um pouco
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   botao: { minHeight: 52, borderRadius: 14, borderBottomWidth: 4, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 18 },
   principal: { backgroundColor: cores.marca700, borderBottomColor: cores.marca900 },
   principalApertado: { backgroundColor: cores.marca800, transform: [{ translateY: 2 }] },
@@ -48,4 +48,4 @@ const estilos = StyleSheet.create({
   perigoApertado: { backgroundColor: cores.erroEscuro, transform: [{ translateY: 2 }] },
   conteudo: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   texto: { fontFamily: fontes.textoForte, fontSize: 16 },
-})
+}))

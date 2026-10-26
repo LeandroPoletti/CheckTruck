@@ -3,7 +3,7 @@ import type { ItemDeTroca } from '@/servicos/caminhoes'
 import { formatData, formatKm, textoDias, textoKmRestante } from '@/dados/formato'
 import BarraDeUso from './BarraDeUso'
 import EtiquetaStatus from './EtiquetaStatus'
-import { cores, coresDoStatus, fontes } from '@/tema'
+import { comTema, cores, coresDoStatus, fontes } from '@/tema'
 
 // Próximas trocas do caminhão, da mais urgente para a menos urgente: quanto falta em km, a barra e quando trocar
 export default function ListaDeTrocas({ itens }: { itens: ItemDeTroca[] }) {
@@ -38,7 +38,7 @@ function LinhaDaTroca({ item, primeira }: { item: ItemDeTroca; primeira: boolean
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   lista: { backgroundColor: cores.branco, borderRadius: 20, paddingHorizontal: 16 },
   troca: { paddingVertical: 16, gap: 8 },
   trocaComLinha: { borderTopWidth: 1, borderTopColor: cores.borda },
@@ -46,4 +46,4 @@ const estilos = StyleSheet.create({
   nome: { flex: 1, fontFamily: fontes.textoForte, fontSize: 15, color: cores.texto },
   km: { fontFamily: fontes.textoMedio, fontSize: 14, color: cores.texto },
   quando: { fontFamily: fontes.texto, fontSize: 13, lineHeight: 18, color: cores.textoFraco },
-})
+}))

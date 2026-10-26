@@ -6,7 +6,7 @@ import { minhaEmpresa, type Empresa } from '@/servicos/empresa'
 import { formatarDocumento } from '@/dados/empresa'
 import MensagemErro from '@/componentes/MensagemErro'
 import TelaComTopo from '@/componentes/TelaComTopo'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 // Dados da empresa, igual ao Minha empresa do web (só Admin e Gestor chegam aqui)
 export default function MinhaEmpresa() {
@@ -54,11 +54,11 @@ function Dado({ rotulo, valor }: { rotulo: string; valor: string }) {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   conteudo: { padding: 20, paddingBottom: 40, gap: 14 },
   carregando: { marginTop: 40 },
   cartao: { backgroundColor: cores.branco, borderRadius: 20, padding: 20, gap: 14 },
   dado: { gap: 2 },
   rotulo: { fontFamily: fontes.textoMedio, fontSize: 13, color: cores.textoMedio },
   valor: { fontFamily: fontes.textoForte, fontSize: 17, color: cores.texto },
-})
+}))

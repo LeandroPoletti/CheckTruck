@@ -9,7 +9,7 @@ import CampoDeBusca from '@/componentes/CampoDeBusca'
 import LinhaDoCatalogo from '@/componentes/LinhaDoCatalogo'
 import MensagemErro from '@/componentes/MensagemErro'
 import TelaComTopo from '@/componentes/TelaComTopo'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 type Dados = { fabricantes: Fabricante[]; modelos: Modelo[] }
 
@@ -84,11 +84,11 @@ export default function Catalogo() {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   conteudo: { padding: 20, paddingBottom: 40, gap: 14 },
   explicacao: { fontFamily: fontes.texto, fontSize: 13, lineHeight: 19, color: cores.textoMedio },
   bloco: { gap: 10 },
   carregando: { marginTop: 40 },
   vazio: { fontFamily: fontes.texto, fontSize: 14, color: cores.textoFraco, textAlign: 'center', paddingVertical: 8 },
   lista: { backgroundColor: cores.branco, borderRadius: 20, paddingHorizontal: 16 },
-})
+}))

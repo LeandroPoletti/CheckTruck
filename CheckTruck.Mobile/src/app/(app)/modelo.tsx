@@ -10,7 +10,7 @@ import Campo from '@/componentes/Campo'
 import ConfirmarExclusao from '@/componentes/ConfirmarExclusao'
 import Escolha from '@/componentes/Escolha'
 import MensagemErro from '@/componentes/MensagemErro'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 type Erros = { fabricante?: string; nome?: string }
 
@@ -135,10 +135,10 @@ export default function JanelaDoModelo() {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.branco },
   conteudo: { padding: 24, gap: 20 },
   grupo: { gap: 10 },
   rotulo: { fontFamily: fontes.textoMedio, fontSize: 13, color: cores.textoMedio },
   erro: { fontFamily: fontes.texto, fontSize: 12, lineHeight: 17, color: cores.erroTexto },
-})
+}))

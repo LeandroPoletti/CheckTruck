@@ -241,6 +241,7 @@ erDiagram
         bigint EmpresaId FK "opcional"
         varchar Nome "até 150"
         int Permissoes "Permissao (bits)"
+        int Tema "TemaDeCor"
     }
     Celular {
         bigint Id PK

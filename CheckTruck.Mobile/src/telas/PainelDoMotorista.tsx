@@ -12,7 +12,7 @@ import CartaoVazio from '@/componentes/CartaoVazio'
 import MensagemErro from '@/componentes/MensagemErro'
 import Saudacao from '@/componentes/Saudacao'
 import SituacaoDoCaminhao from '@/componentes/SituacaoDoCaminhao'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 // Tela do motorista: o caminhão que está com ele (próximas trocas em km e data), atualizar o km, os chamados e, no
 // fim, os avisos de troca do celular.
@@ -103,6 +103,7 @@ export default function PainelDoMotorista({ usuario }: { usuario: Usuario }) {
           )}
 
           {caminhao && <Atalho icone="bell" titulo="Avisos de troca" onPress={() => router.push('/avisos')} />}
+          <Atalho icone="droplet" titulo="Cor do app" onPress={() => router.push('/cor')} />
         </ScrollView>
       </View>
     </SafeAreaView>
@@ -118,8 +119,8 @@ function SemCaminhao() {
   )
 }
 
-const estilos = StyleSheet.create({
-  tela: { flex: 1, backgroundColor: cores.marca900 },
+const estilos = comTema(() => StyleSheet.create({
+  tela: { flex: 1, backgroundColor: cores.topo },
   corpo: { flex: 1, backgroundColor: cores.fundo, borderTopLeftRadius: 28, borderTopRightRadius: 28, marginTop: -20, overflow: 'hidden' },
   conteudo: { padding: 20, paddingBottom: 40, gap: 14 },
   bloco: { gap: 10 },
@@ -131,4 +132,4 @@ const estilos = StyleSheet.create({
   placaOpcaoTextoEscolhida: { color: cores.branco },
   secao: { fontFamily: fontes.subtitulo, fontSize: 22, color: cores.texto, marginTop: 6 },
   vazio: { fontFamily: fontes.texto, fontSize: 14, color: cores.textoFraco, textAlign: 'center', paddingVertical: 8 },
-})
+}))

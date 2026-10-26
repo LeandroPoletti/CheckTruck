@@ -13,7 +13,8 @@
   --text-sm: 0.9375rem;
   --text-sm--line-height: 1.4rem;
 
-  /* Verde das placas de estrada */
+  /* Cores do tema. O padrão é o verde das placas de estrada; os outros temas (azul, amarelo e preto) trocam estes
+     valores lá embaixo, pelo data-tema do <html>, que vem da conta da pessoa (o mesmo tema no site e no app) */
   --color-brand-900: #073823;
   --color-brand-800: #0a4a2e;
   --color-brand-700: #0f6b42;
@@ -24,12 +25,135 @@
   --color-brand-200: #c0e1cf;
   --color-brand-100: #e0f1e7;
   --color-brand-50: #f0f9f3;
-
-  /* Amarelo da faixa do meio da estrada: marca a tela aberta no menu e a faixa dos desenhos */
-  --color-faixa: #f2c230;
-
   --color-mist-50: #edf2ee;
   --color-mist-100: #e1e9e3;
+
+  /* O topo colorido (menu do site e lado esquerdo do login): o fundo, a letra em cima dele (principal, a dos itens
+     do menu, secundária e a dos grupos), a tela aberta no menu (o fundo e a letra) e o marcador dela */
+  --color-topo: #073823;
+  --color-topo-forte: #0a4a2e;
+  --color-sobre-topo: #ffffff;
+  --color-item-do-menu: #e0f1e7;
+  --color-sobre-topo-2: #c0e1cf;
+  --color-sobre-topo-3: #94cdb0;
+  --color-item-aberto: color-mix(in oklab, #ffffff 12%, transparent);
+  --color-sobre-item-aberto: #ffffff;
+  --color-marcador: #f2c230;
+
+  /* A placa da logo e a cabine do caminhão dos desenhos */
+  --color-logo: #0f6b42;
+  --color-logo-moldura: #ffffff;
+
+  /* Amarelo da faixa do meio da estrada, nos desenhos (o mesmo em todos os temas) */
+  --color-faixa: #f2c230;
+
+  /* OK é sempre verde, em qualquer tema (Atenção e Crítico usam o amarelo e o vermelho do Tailwind) */
+  --color-ok-50: #f0f9f3;
+  --color-ok-200: #c0e1cf;
+  --color-ok-500: #339966;
+  --color-ok-600: #1c8352;
+  --color-ok-700: #0f6b42;
+}
+
+/* Cores do caminhão dos desenhos e da estrada do login: no fundo claro, o teto, o vidro e a faixa da cabine; em cima
+   do topo colorido, a cabine, o teto, o vidro, a faixa e o asfalto. No verde são as cores de sempre; nos outros temas
+   saem das cores do tema (o amarelo troca algumas lá embaixo) */
+:root {
+  --caminhao-teto: #0a4a2e;
+  --caminhao-vidro: #c0e1cf;
+  --caminhao-faixa: #f2c230;
+  --caminhao-cabine-no-topo: #ffffff;
+  --caminhao-teto-no-topo: #cfe0d6;
+  --caminhao-vidro-no-topo: #7fb59a;
+  --caminhao-faixa-no-topo: #f2c230;
+  --asfalto-no-topo: #0b2e1e;
+}
+
+:root[data-tema] {
+  --caminhao-teto: color-mix(in srgb, var(--color-logo) 70%, black);
+  --caminhao-vidro: color-mix(in srgb, var(--color-logo) 30%, white);
+  --caminhao-cabine-no-topo: var(--color-sobre-topo);
+  --caminhao-teto-no-topo: var(--color-sobre-topo-2);
+  --caminhao-vidro-no-topo: var(--color-sobre-topo-3);
+  --asfalto-no-topo: color-mix(in srgb, var(--color-topo) 45%, black);
+}
+
+/* Azul da placa Mercosul */
+:root[data-tema="azul"] {
+  --color-brand-900: #0f1d4d;
+  --color-brand-800: #162a6b;
+  --color-brand-700: #1f3a93;
+  --color-brand-600: #2a4bb0;
+  --color-brand-500: #3d63c9;
+  --color-brand-400: #6f8fdc;
+  --color-brand-300: #a3b8ea;
+  --color-brand-200: #c9d5f3;
+  --color-brand-100: #e4eaf9;
+  --color-brand-50: #f2f5fc;
+  --color-mist-50: #edf0f6;
+  --color-mist-100: #e1e6f0;
+  --color-topo: #0f1d4d;
+  --color-topo-forte: #162a6b;
+  --color-item-do-menu: #e4eaf9;
+  --color-sobre-topo-2: #c9d5f3;
+  --color-sobre-topo-3: #a3b8ea;
+  --color-logo: #1f3a93;
+}
+
+/* Amarelo das placas de advertência, com grafite: o menu e o lado do login em grafite, com a logo, a tela aberta e o
+   caminhão em amarelo; os botões em grafite */
+:root[data-tema="amarelo"] {
+  --color-brand-900: #111214;
+  --color-brand-800: #1a1c1f;
+  --color-brand-700: #26292e;
+  --color-brand-600: #6e5000;
+  --color-brand-500: #8a6500;
+  --color-brand-400: #e0a800;
+  --color-brand-300: #ffd65a;
+  --color-brand-200: #ffe48f;
+  --color-brand-100: #fff3c7;
+  --color-brand-50: #fffbea;
+  --color-mist-50: #f3f2ee;
+  --color-mist-100: #e9e7e0;
+  --color-topo: #23262b;
+  --color-topo-forte: #2f333a;
+  --color-item-do-menu: #e9eaec;
+  --color-sobre-topo-2: #c4c8ce;
+  --color-sobre-topo-3: #9aa0a8;
+  --color-item-aberto: #ffc72c;
+  --color-sobre-item-aberto: #1e2126;
+  --color-marcador: #ffc72c;
+  --color-logo: #ffc72c;
+  --color-logo-moldura: #1e2126;
+  --caminhao-teto: #d9a300;
+  --caminhao-vidro: #2f343b;
+  --caminhao-faixa: #1e2126;
+  --caminhao-cabine-no-topo: #ffc72c;
+  --caminhao-teto-no-topo: #d9a300;
+  --caminhao-vidro-no-topo: #2f343b;
+  --caminhao-faixa-no-topo: #1e2126;
+}
+
+/* Preto: o topo, os botões e a logo em preto; o fundo das telas continua claro */
+:root[data-tema="preto"] {
+  --color-brand-900: #141518;
+  --color-brand-800: #1f2125;
+  --color-brand-700: #2b2e33;
+  --color-brand-600: #41454c;
+  --color-brand-500: #5b6069;
+  --color-brand-400: #868b94;
+  --color-brand-300: #b2b6bc;
+  --color-brand-200: #d4d6da;
+  --color-brand-100: #e9eaec;
+  --color-brand-50: #f5f5f6;
+  --color-mist-50: #eef0f2;
+  --color-mist-100: #e3e5e8;
+  --color-topo: #141518;
+  --color-topo-forte: #24272b;
+  --color-item-do-menu: #e9eaec;
+  --color-sobre-topo-2: #d4d6da;
+  --color-sobre-topo-3: #b2b6bc;
+  --color-logo: #2b2e33;
 }
 
 html, body, #root {

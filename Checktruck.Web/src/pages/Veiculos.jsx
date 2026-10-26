@@ -81,7 +81,7 @@ export default function Veiculos() {
             <Card
               key={v.id}
               className={`flex flex-col border-l-4 p-4 ${
-                status === 'critico' ? 'border-l-red-500' : status === 'atencao' ? 'border-l-amber-500' : 'border-l-brand-500'
+                status === 'critico' ? 'border-l-red-500' : status === 'atencao' ? 'border-l-amber-500' : 'border-l-ok-500'
               } ${!v.ativo ? 'opacity-60' : ''}`}
             >
               <div className="flex items-start justify-between">

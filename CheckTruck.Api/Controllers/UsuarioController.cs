@@ -1,6 +1,7 @@
 using CheckTruck.Api.Acesso;
 using CheckTruck.Api.Dtos.Comuns;
 using CheckTruck.Api.Dtos.Usuarios;
+using CheckTruck.Dominio.Enums;
 using CheckTruck.Dominio.Servicos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,12 +13,25 @@ namespace CheckTruck.Api.Controllers;
 public class UsuarioController(ServicoUsuario servicoUsuario) : CheckTruckController
 {
     /// <summary>
-    /// Quem está logado, com cargo, permissões e o nome da empresa: o front monta o menu com isso.
+    /// Quem está logado, com cargo, permissões, o nome da empresa e o tema de cor: o front monta o menu com isso.
     /// O dono do sistema vem sem empresa.
     /// </summary>
     [HttpGet("me")]
     [ExigePermissao]
     public ActionResult<UsuarioLogadoResponseDto> Me() => HttpContext.UsuarioLogado().ToLogadoResponseDto();
+
+    /// <summary>Troca a cor de quem está logado (corpo: "Verde", "Azul", "Amarelo" ou "Preto"): vale no site e no app.</summary>
+    [HttpPut("me/tema")]
+    [ExigePermissao]
+    public async Task<IActionResult> AlterarTema([FromBody] TemaDeCor tema)
+    {
+        if (!await servicoUsuario.AlterarTemaAsync(tema))
+        {
+            return Erro(servicoUsuario.Mensagens);
+        }
+
+        return NoContent();
+    }
 
     /// <summary>Motoristas ativos, para escolher quem está com o caminhão.</summary>
     [HttpGet("motoristas")]

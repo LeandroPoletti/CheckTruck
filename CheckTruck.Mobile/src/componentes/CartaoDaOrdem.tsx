@@ -3,7 +3,7 @@ import { router } from 'expo-router'
 import type { OrdemDeServico } from '@/servicos/ordens'
 import { formatData, formatDataHora, formatKm } from '@/dados/formato'
 import Placa from './Placa'
-import { cores, coresDoStatus, fontes } from '@/tema'
+import { comTema, cores, coresDoStatus, fontes } from '@/tema'
 
 type Props = {
   os: OrdemDeServico
@@ -54,7 +54,7 @@ export default function CartaoDaOrdem({ os, mostrarPlaca = true }: Props) {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   cartao: { backgroundColor: cores.branco, borderRadius: 20, padding: 16, gap: 8 },
   linha: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   numero: { fontFamily: fontes.subtitulo, fontSize: 20, color: cores.texto },
@@ -73,4 +73,4 @@ const estilos = StyleSheet.create({
     backgroundColor: coresDoStatus.atencao.fundo,
   },
   detalhe: { fontFamily: fontes.texto, fontSize: 13, lineHeight: 18, color: cores.textoMedio },
-})
+}))

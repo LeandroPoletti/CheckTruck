@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native'
 import { Feather } from '@expo/vector-icons'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 // Faixa vermelha com a mensagem de erro. Sem mensagem, não aparece.
 export default function MensagemErro({ children }: { children?: string | null }) {
@@ -13,7 +13,7 @@ export default function MensagemErro({ children }: { children?: string | null })
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   erro: {
     flexDirection: 'row',
     gap: 10,
@@ -24,4 +24,4 @@ const estilos = StyleSheet.create({
     paddingVertical: 12,
   },
   texto: { flex: 1, fontFamily: fontes.texto, fontSize: 14, lineHeight: 20, color: cores.erroTexto },
-})
+}))

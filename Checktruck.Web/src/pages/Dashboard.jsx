@@ -158,14 +158,14 @@ function SituacaoDaFrota({ frotaAtiva, contagem: { ok, atencao, critico } }) {
         )}
         {total > 0 && (
           <div className="mt-5 flex h-4 max-w-2xl gap-1">
-            {[[ok, 'bg-brand-500'], [atencao, 'bg-amber-500'], [critico, 'bg-red-500']].map(([n, cor]) => (
+            {[[ok, 'bg-ok-500'], [atencao, 'bg-amber-500'], [critico, 'bg-red-500']].map(([n, cor]) => (
               n > 0 && <span key={cor} className={`rounded ${cor}`} style={{ flexGrow: n }} />
             ))}
           </div>
         )}
         <div className="mt-4 flex gap-8">
           <Numero valor={frotaAtiva} texto={frotaAtiva === 1 ? 'caminhão ativo' : 'caminhões ativos'} cor="text-stone-900" />
-          <Numero valor={ok} texto={ok === 1 ? 'item OK' : 'itens OK'} cor="text-brand-700" />
+          <Numero valor={ok} texto={ok === 1 ? 'item OK' : 'itens OK'} cor="text-ok-700" />
           <Numero valor={atencao} texto={atencao === 1 ? 'item em atenção' : 'itens em atenção'} cor="text-amber-600" />
           <Numero valor={critico} texto={critico === 1 ? 'item crítico' : 'itens críticos'} cor="text-red-600" />
         </div>

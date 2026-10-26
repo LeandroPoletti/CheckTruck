@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
-import { cores } from '@/tema'
+import { comTema, cores } from '@/tema'
 
 type Props = {
   /** A primeira da lista não tem a linha de cima. */
@@ -27,8 +27,8 @@ export default function LinhaTocavel({ primeira, rotulo, onPress, children }: Pr
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   linha: { paddingVertical: 14, gap: 4 },
   comBorda: { borderTopWidth: 1, borderTopColor: cores.borda },
   apertada: { opacity: 0.6 },
-})
+}))

@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text } from 'react-native'
 import { Feather } from '@expo/vector-icons'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 // Linha branca que leva para outra tela (ex.: o histórico do caminhão, os intervalos de troca)
 export default function Atalho({ icone, titulo, onPress }: { icone: keyof typeof Feather.glyphMap; titulo: string; onPress(): void }) {
@@ -13,8 +13,8 @@ export default function Atalho({ icone, titulo, onPress }: { icone: keyof typeof
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   atalho: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: cores.branco, borderRadius: 16, padding: 16 },
   atalhoApertado: { backgroundColor: cores.marca50 },
   atalhoTexto: { flex: 1, fontFamily: fontes.textoForte, fontSize: 15, color: cores.texto },
-})
+}))

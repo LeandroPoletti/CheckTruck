@@ -14,7 +14,7 @@ import { Caminhao } from '@/componentes/Desenhos'
 import FaixaDaEstrada from '@/componentes/FaixaDaEstrada'
 import { Simbolo } from '@/componentes/Logo'
 import MensagemErro from '@/componentes/MensagemErro'
-import { cores, fontes } from '@/tema'
+import { amareloDaEstrada, comTema, cores, fontes } from '@/tema'
 
 // Entrar com a mesma conta do web (e-mail e senha cadastrados pelo admin ou pelo gestor)
 export default function Login() {
@@ -133,16 +133,16 @@ export default function Login() {
   )
 }
 
-const estilos = StyleSheet.create({
-  tela: { flex: 1, backgroundColor: cores.marca900 },
+const estilos = comTema(() => StyleSheet.create({
+  tela: { flex: 1, backgroundColor: cores.topo },
   rolagem: { flexGrow: 1 },
   marca: { flexGrow: 1, paddingHorizontal: 28, gap: 14 },
-  nome: { fontFamily: fontes.titulo, fontSize: 44, lineHeight: 50, color: cores.branco, letterSpacing: -0.5, marginTop: 4 },
-  descricao: { fontFamily: fontes.texto, fontSize: 16, lineHeight: 23, color: cores.marca200, maxWidth: 290 },
+  nome: { fontFamily: fontes.titulo, fontSize: 44, lineHeight: 50, color: cores.sobreTopo, letterSpacing: -0.5, marginTop: 4 },
+  descricao: { fontFamily: fontes.texto, fontSize: 16, lineHeight: 23, color: cores.sobreTopo2, maxWidth: 290 },
   chao: { marginTop: 'auto', marginHorizontal: -28, paddingTop: 12 },
   caminhao: { alignItems: 'flex-end', paddingRight: 8, marginBottom: -2 },
-  estrada: { height: 18, backgroundColor: '#0b2e1e', flexDirection: 'row', alignItems: 'center', gap: 24, paddingLeft: 10, overflow: 'hidden', marginBottom: 16 },
-  tracoDaEstrada: { width: 34, height: 4, borderRadius: 2, backgroundColor: cores.faixa },
+  estrada: { height: 18, backgroundColor: cores.asfalto, flexDirection: 'row', alignItems: 'center', gap: 24, paddingLeft: 10, overflow: 'hidden', marginBottom: 16 },
+  tracoDaEstrada: { width: 34, height: 4, borderRadius: 2, backgroundColor: amareloDaEstrada },
   painel: {
     backgroundColor: cores.branco,
     borderTopLeftRadius: 28,
@@ -157,4 +157,4 @@ const estilos = StyleSheet.create({
   servidor: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   pontoServidor: { width: 6, height: 6, borderRadius: 3, backgroundColor: cores.marca500 },
   servidorTexto: { fontFamily: fontes.texto, fontSize: 12, color: cores.textoFraco },
-})
+}))

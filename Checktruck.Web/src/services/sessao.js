@@ -1,8 +1,10 @@
 // Sessão de quem está logado, guardada no localStorage (sem context).
 import { authService, usuarioService } from './index'
 import { lerSessao, salvarSessao } from './api'
+import { aplicarTema } from '../data/temas'
 
-// Cargo, permissões e empresa vêm de GET /api/Usuario/me, gravados na sessão no login.
+// Cargo, permissões, empresa e tema vêm de GET /api/Usuario/me, gravados na sessão no login (e de novo a cada
+// vez que o site abre, para pegar o que mudou pelo app, como o tema).
 // Sessão antiga, sem permissões ou sem empresa, obriga a entrar de novo (o dono do sistema tem empresa null).
 export function obterUsuario() {
   const sessao = lerSessao()
@@ -15,6 +17,7 @@ export function obterUsuario() {
     cargo: sessao.cargo,
     permissoes: sessao.permissoes,
     cuidaDosAcessos: sessao.cuidaDosAcessos,
+    tema: sessao.tema,
   }
 }
 
@@ -30,8 +33,8 @@ export async function entrar(email, senha) {
   }
 }
 
-// Busca quem está logado e grava na sessão
-async function recarregarUsuario() {
+// Busca quem está logado, grava na sessão e aplica o tema dele
+export async function recarregarUsuario() {
   const me = await usuarioService.obterMe()
   const { accessToken, refreshToken } = lerSessao()
   salvarSessao({
@@ -44,7 +47,16 @@ async function recarregarUsuario() {
     cargo: me.cargo,
     permissoes: me.permissoes,
     cuidaDosAcessos: me.cuidaDosAcessos,
+    tema: me.tema,
   })
+  aplicarTema(me.tema)
+}
+
+// Troca o tema de quem está logado: grava na conta (o app muda junto) e já aplica no site
+export async function trocarTema(tema) {
+  await usuarioService.alterarTema(tema)
+  salvarSessao({ ...lerSessao(), tema })
+  aplicarTema(tema)
 }
 
 export function sair() {

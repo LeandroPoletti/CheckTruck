@@ -32,6 +32,9 @@ public class Usuario : IdentityUser
     /// <summary>Inativo não entra no sistema.</summary>
     public bool Ativo { get; set; }
 
+    /// <summary>Cor do site e do app que a pessoa escolheu (Verde enquanto não escolher).</summary>
+    public TemaDeCor Tema { get; set; }
+
     public bool CuidaDosAcessos => Cargo is Cargo.Admin or Cargo.Gestor;
 
     public Permissao PermissoesEfetivas => CuidaDosAcessos ? PermissaoUtil.Todas : Permissoes;

@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native'
 import Botao from './Botao'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 type Props = { titulo: string; texto: string; excluindo: boolean; aoExcluir(): void; aoCancelar(): void }
 
@@ -16,8 +16,8 @@ export default function ConfirmarExclusao({ titulo, texto, excluindo, aoExcluir,
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   caixa: { backgroundColor: cores.erroFundo, borderRadius: 16, padding: 16, gap: 12 },
   titulo: { fontFamily: fontes.textoForte, fontSize: 16, color: cores.erroTexto },
   texto: { fontFamily: fontes.texto, fontSize: 14, lineHeight: 20, color: cores.texto },
-})
+}))

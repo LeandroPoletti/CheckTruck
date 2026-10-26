@@ -9,7 +9,7 @@ import CampoDeBusca from '@/componentes/CampoDeBusca'
 import EtiquetaStatus from '@/componentes/EtiquetaStatus'
 import CartaoVazio from '@/componentes/CartaoVazio'
 import Placa from '@/componentes/Placa'
-import { cores, coresDoStatus, fontes } from '@/tema'
+import { comTema, cores, coresDoStatus, fontes } from '@/tema'
 
 type Filtro = 'todos' | Status | 'desativados'
 
@@ -150,7 +150,7 @@ function CartaoNaLista({ caminhao }: { caminhao: CaminhaoNaLista }) {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   filtros: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   filtro: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: cores.branco, borderWidth: 1, borderColor: cores.borda },
   filtroEscolhido: { backgroundColor: cores.marca700, borderColor: cores.marca700 },
@@ -175,4 +175,4 @@ const estilos = StyleSheet.create({
     color: cores.textoMedio,
     backgroundColor: cores.borda,
   },
-})
+}))

@@ -10,7 +10,7 @@ import Campo from '@/componentes/Campo'
 import Chave from '@/componentes/Chave'
 import ConfirmarExclusao from '@/componentes/ConfirmarExclusao'
 import MensagemErro from '@/componentes/MensagemErro'
-import { cores } from '@/tema'
+import { comTema, cores } from '@/tema'
 
 type Erros = { nome?: string; funcao?: string }
 
@@ -133,7 +133,7 @@ export default function JanelaDoMecanico() {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.branco },
   conteudo: { padding: 24, gap: 20 },
-})
+}))

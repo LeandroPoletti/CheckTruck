@@ -300,7 +300,7 @@ export const usuarioFromApi = (dto) => ({
   ativo: dto.ativo,
 })
 // Quem está logado: o acesso e o nome da empresa (null para o dono do sistema)
-export const usuarioLogadoFromApi = (dto) => ({ ...usuarioFromApi(dto), empresa: dto.empresa })
+export const usuarioLogadoFromApi = (dto) => ({ ...usuarioFromApi(dto), empresa: dto.empresa, tema: dto.tema })
 
 export const usuarioToApi = (u) => ({
   nome: u.nome.trim(),

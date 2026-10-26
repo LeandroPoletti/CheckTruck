@@ -15,7 +15,7 @@ import Campo from '@/componentes/Campo'
 import Chave from '@/componentes/Chave'
 import Escolha from '@/componentes/Escolha'
 import MensagemErro from '@/componentes/MensagemErro'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 type Listas = { fabricantes: Fabricante[]; modelos: Modelo[]; geracoes: Geracao[]; motoristas: Motorista[] }
 type Form = {
@@ -318,7 +318,7 @@ function Grupo({ rotulo, erro, children }: { rotulo: string; erro?: string; chil
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.branco },
   conteudo: { padding: 24, gap: 20 },
   etapa: { fontFamily: fontes.textoForte, fontSize: 16, color: cores.marca700, marginTop: 4 }, // Inter: a Overpass desenha errado o "·"
@@ -328,4 +328,4 @@ const estilos = StyleSheet.create({
   erro: { fontFamily: fontes.texto, fontSize: 12, lineHeight: 17, color: cores.erroTexto },
   linha: { flexDirection: 'row', gap: 12 },
   metade: { flex: 1 },
-})
+}))

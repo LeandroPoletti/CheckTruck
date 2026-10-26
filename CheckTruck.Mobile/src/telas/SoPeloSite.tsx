@@ -4,7 +4,7 @@ import { Feather } from '@expo/vector-icons'
 import { useSessao, type Usuario } from '@/servicos/sessao'
 import Botao from '@/componentes/Botao'
 import Saudacao from '@/componentes/Saudacao'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 // Tela de quem não tem nada liberado no app (sem Ver frota e sem Atender chamados): o acesso é pelo site.
 export default function SoPeloSite({ usuario }: { usuario: Usuario }) {
@@ -30,8 +30,8 @@ export default function SoPeloSite({ usuario }: { usuario: Usuario }) {
   )
 }
 
-const estilos = StyleSheet.create({
-  tela: { flex: 1, backgroundColor: cores.marca900 },
+const estilos = comTema(() => StyleSheet.create({
+  tela: { flex: 1, backgroundColor: cores.topo },
   corpo: { flex: 1, backgroundColor: cores.fundo, borderTopLeftRadius: 28, borderTopRightRadius: 28, marginTop: -20 },
   conteudo: { padding: 24, gap: 16 },
   cartao: { backgroundColor: cores.branco, borderRadius: 20, padding: 20, gap: 10 },
@@ -45,4 +45,4 @@ const estilos = StyleSheet.create({
   },
   titulo: { fontFamily: fontes.subtitulo, fontSize: 22, color: cores.texto },
   texto: { fontFamily: fontes.texto, fontSize: 13, lineHeight: 18, color: cores.textoFraco },
-})
+}))

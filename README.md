@@ -139,6 +139,8 @@ O aviso de chamado novo precisa do projeto no Expo (uma vez só): na pasta `Chec
   (fabricante → modelo → geração, com o país no cadastro do fabricante), no fim da tela inicial: cadastrar, editar e
   excluir (o mecânico também desativa; dos tipos e do catálogo, só o que é da empresa).
 - **Admin e Gestor:** Minha empresa, no fim da tela inicial, com os dados da empresa.
+- **Todos:** Cor do app, no fim da tela inicial: verde (o padrão), azul, amarelo ou preto. É a mesma cor do site
+  (no site, o botão Cor no fim do menu): fica na conta da pessoa, e trocar num muda no outro.
 - **Sem criar conta:** no app entra quem já tem acesso (o e-mail e a senha que o admin ou o gestor cadastrou no site).
 - Quem não tem Ver frota nem Atender chamados usa só o site.
 

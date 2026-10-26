@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native'
 import { Feather } from '@expo/vector-icons'
-import { coresDoStatus, fontes } from '@/tema'
+import { comTema, coresDoStatus, fontes } from '@/tema'
 import type { Status } from '@/servicos/caminhoes'
 
 // OK (com o visto), Atenção ou Crítico (com o triângulo), na cor do status, igual ao site
@@ -14,7 +14,7 @@ export default function EtiquetaStatus({ status }: { status: Status }) {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   etiqueta: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingLeft: 8, paddingRight: 10, paddingVertical: 3, borderRadius: 999 },
   texto: { fontFamily: fontes.textoForte, fontSize: 13 },
-})
+}))

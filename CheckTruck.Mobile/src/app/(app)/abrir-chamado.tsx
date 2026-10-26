@@ -10,7 +10,7 @@ import CabecalhoDoModal from '@/componentes/CabecalhoDoModal'
 import Campo from '@/componentes/Campo'
 import Escolha from '@/componentes/Escolha'
 import MensagemErro from '@/componentes/MensagemErro'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 // Conta um problema do caminhão, e quem atende chamados vê no web e no app. O motorista abre do caminhão dele (a placa
 // já vem); pela aba Chamados (admin, gestor, quem tem Abrir chamados) escolhe o caminhão, igual ao web.
@@ -113,7 +113,7 @@ export default function AbrirChamado() {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.branco },
   conteudo: { padding: 24, gap: 22 },
   grupo: { gap: 10 },
@@ -124,4 +124,4 @@ const estilos = StyleSheet.create({
   opcaoTextoEscolhida: { color: cores.branco },
   urgencias: { flexDirection: 'row', gap: 8 },
   urgencia: { flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 14, backgroundColor: cores.fundo },
-})
+}))

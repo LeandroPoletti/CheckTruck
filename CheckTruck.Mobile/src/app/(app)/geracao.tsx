@@ -12,7 +12,7 @@ import Campo from '@/componentes/Campo'
 import ConfirmarExclusao from '@/componentes/ConfirmarExclusao'
 import Escolha from '@/componentes/Escolha'
 import MensagemErro from '@/componentes/MensagemErro'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 const CV_MIN = 100
 const CV_MAX = 1000
@@ -253,7 +253,7 @@ export default function JanelaDaGeracao() {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.branco },
   conteudo: { padding: 24, gap: 20 },
   modelo: { backgroundColor: cores.fundo, borderRadius: 16, padding: 16, gap: 2 },
@@ -276,4 +276,4 @@ const estilos = StyleSheet.create({
     backgroundColor: cores.marca100,
   },
   potenciaTexto: { fontFamily: fontes.textoForte, fontSize: 14, color: cores.marca700 },
-})
+}))

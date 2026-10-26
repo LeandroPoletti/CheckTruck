@@ -4,7 +4,7 @@ import type { Chamado } from '@/servicos/chamados'
 import { formatDataHora } from '@/dados/formato'
 import { nomeTipoOcorrencia, nomeUrgencia } from '@/dados/chamados'
 import Placa from './Placa'
-import { cores, coresDoStatus, fontes } from '@/tema'
+import { comTema, cores, coresDoStatus, fontes } from '@/tema'
 
 type Props = {
   chamado: Chamado
@@ -21,11 +21,11 @@ type Props = {
   children?: ReactNode
 }
 
-const COR_DA_URGENCIA = {
+const COR_DA_URGENCIA = comTema(() => ({
   Baixa: { texto: cores.textoMedio, fundo: cores.fundo },
   Media: coresDoStatus.atencao,
   Alta: coresDoStatus.critico,
-}
+}))
 
 export default function CartaoDoChamado({ chamado, daFrota = false, euId, aoTocarNaPlaca, children }: Props) {
   const concluido = chamado.status === 'Concluido'
@@ -79,7 +79,7 @@ export default function CartaoDoChamado({ chamado, daFrota = false, euId, aoToca
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   cartao: { backgroundColor: cores.branco, borderRadius: 16, padding: 16, gap: 6 },
   linha: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   tipo: { fontFamily: fontes.textoForte, fontSize: 15, color: cores.texto },
@@ -91,4 +91,4 @@ const estilos = StyleSheet.create({
   descricao: { fontFamily: fontes.texto, fontSize: 14, lineHeight: 20, color: cores.texto },
   nota: { fontFamily: fontes.textoMedio, fontSize: 13, lineHeight: 18, color: cores.marca700 },
   notaFraca: { color: cores.textoFraco },
-})
+}))

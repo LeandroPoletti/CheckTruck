@@ -17,7 +17,7 @@ import CabecalhoDoModal from '@/componentes/CabecalhoDoModal'
 import Campo from '@/componentes/Campo'
 import Escolha from '@/componentes/Escolha'
 import MensagemErro from '@/componentes/MensagemErro'
-import { cores, coresDoStatus, fontes } from '@/tema'
+import { comTema, cores, coresDoStatus, fontes } from '@/tema'
 
 const porNome = (a: { nome: string }, b: { nome: string }) => a.nome.localeCompare(b.nome)
 
@@ -333,7 +333,7 @@ function CadastroRapido({ aoCadastrar }: { aoCadastrar(mecanico: Mecanico): void
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.branco },
   conteudo: { padding: 24, gap: 22 },
   grupo: { gap: 10 },
@@ -349,4 +349,4 @@ const estilos = StyleSheet.create({
   linha: { flexDirection: 'row', gap: 12 },
   metade: { flex: 1 },
   cadastro: { borderWidth: 1, borderColor: cores.borda, borderRadius: 16, padding: 14, gap: 12 },
-})
+}))

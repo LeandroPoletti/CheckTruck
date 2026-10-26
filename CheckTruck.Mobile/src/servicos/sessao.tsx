@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { AppState } from 'react-native'
+import type { TemaDeCor } from '@/tema'
 import { chamarApi, ErroDaApi, type Opcoes } from './api'
-import { lerTokens, salvarTokens, type Tokens } from './armazenamento'
+import { lerTema, lerTokens, salvarTema, salvarTokens, type Tokens } from './armazenamento'
 import { cancelarAvisos } from './avisos'
 
 /** Quem está logado: o mesmo GET /api/Usuario/me que o web usa. */
@@ -13,6 +15,8 @@ export type Usuario = {
   /** Admin e Gestor: podem tudo, inclusive corrigir o km. */
   cuidaDosAcessos: boolean
   empresa: string | null
+  /** A cor que a pessoa escolheu (no site ou no app): vale nos dois. */
+  tema: TemaDeCor
 }
 
 /** Chama a API com o token de quem está logado. */
@@ -22,8 +26,12 @@ type Sessao = {
   /** Lendo a sessão guardada, logo que o app abre. */
   carregando: boolean
   usuario: Usuario | null
+  /** A cor do app agora: a de quem está logado ou, no login, a última usada neste celular. */
+  tema: TemaDeCor
   entrar(email: string, senha: string): Promise<void>
   sair(): Promise<void>
+  /** Grava a cor na conta (o site muda junto) e já troca no app. */
+  trocarTema(tema: TemaDeCor): Promise<void>
   chamar: Chamar
 }
 
@@ -35,6 +43,7 @@ const SessaoContext = createContext<Sessao | null>(null)
 export function SessaoProvider({ children }: { children: ReactNode }) {
   const [carregando, setCarregando] = useState(true)
   const [usuario, setUsuario] = useState<Usuario | null>(null)
+  const [ultimoTema, setUltimoTema] = useState<TemaDeCor>('Verde')
   // Os tokens ficam fora do estado: renovar não muda as funções, e as telas não recarregam à toa
   const tokens = useRef<Tokens | null>(null)
   // Vários pedidos com o token vencido ao mesmo tempo esperam a mesma renovação
@@ -76,6 +85,7 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
   // Ao abrir o app: confere os tokens guardados com a API (renovando, se venceu). Sem renovação (401), apaga.
   useEffect(() => {
     async function restaurar() {
+      setUltimoTema((await lerTema()) ?? 'Verde')
       tokens.current = await lerTokens()
       if (tokens.current) {
         try {
@@ -119,10 +129,38 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
     }
   }, [comRenovacao, sair])
 
+  const trocarTema = useCallback(async (tema: TemaDeCor) => {
+    await chamar<void>('/api/Usuario/me/tema', { metodo: 'PUT', corpo: tema })
+    setUsuario((atual) => (atual ? { ...atual, tema } : atual))
+  }, [chamar])
+
+  // Ao voltar para o app (estava em segundo plano), busca de novo quem está logado: pega o que mudou pelo site,
+  // como o tema. Sem internet, segue com o que já tinha; só troca o usuário (e redesenha as telas) se algo mudou
+  useEffect(() => {
+    const assinatura = AppState.addEventListener('change', async (estado) => {
+      if (estado !== 'active' || !tokens.current) return
+      try {
+        const eu = await chamar<Usuario>('/api/Usuario/me')
+        setUsuario((atual) => (JSON.stringify(atual) === JSON.stringify(eu) ? atual : eu))
+      } catch {
+        // sem conexão agora: tenta de novo na próxima vez
+      }
+    })
+    return () => assinatura.remove()
+  }, [chamar])
+
+  // O tema de quem entrou fica guardado para o próximo login neste celular
+  const tema = usuario?.tema ?? ultimoTema
+  useEffect(() => {
+    if (!usuario?.tema) return
+    setUltimoTema(usuario.tema)
+    salvarTema(usuario.tema).catch(() => {})
+  }, [usuario])
+
   // As funções não mudam (nem quando o token é renovado): as telas podem usá-las para recarregar sem repetir à toa
   const sessao = useMemo(
-    () => ({ carregando, usuario, entrar, sair, chamar }),
-    [carregando, usuario, entrar, sair, chamar],
+    () => ({ carregando, usuario, tema, entrar, sair, trocarTema, chamar }),
+    [carregando, usuario, tema, entrar, sair, trocarTema, chamar],
   )
 
   return <SessaoContext.Provider value={sessao}>{children}</SessaoContext.Provider>

@@ -56,6 +56,9 @@ public class UsuarioLogadoResponseDto : UsuarioResponseDto
 {
     /// <summary>Nome da empresa: aparece no menu.</summary>
     public string? Empresa { get; set; }
+
+    /// <summary>Cor do site e do app que a pessoa escolheu.</summary>
+    public TemaDeCor Tema { get; set; }
 }
 
 public static class UsuarioDtoExtensions
@@ -63,7 +66,7 @@ public static class UsuarioDtoExtensions
     public static UsuarioResponseDto ToResponseDto(this Usuario entidade) => Preencher(new UsuarioResponseDto(), entidade);
 
     public static UsuarioLogadoResponseDto ToLogadoResponseDto(this Usuario entidade) =>
-        Preencher(new UsuarioLogadoResponseDto { Empresa = entidade.Empresa?.Nome }, entidade);
+        Preencher(new UsuarioLogadoResponseDto { Empresa = entidade.Empresa?.Nome, Tema = entidade.Tema }, entidade);
 
     private static T Preencher<T>(T dto, Usuario entidade) where T : UsuarioResponseDto
     {

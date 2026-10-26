@@ -10,7 +10,7 @@ import Campo from '@/componentes/Campo'
 import ConfirmarExclusao from '@/componentes/ConfirmarExclusao'
 import Escolha from '@/componentes/Escolha'
 import MensagemErro from '@/componentes/MensagemErro'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 type Erros = { nome?: string; pais?: string }
 
@@ -179,7 +179,7 @@ function NovoPais({ aoCadastrar }: { aoCadastrar(pais: Pais): void }) {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.branco },
   conteudo: { padding: 24, gap: 20 },
   grupo: { gap: 10 },
@@ -188,4 +188,4 @@ const estilos = StyleSheet.create({
   cadastro: { borderWidth: 1, borderColor: cores.borda, borderRadius: 16, padding: 14, gap: 12 },
   linha: { flexDirection: 'row', gap: 12 },
   metade: { flex: 1 },
-})
+}))

@@ -13,7 +13,7 @@ import LinhaTocavel from '@/componentes/LinhaTocavel'
 import MensagemErro from '@/componentes/MensagemErro'
 import Pilula from '@/componentes/Pilula'
 import TelaComTopo from '@/componentes/TelaComTopo'
-import { cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 type Dados = { modelo: Modelo | null; geracoes: Geracao[]; caminhoes: number[]; intervalos: number[] }
 
@@ -124,7 +124,7 @@ export default function GeracoesDoModelo() {
   )
 }
 
-const estilos = StyleSheet.create({
+const estilos = comTema(() => StyleSheet.create({
   conteudo: { padding: 20, paddingBottom: 40, gap: 14 },
   explicacao: { fontFamily: fontes.texto, fontSize: 13, lineHeight: 19, color: cores.textoMedio },
   bloco: { gap: 10 },
@@ -136,4 +136,4 @@ const estilos = StyleSheet.create({
   meta: { fontFamily: fontes.texto, fontSize: 13, lineHeight: 18, color: cores.textoMedio },
   conta: { fontFamily: fontes.texto, fontSize: 12, color: cores.textoFraco },
   potencias: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 },
-})
+}))

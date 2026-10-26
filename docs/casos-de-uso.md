@@ -115,6 +115,7 @@ gerações e intervalos de fábrica que todas as empresas usam.
 | UC17 Gerenciar acessos | Admin e Gestor | Site |
 | UC18 Minha empresa | Admin e Gestor | Site e app |
 | UC19 Manter o catálogo do sistema | Dono do sistema | Site |
+| UC20 Escolher a cor do sistema (verde, azul, amarelo ou preto) | Todos os acessos ativos | Site e app |
 
 ## Antes e depois
 
