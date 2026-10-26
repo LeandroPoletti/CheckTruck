@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import { entrar } from '../../services/sessao'
 import { Field, Input, Button, MensagemErro } from '../../components/ui/Form'
 import TelaPublica from './TelaPublica'
@@ -14,6 +15,7 @@ export default function Login() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('admin@admin.com')
   const [senha, setSenha] = useState('Admin@123')
+  const [verSenha, setVerSenha] = useState(false)
   const [error, setError] = useState('')
   const [entrando, setEntrando] = useState(false)
 
@@ -34,7 +36,7 @@ export default function Login() {
     <TelaPublica abaixo={<ContasDeDemonstracao onEscolher={(d) => { setEmail(d.email); setSenha(d.senha); setError('') }} />}>
       <h2 className="text-[28px] font-extrabold text-stone-900">Entrar</h2>
       <p className="mt-1 text-sm text-stone-500">
-        Use o e-mail e a senha cadastrados pelo admin ou pelo gestor.
+        Entre com as credenciais fornecidas pela sua empresa.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-5 space-y-4">
@@ -48,13 +50,25 @@ export default function Login() {
           />
         </Field>
         <Field label="Senha" required>
-          <Input
-            type="password"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-            placeholder="••••••••"
-            required
-          />
+          {/* O olho mostra e esconde a senha, igual ao app */}
+          <div className="relative">
+            <Input
+              type={verSenha ? 'text' : 'password'}
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              placeholder="••••••••"
+              required
+              className="pr-12"
+            />
+            <button
+              type="button"
+              onClick={() => setVerSenha(!verSenha)}
+              aria-label={verSenha ? 'Esconder a senha' : 'Mostrar a senha'}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-md p-2 text-stone-500 transition hover:bg-stone-100 hover:text-stone-800"
+            >
+              {verSenha ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
         </Field>
 
         <MensagemErro>{error}</MensagemErro>
