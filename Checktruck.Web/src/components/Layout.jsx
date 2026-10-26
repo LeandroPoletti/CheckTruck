@@ -73,12 +73,13 @@ export function Abas({ abas, atual, onTrocar, contagem, children }) {
   )
 }
 
-// Tabela das listas: o cartão, o cabeçalho e a linha entre os registros.
+// Tabela das listas: o cartão, o cabeçalho e a linha entre os registros. Em tela estreita, a tabela que não cabe rola
+// para o lado dentro do cartão (a coluna dos botões nunca fica escondida).
 // colunas: os títulos ('' = coluna sem título, ex.: a dos botões; false = coluna que não aparece).
 // As linhas (<tr>) vêm de quem usa.
 export function Tabela({ colunas, children }) {
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-stone-200 bg-stone-50 text-left text-sm font-semibold text-stone-500">

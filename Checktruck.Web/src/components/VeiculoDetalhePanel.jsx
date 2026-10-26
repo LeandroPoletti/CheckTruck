@@ -101,15 +101,15 @@ export default function VeiculoDetalhePanel({ veiculo, situacao, ordens, histori
             <div className="max-h-[360px] space-y-4 overflow-y-auto pr-1">
               {historico.map((os) => (
                 <div key={os.id} className="flex gap-3 border-b border-stone-100 pb-3 last:border-0">
-                  <div className="w-14 shrink-0 text-xs leading-tight text-stone-400">
+                  <div className="w-18 shrink-0 whitespace-nowrap text-xs leading-tight text-stone-400">
                     {formatData(os.dataRealizacao)}
                   </div>
                   <div className="flex-1">
                     {os.itens.map((i) => (
-                      <p key={i.tipoId} className="text-sm font-semibold text-stone-800">
+                      <p key={i.tipoId} className="flex flex-wrap items-baseline gap-x-2 text-sm font-semibold text-stone-800">
                         {i.tipoNome}
                         {i.isPrimeiraTroca && <SeloPrimeiraTroca />}
-                        <span className="ml-2 text-xs font-normal text-stone-500">próx. {formatKm(i.kmProximaTroca)}</span>
+                        <span className="whitespace-nowrap text-xs font-normal text-stone-500">próx. {formatKm(i.kmProximaTroca)}</span>
                       </p>
                     ))}
                     <p className="text-xs text-stone-500">

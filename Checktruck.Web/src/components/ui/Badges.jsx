@@ -31,7 +31,8 @@ export function AtivoBadge({ ativo }) {
   return <Etiqueta opcoes={ATIVO} valor={ativo ? 'ativo' : 'inativo'} />
 }
 
-// A placa no desenho da placa Mercosul, igual à do app: faixa azul com BRASIL e a bandeira, letras pretas
+// A placa no desenho da placa Mercosul, igual à do app: faixa azul com BRASIL e a bandeira, letras pretas (sempre numa
+// linha só, mesmo na coluna estreita de uma tabela)
 const PLACA = {
   sm: { faixa: 'text-[6.5px] py-px', bandeira: 'h-[6px] w-[8px]', letras: 'text-[17px] px-2' },
   md: { faixa: 'text-[7.5px] py-[2px]', bandeira: 'h-[7px] w-[10px]', letras: 'text-[21px] px-2.5' },
@@ -46,7 +47,7 @@ export function PlacaBadge({ placa, size = 'md' }) {
         BRASIL
         <Bandeira className={`absolute right-1 top-1/2 -translate-y-1/2 ${t.bandeira}`} />
       </span>
-      <span className={`text-center font-placa font-bold leading-tight tracking-wide text-stone-900 ${t.letras}`}>{placa}</span>
+      <span className={`whitespace-nowrap text-center font-placa font-bold leading-tight tracking-wide text-stone-900 ${t.letras}`}>{placa}</span>
     </span>
   )
 }
@@ -61,9 +62,9 @@ function Bandeira({ className }) {
   )
 }
 
-// "1ª troca" ao lado do item trocado na OS (a troca de amaciamento)
+// "1ª troca" ao lado do item trocado na OS (a troca de amaciamento), sempre inteiro numa linha
 export function SeloPrimeiraTroca() {
-  return <span className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">1ª troca</span>
+  return <span className="whitespace-nowrap rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">1ª troca</span>
 }
 
 // urgencia e status: nomes dos enums UrgenciaChamado e StatusChamado da API

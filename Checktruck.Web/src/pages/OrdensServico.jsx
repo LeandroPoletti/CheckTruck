@@ -79,15 +79,16 @@ export default function OrdensServico() {
               </td>
               <td className="px-5 py-3.5">
                 {o.itens.map((i) => (
-                  <p key={i.tipoId} className="font-medium text-stone-800">
+                  // Nome, "1ª troca" e a próxima troca: o que não cabe vai inteiro para a linha de baixo
+                  <p key={i.tipoId} className="flex flex-wrap items-baseline gap-x-2 font-medium text-stone-800">
                     {i.tipoNome}
                     {i.isPrimeiraTroca && <SeloPrimeiraTroca />}
-                    <span className="ml-2 text-xs font-normal text-stone-400">próx. {formatKm(i.kmProximaTroca)}</span>
+                    <span className="whitespace-nowrap text-xs font-normal text-stone-400">próx. {formatKm(i.kmProximaTroca)}</span>
                   </p>
                 ))}
                 {o.concessionaria && <p className="text-xs text-stone-400">{o.concessionaria}</p>}
               </td>
-              <td className="px-5 py-3.5 text-stone-700">{formatKm(o.kmNaTroca)}</td>
+              <td className="whitespace-nowrap px-5 py-3.5 text-stone-700">{formatKm(o.kmNaTroca)}</td>
               <td className="px-5 py-3.5 text-stone-700">{o.mecanicos.map((m) => m.nome).join(', ')}</td>
               <td className="px-5 py-3.5">
                 <p className="text-stone-700">{o.lancadoPorNome ?? '—'}</p>

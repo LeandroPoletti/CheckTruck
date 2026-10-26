@@ -85,8 +85,9 @@ const normalizarBusca = (texto) =>
   String(texto ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[-\s]/g, '').toLowerCase()
 export const contemBusca = (texto, busca) => normalizarBusca(texto).includes(normalizarBusca(busca))
 
+// O espaço antes do km é o que não quebra linha: o número e o km ficam sempre juntos
 export function formatKm(km) {
-  return Math.round(km).toLocaleString('pt-BR') + ' km'
+  return Math.round(km).toLocaleString('pt-BR') + '\u00a0km'
 }
 
 // Dias até a data da próxima troca (negativo = já venceu)
