@@ -39,6 +39,10 @@ flowchart LR
 | — | Acesso | Admin ou Gestor |
 | — | Minha empresa | Admin ou Gestor |
 
+Ordens de serviço e o histórico de manutenções do detalhe do caminhão têm o filtro de **período**, pela data da troca:
+Tudo, Este mês, Últimos 3 meses, Este ano ou Escolher datas (De e Até). O app tem o mesmo filtro, na aba OS e no
+detalhe do caminhão.
+
 Os botões dentro das telas também seguem as permissões: Atualizar km (Atualizar km), Corrigir km (Admin e
 Gestor), Editar (Veículos), Lançar OS (Ordem de serviço).
 
@@ -90,7 +94,7 @@ flowchart TB
 |---|---|---|
 | `login` | Entrar (sem criar conta: o acesso vem do admin ou do gestor) | Todos |
 | `(app)/index` | Tela inicial de cada perfil (`src/telas`) | Logado |
-| `(app)/caminhao/[id]` | Situação, próximas trocas, OS e histórico de km do caminhão | Ver frota |
+| `(app)/caminhao/[id]` | Situação, próximas trocas, OS (com o filtro de período) e histórico de km do caminhão | Ver frota |
 | `(app)/atualizar-km` | Atualizar km (o motorista, no caminhão dele) | Atualizar km ou motorista |
 | `(app)/corrigir-km` | Baixar um km digitado errado, com motivo | Admin e Gestor |
 | `(app)/lancar-os` | Lançar OS (cadastrando o mecânico ali mesmo) | Ordem de serviço |

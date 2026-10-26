@@ -3,10 +3,12 @@ import { StyleSheet, Text } from 'react-native'
 import { router } from 'expo-router'
 import type { Usuario } from '@/servicos/sessao'
 import { maisNovaPrimeiro, type OrdemDeServico } from '@/servicos/ordens'
+import { TODO_O_PERIODO, noPeriodo } from '@/dados/periodo'
 import Botao from '@/componentes/Botao'
 import CampoDeBusca from '@/componentes/CampoDeBusca'
 import CartaoDaOrdem from '@/componentes/CartaoDaOrdem'
 import CartaoVazio from '@/componentes/CartaoVazio'
+import FiltroPeriodo from '@/componentes/FiltroPeriodo'
 import { comTema, cores, fontes } from '@/tema'
 
 // Pela placa (com ou sem hífen) ou pelo número da OS
@@ -16,11 +18,13 @@ function combina(os: OrdemDeServico, busca: string) {
   return (os.veiculo?.placa ?? '').toLowerCase().replace(/-/g, '').includes(termo) || String(os.id) === termo
 }
 
-// Ordens de serviço da empresa (Ver frota), com Lançar OS para quem tem a permissão Ordem de serviço.
+// Ordens de serviço da empresa (Ver frota), com busca, filtro de período e Lançar OS para quem tem a permissão
+// Ordem de serviço.
 export default function OrdensDaFrota({ ordens, usuario }: { ordens: OrdemDeServico[]; usuario: Usuario }) {
   const [busca, setBusca] = useState('')
+  const [periodo, setPeriodo] = useState(TODO_O_PERIODO)
   const podeLancar = usuario.permissoes.includes('OrdemServico')
-  const lista = [...ordens].sort(maisNovaPrimeiro).filter((o) => combina(o, busca))
+  const lista = [...ordens].sort(maisNovaPrimeiro).filter((o) => combina(o, busca) && noPeriodo(o.realizadoEm, periodo))
 
   return (
     <>
@@ -34,6 +38,7 @@ export default function OrdensDaFrota({ ordens, usuario }: { ordens: OrdemDeServ
       ) : (
         <>
           <CampoDeBusca valor={busca} aoMudar={setBusca} placeholder="Buscar por placa ou nº da OS" />
+          <FiltroPeriodo valor={periodo} aoMudar={setPeriodo} quantas={lista.length} />
           {lista.length === 0
             ? <Text style={estilos.nenhuma}>Nenhuma OS encontrada.</Text>
             : lista.map((o) => <CartaoDaOrdem key={o.id} os={o} />)}

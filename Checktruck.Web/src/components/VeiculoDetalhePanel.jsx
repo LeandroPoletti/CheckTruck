@@ -1,12 +1,15 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
 import { Card } from './Layout'
 import { Button } from './ui/Form'
 import { StatusBadge, PlacaBadge, SeloPrimeiraTroca } from './ui/Badges'
 import { BarraDeUso } from './ui/BarraDeUso'
+import FiltroPeriodo from './ui/FiltroPeriodo'
 import {
   formatKm, formatData, formatDataHora, getHistoricoVeiculo, nomeDoCaminhao, textoDias, TRACOES, ORIGENS_KM,
 } from '../data/domain'
+import { TODO_O_PERIODO, noPeriodo } from '../data/periodo'
 
 export function VeiculoNaoEncontrado({ backTo }) {
   const navigate = useNavigate()
@@ -22,12 +25,14 @@ export function VeiculoNaoEncontrado({ backTo }) {
 
 // Apresentacional: a página de detalhe carrega os dados e passa por props.
 // situacao = fabricante, modelo, geração e potência, mais o status geral e os itens já calculados pela API
-// (do mais urgente para o menos urgente). ordens = as OS do caminhão. historicoKm = toda mudança de km,
-// da mais nova para a mais velha.
+// (do mais urgente para o menos urgente). ordens = as OS do caminhão (o histórico de manutenções tem o filtro de
+// período). historicoKm = toda mudança de km, da mais nova para a mais velha.
 export default function VeiculoDetalhePanel({ veiculo, situacao, ordens, historicoKm, backTo, actions }) {
   const navigate = useNavigate()
 
+  const [periodo, setPeriodo] = useState(TODO_O_PERIODO)
   const historico = getHistoricoVeiculo(veiculo.id, ordens)
+  const historicoNoPeriodo = historico.filter((os) => noPeriodo(os.dataRealizacao, periodo))
   const detalhes = [
     situacao.geracaoNome,
     situacao.normaNome,
@@ -95,11 +100,16 @@ export default function VeiculoDetalhePanel({ veiculo, situacao, ordens, histori
 
         <Card className="p-5">
           <h3 className="mb-4 text-xl font-bold text-stone-900">Histórico de manutenções</h3>
+          {historico.length > 0 && (
+            <FiltroPeriodo valor={periodo} onChange={setPeriodo} quantas={historicoNoPeriodo.length} className="mb-4" />
+          )}
           {historico.length === 0 ? (
             <p className="py-6 text-center text-sm text-stone-400">Nenhuma manutenção registrada ainda.</p>
+          ) : historicoNoPeriodo.length === 0 ? (
+            <p className="py-6 text-center text-sm text-stone-400">Nenhuma manutenção nesse período.</p>
           ) : (
             <div className="max-h-[360px] space-y-4 overflow-y-auto pr-1">
-              {historico.map((os) => (
+              {historicoNoPeriodo.map((os) => (
                 <div key={os.id} className="flex gap-3 border-b border-stone-100 pb-3 last:border-0">
                   <div className="w-18 shrink-0 whitespace-nowrap text-xs leading-tight text-stone-400">
                     {formatData(os.dataRealizacao)}

@@ -6,10 +6,12 @@ import { useSessao } from '@/servicos/sessao'
 import { historicoDeKm, situacaoDoCaminhao, type Caminhao, type RegistroDeKm } from '@/servicos/caminhoes'
 import { kmDaMaiorOs, maisNovaPrimeiro, ordensDoCaminhao, type OrdemDeServico } from '@/servicos/ordens'
 import { formatDataHora, formatKm } from '@/dados/formato'
+import { TODO_O_PERIODO, noPeriodo } from '@/dados/periodo'
 import { ORIGENS_KM } from '@/dados/caminhoes'
 import Atalho from '@/componentes/Atalho'
 import Botao from '@/componentes/Botao'
 import CartaoDaOrdem from '@/componentes/CartaoDaOrdem'
+import FiltroPeriodo from '@/componentes/FiltroPeriodo'
 import MensagemErro from '@/componentes/MensagemErro'
 import SituacaoDoCaminhao from '@/componentes/SituacaoDoCaminhao'
 import TelaComTopo from '@/componentes/TelaComTopo'
@@ -18,7 +20,7 @@ import { comTema, cores, coresDoStatus, fontes } from '@/tema'
 type Dados = { caminhao: Caminhao; ordens: OrdemDeServico[]; historico: RegistroDeKm[] }
 
 // Tudo de um caminhão, igual ao detalhe no web: a situação (com Atualizar km e Lançar OS), o histórico de manutenções
-// e o histórico de km. Editar (permissão Veículos), Corrigir km (Admin e Gestor) e Intervalos de troca para quem pode.
+// (com o filtro de período) e o histórico de km. Editar (permissão Veículos), Corrigir km (Admin e Gestor) e Intervalos de troca para quem pode.
 // Recarrega ao voltar para a tela (ex.: depois de atualizar o km) e ao puxar para baixo.
 export default function DetalheDoCaminhao() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -27,6 +29,8 @@ export default function DetalheDoCaminhao() {
   const [dados, setDados] = useState<Dados | null>(null)
   const [erro, setErro] = useState('')
   const [puxando, setPuxando] = useState(false)
+  const [periodo, setPeriodo] = useState(TODO_O_PERIODO)
+  const ordensNoPeriodo = dados?.ordens.filter((os) => noPeriodo(os.realizadoEm, periodo)) ?? []
 
   const carregar = useCallback(async () => {
     try {
@@ -100,7 +104,14 @@ export default function DetalheDoCaminhao() {
             <Text style={estilos.secao}>Histórico de manutenções</Text>
             {dados.ordens.length === 0
               ? <Text style={estilos.vazio}>Nenhuma manutenção registrada ainda.</Text>
-              : dados.ordens.map((os) => <CartaoDaOrdem key={os.id} os={os} mostrarPlaca={false} />)}
+              : (
+                <>
+                  <FiltroPeriodo valor={periodo} aoMudar={setPeriodo} quantas={ordensNoPeriodo.length} />
+                  {ordensNoPeriodo.length === 0
+                    ? <Text style={estilos.vazio}>Nenhuma manutenção nesse período.</Text>
+                    : ordensNoPeriodo.map((os) => <CartaoDaOrdem key={os.id} os={os} mostrarPlaca={false} />)}
+                </>
+              )}
 
             <Text style={estilos.secao}>Histórico de km</Text>
             {dados.historico.length === 0

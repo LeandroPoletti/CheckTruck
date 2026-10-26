@@ -9,7 +9,7 @@ como ele é hoje, mais os que surgiram no desenvolvimento. **Situação:** ✅ f
 |----|-----------|----------|------------|
 | RF-01 | Cadastrar, editar e desativar caminhões (placa, potência, tração, chassi, anos e km) | ✅ | Caminhão não é excluído, só desativado |
 | RF-02 | Lançar ordem de serviço com data, km, itens trocados, mecânicos e primeira troca | ✅ | Uma OS tem vários itens e vários mecânicos; a nota fiscal saiu do projeto |
-| RF-03 | Consultar o histórico de manutenções de cada caminhão | 🟡 | Busca por placa ou nº da OS e filtro por tipo; ainda sem filtro por período |
+| RF-03 | Consultar o histórico de manutenções de cada caminhão | ✅ | Busca por placa ou nº da OS, filtro por tipo e por período (Este mês, Últimos 3 meses, Este ano ou De e Até), no site e no app |
 | RF-04 | Atualizar o km do caminhão sem deixar diminuir | ✅ | Correção só por Admin e Gestor, com motivo |
 | RF-05 | Calcular e mostrar alertas por km e por data | ✅ | Margem fixa (10% do ciclo, mínimo 5.000 km, ou 30 dias); não é configurável |
 | RF-06 | Entrar no sistema e controlar o acesso | ✅ | Por cargo e permissões, não por 3 perfis fixos |

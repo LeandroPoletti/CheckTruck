@@ -5,6 +5,7 @@ import { PageHeader, Tabela, EmptyState, Carregando, ErroCarregamento } from '..
 import { Button, CampoBusca, Select } from '../components/ui/Form'
 import { PlacaBadge, SeloPrimeiraTroca } from '../components/ui/Badges'
 import AcoesLinha from '../components/ui/AcoesLinha'
+import FiltroPeriodo from '../components/ui/FiltroPeriodo'
 import OrdemServicoModal from '../components/modals/OrdemServicoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { ordemServicoService } from '../services'
@@ -12,8 +13,9 @@ import { useCarga } from '../hooks/useCarga'
 import { obterUsuario } from '../services/sessao'
 import { pode } from '../data/acesso'
 import { formatKm, formatData, formatDataHora, contemBusca } from '../data/domain'
+import { TODO_O_PERIODO, noPeriodo } from '../data/periodo'
 
-// Todas as ordens de serviço da frota, da mais nova para a mais velha.
+// Todas as ordens de serviço da frota, da mais nova para a mais velha, com busca e filtros de tipo e de período.
 // Ver: Ver frota. Lançar, corrigir e excluir: Ordem de serviço.
 export default function OrdensServico() {
   const navigate = useNavigate()
@@ -23,6 +25,7 @@ export default function OrdensServico() {
   const { dados: ordens = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => ordemServicoService.listar())
   const [busca, setBusca] = useState('')
   const [tipo, setTipo] = useState('')
+  const [periodo, setPeriodo] = useState(TODO_O_PERIODO)
   const [modal, setModal] = useState(null) // { registro } (null ao lançar) enquanto o modal está aberto
   const [excluindo, setExcluindo] = useState(null)
 
@@ -35,9 +38,10 @@ export default function OrdensServico() {
   const filtradas = useMemo(() => {
     return ordens
       .filter((o) => !tipo || o.itens.some((i) => i.tipoId === tipo))
+      .filter((o) => noPeriodo(o.dataRealizacao, periodo))
       .filter((o) => contemBusca(o.placa, busca) || o.id === busca.trim())
       .sort((a, b) => b.dataRealizacao.localeCompare(a.dataRealizacao) || Number(b.id) - Number(a.id))
-  }, [ordens, busca, tipo])
+  }, [ordens, busca, tipo, periodo])
 
   if (carregando) return <Carregando />
   if (erro) return <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />
@@ -50,13 +54,14 @@ export default function OrdensServico() {
         action={podeMexer && <Button onClick={() => setModal({ registro: null })}><Plus size={16} /> Lançar OS</Button>}
       />
 
-      <div className="mb-5 flex gap-3">
+      <div className="mb-3 flex gap-3">
         <CampoBusca value={busca} onChange={setBusca} placeholder="Buscar por placa ou nº da OS" className="flex-1" />
         <Select value={tipo} onChange={(e) => setTipo(e.target.value)} className="w-64">
           <option value="">Tipo: todos</option>
           {tipos.map(([id, nome]) => <option key={id} value={id}>{nome}</option>)}
         </Select>
       </div>
+      <FiltroPeriodo valor={periodo} onChange={setPeriodo} quantas={filtradas.length} className="mb-5" />
 
       {filtradas.length === 0 ? (
         <EmptyState

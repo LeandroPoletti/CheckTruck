@@ -125,7 +125,7 @@ O aviso de chamado novo precisa do projeto no Expo (uma vez só): na pasta `Chec
   vence primeiro para o último (os desativados num filtro à parte), com busca e tudo de cada um: situação, histórico
   de manutenções e de km. Com as permissões: Atualizar km, Lançar OS, cadastrar e editar caminhão, Corrigir km
   (Admin e Gestor) e os intervalos de troca (do caminhão e da empresa, por geração). Também os chamados de todos os
-  caminhões para atender e resolver, e as ordens de serviço.
+  caminhões para atender e resolver, e as ordens de serviço (com o filtro de período, igual ao site).
 - **Avisos de troca no celular** (motorista e quem vê a frota): todo dia às 8h enquanto tiver troca vencida
   ou chegando, e às 8h do dia em que vence a data de uma troca. O próprio celular agenda (sem servidor) e refaz os
   avisos toda vez que o app abre. A tela Avisos de troca, no fim da tela inicial, mostra se estão ligados, os próximos
