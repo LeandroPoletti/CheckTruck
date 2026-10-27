@@ -7,7 +7,7 @@ import EmpresaModal from '../components/modals/EmpresaModal'
 import SenhaDoAdminModal from '../components/modals/SenhaDoAdminModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { empresaService } from '../services'
-import { useCarga } from '../hooks/useCarga'
+import { useCargaDaTela } from '../hooks/useCarga'
 import { formatDocumento } from '../data/acesso'
 import { formatData } from '../data/domain'
 
@@ -20,7 +20,7 @@ const ABAS = [
 // que ele passa para o dono da empresa), desativa, ativa de novo e define uma senha nova para o Admin.
 export default function Empresas() {
   const [aba, setAba] = useState('ativas')
-  const { dados: empresas = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => empresaService.listar())
+  const { dados: empresas = [], carregando, erro, recarregar, tentarNovamente } = useCargaDaTela(() => empresaService.listar())
   const [erroAcao, setErroAcao] = useState(null)
   const [cadastrando, setCadastrando] = useState(false)
   const [trocandoSenha, setTrocandoSenha] = useState(null) // empresa do Admin que vai ganhar senha nova

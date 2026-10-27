@@ -43,19 +43,22 @@ flowchart TB
     site["<b>Site</b><br/>React 19 + Vite<br/>(navegador)"]
     app["<b>App</b><br/>React Native + Expo<br/>(iPhone e Android)"]
 
-    api["<b>API REST</b><br/>ASP.NET Core (.NET 10)<br/>Identity · OData · EF Core"]
+    api["<b>API REST</b><br/>ASP.NET Core (.NET 10)<br/>Identity · OData · EF Core · SignalR"]
     db[("<b>PostgreSQL</b>")]
     push["<b>Serviço de push do Expo</b><br/>exp.host"]
 
     site -- "HTTPS · JSON<br/>token Bearer" --> api
     app -- "HTTP(S) · JSON<br/>token Bearer" --> api
+    api -. "canal de mudanças<br/>(SignalR, WebSocket)" .-> site
+    api -. "canal de mudanças<br/>(SignalR, WebSocket)" .-> app
     api -- "EF Core" --> db
     api -- "aviso de<br/>chamado novo" --> push
     push -. "APNs / FCM" .-> app
 ```
 
 - **Site e app são o mesmo sistema:** usam a mesma API, o mesmo banco e o mesmo login. O que muda num aparece no
-  outro ao recarregar a tela.
+  outro na hora: cada site e app aberto fica ligado num canal (SignalR) e, quando alguém da empresa grava alguma
+  coisa, a API avisa os outros e a tela aberta recarrega sozinha.
 - **Toda regra fica na API.** Site e app só mostram e validam antes de enviar (para avisar mais rápido); a API
   valida de novo e calcula tudo (próxima troca, status, alertas).
 - **Push:** a API manda o aviso de chamado novo para o serviço do Expo, que entrega no celular (Apple ou Google).
@@ -65,7 +68,7 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    api["<b>CheckTruck.Api</b> · apresentação<br/>Controllers · DTOs · filtros de acesso · envio do push (AvisosPeloExpo)"]
+    api["<b>CheckTruck.Api</b> · apresentação<br/>Controllers · DTOs · filtros de acesso · push (AvisosPeloExpo) · canal de mudanças"]
     dom["<b>CheckTruck.Dominio</b> · regras do negócio<br/>Serviços · entidades · enums · interfaces (IRepositorioCrud, IUsuarioLogado, IEnviadorDeAvisos)"]
     repo["<b>CheckTruck.Repositorio</b> · infraestrutura<br/>EF Core · Context com filtro por empresa · migrations · catálogo inicial"]
     db[("PostgreSQL")]
@@ -81,7 +84,7 @@ flowchart TB
 
 | Projeto | Responsabilidade | Depende de |
 |---------|------------------|------------|
-| `CheckTruck.Api` | Recebe os pedidos HTTP, confere o login e as permissões, converte DTO ↔ entidade e devolve os erros num formato só (ProblemDetails, com a mensagem em `detail`). Também manda o push pelo Expo. | Repositorio (e, por ele, Dominio) |
+| `CheckTruck.Api` | Recebe os pedidos HTTP, confere o login e as permissões, converte DTO ↔ entidade e devolve os erros num formato só (ProblemDetails, com a mensagem em `detail`). Também manda o push pelo Expo e o aviso de mudança (SignalR). | Repositorio (e, por ele, Dominio) |
 | `CheckTruck.Dominio` | Entidades, enums e **todas as regras**: cálculo da próxima troca e do status, ordem dos intervalos, km que só sobe, chamados, acessos. Não conhece banco nem HTTP: fala com eles por interfaces. | — |
 | `CheckTruck.Repositorio` | Entity Framework Core com PostgreSQL: contexto, configuração das tabelas, migrations, catálogo inicial e o filtro por empresa. | Dominio |
 | `CheckTruck.Testes` | 129 testes automáticos (xUnit): as regras do Dominio, com um repositório em memória no lugar do banco, e a separação entre empresas, com o `Context` de verdade num SQLite na memória. | Dominio e Repositorio |
@@ -99,6 +102,8 @@ regras podem ser testadas sem banco, trocando o repositório por um em memória.
 4. O repositório grava pelo EF Core; o `Context` põe a empresa de quem está logado em todo registro e filtra todas
    as consultas por ela.
 5. O controller devolve o DTO (ou o erro como ProblemDetails).
+6. Se foi uma mudança que deu certo, o `AvisoDeMudanca` manda "mudou" pelo canal para os outros sites e apps abertos
+   da mesma empresa (o de quem mudou fica de fora).
 
 ## Organização do site e do app
 
@@ -124,6 +129,7 @@ Os dois mostram só o que as permissões de quem entrou liberam, mas quem decide
 | **ASP.NET Identity com token Bearer** | Login pronto e seguro (senha com hash, bloqueio após tentativas erradas). O token vale 1 hora e o site e o app renovam sozinhos com a chave de renovação (14 dias); trocar senha ou e-mail, ou desativar o acesso ou a empresa, encerra a renovação. |
 | **OData nas listas** | Filtro, ordenação e paginação (`$filter`, `$orderby`, `$top` até 100, `$skip`, `$count`) sem escrever uma rota para cada caso. |
 | **Push pelo Expo** | Um envio só para iPhone e Android, sem guardar chave da Apple ou do Google na API. Se o aviso falhar, o chamado continua aberto. |
+| **Atualizar sozinho pelo SignalR** (`CanalDeMudancas` + `AvisoDeMudanca`) | Já vem no ASP.NET Core e mantém um canal aberto (WebSocket) com cada site e app. O aviso só diz "mudou" e cada tela relê o que mostra pela API de sempre, com as permissões de sempre: nenhum dado passa pelo canal. Um filtro só, em todas as rotas, avisa depois de cada mudança que deu certo, então rota nova já avisa sem fazer nada. |
 | **Avisos de troca no próprio celular** | Funcionam sem servidor e sem internet na hora do aviso; o app refaz a agenda toda vez que abre. |
 | **Expo (React Native) para o app** | Um código só para iPhone e Android, em TypeScript, como o documento do TCC prevê. |
 

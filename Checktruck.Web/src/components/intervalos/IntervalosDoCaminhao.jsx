@@ -6,7 +6,7 @@ import AcoesLinha, { BotaoLinha } from '../ui/AcoesLinha'
 import IntervaloModal from '../modals/IntervaloModal'
 import ConfirmarExclusaoModal from '../modals/ConfirmarExclusaoModal'
 import { intervaloVeiculoService } from '../../services'
-import { useCarga } from '../../hooks/useCarga'
+import { useCargaDaTela } from '../../hooks/useCarga'
 import { formatKm, nomeDoCaminhao } from '../../data/domain'
 import { montarLinhas, daOrigem, oQueVoltaAValer, textoPrazo } from '../../data/intervalos'
 
@@ -17,7 +17,7 @@ export default function IntervalosDoCaminhao({ veiculos, tipos, veiculoId, onVei
   const veiculo = veiculos.find((v) => v.id === veiculoId)
   // Tabela do caminhão (a API manda cada item com os intervalos na ordem em que valem), de novo depois de salvar
   const { dados: tabela = [], carregando, erro, recarregar, tentarNovamente } =
-    useCarga(() => (veiculoId ? intervaloVeiculoService.tabela(veiculoId) : Promise.resolve([])), [veiculoId])
+    useCargaDaTela(() => (veiculoId ? intervaloVeiculoService.tabela(veiculoId) : Promise.resolve([])), [veiculoId])
   const [modal, setModal] = useState(null) // linha da tabela enquanto o modal está aberto
   const [excluindo, setExcluindo] = useState(null)
 

@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { router, useFocusEffect } from 'expo-router'
-import { useSessao } from '@/servicos/sessao'
+import { router } from 'expo-router'
+import { useCarregarNaTela, useSessao } from '@/servicos/sessao'
 import { listarMecanicos, type Mecanico } from '@/servicos/cadastros'
 import { contemBusca } from '@/dados/formato'
 import Botao from '@/componentes/Botao'
@@ -33,7 +33,7 @@ export default function Mecanicos() {
     }
   }, [chamar])
 
-  useFocusEffect(useCallback(() => { carregar() }, [carregar]))
+  useCarregarNaTela(carregar)
 
   const ativos = lista?.filter((m) => m.ativo).length ?? 0
   const filtrados = [...(lista ?? [])].sort(ordem).filter((m) => contemBusca(`${m.nome} ${m.funcao}`, busca))

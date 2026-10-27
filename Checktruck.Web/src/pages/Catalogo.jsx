@@ -4,7 +4,7 @@ import { PageHeader, Card, Carregando, ErroCarregamento } from '../components/La
 import { Button } from '../components/ui/Form'
 import { BotaoLinha } from '../components/ui/AcoesLinha'
 import { fabricanteService, modeloService, geracaoService, veiculoService, intervaloService } from '../services'
-import { useCarga } from '../hooks/useCarga'
+import { useCargaDaTela } from '../hooks/useCarga'
 import FabricanteModal from '../components/modals/FabricanteModal'
 import ModeloModal from '../components/modals/ModeloModal'
 import GeracaoModal from '../components/modals/GeracaoModal'
@@ -23,7 +23,7 @@ export default function Catalogo() {
   const verFrota = pode(usuario, 'VerFrota')
   const [fabricanteSel, setFabricanteSel] = useState(null)
   const [modeloSel, setModeloSel] = useState(null)
-  const { dados = VAZIO, carregando, erro, recarregar, tentarNovamente } = useCarga(() =>
+  const { dados = VAZIO, carregando, erro, recarregar, tentarNovamente } = useCargaDaTela(() =>
     Promise.all([
       fabricanteService.listar(),
       modeloService.listar(),

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { router, useFocusEffect } from 'expo-router'
-import { useSessao, type Usuario } from '@/servicos/sessao'
+import { router } from 'expo-router'
+import { useCarregarNaTela, useSessao, type Usuario } from '@/servicos/sessao'
 import { quandoTocarNoAvisoDeChamado } from '@/servicos/avisos'
 import { caminhoesDaFrota, type CaminhaoNaLista } from '@/servicos/caminhoes'
 import { listarChamados, type Chamado } from '@/servicos/chamados'
@@ -52,7 +52,7 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
     }
   }, [chamar, verFrota, atender])
 
-  useFocusEffect(useCallback(() => { carregar() }, [carregar]))
+  useCarregarNaTela(carregar)
 
   useEffect(() => {
     if (!atender) return

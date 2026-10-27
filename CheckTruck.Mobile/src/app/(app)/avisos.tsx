@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, AppState, Linking, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { useFocusEffect } from 'expo-router'
 import { Feather } from '@expo/vector-icons'
-import { useSessao } from '@/servicos/sessao'
+import { useCarregarNaTela, useSessao } from '@/servicos/sessao'
 import {
   agendarAvisos, avisoDeTeste, caminhoesDosAvisos, pedirPermissao, situacaoDosAvisos, type SituacaoDosAvisos,
 } from '@/servicos/avisos'
@@ -43,7 +42,7 @@ export default function Avisos() {
     }
   }, [chamar, usuario])
 
-  useFocusEffect(useCallback(() => { carregar() }, [carregar]))
+  useCarregarNaTela(carregar)
   useEffect(() => {
     const assinatura = AppState.addEventListener('change', (estado) => { if (estado === 'active') carregar() })
     return () => assinatura.remove()

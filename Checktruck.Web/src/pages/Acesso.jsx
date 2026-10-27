@@ -6,7 +6,7 @@ import { BotaoLinha } from '../components/ui/AcoesLinha'
 import UsuarioModal from '../components/modals/UsuarioModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { usuarioService } from '../services'
-import { useCarga } from '../hooks/useCarga'
+import { useCargaDaTela } from '../hooks/useCarga'
 import { obterUsuario } from '../services/sessao'
 import { PERMISSOES, nomeCargo, formatCpf } from '../data/acesso'
 
@@ -19,7 +19,7 @@ const ABAS = [
 export default function Acesso() {
   const eu = obterUsuario()
   const [aba, setAba] = useState('ativos')
-  const { dados: usuarios = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => usuarioService.listar())
+  const { dados: usuarios = [], carregando, erro, recarregar, tentarNovamente } = useCargaDaTela(() => usuarioService.listar())
   const [erroAcao, setErroAcao] = useState(null)
   const [editando, setEditando] = useState(null) // { usuario } (null no cadastro) enquanto o modal está aberto
   const [desativando, setDesativando] = useState(null)

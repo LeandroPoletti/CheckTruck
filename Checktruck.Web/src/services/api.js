@@ -28,12 +28,19 @@ export function salvarSessao(sessao) {
   } catch { /* noop */ }
 }
 
+// Id do canal de mudanças deste site (services/mudancas.js): vai em cada pedido para a API não avisar quem mudou
+let conexao = null
+export function definirConexao(id) {
+  conexao = id
+}
+
 // ---------------------------------------------------------------------------
 // Interceptors
 // ---------------------------------------------------------------------------
 api.interceptors.request.use((config) => {
   const sessao = lerSessao()
   if (sessao?.accessToken) config.headers.Authorization = `Bearer ${sessao.accessToken}`
+  if (conexao) config.headers['X-Conexao'] = conexao
   return config
 })
 

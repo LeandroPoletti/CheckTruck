@@ -7,7 +7,7 @@ import { BarraDeUso } from '../components/ui/BarraDeUso'
 import { Button } from '../components/ui/Form'
 import { formatKm, nomeDoModelo, textoDias } from '../data/domain'
 import { dashboardService } from '../services'
-import { useCarga } from '../hooks/useCarga'
+import { useCargaDaTela } from '../hooks/useCarga'
 import { Caminhao } from '../components/marca/Desenhos'
 import { obterUsuario } from '../services/sessao'
 import { pode } from '../data/acesso'
@@ -27,7 +27,7 @@ export default function Dashboard() {
     mecanico: pode(usuario, 'Cadastros'),
   }
   // A API já devolve a situação da frota calculada: contagens, alertas e frota por geração
-  const { dados, carregando, erro, recarregar, tentarNovamente } = useCarga(() => dashboardService.obter(LIMITE_ALERTAS))
+  const { dados, carregando, erro, recarregar, tentarNovamente } = useCargaDaTela(() => dashboardService.obter(LIMITE_ALERTAS))
   const [novoVeiculoOpen, setNovoVeiculoOpen] = useState(false)
   const [novoAcessoOpen, setNovoAcessoOpen] = useState(false)
   const [novoMecanicoOpen, setNovoMecanicoOpen] = useState(false)

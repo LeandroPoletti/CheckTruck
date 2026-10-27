@@ -12,6 +12,12 @@ function enderecoDaApi(): string {
 
 export const API_URL = enderecoDaApi()
 
+// Id do canal de mudanças deste app (mudancas.ts): vai em cada pedido para a API não avisar quem fez a mudança
+let conexao: string | null = null
+export function definirConexao(id: string | null) {
+  conexao = id
+}
+
 /** Erro que a API devolveu (ou a falta de conexão, com status 0), já com a mensagem para mostrar. */
 export class ErroDaApi extends Error {
   constructor(mensagem: string, readonly status: number) {
@@ -25,6 +31,7 @@ export async function chamarApi<T>(caminho: string, { metodo = 'GET', corpo, tok
   const headers: Record<string, string> = { Accept: 'application/json' }
   if (corpo !== undefined) headers['Content-Type'] = 'application/json'
   if (token) headers.Authorization = `Bearer ${token}`
+  if (conexao) headers['X-Conexao'] = conexao
 
   let resposta: Response
   try {

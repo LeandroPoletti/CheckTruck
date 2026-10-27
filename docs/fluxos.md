@@ -127,6 +127,35 @@ sequenceDiagram
 O celular entra nessa lista quando a pessoa abre o app logada e com os avisos ligados (`PUT /api/Celular`), e sai
 quando ela toca em Sair (`DELETE /api/Celular`). Um celular fica com quem entrou nele por último.
 
+## Atualizar sozinho (site e app)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor G as Gestor (site)
+    participant S as Site do gestor
+    participant A as API
+    participant C as CanalDeMudancas (SignalR)
+    participant App as App do mecânico
+    actor M as Mecânico
+
+    S->>C: abre o canal ao entrar (token em access_token)
+    App->>C: abre o canal ao entrar
+    C->>C: cada conexão entra no grupo da empresa de quem entrou
+    G->>S: Atualizar km do ABC-1D23
+    S->>A: PUT /api/Veiculo/7/kilometragem (cabeçalho X-Conexao do site)
+    A->>A: grava (as regras de sempre)
+    A-->>S: 204, e o site recarrega a tela dele
+    A->>C: AvisoDeMudanca: "mudou" para a empresa, menos o X-Conexao
+    C-->>App: mudou
+    App->>A: GET da tela aberta (a situação do caminhão)
+    App-->>M: km novo na tela, sem puxar para baixo
+```
+
+O aviso não leva dado nenhum: cada tela relê pela API, com as permissões de quem está nela. A conexão que cair
+(rede, app em segundo plano, API reiniciada) volta sozinha e, ao voltar, a tela recarrega, porque pode ter perdido
+algum aviso. A mudança do dono do sistema (catálogo do sistema, empresas) vai para todas as empresas.
+
 ## Entrar e continuar logado
 
 ```mermaid

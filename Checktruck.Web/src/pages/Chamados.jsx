@@ -9,7 +9,7 @@ import ChamadoModal from '../components/modals/ChamadoModal'
 import ResolverChamadoModal from '../components/modals/ResolverChamadoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { chamadoService } from '../services'
-import { useCarga } from '../hooks/useCarga'
+import { useCargaDaTela } from '../hooks/useCarga'
 import { obterUsuario } from '../services/sessao'
 import { pode } from '../data/acesso'
 import { nomeTipoOcorrencia } from '../data/chamados'
@@ -29,7 +29,7 @@ export default function Chamados() {
   const podeVerCaminhao = pode(eu, 'VerFrota')
 
   const [aba, setAba] = useState('Pendente')
-  const { dados: chamados = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => chamadoService.listar())
+  const { dados: chamados = [], carregando, erro, recarregar, tentarNovamente } = useCargaDaTela(() => chamadoService.listar())
   const [erroAcao, setErroAcao] = useState(null)
   const [editando, setEditando] = useState(null) // { chamado } (null ao abrir) enquanto o modal está aberto
   const [resolvendo, setResolvendo] = useState(null)

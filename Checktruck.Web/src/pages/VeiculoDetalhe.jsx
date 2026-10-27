@@ -3,7 +3,7 @@ import { useState } from 'react'
 import VeiculoDetalhePanel, { VeiculoNaoEncontrado } from '../components/VeiculoDetalhePanel'
 import { Carregando, ErroCarregamento } from '../components/Layout'
 import { veiculoService, ordemServicoService, filtro } from '../services'
-import { useCarga } from '../hooks/useCarga'
+import { useCargaDaTela } from '../hooks/useCarga'
 import { Button } from '../components/ui/Form'
 import AtualizarKmModal from '../components/modals/AtualizarKmModal'
 import NovoVeiculoModal from '../components/modals/NovoVeiculoModal'
@@ -23,7 +23,7 @@ export default function VeiculoDetalhe() {
   const [corrigirKmOpen, setCorrigirKmOpen] = useState(false)
   // A situação (o que vence e quando) vem pronta da API: intervalo que vale para cada item, por km e por data.
   // Ela também traz fabricante, modelo, geração e potência para o cabeçalho.
-  const { dados, carregando, erro, recarregar, tentarNovamente } = useCarga(async () => {
+  const { dados, carregando, erro, recarregar, tentarNovamente } = useCargaDaTela(async () => {
     const [veiculo, situacao, ordens, historicoKm] = await Promise.all([
       veiculoService.obter(id),
       veiculoService.obterSituacao(id),

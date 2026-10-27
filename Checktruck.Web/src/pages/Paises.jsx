@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Tabela, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
-import { useCarga } from '../hooks/useCarga'
+import { useCargaDaTela } from '../hooks/useCarga'
 import { Button, CampoBusca } from '../components/ui/Form'
 import PaisModal from '../components/modals/PaisModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
@@ -10,7 +10,7 @@ import { paisService } from '../services'
 import { contemBusca } from '../data/domain'
 
 export default function Paises() {
-  const { dados: paises = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => paisService.listar())
+  const { dados: paises = [], carregando, erro, recarregar, tentarNovamente } = useCargaDaTela(() => paisService.listar())
   const [busca, setBusca] = useState('')
   const [modal, setModal] = useState(null) // { registro } ao cadastrar/editar
   const [excluindo, setExcluindo] = useState(null)

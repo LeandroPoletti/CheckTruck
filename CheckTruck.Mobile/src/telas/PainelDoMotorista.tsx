@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { router, useFocusEffect } from 'expo-router'
-import { useSessao, type Usuario } from '@/servicos/sessao'
+import { router } from 'expo-router'
+import { useCarregarNaTela, useSessao, type Usuario } from '@/servicos/sessao'
 import { meusCaminhoes, type Caminhao } from '@/servicos/caminhoes'
 import { listarChamados, type Chamado } from '@/servicos/chamados'
 import Atalho from '@/componentes/Atalho'
@@ -40,7 +40,7 @@ export default function PainelDoMotorista({ usuario }: { usuario: Usuario }) {
     }
   }, [chamar, podeAbrirChamado])
 
-  useFocusEffect(useCallback(() => { carregar() }, [carregar]))
+  useCarregarNaTela(carregar)
 
   async function puxarParaAtualizar() {
     setPuxando(true)

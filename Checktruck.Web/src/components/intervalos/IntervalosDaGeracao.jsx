@@ -6,7 +6,7 @@ import AcoesLinha, { BotaoLinha } from '../ui/AcoesLinha'
 import IntervaloModal from '../modals/IntervaloModal'
 import ConfirmarExclusaoModal from '../modals/ConfirmarExclusaoModal'
 import { intervaloService } from '../../services'
-import { useCarga } from '../../hooks/useCarga'
+import { useCargaDaTela } from '../../hooks/useCarga'
 import { obterUsuario } from '../../services/sessao'
 import { ehDonoDoSistema } from '../../data/acesso'
 import { formatKm, nomeDoModelo, agruparPorModelo } from '../../data/domain'
@@ -20,7 +20,7 @@ export default function IntervalosDaGeracao({ geracoes, tipos, geracaoId, onGera
   const geracao = geracoes.find((g) => g.id === geracaoId)
   // Tabela da geração (a API manda cada item com os intervalos na ordem em que valem), de novo depois de salvar
   const { dados: tabela = [], carregando, erro, recarregar, tentarNovamente } =
-    useCarga(() => (geracaoId ? intervaloService.tabela(geracaoId) : Promise.resolve([])), [geracaoId])
+    useCargaDaTela(() => (geracaoId ? intervaloService.tabela(geracaoId) : Promise.resolve([])), [geracaoId])
   const [modal, setModal] = useState(null) // linha da tabela enquanto o modal está aberto
   const [excluindo, setExcluindo] = useState(null)
 

@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
-import { useSessao } from '@/servicos/sessao'
+import { router, useLocalSearchParams } from 'expo-router'
+import { useCarregarNaTela, useSessao } from '@/servicos/sessao'
 import {
   fabricantes as listarFabricantes, geracoes as listarGeracoes, modelos as listarModelos,
   type Fabricante, type Geracao, type Modelo,
@@ -39,7 +39,7 @@ export default function ModelosDoFabricante() {
     }
   }, [chamar, id])
 
-  useFocusEffect(useCallback(() => { carregar() }, [carregar]))
+  useCarregarNaTela(carregar)
 
   const fabricante = dados?.fabricante
 

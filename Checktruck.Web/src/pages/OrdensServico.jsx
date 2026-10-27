@@ -9,7 +9,7 @@ import FiltroPeriodo from '../components/ui/FiltroPeriodo'
 import OrdemServicoModal from '../components/modals/OrdemServicoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { ordemServicoService } from '../services'
-import { useCarga } from '../hooks/useCarga'
+import { useCargaDaTela } from '../hooks/useCarga'
 import { obterUsuario } from '../services/sessao'
 import { pode } from '../data/acesso'
 import { formatKm, formatData, formatDataHora, contemBusca } from '../data/domain'
@@ -22,7 +22,7 @@ export default function OrdensServico() {
   const usuario = obterUsuario()
   const podeMexer = pode(usuario, 'OrdemServico')
 
-  const { dados: ordens = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => ordemServicoService.listar())
+  const { dados: ordens = [], carregando, erro, recarregar, tentarNovamente } = useCargaDaTela(() => ordemServicoService.listar())
   const [busca, setBusca] = useState('')
   const [tipo, setTipo] = useState('')
   const [periodo, setPeriodo] = useState(TODO_O_PERIODO)

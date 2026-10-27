@@ -6,7 +6,7 @@ import { AcoesDoCatalogo } from '../components/ui/AcoesLinha'
 import ModeloModal from '../components/modals/ModeloModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { modeloService, fabricanteService, geracaoService } from '../services'
-import { useCarga } from '../hooks/useCarga'
+import { useCargaDaTela } from '../hooks/useCarga'
 import { contemBusca } from '../data/domain'
 
 const VAZIO = { modelos: [], fabricantes: [], geracoes: [] }
@@ -14,7 +14,7 @@ const VAZIO = { modelos: [], fabricantes: [], geracoes: [] }
 // Modelos = linhas de cada fabricante (FH, FM, R, Actros...). As épocas ficam em Gerações.
 export default function Modelos() {
   // Modelos (já trazem o fabricante) + fabricantes para o filtro + gerações para a contagem
-  const { dados = VAZIO, carregando, erro, recarregar, tentarNovamente } = useCarga(() =>
+  const { dados = VAZIO, carregando, erro, recarregar, tentarNovamente } = useCargaDaTela(() =>
     Promise.all([modeloService.listar(), fabricanteService.listar(), geracaoService.listar()])
       .then(([modelos, fabricantes, geracoes]) => ({ modelos, fabricantes, geracoes })))
   const [busca, setBusca] = useState('')

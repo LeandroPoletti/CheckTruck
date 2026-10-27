@@ -1,8 +1,23 @@
+import { useEffect } from 'react'
 import Sidebar from './Sidebar'
 import { Button } from './ui/Form'
 import { EstradaVazia } from './marca/Desenhos'
+import { abrirCanal, quandoMudar } from '../services/mudancas'
+import { recarregarUsuario } from '../services/sessao'
 
+// Moldura das telas de quem entrou: o menu e a tela. Enquanto ela está aberta, fica ligado o canal que avisa as
+// mudanças feitas por outros (no site ou no app): as telas recarregam sozinhas e os dados de quem está logado são
+// lidos de novo (ex.: o tema trocado pelo app)
 export default function Layout({ usuario, itensMenu, children }) {
+  useEffect(() => {
+    const fechar = abrirCanal()
+    const pararDeOuvir = quandoMudar(() => recarregarUsuario().catch(() => {}))
+    return () => {
+      pararDeOuvir()
+      fechar()
+    }
+  }, [])
+
   return (
     <div className="flex h-screen bg-mist-50">
       <Sidebar usuario={usuario} itens={itensMenu} />

@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { router, useFocusEffect } from 'expo-router'
-import { useSessao } from '@/servicos/sessao'
+import { router } from 'expo-router'
+import { useCarregarNaTela, useSessao } from '@/servicos/sessao'
 import { tiposDeManutencao, type TipoDeManutencao } from '@/servicos/cadastros'
 import { contemBusca } from '@/dados/formato'
 import { COMPONENTES } from '@/dados/intervalos'
@@ -33,7 +33,7 @@ export default function TiposDeManutencao() {
     }
   }, [chamar])
 
-  useFocusEffect(useCallback(() => { carregar() }, [carregar]))
+  useCarregarNaTela(carregar)
 
   // Do jeito do web: por componente (Motor, Câmbio...) e, dentro dele, pelo nome
   const filtrados = [...(tipos ?? [])]

@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
-import { useSessao } from '@/servicos/sessao'
+import { router, useLocalSearchParams } from 'expo-router'
+import { useCarregarNaTela, useSessao } from '@/servicos/sessao'
 import { geracoes as listarGeracoes, modelos as listarModelos, type Geracao, type Modelo } from '@/servicos/cadastros'
 import { caminhoesDaFrota } from '@/servicos/caminhoes'
 import { intervalosRecomendados } from '@/servicos/intervalos'
@@ -48,7 +48,7 @@ export default function GeracoesDoModelo() {
     }
   }, [chamar, id, verFrota])
 
-  useFocusEffect(useCallback(() => { carregar() }, [carregar]))
+  useCarregarNaTela(carregar)
 
   const modelo = dados?.modelo
   const nomeDoModelo = modelo ? `${modelo.fabricante?.nome ?? ''} ${modelo.nome}`.trim() : ''

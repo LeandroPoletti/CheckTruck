@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { router, useFocusEffect } from 'expo-router'
-import { useSessao } from '@/servicos/sessao'
+import { router } from 'expo-router'
+import { useCarregarNaTela, useSessao } from '@/servicos/sessao'
 import { fabricantes as listarFabricantes, modelos as listarModelos, type Fabricante, type Modelo } from '@/servicos/cadastros'
 import { contemBusca, quantos } from '@/dados/formato'
 import Botao from '@/componentes/Botao'
@@ -31,7 +31,7 @@ export default function Catalogo() {
     }
   }, [chamar])
 
-  useFocusEffect(useCallback(() => { carregar() }, [carregar]))
+  useCarregarNaTela(carregar)
 
   const filtrados = dados?.fabricantes.filter((f) => contemBusca(`${f.nome} ${f.paisOrigem?.nome ?? ''}`, busca)) ?? []
 

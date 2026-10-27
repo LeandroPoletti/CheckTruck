@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Tabela, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
-import { useCarga } from '../hooks/useCarga'
+import { useCargaDaTela } from '../hooks/useCarga'
 import { Button, CampoBusca } from '../components/ui/Form'
 import TipoManutencaoModal from '../components/modals/TipoManutencaoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
@@ -11,7 +11,7 @@ import { contemBusca } from '../data/domain'
 
 // Itens que o sistema acompanha nos caminhões (óleo do motor, filtro de ar...)
 export default function TiposManutencao() {
-  const { dados: tipos = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => tipoManutencaoService.listar())
+  const { dados: tipos = [], carregando, erro, recarregar, tentarNovamente } = useCargaDaTela(() => tipoManutencaoService.listar())
   const [busca, setBusca] = useState('')
   const [modal, setModal] = useState(null) // { registro } (null ao cadastrar) enquanto o modal está aberto
   const [excluindo, setExcluindo] = useState(null)

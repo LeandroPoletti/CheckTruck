@@ -11,10 +11,10 @@ diagramas) está em [`docs/`](docs/README.md).
 
 | Parte | Tecnologia |
 |-------|------------|
-| API | .NET 10 · ASP.NET Core · Entity Framework Core · ASP.NET Identity (token Bearer) · OData |
+| API | .NET 10 · ASP.NET Core · Entity Framework Core · ASP.NET Identity (token Bearer) · OData · SignalR |
 | Banco | PostgreSQL |
-| Front | React 19 · Vite · Tailwind CSS 4 · React Router · axios |
-| App | React Native · Expo · TypeScript · Expo Router |
+| Front | React 19 · Vite · Tailwind CSS 4 · React Router · axios · SignalR |
+| App | React Native · Expo · TypeScript · Expo Router · SignalR |
 
 ## Estrutura
 
@@ -118,7 +118,8 @@ e rode `npx expo start --clear` (sem o `--clear`, o app continua com o endereço
 O aviso de chamado novo precisa do projeto no Expo (uma vez só): na pasta `CheckTruck.Mobile`, rode
 `npx eas-cli@latest init` e entre com a sua conta do Expo. Ele cria o projeto e grava o `projectId` no `app.json`.
 
-**O que cada um vê no app** (o mesmo login e os mesmos dados do web):
+**O que cada um vê no app** (o mesmo login e os mesmos dados do web; o que muda num aparece no outro na hora, sem
+puxar a tela para baixo nem apertar F5):
 
 - **Motorista:** o caminhão que está com ele (próximas trocas em km e data), Atualizar km e os chamados dele.
 - **Com Ver frota e/ou Atender chamados** (mecânico, chefe de manutenção, gestor...): os caminhões, do que

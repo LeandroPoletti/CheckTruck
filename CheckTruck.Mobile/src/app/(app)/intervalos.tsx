@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
-import { useSessao } from '@/servicos/sessao'
+import { router, useLocalSearchParams } from 'expo-router'
+import { useCarregarNaTela, useSessao } from '@/servicos/sessao'
 import { tiposDeManutencao, type TipoDeManutencao } from '@/servicos/cadastros'
 import {
   caminhoesDosIntervalos, intervalosDe, type Alvo, type CaminhaoDoIntervalo, type Intervalo, type IntervalosDoItem, type Origem,
@@ -54,7 +54,7 @@ export default function Intervalos() {
     }
   }, [chamar, id])
 
-  useFocusEffect(useCallback(() => { carregar() }, [carregar]))
+  useCarregarNaTela(carregar)
 
   async function puxarParaAtualizar() {
     setPuxando(true)

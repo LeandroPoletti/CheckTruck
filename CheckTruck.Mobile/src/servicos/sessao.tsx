@@ -1,9 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { AppState } from 'react-native'
+import { useFocusEffect } from 'expo-router'
 import type { TemaDeCor } from '@/tema'
 import { chamarApi, ErroDaApi, type Opcoes } from './api'
 import { lerTema, lerTokens, salvarTema, salvarTokens, type Tokens } from './armazenamento'
 import { cancelarAvisos } from './avisos'
+import { abrirCanal } from './mudancas'
 
 /** Quem está logado: o mesmo GET /api/Usuario/me que o web usa. */
 export type Usuario = {
@@ -33,6 +35,8 @@ type Sessao = {
   /** Grava a cor na conta (o site muda junto) e já troca no app. */
   trocarTema(tema: TemaDeCor): Promise<void>
   chamar: Chamar
+  /** Quantos avisos de mudança chegaram (site ou outro app): as telas abertas recarregam quando muda. */
+  mudancas: number
 }
 
 const SessaoContext = createContext<Sessao | null>(null)
@@ -44,6 +48,7 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
   const [carregando, setCarregando] = useState(true)
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [ultimoTema, setUltimoTema] = useState<TemaDeCor>('Verde')
+  const [mudancas, setMudancas] = useState(0)
   // Os tokens ficam fora do estado: renovar não muda as funções, e as telas não recarregam à toa
   const tokens = useRef<Tokens | null>(null)
   // Vários pedidos com o token vencido ao mesmo tempo esperam a mesma renovação
@@ -134,20 +139,36 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
     setUsuario((atual) => (atual ? { ...atual, tema } : atual))
   }, [chamar])
 
-  // Ao voltar para o app (estava em segundo plano), busca de novo quem está logado: pega o que mudou pelo site,
-  // como o tema. Sem internet, segue com o que já tinha; só troca o usuário (e redesenha as telas) se algo mudou
+  // Busca de novo quem está logado: pega o que mudou pelo site, como o tema. Sem internet, segue com o que já tinha;
+  // só troca o usuário (e redesenha as telas) se algo mudou
+  const relerUsuario = useCallback(async () => {
+    if (!tokens.current) return
+    try {
+      const eu = await chamar<Usuario>('/api/Usuario/me')
+      setUsuario((atual) => (JSON.stringify(atual) === JSON.stringify(eu) ? atual : eu))
+    } catch {
+      // sem conexão agora: tenta de novo na próxima vez
+    }
+  }, [chamar])
+
+  // Ao voltar para o app (estava em segundo plano)
   useEffect(() => {
-    const assinatura = AppState.addEventListener('change', async (estado) => {
-      if (estado !== 'active' || !tokens.current) return
-      try {
-        const eu = await chamar<Usuario>('/api/Usuario/me')
-        setUsuario((atual) => (JSON.stringify(atual) === JSON.stringify(eu) ? atual : eu))
-      } catch {
-        // sem conexão agora: tenta de novo na próxima vez
-      }
+    const assinatura = AppState.addEventListener('change', (estado) => {
+      if (estado === 'active') relerUsuario()
     })
     return () => assinatura.remove()
-  }, [chamar])
+  }, [relerUsuario])
+
+  // Canal de mudanças enquanto alguém está logado: a cada aviso, as telas abertas recarregam e quem está logado é
+  // lido de novo (o tema e as permissões podem ter mudado pelo site)
+  const logado = usuario?.id
+  useEffect(() => {
+    if (!logado) return
+    return abrirCanal(() => tokens.current?.accessToken ?? null, () => {
+      setMudancas((n) => n + 1)
+      relerUsuario()
+    })
+  }, [logado, relerUsuario])
 
   // O tema de quem entrou fica guardado para o próximo login neste celular
   const tema = usuario?.tema ?? ultimoTema
@@ -159,8 +180,8 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
 
   // As funções não mudam (nem quando o token é renovado): as telas podem usá-las para recarregar sem repetir à toa
   const sessao = useMemo(
-    () => ({ carregando, usuario, tema, entrar, sair, trocarTema, chamar }),
-    [carregando, usuario, tema, entrar, sair, trocarTema, chamar],
+    () => ({ carregando, usuario, tema, entrar, sair, trocarTema, chamar, mudancas }),
+    [carregando, usuario, tema, entrar, sair, trocarTema, chamar, mudancas],
   )
 
   return <SessaoContext.Provider value={sessao}>{children}</SessaoContext.Provider>
@@ -170,4 +191,15 @@ export function useSessao(): Sessao {
   const sessao = useContext(SessaoContext)
   if (!sessao) throw new Error('useSessao precisa estar dentro do SessaoProvider')
   return sessao
+}
+
+/**
+ * Carrega a tela toda vez que ela aparece e de novo quando chega um aviso de mudança com ela aberta (alguém mudou
+ * algo no site ou em outro app). Para as telas de lista e de detalhe; os formulários não usam, para nada mudar
+ * embaixo de quem está preenchendo.
+ */
+export function useCarregarNaTela(carregar: () => unknown) {
+  const { mudancas } = useSessao()
+  // mudancas entra só para a função mudar a cada aviso: o useFocusEffect roda de novo quando a função muda
+  useFocusEffect(useCallback(() => { carregar() }, [carregar, mudancas]))
 }

@@ -40,6 +40,7 @@ como ele é hoje, mais os que surgiram no desenvolvimento. **Situação:** ✅ f
 | RNF-07 | API documentada | 🟡 | Scalar em `/docs` em desenvolvimento e a lista de rotas em [api.md](api.md); falta publicar |
 | RNF-08 | Testes automáticos e integração contínua | ✅ | Novo. 129 testes (xUnit) e GitHub Actions a cada push |
 | RNF-09 | Fácil para quem tem pouca prática com celular | ✅ | Novo. Botões grandes, textos simples, ações onde se procura |
+| RNF-10 | Site e app com os mesmos dados na hora | ✅ | Novo. O que muda num aparece no outro sem recarregar (SignalR): as telas abertas da empresa recarregam sozinhas |
 
 ## Regras de negócio
 

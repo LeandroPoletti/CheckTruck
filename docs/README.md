@@ -5,11 +5,11 @@ telas e rotas da API. Para instalar e rodar, veja o [README principal](../README
 
 | Documento | O que tem |
 |-----------|-----------|
-| [Arquitetura](arquitetura.md) | Visão geral, containers (site, app, API, banco, push), camadas do backend, decisões, segurança e como roda |
+| [Arquitetura](arquitetura.md) | Visão geral, containers (site, app, API, banco, push, canal de mudanças), camadas do backend, decisões, segurança e como roda |
 | [Banco de dados](banco-de-dados.md) | Diagramas ER (gerados do modelo do EF), separação por empresa e restrições |
 | [Domínio](dominio.md) | Diagramas de classes das entidades e dos serviços, e os enums |
 | [Casos de uso](casos-de-uso.md) | Casos de uso por perfil, casos de uso × permissões e o antes e depois |
-| [Fluxos](fluxos.md) | Diagramas de sequência: situação do caminhão, lançar OS, chamado com aviso, login e renovação, cadastro de empresa, km e avisos de troca |
+| [Fluxos](fluxos.md) | Diagramas de sequência: situação do caminhão, lançar OS, chamado com aviso, atualizar sozinho, login e renovação, cadastro de empresa, km e avisos de troca |
 | [Requisitos](requisitos.md) | Requisitos funcionais e não funcionais e regras de negócio, com a situação de cada um |
 | [Telas](telas.md) | Navegação do site e do app e quem vê cada tela |
 | [API](api.md) | Todas as rotas, com a permissão de cada uma |

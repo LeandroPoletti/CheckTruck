@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader, Card, Carregando, ErroCarregamento } from '../components/Layout'
-import { useCarga } from '../hooks/useCarga'
+import { useCargaDaTela } from '../hooks/useCarga'
 import { StatusBadge, PlacaBadge } from '../components/ui/Badges'
 import { BarraDeUso } from '../components/ui/BarraDeUso'
 import { Button, Select, CampoBusca } from '../components/ui/Form'
@@ -18,7 +18,7 @@ export default function Veiculos() {
   const usuario = obterUsuario()
   const podeCadastrar = pode(usuario, 'Veiculos')
   // Uma request: a API devolve cada veículo com fabricante, modelo, geração, potência, motorista e situação já calculada
-  const { dados: veiculos = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => veiculoService.listarSituacao())
+  const { dados: veiculos = [], carregando, erro, recarregar, tentarNovamente } = useCargaDaTela(() => veiculoService.listarSituacao())
   const [busca, setBusca] = useState('')
   const [geracaoFiltro, setGeracaoFiltro] = useState('todas')
   const [statusFiltro, setStatusFiltro] = useState('ativos')

@@ -3,6 +3,10 @@
 O site e o app mostram só o que as permissões de quem entrou liberam. Quem decide de verdade é a API: esconder
 uma tela é só para não confundir.
 
+As telas de lista e de detalhe se atualizam sozinhas: quando alguém da empresa muda alguma coisa, no site ou no app,
+a tela aberta recarrega em segundo plano, sem piscar (veja o canal de mudanças na [arquitetura](arquitetura.md)). As
+janelas de formulário não recarregam, para não mexer no que a pessoa está preenchendo.
+
 ## Site
 
 ```mermaid

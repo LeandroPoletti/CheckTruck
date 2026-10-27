@@ -4,7 +4,7 @@ import { Select } from '../components/ui/Form'
 import IntervalosDaGeracao from '../components/intervalos/IntervalosDaGeracao'
 import IntervalosDoCaminhao from '../components/intervalos/IntervalosDoCaminhao'
 import { geracaoService, tipoManutencaoService, intervaloVeiculoService } from '../services'
-import { useCarga } from '../hooks/useCarga'
+import { useCargaDaTela } from '../hooks/useCarga'
 import { obterUsuario } from '../services/sessao'
 import { ehDonoDoSistema } from '../data/acesso'
 import { ordemDasGeracoes } from '../data/domain'
@@ -26,7 +26,7 @@ export default function Intervalos() {
   const [veiculoId, setVeiculoId] = useState(null)
 
   // Listas fixas da página: gerações (com fabricante e modelo), caminhões ativos e tipos de manutenção
-  const { dados, carregando, erro, tentarNovamente } = useCarga(() =>
+  const { dados, carregando, erro, tentarNovamente } = useCargaDaTela(() =>
     Promise.all([geracaoService.listar(), intervaloVeiculoService.listarVeiculos(), tipoManutencaoService.listar()])
       .then(([geracoes, veiculos, tipos]) => {
         geracoes.sort(ordemDasGeracoes)

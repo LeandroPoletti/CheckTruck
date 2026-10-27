@@ -7,6 +7,7 @@ using CheckTruck.Repositorio;
 using CheckTruck.Repositorio.Seed;
 using CheckTruck.Dominio.Interfaces;
 using CheckTruck.Dominio.Servicos;
+using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
@@ -39,7 +40,8 @@ modelBuilder.EntityType<OrdemServico>().Ignore(o => o.LancadoPor);
 
 builder.Services.AddSingleton(modelBuilder.GetEdmModel());
 
-builder.Services.AddControllers()
+// Toda mudança que dá certo avisa os outros sites e apps abertos da empresa para recarregarem a tela (Avisos)
+builder.Services.AddControllers(options => options.Filters.Add<AvisoDeMudanca>())
     .AddOData(options =>
     {
         options.OrderBy().Count().Filter().SetMaxTop(100);
@@ -58,8 +60,25 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     options.ClientErrorMapping[StatusCodes.Status404NotFound].Title = "Não encontrado";
 });
 
-// Token Bearer em todas as rotas; quem pode o quê fica nos filtros da pasta Acesso
-builder.Services.AddAuthentication(IdentityConstants.BearerScheme).AddBearerToken(IdentityConstants.BearerScheme);
+// Token Bearer em todas as rotas; quem pode o quê fica nos filtros da pasta Acesso. O canal de mudanças (WebSocket)
+// não tem como mandar o cabeçalho Authorization: o token vem no endereço, em access_token
+builder.Services.AddAuthentication(IdentityConstants.BearerScheme)
+    .AddBearerToken(IdentityConstants.BearerScheme, opcoes =>
+    {
+        opcoes.Events = new BearerTokenEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var token = context.Request.Query["access_token"].ToString();
+                if (token.Length > 0 && context.Request.Path.StartsWithSegments(CanalDeMudancas.Caminho))
+                {
+                    context.Token = token;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
+    });
 builder.Services.AddAuthorization();
 
 builder.Services.AddIdentityCore<Usuario>(options =>
@@ -98,6 +117,7 @@ builder.Services.AddScoped<ServicoTipoManutencao>();
 builder.Services.AddScoped<ServicoIntervaloRecomendado>();
 builder.Services.AddScoped<ServicoIntervaloVeiculo>();
 builder.Services.AddScoped<ServicoCelular>();
+builder.Services.AddSignalR();
 // Aviso no celular (push) pelo serviço do Expo. Se ele demorar, quem abriu o chamado não espera mais que isso
 builder.Services.AddHttpClient<IEnviadorDeAvisos, AvisosPeloExpo>(http => http.Timeout = TimeSpan.FromSeconds(5));
 builder.Services.AddCors(options =>
@@ -124,6 +144,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<CanalDeMudancas>(CanalDeMudancas.Caminho);
 
 using (var scope = app.Services.CreateScope())
 {

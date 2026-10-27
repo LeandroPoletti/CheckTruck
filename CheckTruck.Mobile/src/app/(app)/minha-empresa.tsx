@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { useFocusEffect } from 'expo-router'
-import { useSessao } from '@/servicos/sessao'
+import { useCarregarNaTela, useSessao } from '@/servicos/sessao'
 import { minhaEmpresa, type Empresa } from '@/servicos/empresa'
 import { formatarDocumento } from '@/dados/empresa'
 import MensagemErro from '@/componentes/MensagemErro'
@@ -23,7 +22,7 @@ export default function MinhaEmpresa() {
     }
   }, [chamar])
 
-  useFocusEffect(useCallback(() => { carregar() }, [carregar]))
+  useCarregarNaTela(carregar)
 
   // O CNPJ; nas contas antigas de uma pessoa só, o CPF dela
   const nomeDoDocumento = empresa?.documento?.length === 11 ? 'CPF' : 'CNPJ'

@@ -1,4 +1,5 @@
 import { useEffect, useEffectEvent, useState } from 'react'
+import { quandoMudar } from '../services/mudancas'
 
 // Carrega da API os dados de uma tela (ou modal) e cuida do resto: carregando, erro, tentar de novo e recarregar.
 //   carregar: função que devolve uma Promise com os dados (ex.: () => paisService.listar())
@@ -29,4 +30,13 @@ export function useCarga(carregar, deps = []) {
       setVersao((v) => v + 1)
     },
   }
+}
+
+// Igual ao useCarga, para as telas: recarrega sozinha (em segundo plano, sem piscar) quando alguém da empresa muda
+// alguma coisa no site ou no app. Os modais continuam no useCarga, para nada mudar embaixo de quem está preenchendo.
+export function useCargaDaTela(carregar, deps = []) {
+  const carga = useCarga(carregar, deps)
+  const recarregar = useEffectEvent(carga.recarregar)
+  useEffect(() => quandoMudar(() => recarregar()), [])
+  return carga
 }

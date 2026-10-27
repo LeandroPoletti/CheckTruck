@@ -6,14 +6,14 @@ import { AcoesDoCatalogo } from '../components/ui/AcoesLinha'
 import GeracaoModal from '../components/modals/GeracaoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { geracaoService } from '../services'
-import { useCarga } from '../hooks/useCarga'
+import { useCargaDaTela } from '../hooks/useCarga'
 import { contemBusca, nomeDoModelo, ordemDasGeracoes, agruparPorModelo } from '../data/domain'
 
 // Gerações = épocas de cada modelo no Brasil (anos, norma, motor, câmbio) com as potências.
 export default function Geracoes() {
   // As gerações já trazem fabricante, modelo e potências
   const { dados: geracoes = [], carregando, erro, recarregar, tentarNovamente } =
-    useCarga(() => geracaoService.listar().then((lista) => lista.sort(ordemDasGeracoes)))
+    useCargaDaTela(() => geracaoService.listar().then((lista) => lista.sort(ordemDasGeracoes)))
   const [busca, setBusca] = useState('')
   const [modeloFiltro, setModeloFiltro] = useState('todos')
   const [modal, setModal] = useState(null) // { registro } (null ao cadastrar) enquanto o modal está aberto

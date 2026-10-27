@@ -11,6 +11,10 @@ fica em `/docs`.
 - **Permissão** na tabela: o que a rota exige além de estar logado. "Gestão" = Admin ou Gestor; "Dono" = dono do
   sistema.
 - **Enums** vão como texto (ex.: `"Vazamento"`, `"Alta"`), menos o componente do tipo de manutenção, que vai como número.
+- **Canal de mudanças:** `/hubs/mudancas` (SignalR, com o token em `access_token`). Depois de toda mudança que deu
+  certo (POST, PUT ou DELETE), a API manda `mudou` para os sites e apps abertos da mesma empresa (a do dono do
+  sistema vai para todos), e eles recarregam a tela. Quem fez a mudança manda o id da conexão dele no cabeçalho
+  `X-Conexao` e não recebe o próprio aviso. O celular (`api/Celular`) não avisa ninguém.
 
 ## Login
 

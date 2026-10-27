@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Tabela, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
-import { useCarga } from '../hooks/useCarga'
+import { useCargaDaTela } from '../hooks/useCarga'
 import { Button, CampoBusca } from '../components/ui/Form'
 import MecanicoModal from '../components/modals/MecanicoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
@@ -12,7 +12,7 @@ import { contemBusca } from '../data/domain'
 
 // Quem faz as trocas nas OS
 export default function Mecanicos() {
-  const { dados: mecanicos = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => mecanicoService.listar())
+  const { dados: mecanicos = [], carregando, erro, recarregar, tentarNovamente } = useCargaDaTela(() => mecanicoService.listar())
   const [busca, setBusca] = useState('')
   const [modal, setModal] = useState(null) // { registro } ao cadastrar/editar
   const [excluindo, setExcluindo] = useState(null)

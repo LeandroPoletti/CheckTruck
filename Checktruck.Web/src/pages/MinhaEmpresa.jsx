@@ -1,11 +1,11 @@
 import { PageHeader, Card, Carregando, ErroCarregamento } from '../components/Layout'
 import { empresaService } from '../services'
-import { useCarga } from '../hooks/useCarga'
+import { useCargaDaTela } from '../hooks/useCarga'
 import { formatDocumento } from '../data/acesso'
 
 // Dados da empresa no CheckTruck (só Admin e Gestor chegam nesta tela)
 export default function MinhaEmpresa() {
-  const { dados: empresa, carregando, erro, tentarNovamente } = useCarga(() => empresaService.obterMinha())
+  const { dados: empresa, carregando, erro, tentarNovamente } = useCargaDaTela(() => empresaService.obterMinha())
 
   if (carregando) return <Carregando />
   if (erro) return <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />

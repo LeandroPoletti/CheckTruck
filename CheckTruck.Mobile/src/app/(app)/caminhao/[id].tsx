@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import { Feather } from '@expo/vector-icons'
-import { useSessao } from '@/servicos/sessao'
+import { useCarregarNaTela, useSessao } from '@/servicos/sessao'
 import { historicoDeKm, situacaoDoCaminhao, type Caminhao, type RegistroDeKm } from '@/servicos/caminhoes'
 import { kmDaMaiorOs, maisNovaPrimeiro, ordensDoCaminhao, type OrdemDeServico } from '@/servicos/ordens'
 import { formatDataHora, formatKm } from '@/dados/formato'
@@ -46,7 +46,7 @@ export default function DetalheDoCaminhao() {
     }
   }, [chamar, id])
 
-  useFocusEffect(useCallback(() => { carregar() }, [carregar]))
+  useCarregarNaTela(carregar)
 
   async function puxarParaAtualizar() {
     setPuxando(true)

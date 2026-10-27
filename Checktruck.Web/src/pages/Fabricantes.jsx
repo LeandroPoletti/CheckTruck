@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader, Tabela, EmptyState, Carregando, ErroCarregamento } from '../components/Layout'
-import { useCarga } from '../hooks/useCarga'
+import { useCargaDaTela } from '../hooks/useCarga'
 import { Button, CampoBusca } from '../components/ui/Form'
 import { AcoesDoCatalogo } from '../components/ui/AcoesLinha'
 import FabricanteModal from '../components/modals/FabricanteModal'
@@ -11,7 +11,7 @@ import { contemBusca } from '../data/domain'
 
 export default function Fabricantes() {
   // O DTO do fabricante já traz o país, então basta uma request
-  const { dados: fabricantes = [], carregando, erro, recarregar, tentarNovamente } = useCarga(() => fabricanteService.listar())
+  const { dados: fabricantes = [], carregando, erro, recarregar, tentarNovamente } = useCargaDaTela(() => fabricanteService.listar())
   const [busca, setBusca] = useState('')
   const [modal, setModal] = useState(null) // { registro } ao cadastrar/editar
   const [excluindo, setExcluindo] = useState(null)
