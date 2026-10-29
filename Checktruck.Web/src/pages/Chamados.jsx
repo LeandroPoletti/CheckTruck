@@ -8,19 +8,22 @@ import AcoesLinha from '../components/ui/AcoesLinha'
 import ChamadoModal from '../components/modals/ChamadoModal'
 import ResolverChamadoModal from '../components/modals/ResolverChamadoModal'
 import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
+import VerMais from '../components/ui/VerMais'
 import { chamadoService } from '../services'
 import { useCargaDaTela } from '../hooks/useCarga'
 import { obterUsuario } from '../services/sessao'
 import { pode } from '../data/acesso'
 import { nomeTipoOcorrencia } from '../data/chamados'
 import { formatDataHora } from '../data/domain'
+import { POR_VEZ } from '../data/pagina'
 
 const ABAS = [
   { id: 'Pendente', label: 'Pendentes' },
   { id: 'Concluido', label: 'Concluídos' },
 ]
 
-// Quem só abre chamado vê os próprios; quem atende vê todos (a API já devolve filtrado).
+// Quem só abre chamado vê os próprios; quem atende vê todos (a API já devolve filtrado). Os pendentes vêm todos, e os
+// concluídos, 50 de cada vez (Ver mais).
 export default function Chamados() {
   const navigate = useNavigate()
   const eu = obterUsuario()
@@ -29,7 +32,9 @@ export default function Chamados() {
   const podeVerCaminhao = pode(eu, 'VerFrota')
 
   const [aba, setAba] = useState('Pendente')
-  const { dados: chamados = [], carregando, erro, recarregar, tentarNovamente } = useCargaDaTela(() => chamadoService.listar())
+  const [quantosConcluidos, setQuantosConcluidos] = useState(POR_VEZ)
+  const { dados, carregando, erro, recarregar, tentarNovamente } = useCargaDaTela(
+    () => chamadoService.listar(quantosConcluidos), [quantosConcluidos], { manter: 'chamados' })
   const [erroAcao, setErroAcao] = useState(null)
   const [editando, setEditando] = useState(null) // { chamado } (null ao abrir) enquanto o modal está aberto
   const [resolvendo, setResolvendo] = useState(null)
@@ -51,11 +56,9 @@ export default function Chamados() {
   if (carregando) return <Carregando />
   if (erro) return <ErroCarregamento mensagem={erro.message} onTentarNovamente={tentarNovamente} />
 
-  const contagem = {
-    Pendente: chamados.filter((c) => c.status === 'Pendente').length,
-    Concluido: chamados.filter((c) => c.status === 'Concluido').length,
-  }
-  const lista = chamados.filter((c) => c.status === aba)
+  const { pendentes, concluidos } = dados
+  const contagem = { Pendente: pendentes.length, Concluido: concluidos.total }
+  const lista = aba === 'Pendente' ? pendentes : concluidos.itens
 
   return (
     <>
@@ -120,6 +123,15 @@ export default function Chamados() {
             </Card>
           ))}
         </div>
+      )}
+      {aba === 'Concluido' && (
+        <VerMais
+          quantos={quantosConcluidos}
+          mostrando={concluidos.itens.length}
+          total={concluidos.total}
+          onVerMais={setQuantosConcluidos}
+          className="mt-5"
+        />
       )}
 
       {editando && <ChamadoModal chamado={editando.chamado} onClose={() => setEditando(null)} onSalvo={recarregar} />}

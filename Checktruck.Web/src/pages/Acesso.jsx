@@ -8,7 +8,7 @@ import ConfirmarExclusaoModal from '../components/modals/ConfirmarExclusaoModal'
 import { usuarioService } from '../services'
 import { useCargaDaTela } from '../hooks/useCarga'
 import { obterUsuario } from '../services/sessao'
-import { PERMISSOES, nomeCargo, formatCpf } from '../data/acesso'
+import { PERMISSOES, nomeCargo, formatCpf, podeMexerNoAcesso } from '../data/acesso'
 
 const ABAS = [
   { id: 'ativos', label: 'Ativos' },
@@ -74,13 +74,17 @@ export default function Acesso() {
                 {u.cuidaDosAcessos ? 'Todas' : `${u.permissoes.length} de ${PERMISSOES.length}`}
               </td>
               <td className="px-5 py-3.5">
-                <div className="flex justify-end gap-2">
-                  <BotaoLinha onClick={() => setEditando({ usuario: u })}>Editar</BotaoLinha>
-                  {u.ativo && !u.adminDoSistema && u.id !== eu.id && (
-                    <BotaoLinha perigo onClick={() => setDesativando(u)}>Desativar</BotaoLinha>
-                  )}
-                  {!u.ativo && <BotaoLinha onClick={() => ativar(u)}>Ativar</BotaoLinha>}
-                </div>
+                {podeMexerNoAcesso(eu, u) ? (
+                  <div className="flex justify-end gap-2">
+                    <BotaoLinha onClick={() => setEditando({ usuario: u })}>Editar</BotaoLinha>
+                    {u.ativo && !u.adminDoSistema && u.id !== eu.id && (
+                      <BotaoLinha perigo onClick={() => setDesativando(u)}>Desativar</BotaoLinha>
+                    )}
+                    {!u.ativo && <BotaoLinha onClick={() => ativar(u)}>Ativar</BotaoLinha>}
+                  </div>
+                ) : (
+                  <p className="text-right text-sm text-stone-500">Só um Admin muda</p>
+                )}
               </td>
             </tr>
           ))}

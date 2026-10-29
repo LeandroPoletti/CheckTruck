@@ -12,20 +12,29 @@ const voltar = {
     (previousRetryCount < 3 ? 2000 : 10000),
 }
 
+// Vários avisos seguidos viram uma recarga só
+const JUNTAR_AVISOS_MS = 500
+
 /** Abre o canal de quem está logado e chama aoMudar a cada aviso. Devolve a função que fecha (ao sair). */
 export function abrirCanal(token: () => string | null, aoMudar: () => void): () => void {
+  let juntando: ReturnType<typeof setTimeout> | undefined
+  const avisar = () => {
+    clearTimeout(juntando)
+    juntando = setTimeout(aoMudar, JUNTAR_AVISOS_MS)
+  }
+
   const conexao = new HubConnectionBuilder()
     .withUrl(`${API_URL}/hubs/mudancas`, { accessTokenFactory: () => token() ?? '', withCredentials: false })
     .withAutomaticReconnect(voltar)
     .configureLogging(LogLevel.None)
     .build()
 
-  conexao.on('mudou', aoMudar)
+  conexao.on('mudou', avisar)
   conexao.onreconnecting(() => definirConexao(null))
   // Enquanto esteve fora pode ter perdido algum aviso: recarrega também
   conexao.onreconnected(() => {
     definirConexao(conexao.connectionId)
-    aoMudar()
+    avisar()
   })
 
   let fechado = false
@@ -43,6 +52,7 @@ export function abrirCanal(token: () => string | null, aoMudar: () => void): () 
   return () => {
     fechado = true
     clearTimeout(espera)
+    clearTimeout(juntando)
     definirConexao(null)
     conexao.stop()
   }

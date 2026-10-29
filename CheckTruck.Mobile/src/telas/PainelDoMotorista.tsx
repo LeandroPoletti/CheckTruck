@@ -14,6 +14,9 @@ import Saudacao from '@/componentes/Saudacao'
 import SituacaoDoCaminhao from '@/componentes/SituacaoDoCaminhao'
 import { comTema, cores, fontes } from '@/tema'
 
+/** Os chamados dele que aparecem na tela (os mais novos). */
+const CHAMADOS_NA_TELA = 5
+
 // Tela do motorista: o caminhão que está com ele (próximas trocas em km e data), atualizar o km, os chamados e, no
 // fim, os avisos de troca do celular.
 // Recarrega sempre que a tela volta a aparecer (ex.: depois de atualizar o km) e ao puxar para baixo.
@@ -30,10 +33,13 @@ export default function PainelDoMotorista({ usuario }: { usuario: Usuario }) {
     try {
       const [lista, abertos] = await Promise.all([
         meusCaminhoes(chamar),
-        podeAbrirChamado ? listarChamados(chamar) : Promise.resolve([]),
+        podeAbrirChamado ? listarChamados(chamar, CHAMADOS_NA_TELA) : null,
       ])
       setCaminhoes(lista)
-      setChamados(abertos)
+      // Os mais novos primeiro, pendentes ou concluídos
+      setChamados(abertos === null ? [] : [...abertos.pendentes, ...abertos.concluidos.itens]
+        .sort((a, b) => b.abertoEm.localeCompare(a.abertoEm))
+        .slice(0, CHAMADOS_NA_TELA))
       setErro('')
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Não foi possível carregar.')
@@ -98,7 +104,7 @@ export default function PainelDoMotorista({ usuario }: { usuario: Usuario }) {
               />
               {chamados.length === 0
                 ? <Text style={estilos.vazio}>Você ainda não abriu nenhum chamado.</Text>
-                : chamados.slice(0, 5).map((c) => <CartaoDoChamado key={c.id} chamado={c} />)}
+                : chamados.map((c) => <CartaoDoChamado key={c.id} chamado={c} />)}
             </>
           )}
 

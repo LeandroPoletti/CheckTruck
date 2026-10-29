@@ -6,6 +6,13 @@ using CheckTruck.Dominio.Enums;
 
 namespace CheckTruck.Api.Dtos.Veiculos;
 
+/// <summary>Atualizar km: o km do painel do caminhão agora.</summary>
+public class AtualizarKmRequestDto
+{
+    [Range(0, int.MaxValue, ErrorMessage = "O km do caminhão não pode ser negativo.")]
+    public int Km { get; set; }
+}
+
 /// <summary>Correção de km feita por Admin ou Gestor (ex.: alguém digitou um zero a mais).</summary>
 public class CorrecaoKmRequestDto
 {
@@ -31,7 +38,7 @@ public class RegistroKmResponseDto
     public string? Motivo { get; set; }
 
     /// <summary>Número da OS que subiu o km; null se não foi OS ou se a OS foi excluída.</summary>
-    public long? OrdemServicoId { get; set; }
+    public int? OrdemServicoNumero { get; set; }
     public UsuarioResumoDto? RegistradoPor { get; set; }
     public DateTime RegistradoEm { get; set; }
 }
@@ -45,7 +52,7 @@ public static class RegistroKmDtoExtensions
         KmNovo = r.KmNovo,
         Origem = r.Origem,
         Motivo = r.Motivo,
-        OrdemServicoId = r.OrdemServico == null ? null : r.OrdemServico.Id,
+        OrdemServicoNumero = r.OrdemServico == null ? null : r.OrdemServico.Numero,
         RegistradoPor = r.RegistradoPor == null ? null : new UsuarioResumoDto { Id = r.RegistradoPor.Id, Nome = r.RegistradoPor.Nome },
         RegistradoEm = r.RegistradoEm
     };

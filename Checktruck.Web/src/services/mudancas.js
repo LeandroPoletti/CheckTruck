@@ -11,7 +11,23 @@ export function quandoMudar(aoMudar) {
   return () => { ouvintes.delete(aoMudar) }
 }
 
-const avisar = () => ouvintes.forEach((aoMudar) => aoMudar())
+// Vários avisos seguidos viram uma recarga só. Com a aba do navegador escondida, a recarga espera ela voltar
+const JUNTAR_AVISOS_MS = 500
+let juntando
+let mudouEscondido = false
+const chamarOuvintes = () => ouvintes.forEach((aoMudar) => aoMudar())
+function avisar() {
+  clearTimeout(juntando)
+  juntando = setTimeout(() => {
+    if (document.hidden) mudouEscondido = true
+    else chamarOuvintes()
+  }, JUNTAR_AVISOS_MS)
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden || !mudouEscondido) return
+  mudouEscondido = false
+  chamarOuvintes()
+})
 
 // Caiu (rede, API reiniciada): tenta voltar para sempre, nas primeiras vezes logo e depois a cada 10 segundos
 const voltar = { nextRetryDelayInMilliseconds: ({ previousRetryCount }) => (previousRetryCount < 3 ? 2000 : 10000) }

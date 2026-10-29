@@ -58,7 +58,46 @@ public class ServicoOrdemServico(
         return base.Valida(entidade);
     }
 
-    /// <summary>Lança a OS: quem lançou e quando ficam gravados. Os mecânicos e o motorista precisam estar ativos.</summary>
+    /// <summary>
+    /// OS da frota, da troca mais nova para a mais velha. Filtros (todos opcionais): tipo trocado, período da troca
+    /// (de e até, os dois dias entram) e busca pela placa (com ou sem hífen) ou pelo número da OS.
+    /// </summary>
+    public IQueryable<OrdemServico> Filtrar(long? tipoId, string? busca, DateOnly? de, DateOnly? ate)
+    {
+        var ordens = Query(_ => true);
+        if (tipoId is { } tipo)
+        {
+            ordens = ordens.Where(o => o.Itens.Any(i => i.TipoManutencao.Id == tipo));
+        }
+
+        // A data da troca fica no banco à meia-noite, em UTC
+        if (de is { } primeiroDia)
+        {
+            var desde = primeiroDia.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+            ordens = ordens.Where(o => o.RealizadoEm >= desde);
+        }
+
+        if (ate is { } ultimoDia)
+        {
+            var antesDe = ultimoDia.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+            ordens = ordens.Where(o => o.RealizadoEm < antesDe);
+        }
+
+        // Só letras e números, em maiúscula: "abc1d23" e "ABC-1D23" acham a mesma placa
+        var termo = new string((busca ?? "").Where(char.IsLetterOrDigit).ToArray()).ToUpperInvariant();
+        if (termo.Length > 0)
+        {
+            int? numero = int.TryParse(termo, out var n) ? n : null;
+            ordens = ordens.Where(o => o.Veiculo.Placa.Replace("-", "").Contains(termo) || o.Numero == numero);
+        }
+
+        return ordens.OrderByDescending(o => o.RealizadoEm).ThenByDescending(o => o.Numero);
+    }
+
+    /// <summary>
+    /// Lança a OS com o próximo número da empresa: quem lançou e quando ficam gravados. Os mecânicos e o motorista
+    /// precisam estar ativos.
+    /// </summary>
     public override OrdemServico? Inserir(OrdemServico entidade)
     {
         ConferirAtivos(entidade);
@@ -67,6 +106,9 @@ public class ServicoOrdemServico(
             return null;
         }
 
+        // A consulta só olha a empresa de quem está logado. Duas OS lançadas no mesmo instante pegam o mesmo número:
+        // o índice único barra a segunda, e quem lançou tenta de novo
+        entidade.Numero = (Query(_ => true).Max(o => (int?)o.Numero) ?? 0) + 1;
         entidade.LancadoPor = usuarioLogado.Usuario;
         entidade.CriadoEm = DateTime.UtcNow;
         AtualizarKmDoVeiculo(entidade);
@@ -81,6 +123,14 @@ public class ServicoOrdemServico(
     /// </summary>
     public override OrdemServico? Atualizar(OrdemServico entidade)
     {
+        // Alguém corrigiu a OS depois que a pessoa abriu: avisa antes das outras regras
+        var versao = entidade.Versao;
+        if (!Query(o => o.Id == entidade.Id && o.Versao == versao).Any())
+        {
+            Mensagens.Add(ConflitoDeEdicao);
+            return null;
+        }
+
         entidade.AtualizadoEm = DateTime.UtcNow;
         if (!PreencherProximaTroca(entidade) || !Valida(entidade))
         {

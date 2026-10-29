@@ -1,4 +1,5 @@
 using CheckTruck.Api.Acesso;
+using CheckTruck.Api.Dtos.Comuns;
 using CheckTruck.Api.Dtos.OrdensServico;
 using CheckTruck.Dominio.Entidades;
 using CheckTruck.Dominio.Enums;
@@ -39,11 +40,20 @@ public class OrdemServicoController(
     [HttpGet]
     public ActionResult<IEnumerable<OrdemServicoResponseDto>> Get() => GetODataCore();
 
+    /// <summary>
+    /// OS da frota (tela de OS do site e do app), da troca mais nova para a mais velha: as primeiras (quantos) e o
+    /// total. Filtros: tipoId, busca (placa ou nº da OS), de e ate (aaaa-mm-dd, os dois dias entram).
+    /// </summary>
+    [HttpGet("pagina")]
+    public ActionResult<PaginaDto<OrdemServicoResponseDto>> GetPagina([FromQuery] FiltroDasOrdensDto filtro) =>
+        Completa(servicoOrdemServico.Filtrar(filtro.TipoId, filtro.Busca, filtro.De, filtro.Ate))
+            .Pagina(filtro.Quantos, ordens => ordens.AsEnumerable().Select(o => o.ToResponseDto()));
+
     [HttpGet("{id:long}")]
     public ActionResult<OrdemServicoResponseDto> GetById(long id) => GetByIdCore(id);
 
     /// <summary>
-    /// Lança uma ordem de serviço (permissão Ordem de serviço). O número da OS é o id, gerado em sequência.
+    /// Lança uma ordem de serviço (permissão Ordem de serviço). O número segue a sequência da empresa (1, 2, 3...).
     /// itens: o que foi trocado (um por tipo de manutenção). mecanicoIds: quem fez (pelo menos um).
     /// Quem lançou e a data/hora ficam gravados (lancadoPor / lancadoEm). motoristaId é opcional: quando vem,
     /// vira o motorista atual do caminhão. Se o kmProximaTroca de um item vier 0 ou a dataProximaTroca vier null,

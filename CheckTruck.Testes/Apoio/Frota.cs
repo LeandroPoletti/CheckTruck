@@ -66,6 +66,7 @@ public sealed class Frota
         var os = new OrdemServico
         {
             Id = Repositorio.Tabela<OrdemServico>().Count + 1,
+            Numero = Repositorio.Tabela<OrdemServico>().Count + 1,
             Veiculo = veiculo,
             RealizadoEm = realizadoEm,
             KmAtual = km,

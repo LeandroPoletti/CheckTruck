@@ -35,10 +35,10 @@ como ele é hoje, mais os que surgiram no desenvolvimento. **Situação:** ✅ f
 | RNF-02 | Respostas da API em menos de 3 segundos | 🟡 | Ainda não medido com carga. O cálculo da situação é feito no servidor; o aviso pelo Expo espera no máximo 5 s |
 | RNF-03 | Dados no PostgreSQL, na nuvem, com backup | 🟡 | PostgreSQL ✅; hoje roda local (Docker), sem nuvem e sem backup automático ⏳ |
 | RNF-04 | Segurança | ✅ | Token Bearer de 1 hora com renovação, senhas com hash, bloqueio por tentativas erradas, dados separados por empresa, empresa desativada não entra, HTTPS fora de desenvolvimento |
-| RNF-05 | Escalabilidade | 🟡 | Um banco para todas as empresas (multiempresa); ainda não foi publicada nem testada com carga |
-| RNF-06 | Integridade dos dados em camadas | ✅ | Banco (chaves, únicos, obrigatórios) + API (todas as regras) + telas (avisam antes de enviar) |
+| RNF-05 | Escalabilidade | 🟡 | Um banco para todas as empresas (multiempresa); as listas que crescem sempre vêm 50 de cada vez e os avisos seguidos viram uma recarga só; ainda não foi publicada nem testada com carga |
+| RNF-06 | Integridade dos dados em camadas | ✅ | Banco (chaves, únicos, obrigatórios) + API (todas as regras) + telas (avisam antes de enviar). Duas pessoas editando o mesmo caminhão ou a mesma OS: quem salva depois é avisado e nada é gravado |
 | RNF-07 | API documentada | 🟡 | Scalar em `/docs` em desenvolvimento e a lista de rotas em [api.md](api.md); falta publicar |
-| RNF-08 | Testes automáticos e integração contínua | ✅ | Novo. 129 testes (xUnit) e GitHub Actions a cada push |
+| RNF-08 | Testes automáticos e integração contínua | ✅ | Novo. 137 testes (xUnit) e GitHub Actions a cada push |
 | RNF-09 | Fácil para quem tem pouca prática com celular | ✅ | Novo. Botões grandes, textos simples, ações onde se procura |
 | RNF-10 | Site e app com os mesmos dados na hora | ✅ | Novo. O que muda num aparece no outro sem recarregar (SignalR): as telas abertas da empresa recarregam sozinhas |
 
@@ -62,7 +62,7 @@ como ele é hoje, mais os que surgiram no desenvolvimento. **Situação:** ✅ f
 | RN-14 | **Aviso de chamado novo** para quem pode atender na mesma empresa, menos quem abriu; se o aviso falhar, o chamado continua aberto | `ServicoCelular` | `CelularTests` |
 | RN-15 | **Dados separados por empresa:** a empresa nunca vem do front; o banco filtra todas as consultas e alterações pela empresa de quem está logado | `Context` (filtro global) | `SeparacaoEntreEmpresasTests` |
 | RN-16 | **Catálogo do sistema e da empresa:** o do sistema só o dono do sistema muda; o da empresa só ela vê. Nomes não repetem; não se exclui o que está em uso | `ServicoCatalogo` e filhos | `SeparacaoEntreEmpresasTests` (só a separação) |
-| RN-17 | **Acessos:** só Admin e Gestor cadastram, editam e desativam; ninguém tira o próprio cargo de gestão; CPF único na empresa | `ServicoUsuario` | `DocumentosTests` (CPF e CNPJ) |
+| RN-17 | **Acessos:** só Admin e Gestor cadastram, editam e desativam; o acesso de um Admin, e o cargo de Admin, só um Admin muda; ninguém tira o próprio cargo de gestão; CPF único na empresa | `ServicoUsuario` | `DocumentosTests` (CPF e CNPJ), `AdminEGestorTests` |
 | RN-18 | **Valores aceitos:** nenhum número negativo; anos de 1900 até o ano que vem, e o ano modelo é o de fabricação ou o seguinte; Renavam opcional, com 11 números | `ServicoVeiculo` e demais serviços | `VeiculoTests` |
 | RN-19 | **Empresas:** só o dono do sistema cadastra, sempre com o Admin dela; CNPJ válido e que não repete; empresa desativada não entra nem renova o login, e os dados ficam guardados | `ServicoEmpresa`, filtros de acesso, `ConfirmacaoUsuarioAtivo` | `EmpresaTests` |
 

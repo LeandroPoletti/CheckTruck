@@ -7,6 +7,7 @@ import { historicoDeKm, situacaoDoCaminhao, type Caminhao, type RegistroDeKm } f
 import { kmDaMaiorOs, maisNovaPrimeiro, ordensDoCaminhao, type OrdemDeServico } from '@/servicos/ordens'
 import { formatDataHora, formatKm } from '@/dados/formato'
 import { TODO_O_PERIODO, noPeriodo } from '@/dados/periodo'
+import { POR_VEZ, type Pagina } from '@/dados/pagina'
 import { ORIGENS_KM } from '@/dados/caminhoes'
 import Atalho from '@/componentes/Atalho'
 import Botao from '@/componentes/Botao'
@@ -15,12 +16,13 @@ import FiltroPeriodo from '@/componentes/FiltroPeriodo'
 import MensagemErro from '@/componentes/MensagemErro'
 import SituacaoDoCaminhao from '@/componentes/SituacaoDoCaminhao'
 import TelaComTopo from '@/componentes/TelaComTopo'
+import VerMais from '@/componentes/VerMais'
 import { comTema, cores, coresDoStatus, fontes } from '@/tema'
 
-type Dados = { caminhao: Caminhao; ordens: OrdemDeServico[]; historico: RegistroDeKm[] }
+type Dados = { caminhao: Caminhao; ordens: OrdemDeServico[]; historico: Pagina<RegistroDeKm> }
 
 // Tudo de um caminhão, igual ao detalhe no web: a situação (com Atualizar km e Lançar OS), o histórico de manutenções
-// (com o filtro de período) e o histórico de km. Editar (permissão Veículos), Corrigir km (Admin e Gestor) e Intervalos de troca para quem pode.
+// (com o filtro de período) e o histórico de km (50 de cada vez, Ver mais). Editar (permissão Veículos), Corrigir km (Admin e Gestor) e Intervalos de troca para quem pode.
 // Recarrega ao voltar para a tela (ex.: depois de atualizar o km) e ao puxar para baixo.
 export default function DetalheDoCaminhao() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -30,6 +32,7 @@ export default function DetalheDoCaminhao() {
   const [erro, setErro] = useState('')
   const [puxando, setPuxando] = useState(false)
   const [periodo, setPeriodo] = useState(TODO_O_PERIODO)
+  const [quantosKm, setQuantosKm] = useState(POR_VEZ)
   const ordensNoPeriodo = dados?.ordens.filter((os) => noPeriodo(os.realizadoEm, periodo)) ?? []
 
   const carregar = useCallback(async () => {
@@ -37,14 +40,14 @@ export default function DetalheDoCaminhao() {
       const [caminhao, ordens, historico] = await Promise.all([
         situacaoDoCaminhao(chamar, Number(id)),
         ordensDoCaminhao(chamar, Number(id)),
-        historicoDeKm(chamar, Number(id)),
+        historicoDeKm(chamar, Number(id), quantosKm),
       ])
       setDados({ caminhao, ordens: [...ordens].sort(maisNovaPrimeiro), historico })
       setErro('')
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Não foi possível carregar o caminhão.')
     }
-  }, [chamar, id])
+  }, [chamar, id, quantosKm])
 
   useCarregarNaTela(carregar)
 
@@ -114,13 +117,19 @@ export default function DetalheDoCaminhao() {
               )}
 
             <Text style={estilos.secao}>Histórico de km</Text>
-            {dados.historico.length === 0
+            {dados.historico.itens.length === 0
               ? <Text style={estilos.vazio}>Nenhuma mudança de km registrada ainda.</Text>
               : (
                 <View style={estilos.lista}>
-                  {dados.historico.map((h, i) => <LinhaDoKm key={h.id} registro={h} primeira={i === 0} />)}
+                  {dados.historico.itens.map((h, i) => <LinhaDoKm key={h.id} registro={h} primeira={i === 0} />)}
                 </View>
               )}
+            <VerMais
+              quantos={quantosKm}
+              mostrando={dados.historico.itens.length}
+              total={dados.historico.total}
+              aoVerMais={setQuantosKm}
+            />
           </>
         )}
       </ScrollView>
@@ -131,7 +140,7 @@ export default function DetalheDoCaminhao() {
 // "OS nº 12" quando foi uma OS (ou "OS excluída", se ela saiu); o resto pelo nome da origem
 function textoDaOrigem(h: RegistroDeKm) {
   if (h.origem !== 'OrdemServico') return ORIGENS_KM[h.origem] ?? h.origem
-  return h.ordemServicoId ? `OS nº ${h.ordemServicoId}` : 'OS excluída'
+  return h.ordemServicoNumero ? `OS nº ${h.ordemServicoNumero}` : 'OS excluída'
 }
 
 function LinhaDoKm({ registro: h, primeira }: { registro: RegistroDeKm; primeira: boolean }) {

@@ -30,7 +30,15 @@ export const intervaloVeiculoService = {
     return data.map(m.intervalosDoItemFromApi)
   },
 }
-export const ordemServicoService = criarCrud('OrdemServico', { fromApi: m.ordemServicoFromApi, toApi: m.ordemServicoToApi })
+export const ordemServicoService = {
+  ...criarCrud('OrdemServico', { fromApi: m.ordemServicoFromApi, toApi: m.ordemServicoToApi }),
+  // OS da frota, da troca mais nova para a mais velha, já filtradas pela API: as primeiras (quantos) e o total.
+  // Filtros: tipoId, busca (placa ou nº da OS), de e ate (aaaa-mm-dd). quantos 0 traz só o total.
+  async listarPagina({ tipoId, busca, de, ate }, quantos) {
+    const { data } = await api.get('/api/OrdemServico/pagina', { params: { tipoId, busca, de, ate, quantos } })
+    return { itens: data.itens.map(m.ordemServicoFromApi), total: data.total }
+  },
+}
 export const mecanicoService = criarCrud('Mecanico', { fromApi: m.mecanicoFromApi, toApi: m.mecanicoToApi })
 
 export const veiculoService = {
@@ -45,16 +53,14 @@ export const veiculoService = {
     const { data } = await api.get(`/api/Veiculo/${id}/situacao`)
     return m.veiculoSituacaoFromApi(data)
   },
-  // A API recebe a distância percorrida (km a somar), não o km absoluto.
-  async somarKm(id, distancia) {
-    await api.put(`/api/Veiculo/${id}/kilometragem`, distancia, {
-      headers: { 'Content-Type': 'application/json' },
-    })
+  // O km do painel agora (maior que o registrado)
+  async atualizarKm(id, km) {
+    await api.put(`/api/Veiculo/${id}/km`, { km })
   },
-  // Toda mudança de km do caminhão, da mais nova para a mais velha
-  async listarHistoricoKm(id) {
-    const { data } = await api.get(`/api/Veiculo/${id}/historico-km`)
-    return data.map(m.registroKmFromApi)
+  // As mudanças de km do caminhão, da mais nova para a mais velha: as primeiras (quantos) e o total
+  async listarHistoricoKm(id, quantos) {
+    const { data } = await api.get(`/api/Veiculo/${id}/historico-km`, { params: { quantos } })
+    return { itens: data.itens.map(m.registroKmFromApi), total: data.total }
   },
   // Só Admin e Gestor: pode baixar o km (não abaixo da maior OS); o motivo fica no histórico
   async corrigirKm(id, km, motivo) {
@@ -72,9 +78,13 @@ export const dashboardService = {
 
 // Chamados. Quem só abre vê os próprios; quem atende vê todos (a API filtra).
 export const chamadoService = {
-  async listar() {
-    const { data } = await api.get('/api/Chamado')
-    return data.map(m.chamadoFromApi)
+  // Todos os pendentes e os concluídos mais novos (quantosConcluidos), com o total de concluídos
+  async listar(quantosConcluidos) {
+    const { data } = await api.get('/api/Chamado', { params: { quantosConcluidos } })
+    return {
+      pendentes: data.pendentes.map(m.chamadoFromApi),
+      concluidos: { itens: data.concluidos.itens.map(m.chamadoFromApi), total: data.concluidos.total },
+    }
   },
   // Caminhões ativos ({ id, placa }) para escolher ao abrir: não precisa de "Ver frota"
   async listarVeiculos() {

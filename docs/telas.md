@@ -7,6 +7,11 @@ As telas de lista e de detalhe se atualizam sozinhas: quando alguém da empresa 
 a tela aberta recarrega em segundo plano, sem piscar (veja o canal de mudanças na [arquitetura](arquitetura.md)). As
 janelas de formulário não recarregam, para não mexer no que a pessoa está preenchendo.
 
+As listas que crescem sempre (OS da frota, chamados concluídos e histórico de km) mostram as 50 mais novas e, embaixo,
+"Mostrando 50 de 230" com o botão **Ver mais** (mais 50 de cada vez, até 500). Na tela de OS, a busca e o período
+procuram em todas, não só nas que aparecem. O app mostra os 10 últimos chamados concluídos e os 5 últimos chamados do
+motorista, como antes.
+
 ## Site
 
 ```mermaid

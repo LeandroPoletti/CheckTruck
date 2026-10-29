@@ -8,7 +8,8 @@ namespace CheckTruck.Dominio.Servicos;
 
 /// <summary>
 /// Regras dos acessos: cadastrar, editar (inclusive e-mail e senha) e ativar/desativar, só para Admin ou Gestor
-/// (a API confere antes). Também lista e acha os motoristas para o caminhão e a OS, sempre da própria empresa.
+/// (a API confere antes). O acesso de um Admin, e o cargo de Admin, só um Admin muda: o Gestor cuida dos outros.
+/// Também lista e acha os motoristas para o caminhão e a OS, sempre da própria empresa.
 /// O primeiro acesso de cada empresa (o Admin) é cadastrado pelo dono do sistema, que também define uma senha nova
 /// para ele quando ele esquece a dele.
 /// </summary>
@@ -21,6 +22,9 @@ public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usu
     public const string EmailDonoDoSistema = "dono@checktruck.com";
 
     public List<string> Mensagens { get; } = new();
+
+    private const string SoAdminMexeEmAdmin = "Só um Admin pode mudar ou desativar o acesso de um Admin.";
+    private const string SoAdminDaCargoDeAdmin = "Só um Admin pode dar o cargo de Admin.";
 
     public static bool EhAdminDoSistema(Usuario usuario) =>
         string.Equals(usuario.Email, EmailAdminDoSistema, StringComparison.OrdinalIgnoreCase);
@@ -45,6 +49,11 @@ public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usu
         }
 
         Preparar(novo, adminDoSistema: false);
+        if (novo.Cargo == Cargo.Admin && !LogadoEhAdmin())
+        {
+            Mensagens.Add(SoAdminDaCargoDeAdmin);
+        }
+
         ValidarCpfUnico(novo.Cpf, idIgnorar: null);
         if (Mensagens.Count > 0)
         {
@@ -119,8 +128,19 @@ public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usu
             return null;
         }
 
+        if (usuario.Cargo == Cargo.Admin && !LogadoEhAdmin())
+        {
+            Mensagens.Add(SoAdminMexeEmAdmin);
+            return null;
+        }
+
         var adminDoSistema = EhAdminDoSistema(usuario);
         Preparar(dados, adminDoSistema);
+        if (dados.Cargo == Cargo.Admin && !LogadoEhAdmin())
+        {
+            Mensagens.Add(SoAdminDaCargoDeAdmin);
+        }
+
         if (adminDoSistema && !string.Equals(dados.Email, usuario.Email, StringComparison.OrdinalIgnoreCase))
         {
             Mensagens.Add("O e-mail do admin do sistema não pode ser trocado.");
@@ -173,6 +193,12 @@ public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usu
         if (usuario is null)
         {
             Mensagens.Add("Acesso não encontrado.");
+            return null;
+        }
+
+        if (usuario.Cargo == Cargo.Admin && !LogadoEhAdmin())
+        {
+            Mensagens.Add(SoAdminMexeEmAdmin);
             return null;
         }
 
@@ -265,6 +291,8 @@ public class ServicoUsuario(UserManager<Usuario> userManager, IUsuarioLogado usu
 
     // O login (e-mail) vale para o sistema todo, então os acessos não têm o filtro automático do Context
     private long? EmpresaAtual() => usuarioLogado.Usuario!.EmpresaId;
+
+    private bool LogadoEhAdmin() => usuarioLogado.Usuario!.Cargo == Cargo.Admin;
 
     private IQueryable<Usuario> DaEmpresa()
     {

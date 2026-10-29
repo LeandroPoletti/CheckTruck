@@ -1,4 +1,5 @@
 import type { Chamar } from './sessao'
+import type { Pagina } from '@/dados/pagina'
 
 // Chamados: quem está com o caminhão abre, quem tem Atender chamados atende e resolve.
 
@@ -16,8 +17,12 @@ export type Chamado = {
   concluidoEm: string | null
 }
 
+/** Os chamados de uma tela: todos os pendentes e os concluídos mais novos, com o total de concluídos. */
+export type ChamadosDaTela = { pendentes: Chamado[]; concluidos: Pagina<Chamado> }
+
 /** Do mais novo para o mais velho. Quem só abre recebe os próprios; quem atende recebe todos. */
-export const listarChamados = (chamar: Chamar) => chamar<Chamado[]>('/api/Chamado')
+export const listarChamados = (chamar: Chamar, quantosConcluidos: number) =>
+  chamar<ChamadosDaTela>(`/api/Chamado?quantosConcluidos=${quantosConcluidos}`)
 
 /** Caminhões ativos (id e placa) para escolher ao abrir. O motorista só recebe os que estão com ele. */
 export const caminhoesDoChamado = (chamar: Chamar) => chamar<{ id: number; placa: string }[]>('/api/Chamado/veiculos')

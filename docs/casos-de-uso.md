@@ -71,7 +71,8 @@ flowchart LR
     ges --- uc18
 ```
 
-Admin e Gestor podem tudo, inclusive os casos de uso do campo. Só eles cuidam dos acessos e corrigem o km.
+Admin e Gestor podem tudo, inclusive os casos de uso do campo. Só eles cuidam dos acessos e corrigem o km. O acesso
+de um Admin, e o cargo de Admin, só um Admin muda.
 
 ## Dono do sistema
 

@@ -87,18 +87,28 @@ public class ServicoVeiculo(
         return base.Inserir(entidade);
     }
 
-    /// <summary>Editar veículo: o km pode subir, mas não descer.</summary>
-    public override Veiculo? Atualizar(Veiculo entidade) => SalvarKm(entidade, OrigemKm.Edicao);
-
-    /// <summary>Soma ao km do caminhão a distância que ele rodou (maior que zero).</summary>
-    public bool AtualizarKmVeiculo(long veiculoId, int distancia)
+    /// <summary>
+    /// Editar veículo: o km pode subir, mas não descer. Se alguém gravou o caminhão depois que a pessoa abriu (ex.: uma
+    /// OS subiu o km), avisa antes das outras regras, que estariam olhando o caminhão de antes.
+    /// </summary>
+    public override Veiculo? Atualizar(Veiculo entidade)
     {
-        if (distancia <= 0)
+        var versao = entidade.Versao;
+        if (!Query(v => v.Id == entidade.Id && v.Versao == versao).Any())
         {
-            Mensagens.Add("Informe quantos km o caminhão rodou (maior que zero).");
-            return false;
+            Mensagens.Add(ConflitoDeEdicao);
+            return null;
         }
 
+        return SalvarKm(entidade, OrigemKm.Edicao);
+    }
+
+    /// <summary>
+    /// Grava o km do painel, que precisa ser maior que o registrado. Recebe o km do painel, e não quanto o caminhão
+    /// rodou: se o km mudou enquanto a tela estava aberta (ex.: uma OS lançada), nada é somado em cima do que mudou.
+    /// </summary>
+    public bool AtualizarKmVeiculo(long veiculoId, int kmDoPainel)
+    {
         var veiculo = GetById(veiculoId);
         if (veiculo is null)
         {
@@ -106,7 +116,14 @@ public class ServicoVeiculo(
             return false;
         }
 
-        veiculo.KmAtual += distancia;
+        if (kmDoPainel <= veiculo.KmAtual)
+        {
+            Mensagens.Add(string.Create(PtBr,
+                $"Informe um km maior que o atual ({veiculo.KmAtual:N0} km). Se o atual está errado, peça para o Admin ou o Gestor usar Corrigir km."));
+            return false;
+        }
+
+        veiculo.KmAtual = kmDoPainel;
         return SalvarKm(veiculo, OrigemKm.AtualizarKm) is not null;
     }
 
@@ -114,7 +131,7 @@ public class ServicoVeiculo(
     /// Atualizar km pelo motorista: só no caminhão ativo em que ele é o motorista atual. Estar com o caminhão
     /// é a permissão (não precisa de Ver frota nem de Atualizar km). Quem põe o motorista no caminhão é o gestor ou a OS.
     /// </summary>
-    public bool AtualizarKmDoMeuCaminhao(Usuario motorista, long veiculoId, int distancia)
+    public bool AtualizarKmDoMeuCaminhao(Usuario motorista, long veiculoId, int kmDoPainel)
     {
         if (!Query(v => v.Id == veiculoId && v.Ativo && v.MotoristaAtual != null && v.MotoristaAtual.Id == motorista.Id).Any())
         {
@@ -122,7 +139,7 @@ public class ServicoVeiculo(
             return false;
         }
 
-        return AtualizarKmVeiculo(veiculoId, distancia);
+        return AtualizarKmVeiculo(veiculoId, kmDoPainel);
     }
 
     /// <summary>
@@ -159,12 +176,12 @@ public class ServicoVeiculo(
 
         var maiorOs = servicoOrdemServico.Query(o => o.Veiculo.Id == veiculoId)
             .OrderByDescending(o => o.KmAtual)
-            .Select(o => new { o.Id, o.KmAtual })
+            .Select(o => new { o.Numero, o.KmAtual })
             .FirstOrDefault();
         if (maiorOs is not null && kmNovo < maiorOs.KmAtual)
         {
             Mensagens.Add(string.Create(PtBr,
-                $"A OS nº {maiorOs.Id} foi lançada com {maiorOs.KmAtual:N0} km. Use um km a partir desse ou corrija a OS antes."));
+                $"A OS nº {maiorOs.Numero} foi lançada com {maiorOs.KmAtual:N0} km. Use um km a partir desse ou corrija a OS antes."));
             return null;
         }
 

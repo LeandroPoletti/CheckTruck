@@ -1,10 +1,12 @@
 import type { Chamar } from './sessao'
+import type { Pagina } from '@/dados/pagina'
 
 // Ordens de serviço: as trocas feitas nos caminhões. Ver: Ver frota. Lançar: Ordem de serviço.
 
 export type OrdemDeServico = {
-  /** Número da OS. */
   id: number
+  /** Número da OS na empresa (1, 2, 3...). */
+  numero: number
   veiculo: { id: number; placa: string } | null
   /** Data da troca (a API guarda sem hora, em UTC). */
   realizadoEm: string
@@ -38,7 +40,16 @@ export type NovaOrdem = {
   observacao: string
 }
 
-export const listarOrdens = (chamar: Chamar) => chamar<OrdemDeServico[]>('/api/OrdemServico')
+/** Filtros da lista de OS da frota (todos opcionais): placa ou nº da OS, e o período da troca em aaaa-mm-dd. */
+export type FiltrosDasOrdens = { busca?: string | null; de?: string | null; ate?: string | null }
+
+/** OS da frota, da troca mais nova para a mais velha, já filtradas pela API: as primeiras (quantos) e o total. */
+export function ordensDaFrota(chamar: Chamar, filtros: FiltrosDasOrdens, quantos: number) {
+  const params = Object.entries({ ...filtros, quantos })
+    .filter(([, valor]) => valor !== null && valor !== undefined && valor !== '')
+    .map(([nome, valor]) => `${nome}=${encodeURIComponent(String(valor))}`)
+  return chamar<Pagina<OrdemDeServico>>(`/api/OrdemServico/pagina?${params.join('&')}`)
+}
 
 /** Para ordenar da mais nova para a mais velha (pela data da troca; no mesmo dia, a de número maior). */
 export const maisNovaPrimeiro = (a: OrdemDeServico, b: OrdemDeServico) => b.realizadoEm.localeCompare(a.realizadoEm) || b.id - a.id

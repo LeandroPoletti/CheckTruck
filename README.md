@@ -195,7 +195,8 @@ O banco começa com a empresa **Transportadora Almeida**, que fica com todos os 
 Cada pessoa tem um **cargo** e as **permissões** que o Admin ou o Gestor marcarem. O menu mostra só o que ela pode usar.
 
 - **Cargos:** Admin, Gestor, Almoxarife, Mecânico, Chefe de Manutenção, Técnico de Logística, Auxiliar de Logística e Motorista.
-- **Admin e Gestor** têm todas as permissões e são os únicos que cadastram, editam e desativam acessos.
+- **Admin e Gestor** têm todas as permissões e são os únicos que cadastram, editam e desativam acessos. O acesso de
+  um Admin, e o cargo de Admin, só um Admin muda: o Gestor cuida dos outros.
 - Acesso **desativado** não entra no sistema, nem ninguém de uma empresa desativada pelo dono do sistema.
 - O **login** vale 1 hora e o site e o app renovam sozinhos, sem pedir a senha (`POST api/Auth/renovar`, com a chave
   de renovação que vem no login). Entra de novo quem ficou 14 dias sem usar, trocou a senha ou o e-mail, ou teve o
@@ -207,7 +208,7 @@ Cada pessoa tem um **cargo** e as **permissões** que o Admin ou o Gestor marcar
 |-----------|--------|
 | Ver frota | Dashboard, veículos, histórico e ordens de serviço (só ver) |
 | Veículos | Cadastrar, editar e desativar caminhões |
-| Atualizar km | Somar km no caminhão |
+| Atualizar km | Gravar o km do painel do caminhão |
 | Ordem de serviço | Lançar, corrigir e excluir ordens de serviço |
 | Cadastros | Países, fabricantes, modelos, gerações (com as potências), tipos de manutenção, mecânicos e catálogo |
 | Intervalos | Intervalos de troca por geração e por caminhão |
@@ -229,7 +230,7 @@ pela OS. Estar com o caminhão é a permissão para ver a situação dele e atua
 - **Caminhão:** a placa pode ser digitada de qualquer jeito (abc1d23, ABC 1D23...) e fica maiúscula e com hífen:
   ABC-1234 ou ABC-1D23 (fora desse padrão não entra). Caminhão não é excluído, porque as OS e o histórico de km
   dependem dele: quem não usa mais, desativa.
-- **Ordem de serviço:** o número é gerado em sequência. Uma OS tem um ou mais itens trocados (cada tipo uma
+- **Ordem de serviço:** cada empresa tem a sua sequência de números (1, 2, 3...). Uma OS tem um ou mais itens trocados (cada tipo uma
   vez) e um ou mais mecânicos. Se a OS não trouxer a próxima troca de um item, o sistema calcula pelo
   intervalo (km da troca + intervalo). O km da OS atualiza o km do caminhão quando é maior.
   O motorista informado vira o motorista atual do caminhão, e quem lançou fica gravado com data e hora.

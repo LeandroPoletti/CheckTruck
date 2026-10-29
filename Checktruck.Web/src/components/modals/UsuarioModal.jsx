@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Modal } from '../ui/Overlay'
 import { Field, Input, Select, Toggle, Button, MensagemErro } from '../ui/Form'
 import { usuarioService } from '../../services'
-import { CARGOS, CARGOS_GESTAO, PERMISSOES, PERMISSAO_BASE, DEPENDEM_DA_BASE } from '../../data/acesso'
+import { obterUsuario } from '../../services/sessao'
+import { CARGOS_GESTAO, PERMISSOES, PERMISSAO_BASE, DEPENDEM_DA_BASE, cargosQuePodeDar } from '../../data/acesso'
 
 // Cadastro e edição de acesso: o formulário nasce com os dados do acesso (ou vazio, no cadastro).
 export default function UsuarioModal({ usuario, onClose, onSalvo }) {
@@ -102,7 +103,7 @@ export default function UsuarioModal({ usuario, onClose, onSalvo }) {
         <Field label="Cargo" required>
           <Select value={form.cargo} onChange={(e) => set('cargo', e.target.value)} disabled={adminDoSistema}>
             <option value="">Escolha o cargo</option>
-            {CARGOS.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+            {cargosQuePodeDar(obterUsuario()).map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
           </Select>
         </Field>
         <div className="grid grid-cols-2 gap-3">

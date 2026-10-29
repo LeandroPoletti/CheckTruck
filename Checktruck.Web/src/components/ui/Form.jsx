@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Search } from 'lucide-react'
 
 // group: o campo tem vários controles dentro (ex.: etiquetas com ×). Aí ele não pode ser um <label>,
@@ -100,9 +100,14 @@ export function Button({ variant = 'primary', size = 'md', className = '', child
 }
 
 // Erro do formulário ou da ação (ex.: o que a API respondeu). Sem mensagem, não mostra nada.
-export function MensagemErro({ className = '', children }) {
+// aparecer: rola até ele quando chega (o erro da API no fim de um formulário comprido, com a pessoa lá em cima)
+export function MensagemErro({ className = '', aparecer = false, children }) {
+  const caixa = useRef(null)
+  useEffect(() => {
+    if (aparecer && children) caixa.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }, [aparecer, children])
   if (!children) return null
-  return <p className={`rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700 ${className}`}>{children}</p>
+  return <p ref={caixa} className={`rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700 ${className}`}>{children}</p>
 }
 
 // Campo de busca das listas. Clicar na lupa põe o cursor no campo; onChange recebe o texto digitado.

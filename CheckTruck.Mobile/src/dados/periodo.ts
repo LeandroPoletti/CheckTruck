@@ -21,8 +21,8 @@ export const TODO_O_PERIODO: FiltroDePeriodo = { periodo: 'tudo', de: '', ate: '
 const doisDigitos = (n: number) => String(n).padStart(2, '0')
 const paraData = (d: Date) => `${d.getFullYear()}-${doisDigitos(d.getMonth() + 1)}-${doisDigitos(d.getDate())}`
 
-// Primeiro e último dia do período em aaaa-mm-dd (null = sem limite), contando de hoje no fuso do celular
-function limites({ periodo, de, ate }: FiltroDePeriodo): [string | null, string | null] {
+/** Primeiro e último dia do período em aaaa-mm-dd (null = sem limite), contando de hoje no fuso do celular. */
+export function limitesDoPeriodo({ periodo, de, ate }: FiltroDePeriodo): [string | null, string | null] {
   const hoje = new Date()
   const ano = hoje.getFullYear()
   const mes = hoje.getMonth()
@@ -39,7 +39,7 @@ function limites({ periodo, de, ate }: FiltroDePeriodo): [string | null, string 
 
 /** A data da troca (aaaa-mm-dd, ou com a hora, como vem da API) está dentro do período escolhido? */
 export function noPeriodo(data: string, filtro: FiltroDePeriodo) {
-  const [inicio, fim] = limites(filtro)
+  const [inicio, fim] = limitesDoPeriodo(filtro)
   const dia = data.slice(0, 10)
   return (!inicio || dia >= inicio) && (!fim || dia <= fim)
 }

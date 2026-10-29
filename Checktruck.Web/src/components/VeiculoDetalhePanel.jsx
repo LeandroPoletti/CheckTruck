@@ -6,6 +6,7 @@ import { Button } from './ui/Form'
 import { StatusBadge, PlacaBadge, SeloPrimeiraTroca } from './ui/Badges'
 import { BarraDeUso } from './ui/BarraDeUso'
 import FiltroPeriodo from './ui/FiltroPeriodo'
+import VerMais from './ui/VerMais'
 import {
   formatKm, formatData, formatDataHora, getHistoricoVeiculo, nomeDoCaminhao, textoDias, TRACOES, ORIGENS_KM,
 } from '../data/domain'
@@ -26,8 +27,8 @@ export function VeiculoNaoEncontrado({ backTo }) {
 // Apresentacional: a página de detalhe carrega os dados e passa por props.
 // situacao = fabricante, modelo, geração e potência, mais o status geral e os itens já calculados pela API
 // (do mais urgente para o menos urgente). ordens = as OS do caminhão (o histórico de manutenções tem o filtro de
-// período). historicoKm = toda mudança de km, da mais nova para a mais velha.
-export default function VeiculoDetalhePanel({ veiculo, situacao, ordens, historicoKm, backTo, actions }) {
+// período). historicoKm = { itens, total }: as mudanças de km mais novas (quantosKm; onVerMaisKm pede mais).
+export default function VeiculoDetalhePanel({ veiculo, situacao, ordens, historicoKm, quantosKm, onVerMaisKm, backTo, actions }) {
   const navigate = useNavigate()
 
   const [periodo, setPeriodo] = useState(TODO_O_PERIODO)
@@ -128,7 +129,7 @@ export default function VeiculoDetalhePanel({ veiculo, situacao, ordens, histori
                       {os.concessionaria && <> · {os.concessionaria}</>}
                     </p>
                     <p className="text-xs text-stone-400">
-                      OS nº {os.id}
+                      OS nº {os.numero}
                       {os.motoristaNome && <> · Motorista {os.motoristaNome}</>}
                       {' · '}Lançada{os.lancadoPorNome && ` por ${os.lancadoPorNome}`} em {formatDataHora(os.lancadoEm)}
                     </p>
@@ -141,13 +142,13 @@ export default function VeiculoDetalhePanel({ veiculo, situacao, ordens, histori
 
         <Card className="col-span-2 p-5">
           <h3 className="mb-4 text-xl font-bold text-stone-900">Histórico de km</h3>
-          {historicoKm.length === 0 ? (
+          {historicoKm.itens.length === 0 ? (
             <p className="py-6 text-center text-sm text-stone-400">Nenhuma mudança de km registrada ainda.</p>
           ) : (
             <div className="max-h-[300px] overflow-y-auto pr-1">
               <table className="w-full text-sm">
                 <tbody>
-                  {historicoKm.map((h) => (
+                  {historicoKm.itens.map((h) => (
                     <tr key={h.id} className="border-b border-stone-100 align-top last:border-0">
                       <td className="w-36 py-2.5 pr-3 text-xs text-stone-400">{formatDataHora(h.registradoEm)}</td>
                       <td className="w-36 py-2.5 pr-3">
@@ -171,6 +172,13 @@ export default function VeiculoDetalhePanel({ veiculo, situacao, ordens, histori
               </table>
             </div>
           )}
+          <VerMais
+            quantos={quantosKm}
+            mostrando={historicoKm.itens.length}
+            total={historicoKm.total}
+            onVerMais={onVerMaisKm}
+            className="mt-4"
+          />
         </Card>
       </div>
     </>
@@ -180,7 +188,7 @@ export default function VeiculoDetalhePanel({ veiculo, situacao, ordens, histori
 // "OS nº 12" quando foi uma OS (ou "OS excluída", se ela saiu); o resto pelo nome da origem
 function textoOrigemKm(h) {
   if (h.origem !== 'OrdemServico') return ORIGENS_KM[h.origem] ?? h.origem
-  return h.ordemServicoId ? `OS nº ${h.ordemServicoId}` : 'OS excluída'
+  return h.ordemServicoNumero ? `OS nº ${h.ordemServicoNumero}` : 'OS excluída'
 }
 
 // Negativo = já passou do ponto de troca

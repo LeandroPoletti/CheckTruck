@@ -23,10 +23,10 @@ public class MeusCaminhoesController(ServicoVeiculo servicoVeiculo, ServicoSitua
             .Select(s => s.ToResponseDto(incluirItens: true))
             .ToList();
 
-    /// <summary>Soma ao km a distância rodada (maior que zero). Só no caminhão que está com quem está logado.</summary>
-    [HttpPut("{id:long}/kilometragem")]
-    public IActionResult AtualizarKilometragem(long id, [FromBody] int distancia) =>
-        servicoVeiculo.AtualizarKmDoMeuCaminhao(HttpContext.UsuarioLogado(), id, distancia)
+    /// <summary>O km do painel agora, maior que o registrado. Só no caminhão que está com quem está logado.</summary>
+    [HttpPut("{id:long}/km")]
+    public IActionResult AtualizarKm(long id, [FromBody] AtualizarKmRequestDto dto) =>
+        servicoVeiculo.AtualizarKmDoMeuCaminhao(HttpContext.UsuarioLogado(), id, dto.Km)
             ? Ok()
             : Erro(servicoVeiculo.Mensagens);
 }

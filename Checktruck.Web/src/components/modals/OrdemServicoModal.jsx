@@ -51,6 +51,7 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
     dataRealizacao: registro?.dataRealizacao ?? hoje(),
     concessionaria: registro?.concessionaria ?? '',
     observacoes: registro?.observacoes ?? '',
+    versao: registro?.versao ?? 0, // a versão de quando abriu: se alguém salvar antes, a API avisa
   }))
   // Itens escolhidos, na ordem em que entraram. isPrimeiraTroca null = segue a sugestão do caminhão
   const [itens, setItens] = useState(() => (registro?.itens ?? []).map((i) => ({ tipoId: i.tipoId, isPrimeiraTroca: i.isPrimeiraTroca })))
@@ -133,7 +134,7 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
   return (
     <Modal
       onClose={onClose}
-      title={corrigindo ? `Corrigir OS nº ${registro.id}` : 'Lançar ordem de serviço'}
+      title={corrigindo ? `Corrigir OS nº ${registro.numero}` : 'Lançar ordem de serviço'}
       subtitle={corrigindo ? registro.placa : veiculo?.placa ?? 'Escolha o caminhão'}
       width="max-w-xl"
       footer={
@@ -241,7 +242,7 @@ export default function OrdemServicoModal({ veiculo, registro, onClose, onSalvo 
           <Input value={form.observacoes} onChange={(e) => set('observacoes', e.target.value)} placeholder="Opcional" />
         </Field>
 
-        <MensagemErro>{erro}</MensagemErro>
+        <MensagemErro aparecer>{erro}</MensagemErro>
       </div>
     </Modal>
   )

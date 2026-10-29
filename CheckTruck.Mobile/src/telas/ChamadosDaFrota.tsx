@@ -2,16 +2,18 @@ import { useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { router } from 'expo-router'
 import { useSessao, type Usuario } from '@/servicos/sessao'
-import { atenderChamado, type Chamado } from '@/servicos/chamados'
+import { atenderChamado, type Chamado, type ChamadosDaTela } from '@/servicos/chamados'
 import Botao from '@/componentes/Botao'
 import CartaoDoChamado from '@/componentes/CartaoDoChamado'
 import MensagemErro from '@/componentes/MensagemErro'
 import { comTema, cores, fontes } from '@/tema'
 
-const CONCLUIDOS_NA_TELA = 10
+/** Os últimos concluídos que aparecem embaixo dos pendentes. */
+export const CONCLUIDOS_NA_TELA = 10
 
 type Props = {
-  chamados: Chamado[]
+  /** Os pendentes e os últimos concluídos (CONCLUIDOS_NA_TELA). */
+  chamados: ChamadosDaTela
   usuario: Usuario
   /** Recarrega a lista depois de atender. */
   aoMudar(): Promise<void>
@@ -26,8 +28,8 @@ export default function ChamadosDaFrota({ chamados, usuario, aoMudar }: Props) {
   const [erro, setErro] = useState('')
   const verFrota = usuario.permissoes.includes('VerFrota')
   const podeAbrir = usuario.permissoes.includes('AbrirChamados')
-  const pendentes = chamados.filter((c) => c.status === 'Pendente')
-  const concluidos = chamados.filter((c) => c.status === 'Concluido').slice(0, CONCLUIDOS_NA_TELA)
+  const { pendentes } = chamados
+  const concluidos = chamados.concluidos.itens
 
   async function atender(chamado: Chamado) {
     setAtendendoId(chamado.id)

@@ -31,6 +31,9 @@ public class VeiculoRequestDto
 
     /// <summary>Acesso com cargo Motorista que está com o caminhão agora. Opcional.</summary>
     public string? MotoristaAtualId { get; set; }
+
+    /// <summary>Ao editar: a versão que veio quando o caminhão foi aberto. Se alguém salvou antes, nada é gravado.</summary>
+    public uint Versao { get; set; }
 }
 
 public class VeiculoResponseDto
@@ -49,6 +52,9 @@ public class VeiculoResponseDto
     public int KmAtual { get; set; }
     public bool Ativo { get; set; }
     public UsuarioResumoDto? MotoristaAtual { get; set; }
+
+    /// <summary>Muda a cada gravação. Volta no Editar (ver VeiculoRequestDto.Versao).</summary>
+    public uint Versao { get; set; }
 }
 
 public static class VeiculoDtoExtensions
@@ -69,7 +75,8 @@ public static class VeiculoDtoExtensions
         AnoFabricacao = entidade.AnoFabricacao,
         KmAtual = entidade.KmAtual,
         Ativo = entidade.Ativo,
-        MotoristaAtual = entidade.MotoristaAtual?.ToResumoDto()
+        MotoristaAtual = entidade.MotoristaAtual?.ToResumoDto(),
+        Versao = entidade.Versao
     };
 
     public static Veiculo ToEntity(this VeiculoRequestDto dto, Potencia potencia, Usuario? motoristaAtual) => new()
@@ -83,6 +90,7 @@ public static class VeiculoDtoExtensions
         AnoFabricacao = dto.AnoFabricacao,
         KmAtual = dto.KmAtual,
         Ativo = dto.Ativo,
-        MotoristaAtual = motoristaAtual
+        MotoristaAtual = motoristaAtual,
+        Versao = dto.Versao
     };
 }

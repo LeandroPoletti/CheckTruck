@@ -1,4 +1,5 @@
 import type { Chamar } from './sessao'
+import type { Pagina } from '@/dados/pagina'
 
 // Situação dos caminhões (próximas trocas em km e data), do jeito que a API calcula para o web.
 // O motorista usa api/MeusCaminhoes (só os que estão com ele); quem vê a frota usa api/Veiculo.
@@ -55,13 +56,13 @@ export const caminhoesDaFrota = (chamar: Chamar) => chamar<CaminhaoNaLista[]>('/
 export const situacaoDoCaminhao = (chamar: Chamar, id: number) => chamar<Caminhao>(`/api/Veiculo/${id}/situacao`)
 
 /**
- * A API recebe quanto o caminhão rodou desde o último km registrado. O motorista soma pelo
- * api/MeusCaminhoes (estar com o caminhão é a permissão); os outros, pelo api/Veiculo (Atualizar km).
+ * Grava o km do painel (maior que o registrado). O motorista grava pelo api/MeusCaminhoes (estar com o caminhão é
+ * a permissão); os outros, pelo api/Veiculo (Atualizar km).
  */
-export const atualizarKm = (chamar: Chamar, veiculoId: number, kmDoPainel: number, kmAtual: number, doMotorista: boolean) =>
-  chamar<void>(`/api/${doMotorista ? 'MeusCaminhoes' : 'Veiculo'}/${veiculoId}/kilometragem`, {
+export const atualizarKm = (chamar: Chamar, veiculoId: number, kmDoPainel: number, doMotorista: boolean) =>
+  chamar<void>(`/api/${doMotorista ? 'MeusCaminhoes' : 'Veiculo'}/${veiculoId}/km`, {
     metodo: 'PUT',
-    corpo: kmDoPainel - kmAtual,
+    corpo: { km: kmDoPainel },
   })
 
 /** O cadastro do caminhão, como o formulário usa (GET api/Veiculo/{id}). */
@@ -81,6 +82,8 @@ export type CadastroDoCaminhao = {
   kmAtual: number
   ativo: boolean
   motoristaAtual: { id: string; nome: string } | null
+  /** Muda a cada gravação: volta no Editar (se alguém salvou antes, a API não grava). */
+  versao: number
 }
 
 export type DadosDoCaminhao = {
@@ -94,6 +97,8 @@ export type DadosDoCaminhao = {
   kmAtual: number
   ativo: boolean
   motoristaAtualId: string | null
+  /** Ao editar, a versão de quando abriu; ao cadastrar, 0. */
+  versao: number
 }
 
 export const cadastroDoCaminhao = (chamar: Chamar, id: number) => chamar<CadastroDoCaminhao>(`/api/Veiculo/${id}`)
@@ -111,20 +116,21 @@ export const salvarCaminhao = (chamar: Chamar, dados: DadosDoCaminhao, id?: numb
     },
   })
 
-/** Uma mudança no km do caminhão. kmAnterior null = cadastro; ordemServicoId null = não foi OS (ou a OS foi excluída). */
+/** Uma mudança no km do caminhão. kmAnterior null = cadastro; ordemServicoNumero null = não foi OS (ou a OS foi excluída). */
 export type RegistroDeKm = {
   id: number
   kmAnterior: number | null
   kmNovo: number
   origem: string
   motivo: string | null
-  ordemServicoId: number | null
+  ordemServicoNumero: number | null
   registradoPor: { id: string; nome: string } | null
   registradoEm: string
 }
 
-/** Do mais novo para o mais velho. */
-export const historicoDeKm = (chamar: Chamar, id: number) => chamar<RegistroDeKm[]>(`/api/Veiculo/${id}/historico-km`)
+/** As mudanças de km, da mais nova para a mais velha: as primeiras (quantos) e o total. */
+export const historicoDeKm = (chamar: Chamar, id: number, quantos: number) =>
+  chamar<Pagina<RegistroDeKm>>(`/api/Veiculo/${id}/historico-km?quantos=${quantos}`)
 
 /** Só Admin e Gestor: corrige um km digitado errado, com o motivo no histórico. */
 export const corrigirKm = (chamar: Chamar, id: number, km: number, motivo: string) =>

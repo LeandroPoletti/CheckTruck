@@ -33,7 +33,7 @@ export default function AtualizarKm() {
     setSalvando(true)
     setErro('')
     try {
-      await atualizarKm(chamar, Number(id), kmNovo, kmAtual, usuario?.cargo === 'Motorista')
+      await atualizarKm(chamar, Number(id), kmNovo, usuario?.cargo === 'Motorista')
       router.back()
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Não foi possível salvar o km.')

@@ -23,6 +23,10 @@ classDiagram
         <<interface>>
         +long? EmpresaId
     }
+    class EntidadeComVersao {
+        <<interface>>
+        +uint Versao
+    }
     EntidadeBanco <|-- EntidadeDaEmpresa
     EntidadeBanco <|-- ItemDoCatalogo
 ```
@@ -118,6 +122,7 @@ classDiagram
     }
     class OrdemServico {
         <<da empresa>>
+        +int Numero
         +DateTime RealizadoEm
         +int KmAtual
         +string? Concessionaria
@@ -171,6 +176,9 @@ classDiagram
 - **<<da empresa>>** implementa `EntidadeDaEmpresa` (dados de um cliente; a coluna da empresa fica só no banco).
   **<<catálogo>>** implementa `ItemDoCatalogo` (sem empresa = do sistema; com empresa = dela). `Empresa` e
   `Celular` são `EntidadeBanco` simples.
+- `Veiculo` e `OrdemServico` também implementam `EntidadeComVersao`: a versão muda a cada gravação (no PostgreSQL, a
+  coluna `xmin`). Quem edita manda a versão que abriu e, se alguém gravou antes, nada é gravado e a pessoa recebe
+  "Alguém mudou isso enquanto você editava".
 - `Usuario` herda de `IdentityUser` (ASP.NET Identity), que traz o e-mail, o hash da senha e o bloqueio.
 - Composição (◆): a potência só existe dentro da geração, o item só dentro da OS e o histórico de km só dentro do
   caminhão.
@@ -302,7 +310,7 @@ classDiagram
 | `ServicoVeiculo` | Cadastro do caminhão e o km: só sobe (Atualizar km, OS, edição); a correção (Admin e Gestor) pode baixar, com motivo. Toda mudança vai para o histórico. |
 | `ServicoChamado` | Abrir (o motorista só do caminhão dele), editar e excluir enquanto pendente, atender e resolver. |
 | `ServicoCelular` | Guardar o celular de quem entrou e avisar de chamado novo quem pode atender. |
-| `ServicoUsuario` | Acessos: cadastrar, editar, ativar e desativar (só Admin e Gestor), sempre na própria empresa. Para o dono do sistema, os Admins das empresas e a senha nova de cada um. |
+| `ServicoUsuario` | Acessos: cadastrar, editar, ativar e desativar (só Admin e Gestor; o acesso de um Admin, só um Admin), sempre na própria empresa. Para o dono do sistema, os Admins das empresas e a senha nova de cada um. |
 | `ServicoEmpresa` | Empresas (só o dono do sistema): cadastrar com o primeiro acesso (Admin), desativar e ativar. |
 | `ServicoCatalogo<T>` e filhos | Itens do catálogo: o do sistema só o dono do sistema muda; nome que não repete; não exclui o que está em uso. |
 | `ServicoDashboard` | Resumo da frota para o dashboard: quantos itens em cada status, alertas e caminhões por geração. |

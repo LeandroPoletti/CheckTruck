@@ -28,6 +28,9 @@ public class OrdemServicoRequestDto
 
     [MaxLength(150, ErrorMessage = "A concessionária ou oficina pode ter até 150 caracteres.")]
     public string? Concessionaria { get; set; }
+
+    /// <summary>Na correção: a versão que veio quando a OS foi aberta. Se alguém salvou antes, nada é gravado.</summary>
+    public uint Versao { get; set; }
 }
 
 public class ItemOrdemServicoRequestDto
@@ -44,10 +47,29 @@ public class ItemOrdemServicoRequestDto
     public bool IsPrimeiraTroca { get; set; }
 }
 
+/// <summary>Filtros da lista de OS da frota (todos opcionais) e quantas OS vêm (50 se não disser).</summary>
+public class FiltroDasOrdensDto
+{
+    public long? TipoId { get; set; }
+
+    /// <summary>Placa (com ou sem hífen) ou número da OS.</summary>
+    public string? Busca { get; set; }
+
+    /// <summary>Primeiro dia do período da troca (aaaa-mm-dd).</summary>
+    public DateOnly? De { get; set; }
+
+    /// <summary>Último dia do período da troca (aaaa-mm-dd).</summary>
+    public DateOnly? Ate { get; set; }
+
+    public int Quantos { get; set; } = Paginacao.Padrao;
+}
+
 public class OrdemServicoResponseDto
 {
-    /// <summary>Número da OS.</summary>
     public long Id { get; set; }
+
+    /// <summary>Número da OS na empresa (1, 2, 3...).</summary>
+    public int Numero { get; set; }
     public VeiculoResumoDto? Veiculo { get; set; }
     public DateTime RealizadoEm { get; set; }
     public int KmAtual { get; set; }
@@ -71,6 +93,9 @@ public class OrdemServicoResponseDto
     public DateTime LancadoEm { get; set; }
 
     public DateTime? AtualizadoEm { get; set; }
+
+    /// <summary>Muda a cada gravação. Volta na correção (ver OrdemServicoRequestDto.Versao).</summary>
+    public uint Versao { get; set; }
 }
 
 public class ItemOrdemServicoResponseDto
@@ -87,6 +112,7 @@ public static class OrdemServicoDtoExtensions
     public static OrdemServicoResponseDto ToResponseDto(this OrdemServico entidade) => new()
     {
         Id = entidade.Id,
+        Numero = entidade.Numero,
         Veiculo = entidade.Veiculo?.ToResumoDto(),
         RealizadoEm = entidade.RealizadoEm,
         KmAtual = entidade.KmAtual,
@@ -107,7 +133,8 @@ public static class OrdemServicoDtoExtensions
         Concessionaria = entidade.Concessionaria,
         LancadoPor = entidade.LancadoPor?.ToResumoDto(),
         LancadoEm = entidade.CriadoEm,
-        AtualizadoEm = entidade.AtualizadoEm
+        AtualizadoEm = entidade.AtualizadoEm,
+        Versao = entidade.Versao
     };
 
     /// <summary>OS nova, com o que a API já achou pelos ids (caminhão, tipos de cada item, mecânicos e motorista).</summary>
@@ -121,11 +148,13 @@ public static class OrdemServicoDtoExtensions
 
     /// <summary>
     /// Copia o que veio para a OS. Na correção, o item de um tipo que já estava na OS continua o mesmo
-    /// registro, o tipo que não veio sai e o novo entra; os mecânicos ficam os que vieram.
+    /// registro, o tipo que não veio sai e o novo entra; os mecânicos ficam os que vieram. A versão que veio é a que
+    /// o banco confere ao gravar.
     /// </summary>
     public static void AplicarEm(this OrdemServicoRequestDto dto, OrdemServico ordemServico,
         IReadOnlyDictionary<long, TipoManutencao> tipos, IList<Mecanico> mecanicos, Usuario? motorista)
     {
+        ordemServico.Versao = dto.Versao;
         ordemServico.RealizadoEm = dto.RealizadoEm;
         ordemServico.KmAtual = dto.KmAtual;
         ordemServico.Motorista = motorista;

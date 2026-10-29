@@ -163,6 +163,7 @@ erDiagram
         int KmAtual
         varchar LancadoPorId FK "opcional"
         varchar MotoristaId FK "opcional"
+        int Numero "sequência da empresa"
         varchar Observacao "até 500; opcional"
         timestamp RealizadoEm
         bigint VeiculoId FK
@@ -287,6 +288,7 @@ outras são do Identity (hash da senha, carimbo de segurança, bloqueio por tent
 | Empresas | Documento (CNPJ; nas contas antigas de uma pessoa só, o CPF) |
 | AspNetUsers | E-mail (login), em todo o sistema; CPF, dentro da empresa |
 | Veiculos | Placa e chassi, dentro da empresa |
+| OrdensServico | Número da OS, dentro da empresa |
 | Potencias | Potência (cv) dentro da geração |
 | IntervalosRecomendados | Um de fábrica por geração e tipo; um por empresa, geração e tipo |
 | IntervalosVeiculo | Um por caminhão e tipo |
@@ -295,6 +297,10 @@ outras são do Identity (hash da senha, carimbo de segurança, bloqueio por tent
 
 Nomes de país, fabricante e tipo de manutenção também não repetem (e o de modelo, dentro do fabricante), mas
 isso é conferido na API, para dar uma mensagem clara, e não por índice.
+
+**Duas pessoas editando ao mesmo tempo:** em `Veiculos` e `OrdensServico`, o UPDATE leva no WHERE a versão que a
+pessoa abriu, que é a coluna `xmin` do PostgreSQL (ele já tem em toda tabela e muda sozinho a cada gravação). Se alguém
+gravou antes, o banco não acha a linha e nada muda.
 
 **Ao excluir** (chaves estrangeiras):
 

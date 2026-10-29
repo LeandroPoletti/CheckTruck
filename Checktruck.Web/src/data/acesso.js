@@ -14,6 +14,10 @@ export const CARGOS = [
 // Admin e Gestor podem tudo e são os únicos que cuidam dos acessos
 export const CARGOS_GESTAO = ['Admin', 'Gestor']
 
+// O acesso de um Admin, e o cargo de Admin, só um Admin muda: o Gestor cuida dos outros (a API confere)
+export const podeMexerNoAcesso = (eu, acesso) => eu?.cargo === 'Admin' || acesso.cargo !== 'Admin'
+export const cargosQuePodeDar = (eu) => CARGOS.filter((c) => c.id !== 'Admin' || eu?.cargo === 'Admin')
+
 // Dono do sistema: cuida do catálogo do sistema e não é de nenhuma empresa. Fica fora de CARGOS
 // porque não se escolhe: o login dele é criado pelo sistema
 const DONO_DO_SISTEMA = { id: 'DonoDoSistema', nome: 'Dono do sistema' }

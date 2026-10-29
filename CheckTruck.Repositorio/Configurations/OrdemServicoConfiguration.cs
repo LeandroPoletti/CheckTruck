@@ -9,6 +9,8 @@ public class OrdemServicoConfiguration : IEntityTypeConfiguration<OrdemServico>
     public void Configure(EntityTypeBuilder<OrdemServico> builder)
     {
         builder.HasKey(o => o.Id);
+        // O número não repete dentro da empresa (cada uma tem a sua sequência)
+        builder.HasIndex(Context.ColunaEmpresa, nameof(OrdemServico.Numero)).IsUnique();
         // Caminhão com OS não é apagado, nem direto no banco: o histórico de manutenção fica
         builder.HasOne(o => o.Veiculo).WithMany(v => v.OrdensServico)
             .IsRequired().OnDelete(DeleteBehavior.Restrict);

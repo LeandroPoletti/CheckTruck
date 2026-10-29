@@ -77,13 +77,24 @@ public class VeiculoTests
     }
 
     [Fact]
-    public void Atualizar_km_precisa_de_distancia_maior_que_zero()
+    public void Atualizar_km_grava_o_km_do_painel()
     {
         var caminhao = _frota.Caminhao(kmDeEntrada: 10_000);
         var servico = _frota.CriarServicoVeiculo();
 
-        Assert.False(servico.AtualizarKmVeiculo(caminhao.Id, distancia: 0));
-        Assert.Contains("Informe quantos km o caminhão rodou (maior que zero).", servico.Mensagens);
+        Assert.True(servico.AtualizarKmVeiculo(caminhao.Id, kmDoPainel: 12_500));
+        Assert.Equal(12_500, caminhao.KmAtual);
+    }
+
+    [Fact]
+    public void Atualizar_km_precisa_de_km_maior_que_o_registrado()
+    {
+        var caminhao = _frota.Caminhao(kmDeEntrada: 10_000);
+        var servico = _frota.CriarServicoVeiculo();
+
+        Assert.False(servico.AtualizarKmVeiculo(caminhao.Id, kmDoPainel: 10_000));
+        Assert.Contains("Informe um km maior que o atual (10.000 km). Se o atual está errado, peça para o Admin ou o Gestor usar Corrigir km.",
+            servico.Mensagens);
         Assert.Equal(10_000, caminhao.KmAtual);
     }
 }

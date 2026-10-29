@@ -41,6 +41,33 @@ public class OrdemServicoTests
     }
 
     [Fact]
+    public void Numero_da_OS_segue_a_sequencia()
+    {
+        _frota.OsLancada(_caminhao, Hoje.AddDays(-10), 95_000, _frota.Oleo, kmProximaTroca: 135_000);
+        var servico = _frota.CriarServicoOrdemServico();
+
+        var segunda = servico.Inserir(NovaOs(102_000, Item(_frota.Oleo)));
+        var terceira = servico.Inserir(NovaOs(103_000, Item(_frota.Oleo)));
+
+        Assert.Equal(2, segunda!.Numero);
+        Assert.Equal(3, terceira!.Numero);
+    }
+
+    [Fact]
+    public void Lista_filtra_pela_placa_sem_hifen_pelo_numero_e_pelo_periodo()
+    {
+        var antiga = _frota.OsLancada(_caminhao, Hoje.AddMonths(-3), 95_000, _frota.Oleo, kmProximaTroca: 135_000);
+        var nova = _frota.OsLancada(_caminhao, Hoje.AddDays(-1), 99_000, _frota.Oleo, kmProximaTroca: 139_000);
+        antiga.Numero = 5; // número que não aparece na placa (ABC-1D21)
+        var servico = _frota.CriarServicoOrdemServico();
+
+        Assert.Equal(new[] { nova, antiga }, servico.Filtrar(null, "abc1d21", null, null).ToList());
+        Assert.Equal(new[] { antiga }, servico.Filtrar(null, "5", null, null).ToList());
+        Assert.Equal(new[] { nova },
+            servico.Filtrar(null, null, DateOnly.FromDateTime(Hoje.AddDays(-7)), DateOnly.FromDateTime(Hoje)).ToList());
+    }
+
+    [Fact]
     public void Km_e_data_que_vieram_na_OS_valem()
     {
         var servico = _frota.CriarServicoOrdemServico();

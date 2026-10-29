@@ -48,7 +48,7 @@ public class MotoristaTests
     {
         var servico = _frota.CriarServicoVeiculo();
 
-        Assert.True(servico.AtualizarKmDoMeuCaminhao(_motorista, _doMotorista.Id, distancia: 1_500));
+        Assert.True(servico.AtualizarKmDoMeuCaminhao(_motorista, _doMotorista.Id, kmDoPainel: 101_500));
         Assert.Equal(101_500, _doMotorista.KmAtual);
     }
 
@@ -57,7 +57,7 @@ public class MotoristaTests
     {
         var servico = _frota.CriarServicoVeiculo();
 
-        Assert.False(servico.AtualizarKmDoMeuCaminhao(_motorista, _deOutro.Id, distancia: 1_500));
+        Assert.False(servico.AtualizarKmDoMeuCaminhao(_motorista, _deOutro.Id, kmDoPainel: 201_500));
         Assert.Contains("Esse caminhão não está com você. Fale com o gestor.", servico.Mensagens);
         Assert.Equal(200_000, _deOutro.KmAtual);
     }

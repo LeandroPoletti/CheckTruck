@@ -15,6 +15,7 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
     // e pode mostrar detalhes de dentro do sistema.
     private const string ErroAoLer = "Não deu para buscar os dados agora. Tente de novo.";
     private const string ErroAoGravar = "Não deu para gravar agora. Confira os dados e tente de novo; se continuar, avise o suporte.";
+    public const string ConflitoDeEdicao = "Alguém mudou isso enquanto você editava. Feche e abra de novo para ver como ficou.";
 
     /// <summary>
     /// Metódo para validação de entidade antes de operações de INSERT/UPDATE. Erros de validação devem ser adicionados a lista de mensagens.
@@ -85,6 +86,11 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
 
                 return retorno;
             }
+            catch (ConflitoDeEdicaoException)
+            {
+                Mensagens.Add(ConflitoDeEdicao);
+                return null;
+            }
             catch (Exception e)
             {
                 _logger.LogError(e, "Erro ao inserir entidade do tipo {Tipo}", typeof(T).Name);
@@ -106,6 +112,11 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
                 var retorno = _repositorioCrud.Update(entidade);
 
                 return retorno;
+            }
+            catch (ConflitoDeEdicaoException)
+            {
+                Mensagens.Add(ConflitoDeEdicao);
+                return null;
             }
             catch (Exception e)
             {
@@ -152,6 +163,11 @@ public class ServicoCrud<T>(IRepositorioCrud repositorioCrud, ILogger<ServicoCru
             {
                 _repositorioCrud.MakeTransaction(action);
                 return true;
+            }
+            catch (ConflitoDeEdicaoException)
+            {
+                Mensagens.Add(ConflitoDeEdicao);
+                return false;
             }
             catch (Exception e)
             {

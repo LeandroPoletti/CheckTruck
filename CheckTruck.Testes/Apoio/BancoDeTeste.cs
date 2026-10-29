@@ -37,6 +37,16 @@ public sealed class BancoDeTeste : IDisposable
             NullLogger<UserManager<Usuario>>.Instance),
         new Logado(quem));
 
+    /// <summary>Lançar OS (ServicoOrdemServico) como <paramref name="logado"/>, gravando no mesmo Context.</summary>
+    /// <param name="logado">Lido do mesmo Context (a OS grava quem lançou).</param>
+    public static ServicoOrdemServico OrdensDeServico(Context context, Usuario logado)
+    {
+        var repositorio = new RepositorioCrud(context);
+        return new ServicoOrdemServico(repositorio,
+            new ServicoSituacaoVeiculo(repositorio, NullLogger<ServicoSituacaoVeiculo>.Instance),
+            new Logado(logado), NullLogger<ServicoOrdemServico>.Instance);
+    }
+
     public void Dispose() => _conexao.Dispose();
 
     private sealed class Logado(Usuario? usuario) : IUsuarioLogado

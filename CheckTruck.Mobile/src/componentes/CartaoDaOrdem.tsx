@@ -18,7 +18,7 @@ export default function CartaoDaOrdem({ os, mostrarPlaca = true }: Props) {
     <View style={estilos.cartao}>
       <View style={estilos.linha}>
         <View>
-          <Text style={estilos.numero}>OS nº {os.id}</Text>
+          <Text style={estilos.numero}>OS nº {os.numero}</Text>
           <Text style={estilos.meta}>{formatData(os.realizadoEm)} · {formatKm(os.kmAtual)}</Text>
         </View>
         {veiculo && (

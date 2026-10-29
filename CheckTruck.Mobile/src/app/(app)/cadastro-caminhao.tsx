@@ -32,12 +32,14 @@ type Form = {
   kmAtual: string
   motoristaId: string
   ativo: boolean
+  /** A versão de quando abriu: se alguém salvar antes, a API avisa. */
+  versao: number
 }
 type Erros = Partial<Record<keyof Form, string>>
 
 const FORM_VAZIO: Form = {
   fabricanteId: null, modeloId: null, geracaoId: null, potenciaId: null, tracao: '',
-  placa: '', chassi: '', renavam: '', anoFabricacao: '', anoModelo: '', kmAtual: '', motoristaId: '', ativo: true,
+  placa: '', chassi: '', renavam: '', anoFabricacao: '', anoModelo: '', kmAtual: '', motoristaId: '', ativo: true, versao: 0,
 }
 const porNome = (a: { nome: string }, b: { nome: string }) => a.nome.localeCompare(b.nome)
 const ano = (data: string) => data.slice(0, 4)
@@ -93,6 +95,7 @@ export default function CadastroCaminhao() {
             kmAtual: String(caminhao.kmAtual),
             motoristaId: caminhao.motoristaAtual?.id ?? '',
             ativo: caminhao.ativo,
+            versao: caminhao.versao,
           })
         }
       } catch (e) {
@@ -154,6 +157,7 @@ export default function CadastroCaminhao() {
         kmAtual: Number(form.kmAtual || 0),
         ativo: form.ativo,
         motoristaAtualId: form.motoristaId || null,
+        versao: form.versao,
       }, editando ? Number(id) : undefined)
       router.back()
     } catch (e) {

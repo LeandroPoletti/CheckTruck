@@ -6,10 +6,12 @@ namespace CheckTruck.Dominio.Entidades;
 /// Ordem de serviço lançada no sistema: num dia e num km do caminhão, um ou mais mecânicos trocaram
 /// um ou mais itens. Cada item trocado, com a próxima troca dele, fica em <see cref="ItemOrdemServico"/>.
 /// </summary>
-public class OrdemServico : EntidadeDaEmpresa
+public class OrdemServico : EntidadeDaEmpresa, EntidadeComVersao
 {
-    /// <summary>Número da OS: o banco gera em sequência.</summary>
     public long Id { get; set; }
+    public uint Versao { get; set; }
+    /// <summary>Número da OS na empresa: 1, 2, 3... (cada empresa tem a sua sequência). Gerado ao lançar.</summary>
+    public int Numero { get; set; }
     public Veiculo Veiculo { get; set; } = null!;
     public DateTime RealizadoEm { get; set; } = DateTime.UtcNow;
     /// <summary>Km do caminhão na troca.</summary>

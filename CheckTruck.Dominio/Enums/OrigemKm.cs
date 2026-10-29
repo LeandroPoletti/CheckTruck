@@ -8,7 +8,7 @@ public enum OrigemKm
 {
     /// <summary>Km com que o caminhão foi cadastrado.</summary>
     Cadastro = 1,
-    /// <summary>Tela Atualizar km (soma o que o caminhão rodou).</summary>
+    /// <summary>Tela Atualizar km (o km do painel).</summary>
     AtualizarKm = 2,
     /// <summary>OS com km maior que o do caminhão.</summary>
     OrdemServico = 3,

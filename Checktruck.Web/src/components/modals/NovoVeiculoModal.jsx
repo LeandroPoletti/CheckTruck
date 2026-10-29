@@ -22,12 +22,15 @@ const formDoVeiculo = (v) => ({
   kmAtual: v?.kmAtual ?? '',
   motoristaId: v?.motoristaId ?? '',
   ativo: v?.ativo ?? true,
+  versao: v?.versao ?? 0, // a versão de quando abriu: se alguém salvar antes, a API avisa
 })
 
 // Cadastrar ou editar um caminhão.
 // O caminhão aponta para uma potência: fabricante → modelo → geração → potência, em cascata.
 export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }) {
   const [form, setForm] = useState(() => formDoVeiculo(veiculoParaEditar))
+  // O km de quando abriu: se alguém mudar o km enquanto isso, quem avisa é a API (alguém mudou isso enquanto você editava)
+  const [kmQuandoAbriu] = useState(() => veiculoParaEditar?.kmAtual ?? 0)
   const [errors, setErrors] = useState({})
   const [salvando, setSalvando] = useState(false)
   // Catálogo (fabricante → modelo → geração) e motoristas para os selects
@@ -76,7 +79,7 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
     }
     const km = Number(form.kmAtual || 0)
     if (!Number.isInteger(km) || km < 0) e.kmAtual = 'O km não pode ser negativo.'
-    else if (veiculoParaEditar && km < veiculoParaEditar.kmAtual) e.kmAtual = 'O km não pode diminuir (RN-02). Para km digitado errado, Admin ou Gestor usam Corrigir km.'
+    else if (veiculoParaEditar && km < kmQuandoAbriu) e.kmAtual = 'O km não pode diminuir (RN-02). Para km digitado errado, Admin ou Gestor usam Corrigir km.'
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -94,6 +97,7 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
       kmAtual: Number(form.kmAtual || 0),
       motoristaId: form.motoristaId || null,
       ativo: form.ativo,
+      versao: form.versao,
     }
     setSalvando(true)
     try {
@@ -216,7 +220,7 @@ export default function NovoVeiculoModal({ veiculoParaEditar, onClose, onSalvo }
           </Field>
         </div>
 
-        <MensagemErro>{errors.api}</MensagemErro>
+        <MensagemErro aparecer>{errors.api}</MensagemErro>
       </div>
     </Drawer>
   )

@@ -87,7 +87,7 @@ flowchart TB
 | `CheckTruck.Api` | Recebe os pedidos HTTP, confere o login e as permissões, converte DTO ↔ entidade e devolve os erros num formato só (ProblemDetails, com a mensagem em `detail`). Também manda o push pelo Expo e o aviso de mudança (SignalR). | Repositorio (e, por ele, Dominio) |
 | `CheckTruck.Dominio` | Entidades, enums e **todas as regras**: cálculo da próxima troca e do status, ordem dos intervalos, km que só sobe, chamados, acessos. Não conhece banco nem HTTP: fala com eles por interfaces. | — |
 | `CheckTruck.Repositorio` | Entity Framework Core com PostgreSQL: contexto, configuração das tabelas, migrations, catálogo inicial e o filtro por empresa. | Dominio |
-| `CheckTruck.Testes` | 129 testes automáticos (xUnit): as regras do Dominio, com um repositório em memória no lugar do banco, e a separação entre empresas, com o `Context` de verdade num SQLite na memória. | Dominio e Repositorio |
+| `CheckTruck.Testes` | 137 testes automáticos (xUnit): as regras do Dominio, com um repositório em memória no lugar do banco, e a separação entre empresas, com o `Context` de verdade num SQLite na memória. | Dominio e Repositorio |
 
 O Dominio fica no centro e não depende de ninguém: as interfaces (`IRepositorioCrud`, `IUsuarioLogado`,
 `IEnviadorDeAvisos`) são dele, e a Api e o Repositorio as implementam (inversão de dependência). Por isso as
@@ -127,6 +127,7 @@ Os dois mostram só o que as permissões de quem entrou liberam, mas quem decide
 | **Catálogo do sistema + da empresa** | O dono do sistema mantém fabricantes, modelos, gerações e intervalos de fábrica para todos; cada empresa acrescenta o que falta, e só ela vê. |
 | **Cargo + permissões por pessoa** (em vez de 3 perfis fixos) | Cada empresa tem cargos diferentes; o Admin ou Gestor libera uma permissão por vez. As permissões ficam num número só no banco (cada uma é um bit). |
 | **ASP.NET Identity com token Bearer** | Login pronto e seguro (senha com hash, bloqueio após tentativas erradas). O token vale 1 hora e o site e o app renovam sozinhos com a chave de renovação (14 dias); trocar senha ou e-mail, ou desativar o acesso ou a empresa, encerra a renovação. |
+| **Versão no caminhão e na OS** (`EntidadeComVersao`, coluna `xmin`) | Quem salva depois de outra pessoa recebe "Alguém mudou isso enquanto você editava" em vez de apagar a mudança dela sem saber. Usa a coluna que o PostgreSQL já tem, sem coluna nova. |
 | **OData nas listas** | Filtro, ordenação e paginação (`$filter`, `$orderby`, `$top` até 100, `$skip`, `$count`) sem escrever uma rota para cada caso. |
 | **Push pelo Expo** | Um envio só para iPhone e Android, sem guardar chave da Apple ou do Google na API. Se o aviso falhar, o chamado continua aberto. |
 | **Atualizar sozinho pelo SignalR** (`CanalDeMudancas` + `AvisoDeMudanca`) | Já vem no ASP.NET Core e mantém um canal aberto (WebSocket) com cada site e app. O aviso só diz "mudou" e cada tela relê o que mostra pela API de sempre, com as permissões de sempre: nenhum dado passa pelo canal. Um filtro só, em todas as rotas, avisa depois de cada mudança que deu certo, então rota nova já avisa sem fazer nada. |
@@ -169,7 +170,7 @@ Os passos estão no [README](../README.md#como-rodar).
 
 ## Qualidade
 
-- **Testes automáticos:** 129 casos (xUnit) cobrindo intervalos padrão, regras de alerta, situação do caminhão,
+- **Testes automáticos:** 137 casos (xUnit) cobrindo intervalos padrão, regras de alerta, situação do caminhão,
   OS, motorista, veículo, aviso de chamado no celular, empresas, CPF, CNPJ, placa e a cor de cada conta.
 - **Separação entre empresas testada no banco:** com o `Context` de verdade (SQLite na memória), duas empresas e
   o catálogo do sistema, os testes provam que uma empresa não vê, não altera e não exclui o que é da outra (nem

@@ -12,15 +12,14 @@ export default function AtualizarKmModal({ onClose, veiculo, onSalvo }) {
 
   async function handleSubmit() {
     const valor = Number(km)
-    // O km só sobe (RN-02): a API recebe quanto o caminhão rodou, e precisa ser mais que zero
+    // O km só sobe (RN-02)
     if (!Number.isInteger(valor) || valor <= veiculo.kmAtual) {
       setErro(`Informe um km maior que o atual (${formatKm(veiculo.kmAtual)}). Se o atual está errado, peça para o Admin ou o Gestor usar Corrigir km.`)
       return
     }
     setSalvando(true)
     try {
-      // A API recebe a distância percorrida, não o km absoluto
-      await veiculoService.somarKm(veiculo.id, valor - veiculo.kmAtual)
+      await veiculoService.atualizarKm(veiculo.id, valor)
       onSalvo?.(valor)
       onClose()
     } catch (e) {

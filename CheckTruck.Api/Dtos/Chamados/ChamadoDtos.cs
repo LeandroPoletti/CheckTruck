@@ -51,6 +51,13 @@ public class ChamadoResponseDto
     public DateTime? ConcluidoEm { get; set; }
 }
 
+/// <summary>Os chamados da tela: todos os pendentes e os concluídos mais novos.</summary>
+public class ChamadosResponseDto
+{
+    public IList<ChamadoResponseDto> Pendentes { get; set; } = [];
+    public PaginaDto<ChamadoResponseDto> Concluidos { get; set; } = new();
+}
+
 public static class ChamadoDtoExtensions
 {
     // Montada direto na consulta: o banco já devolve placa e nomes, sem carregar as entidades

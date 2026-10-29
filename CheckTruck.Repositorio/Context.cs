@@ -64,6 +64,9 @@ public class Context : IdentityUserContext<Usuario>
         DoCatalogo<TipoManutencao>(builder);
         DoCatalogo<IntervaloRecomendado>(builder);
 
+        ComVersao<Veiculo>(builder);
+        ComVersao<OrdemServico>(builder);
+
         builder.ApplyConfigurationsFromAssembly(typeof(Context).Assembly);
         base.OnModelCreating(builder);
     }
@@ -89,16 +92,47 @@ public class Context : IdentityUserContext<Usuario>
             EF.Property<long?>(e, ColunaEmpresa) == null || EF.Property<long?>(e, ColunaEmpresa) == EmpresaAtualId);
     }
 
+    // A versão de cada gravação é a coluna xmin do PostgreSQL, que o banco muda sozinho (sem coluna nova nas tabelas).
+    // O SQLite dos testes não tem xmin: lá a versão fica de fora
+    private void ComVersao<T>(ModelBuilder builder) where T : class, EntidadeComVersao
+    {
+        if (Database.IsNpgsql())
+        {
+            builder.Entity<T>().Property(e => e.Versao).IsRowVersion();
+        }
+        else
+        {
+            builder.Entity<T>().Ignore(e => e.Versao);
+        }
+    }
+
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
         GravarEmpresa();
+        ConferirVersao();
         return base.SaveChanges(acceptAllChangesOnSuccess);
     }
 
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         GravarEmpresa();
+        ConferirVersao();
         return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    // Quem edita manda a versão que abriu: é ela que vai no WHERE do UPDATE. Se alguém gravou antes, a versão do banco
+    // é outra, o banco não acha a linha e nada é gravado
+    private void ConferirVersao()
+    {
+        foreach (var entrada in ChangeTracker.Entries<EntidadeComVersao>())
+        {
+            var versao = entrada.Metadata.FindProperty(nameof(EntidadeComVersao.Versao));
+            if (versao is not null && entrada.State is EntityState.Modified or EntityState.Deleted)
+            {
+                var propriedade = entrada.Property(versao.Name);
+                propriedade.OriginalValue = propriedade.CurrentValue;
+            }
+        }
     }
 
     // A empresa nunca vem do front. Registro novo ganha a empresa de quem está logado; item do catálogo

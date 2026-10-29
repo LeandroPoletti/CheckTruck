@@ -89,6 +89,25 @@ public sealed class SeparacaoEntreEmpresasTests : IDisposable
         return fabricante.Id;
     }
 
+    // OS de troca de óleo no caminhão, lançada pelo serviço como na API. Devolve o número que ela ganhou
+    private int LancarOs(Usuario quem, long veiculoId)
+    {
+        using var context = _banco.Abrir(quem);
+        var hoje = DateTime.UtcNow.Date;
+        var os = new OrdemServico { Veiculo = context.Veiculos.Single(v => v.Id == veiculoId), RealizadoEm = hoje, KmAtual = 100_000 };
+        os.Itens.Add(new ItemOrdemServico
+        {
+            TipoManutencao = new TipoManutencao { Nome = "Óleo do motor", Componente = Componente.Motor },
+            KmProximaTroca = 140_000,
+            DataProximaTroca = hoje.AddMonths(6),
+        });
+        os.Mecanicos.Add(new Mecanico { Nome = "João", Funcao = "Mecânico", Ativo = true });
+
+        var lancada = BancoDeTeste.OrdensDeServico(context, context.Users.Single(u => u.Id == quem.Id)).Inserir(os);
+        Assert.NotNull(lancada);
+        return lancada.Numero;
+    }
+
     private List<string> Placas(Usuario quem)
     {
         using var context = _banco.Abrir(quem);
@@ -131,8 +150,8 @@ public sealed class SeparacaoEntreEmpresasTests : IDisposable
         {
             var falso = NovoCaminhao(context, "ZZZ-9Z99", ChassiB);
             falso.Id = idDaA;
-            // A empresa vai no WHERE do UPDATE: o banco não acha a linha e nada muda
-            Assert.Throws<DbUpdateConcurrencyException>(() => new RepositorioCrud(context).Update(falso));
+            // A empresa vai no WHERE do UPDATE: o banco não acha a linha e nada muda (o repositório avisa como conflito)
+            Assert.Throws<ConflitoDeEdicaoException>(() => new RepositorioCrud(context).Update(falso));
         }
 
         Assert.Equal(new[] { "AAA-1A11" }, Placas(_adminA));
@@ -236,6 +255,17 @@ public sealed class SeparacaoEntreEmpresasTests : IDisposable
         CadastrarCaminhao(_adminB, "ABC-1D23", ChassiA);
 
         Assert.ThrowsAny<DbUpdateException>(() => CadastrarCaminhao(_adminA, "ABC-1D23", ChassiB));
+    }
+
+    [Fact]
+    public void Numero_da_OS_comeca_em_1_em_cada_empresa()
+    {
+        var caminhaoA = CadastrarCaminhao(_adminA);
+        var caminhaoB = CadastrarCaminhao(_adminB);
+
+        Assert.Equal(1, LancarOs(_adminA, caminhaoA));
+        Assert.Equal(1, LancarOs(_adminB, caminhaoB));
+        Assert.Equal(2, LancarOs(_adminA, caminhaoA));
     }
 
     [Fact]

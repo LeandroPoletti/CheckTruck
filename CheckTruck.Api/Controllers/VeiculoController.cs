@@ -1,4 +1,5 @@
 using CheckTruck.Api.Acesso;
+using CheckTruck.Api.Dtos.Comuns;
 using CheckTruck.Api.Dtos.Veiculos;
 using CheckTruck.Dominio.Entidades;
 using CheckTruck.Dominio.Enums;
@@ -8,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CheckTruck.Api.Controllers;
 
-// Ver: Ver frota. Criar e editar: Veículos. Somar km: Atualizar km.
+// Ver: Ver frota. Criar e editar: Veículos. Km do painel: Atualizar km.
 // Caminhão não é excluído (as OS e o histórico de km dependem dele): quem não usa mais, desativa.
 [ApiController]
 [Route("api/[controller]")]
@@ -113,25 +114,26 @@ public class VeiculoController(
         return PutCore(id, dto.ToEntity(potencia, motorista));
     }
 
-    [HttpPut("{id:long}/kilometragem")]
+    /// <summary>Atualizar km: o km do painel agora, maior que o registrado (para baixar, Corrigir km).</summary>
+    [HttpPut("{id:long}/km")]
     [ExigePermissao(Permissao.AtualizarKm)]
-    public IActionResult AtualizarKilometragem(long id, [FromBody] int distancia)
+    public IActionResult AtualizarKm(long id, [FromBody] AtualizarKmRequestDto dto)
     {
-        var res = servicoVeiculo.AtualizarKmVeiculo(id, distancia);
+        var res = servicoVeiculo.AtualizarKmVeiculo(id, dto.Km);
         return res ? Ok() : Erro(servicoVeiculo.Mensagens);
     }
 
     /// <summary>
     /// Histórico de km do caminhão, do mais novo para o mais velho: cadastro, Atualizar km, OS,
-    /// edição e correções, com quem mudou, quando e de quanto pra quanto.
+    /// edição e correções, com quem mudou, quando e de quanto pra quanto. Os primeiros (quantos, 50 se não disser)
+    /// e o total.
     /// </summary>
     [HttpGet("{id:long}/historico-km")]
-    public ActionResult<IEnumerable<RegistroKmResponseDto>> GetHistoricoKm(long id) =>
+    public ActionResult<PaginaDto<RegistroKmResponseDto>> GetHistoricoKm(long id, [FromQuery] int quantos = Paginacao.Padrao) =>
         servicoRegistroKm.Query(r => r.Veiculo.Id == id)
             .OrderByDescending(r => r.RegistradoEm)
             .ThenByDescending(r => r.Id)
-            .Select(RegistroKmDtoExtensions.Projecao)
-            .ToList();
+            .Pagina(quantos, registros => registros.Select(RegistroKmDtoExtensions.Projecao));
 
     /// <summary>
     /// Corrige o km (ex.: um zero a mais no Atualizar km ou na OS). Só Admin e Gestor. Pode baixar o km,

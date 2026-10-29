@@ -4,9 +4,10 @@ using CheckTruck.Dominio.Interfaces;
 
 namespace CheckTruck.Dominio.Entidades;
 
-public class Veiculo : EntidadeDaEmpresa
+public class Veiculo : EntidadeDaEmpresa, EntidadeComVersao
 {
     public long Id { get; set; }
+    public uint Versao { get; set; }
     public string Placa { get; set; } = "";
     /// <summary>Potência do caminhão. Por ela se chega à geração, ao modelo e ao fabricante.</summary>
     public Potencia Potencia { get; set; } = null!;

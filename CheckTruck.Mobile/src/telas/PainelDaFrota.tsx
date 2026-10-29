@@ -5,25 +5,27 @@ import { router } from 'expo-router'
 import { useCarregarNaTela, useSessao, type Usuario } from '@/servicos/sessao'
 import { quandoTocarNoAvisoDeChamado } from '@/servicos/avisos'
 import { caminhoesDaFrota, type CaminhaoNaLista } from '@/servicos/caminhoes'
-import { listarChamados, type Chamado } from '@/servicos/chamados'
-import { listarOrdens, type OrdemDeServico } from '@/servicos/ordens'
+import { listarChamados, type ChamadosDaTela } from '@/servicos/chamados'
 import Abas, { type DadosDaAba } from '@/componentes/Abas'
 import Atalho from '@/componentes/Atalho'
 import Botao from '@/componentes/Botao'
 import MensagemErro from '@/componentes/MensagemErro'
 import Saudacao from '@/componentes/Saudacao'
 import CaminhoesDaFrota from './CaminhoesDaFrota'
-import ChamadosDaFrota from './ChamadosDaFrota'
+import ChamadosDaFrota, { CONCLUIDOS_NA_TELA } from './ChamadosDaFrota'
 import OrdensDaFrota from './OrdensDaFrota'
 import { comTema, cores } from '@/tema'
 
 type Aba = 'caminhoes' | 'chamados' | 'ordens'
 
+const SEM_CHAMADOS: ChamadosDaTela = { pendentes: [], concluidos: { itens: [], total: 0 } }
+
 // Tela de quem cuida da frota (mecânico, chefe de manutenção, gestor...). Mostra o que o acesso libera, igual ao web:
 // Ver frota mostra os caminhões e as ordens de serviço, e Atender chamados mostra os chamados. Com mais de uma, troca
 // nas abas de cima.
 // No fim da tela, os avisos de troca (Ver frota), os cadastros (permissão Cadastros) e Minha empresa (Admin e Gestor).
-// Recarrega sempre que a tela volta a aparecer (ex.: depois de resolver um chamado) e ao puxar para baixo.
+// Recarrega sempre que a tela volta a aparecer (ex.: depois de resolver um chamado) e ao puxar para baixo. As OS
+// carregam na aba delas (com a busca e o período na API).
 // Tocar no aviso de chamado novo volta para cá, na aba Chamados, já com o chamado novo.
 export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
   const { chamar, sair } = useSessao()
@@ -31,21 +33,19 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
   const atender = usuario.permissoes.includes('AtenderChamados')
   const [aba, setAba] = useState<Aba>(verFrota ? 'caminhoes' : 'chamados')
   const [caminhoes, setCaminhoes] = useState<CaminhaoNaLista[] | null>(null)
-  const [chamados, setChamados] = useState<Chamado[] | null>(null)
-  const [ordens, setOrdens] = useState<OrdemDeServico[] | null>(null)
+  const [chamados, setChamados] = useState<ChamadosDaTela | null>(null)
   const [erro, setErro] = useState('')
   const [puxando, setPuxando] = useState(false)
+  const [puxadas, setPuxadas] = useState(0)
 
   const carregar = useCallback(async () => {
     try {
-      const [frota, lista, os] = await Promise.all([
+      const [frota, lista] = await Promise.all([
         verFrota ? caminhoesDaFrota(chamar) : Promise.resolve([]),
-        atender ? listarChamados(chamar) : Promise.resolve([]),
-        verFrota ? listarOrdens(chamar) : Promise.resolve([]),
+        atender ? listarChamados(chamar, CONCLUIDOS_NA_TELA) : Promise.resolve(SEM_CHAMADOS),
       ])
       setCaminhoes(frota)
       setChamados(lista)
-      setOrdens(os)
       setErro('')
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Não foi possível carregar.')
@@ -65,11 +65,12 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
 
   async function puxarParaAtualizar() {
     setPuxando(true)
+    setPuxadas((n) => n + 1)
     await carregar()
     setPuxando(false)
   }
 
-  const pendentes = chamados?.filter((c) => c.status === 'Pendente').length ?? 0
+  const pendentes = chamados?.pendentes.length ?? 0
   const abas: DadosDaAba<Aba>[] = [
     ...(verFrota ? [{ id: 'caminhoes' as const, titulo: 'Caminhões' }] : []),
     ...(atender ? [{ id: 'chamados' as const, titulo: 'Chamados', contador: pendentes }] : []),
@@ -95,7 +96,7 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
             </View>
           )}
 
-          {(caminhoes === null || chamados === null || ordens === null) && erro === '' && (
+          {(caminhoes === null || chamados === null) && erro === '' && (
             <ActivityIndicator style={estilos.carregando} color={cores.marca700} />
           )}
 
@@ -105,9 +106,9 @@ export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
           {aba === 'chamados' && chamados && (
             <ChamadosDaFrota chamados={chamados} usuario={usuario} aoMudar={carregar} />
           )}
-          {aba === 'ordens' && ordens && <OrdensDaFrota ordens={ordens} usuario={usuario} />}
+          {aba === 'ordens' && caminhoes && <OrdensDaFrota usuario={usuario} puxadas={puxadas} />}
 
-          {caminhoes && chamados && ordens && (
+          {caminhoes && chamados && (
             <>
               {verFrota && <Atalho icone="bell" titulo="Avisos de troca" onPress={() => router.push('/avisos')} />}
               {usuario.permissoes.includes('Cadastros') && (

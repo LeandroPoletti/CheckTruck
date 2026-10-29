@@ -67,9 +67,17 @@ public class RepositorioCrud : IRepositorioCrud
     public IQueryable<T> QueryTodasAsEmpresas<T>(Expression<Func<T, bool>> where) where T : class =>
         _context.Set<T>().IgnoreQueryFilters().Where(where);
 
+    // O banco não achou a linha com a versão (ou a empresa) que veio: alguém gravou antes
     public void Commit()
     {
-        _context.SaveChanges();
+        try
+        {
+            _context.SaveChanges();
+        }
+        catch (DbUpdateConcurrencyException e)
+        {
+            throw new ConflitoDeEdicaoException(e);
+        }
     }
     
     public void MakeTransaction(Action<IRepositorioCrud> action)

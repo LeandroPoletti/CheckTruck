@@ -16,10 +16,21 @@ namespace CheckTruck.Api.Controllers;
 [ExigeUmaDasPermissoes(Permissao.AbrirChamados | Permissao.AtenderChamados)]
 public class ChamadoController(ServicoChamado servicoChamado, ServicoCelular servicoCelular) : CheckTruckController
 {
-    /// <summary>Pendentes e concluídos, do mais novo para o mais velho. Quem só abre vê os próprios.</summary>
+    /// <summary>
+    /// Todos os pendentes e os concluídos mais novos (quantosConcluidos, 50 se não disser), do mais novo para o mais
+    /// velho. Quem só abre vê os próprios.
+    /// </summary>
     [HttpGet]
-    public ActionResult<IEnumerable<ChamadoResponseDto>> Get() =>
-        servicoChamado.Listar(HttpContext.UsuarioLogado()).Select(ChamadoDtoExtensions.Projecao).ToList();
+    public ActionResult<ChamadosResponseDto> Get([FromQuery] int quantosConcluidos = Paginacao.Padrao)
+    {
+        var chamados = servicoChamado.Listar(HttpContext.UsuarioLogado());
+        return new ChamadosResponseDto
+        {
+            Pendentes = chamados.Where(c => c.Status == StatusChamado.Pendente).Select(ChamadoDtoExtensions.Projecao).ToList(),
+            Concluidos = chamados.Where(c => c.Status == StatusChamado.Concluido)
+                .Pagina(quantosConcluidos, concluidos => concluidos.Select(ChamadoDtoExtensions.Projecao)),
+        };
+    }
 
     /// <summary>Caminhões ativos (id e placa), para escolher ao abrir o chamado. O motorista só recebe os que estão com ele.</summary>
     [HttpGet("veiculos")]

@@ -447,6 +447,9 @@ namespace CheckTruck.Repositorio.Migrations
                     b.Property<string>("MotoristaId")
                         .HasColumnType("text");
 
+                    b.Property<int>("Numero")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Observacao")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
@@ -457,15 +460,22 @@ namespace CheckTruck.Repositorio.Migrations
                     b.Property<long>("VeiculoId")
                         .HasColumnType("bigint");
 
-                    b.HasKey("Id");
+                    b.Property<uint>("Versao")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
-                    b.HasIndex("EmpresaId");
+                    b.HasKey("Id");
 
                     b.HasIndex("LancadoPorId");
 
                     b.HasIndex("MotoristaId");
 
                     b.HasIndex("VeiculoId");
+
+                    b.HasIndex("EmpresaId", "Numero")
+                        .IsUnique();
 
                     b.ToTable("OrdensServico");
                 });
@@ -741,6 +751,12 @@ namespace CheckTruck.Repositorio.Migrations
 
                     b.Property<int>("Tracao")
                         .HasColumnType("integer");
+
+                    b.Property<uint>("Versao")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.HasKey("Id");
 

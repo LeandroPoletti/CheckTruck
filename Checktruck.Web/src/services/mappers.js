@@ -154,6 +154,7 @@ export const veiculoFromApi = (dto) => ({
   ativo: dto.ativo,
   motoristaId: dto.motoristaAtual?.id ?? null,
   motoristaNome: dto.motoristaAtual?.nome ?? null,
+  versao: dto.versao, // muda a cada gravação: volta no Editar (se alguém salvou antes, a API não grava)
 })
 // Um item da situação (km e dias que faltam; negativo = vencido). diasRestantes null = vence só por km.
 const itemSituacaoFromApi = (item) => ({
@@ -205,24 +206,26 @@ export const veiculoToApi = (v) => ({
   kmAtual: Number(v.kmAtual) || 0,
   ativo: !!v.ativo,
   motoristaAtualId: v.motoristaId || null,
+  versao: v.versao ?? 0,
 })
 
-// Uma mudança no km do caminhão. kmAnterior null = cadastro; ordemServicoId null = não foi OS (ou a OS foi excluída)
+// Uma mudança no km do caminhão. kmAnterior null = cadastro; ordemServicoNumero null = não foi OS (ou a OS foi excluída)
 export const registroKmFromApi = (dto) => ({
   id: toId(dto.id),
   kmAnterior: dto.kmAnterior,
   kmNovo: dto.kmNovo,
   origem: dto.origem, // nome do enum (ORIGENS_KM)
   motivo: dto.motivo,
-  ordemServicoId: toId(dto.ordemServicoId),
+  ordemServicoNumero: dto.ordemServicoNumero,
   registradoPorNome: dto.registradoPor?.nome ?? null,
   registradoEm: dto.registradoEm,
 })
 
-// Ordem de serviço (o id é o número da OS): o caminhão, o km e a data da troca, quem fez (um ou mais
+// Ordem de serviço (com o número dela na empresa): o caminhão, o km e a data da troca, quem fez (um ou mais
 // mecânicos) e o que foi trocado (itens, cada um com a próxima troca dele)
 export const ordemServicoFromApi = (dto) => ({
   id: toId(dto.id),
+  numero: dto.numero,
   veiculoId: toId(dto.veiculo?.id),
   placa: dto.veiculo?.placa ?? null,
   kmNaTroca: dto.kmAtual,
@@ -241,6 +244,7 @@ export const ordemServicoFromApi = (dto) => ({
   observacoes: dto.observacao,
   lancadoPorNome: dto.lancadoPor?.nome ?? null, // quem lançou a OS (OS antigas podem estar sem)
   lancadoEm: dto.lancadoEm, // data e hora do lançamento
+  versao: dto.versao, // muda a cada gravação: volta na correção (se alguém salvou antes, a API não grava)
 })
 // Próxima troca de cada item (km 0 e data null): a API calcula pelo intervalo que vale
 export const ordemServicoToApi = (o) => ({
@@ -257,6 +261,7 @@ export const ordemServicoToApi = (o) => ({
   motoristaId: o.motoristaId || null, // id do acesso (texto)
   concessionaria: o.concessionaria ?? null,
   observacao: o.observacoes ?? null,
+  versao: o.versao ?? 0,
 })
 
 // ---------------------------------------------------------------------------

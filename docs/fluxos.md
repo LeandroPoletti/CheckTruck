@@ -83,7 +83,7 @@ sequenceDiagram
     opt OS com motorista
         O->>O: ele vira o motorista atual do caminhão
     end
-    O->>R: grava a OS com o número em sequência, quem lançou e quando
+    O->>R: grava a OS com o próximo número da empresa, quem lançou e quando
     O-->>A: OS
     A-->>C: OS criada
     C-->>P: volta para o caminhão, já com a situação nova
@@ -143,7 +143,7 @@ sequenceDiagram
     App->>C: abre o canal ao entrar
     C->>C: cada conexão entra no grupo da empresa de quem entrou
     G->>S: Atualizar km do ABC-1D23
-    S->>A: PUT /api/Veiculo/7/kilometragem (cabeçalho X-Conexao do site)
+    S->>A: PUT /api/Veiculo/7/km (cabeçalho X-Conexao do site)
     A->>A: grava (as regras de sempre)
     A-->>S: 204, e o site recarrega a tela dele
     A->>C: AvisoDeMudanca: "mudou" para a empresa, menos o X-Conexao
@@ -152,7 +152,8 @@ sequenceDiagram
     App-->>M: km novo na tela, sem puxar para baixo
 ```
 
-O aviso não leva dado nenhum: cada tela relê pela API, com as permissões de quem está nela. A conexão que cair
+O aviso não leva dado nenhum: cada tela relê pela API, com as permissões de quem está nela. Vários avisos seguidos
+(meio segundo) viram uma recarga só, e a aba do navegador escondida espera voltar a aparecer. A conexão que cair
 (rede, app em segundo plano, API reiniciada) volta sozinha e, ao voltar, a tela recarrega, porque pode ter perdido
 algum aviso. A mudança do dono do sistema (catálogo do sistema, empresas) vai para todas as empresas.
 
@@ -235,14 +236,17 @@ sequenceDiagram
 
     M->>App: Atualizar km (digita o km do painel)
     App->>App: confere que é maior que o atual e mostra quanto rodou
-    App->>A: PUT /api/MeusCaminhoes/{id}/kilometragem (distância rodada)
-    A->>V: AtualizarKmDoMeuCaminhao(motorista, caminhão, distância)
-    V->>V: o caminhão precisa estar com ele, e a distância, ser maior que zero
-    V->>V: soma ao km e grava no histórico de km (origem Atualizar km)
+    App->>A: PUT /api/MeusCaminhoes/{id}/km (o km do painel)
+    A->>V: AtualizarKmDoMeuCaminhao(motorista, caminhão, km do painel)
+    V->>V: o caminhão precisa estar com ele, e o km, ser maior que o registrado
+    V->>V: grava o km e o histórico de km (origem Atualizar km)
     V-->>A: ok
     A-->>App: 200
     App-->>M: situação nova do caminhão
 ```
+
+O app manda o km do painel, e não quanto o caminhão rodou: se o km mudou enquanto a tela estava aberta (ex.: uma OS
+lançada no site), nada é somado em cima do que mudou.
 
 Ninguém baixa o km pelo Atualizar km. Se alguém digitar errado (ex.: um zero a mais), o Admin ou o Gestor usa
 **Corrigir km**, com motivo, e não pode baixar para menos que o km da maior OS.

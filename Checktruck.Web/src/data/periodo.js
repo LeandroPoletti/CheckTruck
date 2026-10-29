@@ -14,8 +14,8 @@ export const TODO_O_PERIODO = { periodo: 'tudo', de: '', ate: '' }
 const doisDigitos = (n) => String(n).padStart(2, '0')
 const paraData = (d) => `${d.getFullYear()}-${doisDigitos(d.getMonth() + 1)}-${doisDigitos(d.getDate())}`
 
-// Primeiro e último dia do período (null = sem limite), contando de hoje no fuso do computador
-function limites({ periodo, de, ate }) {
+/** Primeiro e último dia do período (aaaa-mm-dd; null = sem limite), contando de hoje no fuso do computador. */
+export function limitesDoPeriodo({ periodo, de, ate }) {
   const hoje = new Date()
   const ano = hoje.getFullYear()
   const mes = hoje.getMonth()
@@ -32,7 +32,7 @@ function limites({ periodo, de, ate }) {
 
 /** A data da troca (aaaa-mm-dd) está dentro do período escolhido? */
 export function noPeriodo(data, filtro) {
-  const [inicio, fim] = limites(filtro)
+  const [inicio, fim] = limitesDoPeriodo(filtro)
   return (!inicio || data >= inicio) && (!fim || data <= fim)
 }
 

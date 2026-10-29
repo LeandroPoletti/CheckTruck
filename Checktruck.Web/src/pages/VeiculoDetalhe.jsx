@@ -11,6 +11,7 @@ import OrdemServicoModal from '../components/modals/OrdemServicoModal'
 import CorrigirKmModal from '../components/modals/CorrigirKmModal'
 import { obterUsuario } from '../services/sessao'
 import { pode, GESTAO } from '../data/acesso'
+import { POR_VEZ } from '../data/pagina'
 
 const BACK_TO = '/veiculos'
 
@@ -21,6 +22,9 @@ export default function VeiculoDetalhe() {
   const [editarOpen, setEditarOpen] = useState(false)
   const [lancarOsOpen, setLancarOsOpen] = useState(false)
   const [corrigirKmOpen, setCorrigirKmOpen] = useState(false)
+  // O histórico de km vem 50 de cada vez (Ver mais), contando de novo em outro caminhão
+  const [verMaisKm, setVerMaisKm] = useState({ id, quantos: POR_VEZ })
+  const quantosKm = verMaisKm.id === id ? verMaisKm.quantos : POR_VEZ
   // A situação (o que vence e quando) vem pronta da API: intervalo que vale para cada item, por km e por data.
   // Ela também traz fabricante, modelo, geração e potência para o cabeçalho.
   const { dados, carregando, erro, recarregar, tentarNovamente } = useCargaDaTela(async () => {
@@ -28,10 +32,10 @@ export default function VeiculoDetalhe() {
       veiculoService.obter(id),
       veiculoService.obterSituacao(id),
       ordemServicoService.listar(filtro.porId('Veiculo', id)),
-      veiculoService.listarHistoricoKm(id),
+      veiculoService.listarHistoricoKm(id, quantosKm),
     ])
     return { veiculo, situacao, ordens, historicoKm }
-  }, [id])
+  }, [id, quantosKm], { manter: id })
 
   if (carregando) return <Carregando />
   if (erro?.status === 404) return <VeiculoNaoEncontrado backTo={BACK_TO} />
@@ -48,6 +52,8 @@ export default function VeiculoDetalhe() {
         situacao={dados.situacao}
         ordens={dados.ordens}
         historicoKm={dados.historicoKm}
+        quantosKm={quantosKm}
+        onVerMaisKm={(quantos) => setVerMaisKm({ id, quantos })}
         backTo={BACK_TO}
         actions={
           <div className="flex gap-2">
