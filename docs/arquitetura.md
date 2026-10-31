@@ -132,6 +132,7 @@ Os dois mostram só o que as permissões de quem entrou liberam, mas quem decide
 | **Push pelo Expo** | Um envio só para iPhone e Android, sem guardar chave da Apple ou do Google na API. Se o aviso falhar, o chamado continua aberto. |
 | **Atualizar sozinho pelo SignalR** (`CanalDeMudancas` + `AvisoDeMudanca`) | Já vem no ASP.NET Core e mantém um canal aberto (WebSocket) com cada site e app. O aviso só diz "mudou" e cada tela relê o que mostra pela API de sempre, com as permissões de sempre: nenhum dado passa pelo canal. Um filtro só, em todas as rotas, avisa depois de cada mudança que deu certo, então rota nova já avisa sem fazer nada. |
 | **Avisos de troca no próprio celular** | Funcionam sem servidor e sem internet na hora do aviso; o app refaz a agenda toda vez que abre. |
+| **Servidor na AWS: CloudFront + EC2 com Docker + RDS** | O CloudFront dá o https sem precisar de domínio e deixa passar o WebSocket. Na EC2, o Caddy entrega o site e repassa `/api` e `/hubs` para a API, então tudo tem um endereço só. O RDS cuida do backup do banco. |
 | **Expo (React Native) para o app** | Um código só para iPhone e Android, em TypeScript, como o documento do TCC prevê. |
 
 ## Segurança
@@ -144,8 +145,11 @@ Os dois mostram só o que as permissões de quem entrou liberam, mas quem decide
   app só escondem o que a pessoa não pode usar.
 - Dados separados por empresa no `Context` (filtro global), e não por cada tela.
 - No celular, os tokens ficam no cofre do aparelho (Keychain no iPhone, Keystore no Android).
-- HTTPS obrigatório fora de desenvolvimento. Em desenvolvimento, o app fala por HTTP na rede local (perfil
-  `celular`), porque o certificado de desenvolvimento só vale no PC.
+- No servidor, tudo passa por https (o CloudFront manda quem chega por http para o https). Em desenvolvimento, o
+  app fala por HTTP na rede local (perfil `celular`), porque o certificado de desenvolvimento só vale no PC.
+- Até 10 tentativas de login por minuto do mesmo IP (`Protecoes`), além do bloqueio da conta.
+- No servidor, as senhas dos primeiros logins vêm de variáveis de ambiente, e o site publicado não mostra as contas
+  de demonstração. O CORS só fica ligado no desenvolvimento (no servidor o site e a API têm o mesmo endereço).
 
 ## Como roda hoje
 
@@ -165,8 +169,9 @@ flowchart LR
     cel -- "http://IP-do-PC:5202" --> apiRun
 ```
 
-Ainda não há servidor na nuvem: a API, o banco e o site rodam no PC, e o celular precisa estar na mesma rede.
-Os passos estão no [README](../README.md#como-rodar).
+No desenvolvimento, a API, o banco e o site rodam no PC, e o celular precisa estar na mesma rede. Os passos estão
+no [README](../README.md#como-rodar). Na nuvem, o sistema roda na AWS (CloudFront, EC2 com Docker e RDS), como
+explicado em [servidor.md](servidor.md).
 
 ## Qualidade
 

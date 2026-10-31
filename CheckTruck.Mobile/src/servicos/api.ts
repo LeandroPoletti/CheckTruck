@@ -41,8 +41,10 @@ export async function chamarApi<T>(caminho: string, { metodo = 'GET', corpo, tok
       body: corpo === undefined ? undefined : JSON.stringify(corpo),
     })
   } catch {
-    throw new ErroDaApi(
-      `Não foi possível falar com o servidor (${API_URL}). Confira se a API está rodando com o perfil "celular" e se o celular está na mesma rede do PC.`,
+    // No desenvolvimento a dica é para quem programa; no app instalado, para quem usa
+    throw new ErroDaApi(__DEV__
+      ? `Não foi possível falar com o servidor (${API_URL}). Confira se a API está rodando com o perfil "celular" e se o celular está na mesma rede do PC.`
+      : 'Sem conexão com o servidor. Confira a internet do celular e tente de novo.',
       0)
   }
 
@@ -65,5 +67,5 @@ async function mensagemDoErro(resposta: Response): Promise<string> {
     // resposta sem corpo
   }
 
-  return `Erro ${resposta.status} ao chamar a API.`
+  return `Não deu certo (erro ${resposta.status}). Tente de novo em instantes.`
 }

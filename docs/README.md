@@ -13,6 +13,7 @@ telas e rotas da API. Para instalar e rodar, veja o [README principal](../README
 | [Requisitos](requisitos.md) | Requisitos funcionais e não funcionais e regras de negócio, com a situação de cada um |
 | [Telas](telas.md) | Navegação do site e do app e quem vê cada tela |
 | [API](api.md) | Todas as rotas, com a permissão de cada uma |
+| [Servidor](servidor.md) | Como o sistema roda na AWS (CloudFront, EC2 com Docker e RDS), como subir e como atualizar |
 
 ## Diagramas
 

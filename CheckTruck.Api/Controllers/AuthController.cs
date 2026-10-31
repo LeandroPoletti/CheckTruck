@@ -1,8 +1,10 @@
 using CheckTruck.Api.Dtos.Auth;
+using CheckTruck.Api.Servidor;
 using CheckTruck.Dominio.Entidades;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 
 namespace CheckTruck.Api.Controllers;
@@ -21,8 +23,10 @@ public class AuthController(
     /// Entra com e-mail e senha. Devolve { tokenType, accessToken, expiresIn, refreshToken };
     /// o front manda o accessToken no cabeçalho Authorization: Bearer. Acesso inativo não entra.
     /// O accessToken vale 1 hora; depois o front pede outro em POST api/Auth/renovar, sem pedir a senha.
+    /// Até 10 tentativas por minuto do mesmo IP (Protecoes); passou disso, 429.
     /// </summary>
     [HttpPost("login")]
+    [EnableRateLimiting(Protecoes.LimiteDoLogin)]
     public async Task<IActionResult> Login([FromBody] LoginRequestDto dto)
     {
         // Com o esquema Bearer, o próprio SignInManager escreve o token na resposta

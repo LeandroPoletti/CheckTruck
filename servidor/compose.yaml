@@ -1,0 +1,38 @@
+# Servidor (AWS): a API e o site, cada um no seu container. O banco é o RDS (o PostgreSQL da AWS).
+# Para subir e para atualizar: sh atualizar.sh (nesta pasta). As senhas ficam no .env (copie o .env.exemplo).
+name: checktruck
+
+# Log de cada container: até 3 arquivos de 10 MB, para não encher o disco
+x-logs: &logs
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: '3'
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: CheckTruck.Api/Dockerfile
+    env_file: .env
+    environment:
+      ChavesDoToken__Pasta: /chaves
+    volumes:
+      - chaves-do-token:/chaves
+    restart: unless-stopped
+    logging: *logs
+
+  # O site e, na frente da API, o Caddy: é a única porta aberta do servidor, e só o CloudFront chega nela
+  site:
+    build:
+      context: ..
+      dockerfile: servidor/site.Dockerfile
+    ports:
+      - '80:80'
+    depends_on:
+      - api
+    restart: unless-stopped
+    logging: *logs
+
+volumes:
+  chaves-do-token:

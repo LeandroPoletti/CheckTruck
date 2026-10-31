@@ -22,4 +22,9 @@ RUN dotnet publish "./CheckTruck.Api.csproj" -c $BUILD_CONFIGURATION -o /app/pub
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+# Pasta das chaves do token (no servidor, servidor/compose.yaml põe um volume nela). A API não roda como root,
+# então a pasta já nasce dela
+USER root
+RUN mkdir /chaves && chown $APP_UID /chaves
+USER $APP_UID
 ENTRYPOINT ["dotnet", "CheckTruck.Api.dll"]

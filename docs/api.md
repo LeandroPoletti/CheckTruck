@@ -5,7 +5,8 @@ Base: `/api`. Tudo em JSON. Toda rota, menos as de `Auth`, exige o token no cabe
 fica em `/docs`.
 
 - **Erros** saem sempre como ProblemDetails, com a mensagem para o usuário em `detail` (400 dado inválido,
-  401 sem login, acesso inativo ou empresa desativada, 403 sem permissão, 404 não encontrado).
+  401 sem login, acesso inativo ou empresa desativada, 403 sem permissão, 404 não encontrado, 429 tentativas de
+  login demais, 500 erro no servidor, com "Algo deu errado do nosso lado. Tente de novo em instantes.").
 - **Listas** com OData aceitam `$filter`, `$orderby`, `$top` (até 100), `$skip` e `$count`
   (ex.: `GET /api/OrdemServico?$filter=Veiculo/Id eq 7`).
 - **Listas que crescem sempre** (OS da frota, chamados concluídos e histórico de km) vêm das mais novas para as mais
@@ -29,9 +30,10 @@ cadastra o resto da equipe (`POST /api/Usuario`).
 
 | Método | Rota | O que faz | Permissão |
 |---|---|---|---|
-| POST | `/api/Auth/login` | Entra; devolve `accessToken` (1 hora) e `refreshToken` (14 dias) | Público |
+| POST | `/api/Auth/login` | Entra; devolve `accessToken` (1 hora) e `refreshToken` (14 dias). Até 10 tentativas por minuto do mesmo IP | Público |
 | POST | `/api/Auth/renovar` | Troca o `refreshToken` por tokens novos, sem a senha | Público (com a chave) |
 | GET | `/api/Usuario/me` | Quem está logado: cargo, permissões, empresa e tema de cor | — |
+| GET | `/api/saude` | `Healthy` quando a API está no ar e fala com o banco (para conferir o servidor) | Público |
 | PUT | `/api/Usuario/me/tema` | Troca a cor de quem está logado (corpo: `"Verde"`, `"Azul"`, `"Amarelo"` ou `"Preto"`); vale no site e no app | — |
 
 ## Empresas

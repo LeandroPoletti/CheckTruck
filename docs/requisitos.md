@@ -33,8 +33,8 @@ como ele é hoje, mais os que surgiram no desenvolvimento. **Situação:** ✅ f
 |----|-----------|----------|-----------|
 | RNF-01 | App para iPhone e Android | ✅ | React Native + Expo; também há o site (React) |
 | RNF-02 | Respostas da API em menos de 3 segundos | 🟡 | Ainda não medido com carga. O cálculo da situação é feito no servidor; o aviso pelo Expo espera no máximo 5 s |
-| RNF-03 | Dados no PostgreSQL, na nuvem, com backup | 🟡 | PostgreSQL ✅; hoje roda local (Docker), sem nuvem e sem backup automático ⏳ |
-| RNF-04 | Segurança | ✅ | Token Bearer de 1 hora com renovação, senhas com hash, bloqueio por tentativas erradas, dados separados por empresa, empresa desativada não entra, HTTPS fora de desenvolvimento |
+| RNF-03 | Dados no PostgreSQL, na nuvem, com backup | 🟡 | PostgreSQL ✅. O servidor na AWS está pronto para subir (RDS com backup todo dia, [servidor.md](servidor.md)); ainda não foi publicado ⏳ |
+| RNF-04 | Segurança | ✅ | Token Bearer de 1 hora com renovação, senhas com hash, bloqueio por tentativas erradas e limite de login por IP, dados separados por empresa, empresa desativada não entra, HTTPS fora de desenvolvimento, senhas iniciais só por variável de ambiente no servidor |
 | RNF-05 | Escalabilidade | 🟡 | Um banco para todas as empresas (multiempresa); as listas que crescem sempre vêm 50 de cada vez e os avisos seguidos viram uma recarga só; ainda não foi publicada nem testada com carga |
 | RNF-06 | Integridade dos dados em camadas | ✅ | Banco (chaves, únicos, obrigatórios) + API (todas as regras) + telas (avisam antes de enviar). Duas pessoas editando o mesmo caminhão ou a mesma OS: quem salva depois é avisado e nada é gravado |
 | RNF-07 | API documentada | 🟡 | Scalar em `/docs` em desenvolvimento e a lista de rotas em [api.md](api.md); falta publicar |

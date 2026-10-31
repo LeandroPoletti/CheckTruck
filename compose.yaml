@@ -1,19 +1,20 @@
-﻿services:
-#  checktruck.api:
-#    image: checktruck.api
-#    build:
-#      context: .
-#      dockerfile: CheckTruck.Api/Dockerfile
-
+# Banco para o desenvolvimento (docker compose up -d db). Só abre no próprio PC (127.0.0.1) e guarda os dados no
+# volume "dados", que fica mesmo depois de um docker compose down. O servidor usa a pasta servidor.
+services:
   db:
-    image: postgres:14.23-trixie
+    image: postgres:17
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - '5432:5432'
-  
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - dados:/var/lib/postgresql/data
+
   adminer:
     image: adminer:standalone
     ports:
-      - '8080:8080'
+      - '127.0.0.1:8080:8080'
+
+volumes:
+  dados:

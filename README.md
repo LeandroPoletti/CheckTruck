@@ -39,7 +39,8 @@ Checktruck.Web/         front (React)
   src/hooks/useCarga.js carregar dados da API numa tela (carregando, erro, tentar de novo e recarregar)
   src/services/         chamadas da API e conversão dos dados
 docs/                   documentação técnica com os diagramas
-compose.yaml            PostgreSQL (e Adminer) em Docker
+compose.yaml            PostgreSQL (e Adminer) em Docker, para o desenvolvimento
+servidor/               o servidor na AWS: Docker com a API e o site (Caddy), scripts e o modelo do .env
 .github/workflows/      CI: a cada push na main, compila a API, roda os testes, passa lint e build no front e confere o app
 ```
 
@@ -59,6 +60,7 @@ Com Docker, na raiz do projeto:
 docker compose up -d db
 ```
 
+O banco só abre no próprio PC e os dados ficam num volume do Docker, mesmo depois de um `docker compose down`.
 A API já vem configurada para esse banco (usuário e senha `postgres`, em `appsettings.Development.json`).
 Se o seu PostgreSQL tiver outra senha, informe a conexão só no terminal, sem salvar em arquivo:
 
@@ -145,15 +147,26 @@ puxar a tela para baixo nem apertar F5):
 - **Sem criar conta:** no app entra quem já tem acesso (o e-mail e a senha que o admin ou o gestor cadastrou no site).
 - Quem não tem Ver frota nem Atender chamados usa só o site.
 
-**Primeiro acesso:** a API cria dois logins. Troque as senhas fora do ambiente de desenvolvimento.
+**Primeiro acesso:** no desenvolvimento, a API cria dois logins com as senhas abaixo, e a tela de login do site
+(`npm run dev`) mostra os dois para entrar com um clique.
 
 | Login | Senha | Quem é |
 |-------|-------|--------|
 | `admin@admin.com` | `Admin@123` | Admin da empresa Transportadora Almeida |
 | `dono@checktruck.com` | `Dono@123` | Dono do sistema: cadastra as empresas, cuida do catálogo do sistema e não é de nenhuma empresa |
 
+No servidor, essas senhas não existem: a API cria os dois logins com a senha das variáveis de ambiente
+`ContasIniciais__SenhaDoAdmin` e `ContasIniciais__SenhaDoDono` (só na primeira vez, quando o login ainda não existe;
+sem elas a API não sobe). O site publicado (`npm run build`) não mostra os logins na tela.
+
 Não existe criar conta: o dono do sistema cadastra cada empresa cliente com o login do Admin dela, e o Admin
 cadastra a equipe (veja Empresas, abaixo).
+
+## Servidor (AWS)
+
+Na nuvem, o sistema roda na AWS: o CloudFront dá o endereço com https, uma EC2 roda a API e o site no Docker (pasta
+`servidor`) e o banco é o RDS, com backup todo dia. Como subir, configurar e atualizar está em
+[docs/servidor.md](docs/servidor.md).
 
 ## Empresas
 

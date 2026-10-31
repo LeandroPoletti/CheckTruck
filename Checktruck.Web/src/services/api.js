@@ -1,11 +1,12 @@
 // Cliente HTTP da CheckTruck.Api (.NET + OData + Identity).
-// As requisições vão direto para VITE_API_URL — o CORS é liberado no backend, sem proxy.
+// No desenvolvimento os pedidos vão para VITE_API_URL (a API libera o CORS ali). No site publicado vão para o mesmo
+// endereço do site: no servidor, o Caddy repassa /api e /hubs para a API (pasta servidor).
 import axios from 'axios'
 
 const SESSION_KEY = 'checktruck.session'
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://localhost:7013',
+  baseURL: import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'https://localhost:7013' : ''),
   headers: { Accept: 'application/json' },
 })
 
@@ -50,10 +51,12 @@ function extrairMensagem(data, status) {
   if (data?.detail) return data.detail
   const erros = Object.values(data?.errors ?? {}).flat()
   if (erros.length) return erros.join(' ')
-  return data?.title ?? `Erro ${status} ao chamar a API.`
+  return data?.title ?? `Não deu certo (erro ${status}). Tente de novo em instantes.`
 }
 
-const SEM_CONEXAO = 'Não foi possível conectar à API. Verifique se a CheckTruck.Api está rodando.'
+const SEM_CONEXAO = import.meta.env.DEV
+  ? 'Não foi possível conectar à API. Verifique se a CheckTruck.Api está rodando.'
+  : 'Sem conexão com o servidor. Confira a internet e tente de novo.'
 
 // O token vale 1 hora. Vencido, troca a chave de renovação (refreshToken) por tokens novos, sem pedir a senha.
 // false: a chave não vale mais (venceu, a senha ou o e-mail mudou, ou o acesso foi desativado).

@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using CheckTruck.Api.Acesso;
 using CheckTruck.Api.Avisos;
+using CheckTruck.Api.Servidor;
 using CheckTruck.Dominio.Entidades;
 using CheckTruck.Dominio.Enums;
 using CheckTruck.Repositorio;
@@ -120,25 +121,23 @@ builder.Services.AddScoped<ServicoCelular>();
 builder.Services.AddSignalR();
 // Aviso no celular (push) pelo serviço do Expo. Se ele demorar, quem abriu o chamado não espera mais que isso
 builder.Services.AddHttpClient<IEnviadorDeAvisos, AvisosPeloExpo>(http => http.Timeout = TimeSpan.FromSeconds(5));
+// No servidor, o site chama a API pelo mesmo endereço (o Caddy repassa /api e /hubs) e o app do celular não usa
+// CORS. Só no desenvolvimento o site (Vite) e o app na web rodam em outra porta e precisam dele.
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy => policy.AllowAnyMethod().AllowAnyOrigin().AllowAnyHeader());
 });
+builder.AddProtecoes();
 
 var app = builder.Build();
 
+app.UseProtecoes();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference("/docs");
+    app.UseCors();
 }
-else
-{
-    // Em desenvolvimento o app do celular fala com a API por http na rede (perfil "celular"), porque o
-    // certificado https de desenvolvimento só vale no PC. Fora do desenvolvimento, todo pedido vai para o https.
-    app.UseHttpsRedirection();
-}
-app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -151,7 +150,38 @@ using (var scope = app.Services.CreateScope())
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
     var context = scope.ServiceProvider.GetRequiredService<Context>();
 
-    // Admin do sistema: entra com o e-mail e a senha abaixo, não precisa de CPF e não pode ser desativado
+    // No servidor a API aplica sozinha as migrations que faltam (no desenvolvimento é o dotnet ef database update)
+    if (!app.Environment.IsDevelopment())
+    {
+        await context.Database.MigrateAsync();
+    }
+
+    // Senha dos dois primeiros logins. No desenvolvimento é a do README. No servidor vem da configuração
+    // (ContasIniciais__SenhaDoAdmin e ContasIniciais__SenhaDoDono) e só é usada quando o login ainda não existe.
+    string SenhaInicial(string chave, string doDesenvolvimento)
+    {
+        if (app.Environment.IsDevelopment())
+        {
+            return doDesenvolvimento;
+        }
+
+        var senha = app.Configuration[$"ContasIniciais:{chave}"];
+        return string.IsNullOrWhiteSpace(senha)
+            ? throw new InvalidOperationException($"Configure ContasIniciais__{chave} para a API criar o primeiro login.")
+            : senha;
+    }
+
+    async Task CriarLogin(Usuario usuario, string senha)
+    {
+        var resultado = await userManager.CreateAsync(usuario, senha);
+        if (!resultado.Succeeded)
+        {
+            var motivos = string.Join(" ", resultado.Errors.Select(e => e.Description));
+            throw new InvalidOperationException($"Não foi possível criar o login {usuario.Email}: {motivos}");
+        }
+    }
+
+    // Admin do sistema: não precisa de CPF e não pode ser desativado
     var admin = await userManager.FindByEmailAsync(ServicoUsuario.EmailAdminDoSistema);
     if (admin is null)
     {
@@ -165,7 +195,7 @@ using (var scope = app.Services.CreateScope())
             // A primeira empresa é a do TCC: a migration SepararPorEmpresa cria e põe nela o que já existia
             EmpresaId = context.Empresas.OrderBy(e => e.Id).First().Id
         };
-        await userManager.CreateAsync(admin, "Admin@123");
+        await CriarLogin(admin, SenhaInicial("SenhaDoAdmin", "Admin@123"));
     }
     else if (admin.Cargo != Cargo.Admin || !admin.Ativo || admin.Nome.Length == 0 || admin.UserName != admin.Email)
     {
@@ -184,7 +214,7 @@ using (var scope = app.Services.CreateScope())
     // Dono do sistema: cuida do catálogo de todas as empresas e não é de nenhuma (sem CPF e sem empresa)
     if (await userManager.FindByEmailAsync(ServicoUsuario.EmailDonoDoSistema) is null)
     {
-        await userManager.CreateAsync(new Usuario
+        await CriarLogin(new Usuario
         {
             Nome = "Dono do sistema",
             Email = ServicoUsuario.EmailDonoDoSistema,
@@ -192,7 +222,7 @@ using (var scope = app.Services.CreateScope())
             Cargo = Cargo.DonoDoSistema,
             Permissoes = Permissao.Cadastros | Permissao.Intervalos,
             Ativo = true
-        }, "Dono@123");
+        }, SenhaInicial("SenhaDoDono", "Dono@123"));
     }
 
     if (!context.Paises.Any(p => p.Nome == "Brasil"))

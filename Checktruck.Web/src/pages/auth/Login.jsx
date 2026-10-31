@@ -5,16 +5,19 @@ import { entrar } from '../../services/sessao'
 import { Field, Input, Button, MensagemErro } from '../../components/ui/Form'
 import TelaPublica from './TelaPublica'
 
-// Logins criados pelo sistema (Program.cs da API)
-const DEMO = [
-  { cargo: 'Admin', email: 'admin@admin.com', senha: 'Admin@123' },
-  { cargo: 'Dono do sistema', email: 'dono@checktruck.com', senha: 'Dono@123' },
-]
+// Logins que a API cria no desenvolvimento (Program.cs). No site publicado (npm run build) a caixa com eles não
+// aparece, o login começa vazio e as senhas nem entram no JavaScript.
+const DEMO = import.meta.env.DEV
+  ? [
+      { cargo: 'Admin', email: 'admin@admin.com', senha: 'Admin@123' },
+      { cargo: 'Dono do sistema', email: 'dono@checktruck.com', senha: 'Dono@123' },
+    ]
+  : []
 
 export default function Login() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('admin@admin.com')
-  const [senha, setSenha] = useState('Admin@123')
+  const [email, setEmail] = useState(DEMO[0]?.email ?? '')
+  const [senha, setSenha] = useState(DEMO[0]?.senha ?? '')
   const [verSenha, setVerSenha] = useState(false)
   const [error, setError] = useState('')
   const [entrando, setEntrando] = useState(false)
@@ -33,7 +36,11 @@ export default function Login() {
   }
 
   return (
-    <TelaPublica abaixo={<ContasDeDemonstracao onEscolher={(d) => { setEmail(d.email); setSenha(d.senha); setError('') }} />}>
+    <TelaPublica
+      abaixo={import.meta.env.DEV && (
+        <ContasDeDemonstracao onEscolher={(d) => { setEmail(d.email); setSenha(d.senha); setError('') }} />
+      )}
+    >
       <h2 className="text-[28px] font-extrabold text-stone-900">Entrar</h2>
       <p className="mt-1 text-sm text-stone-500">
         Entre com as credenciais fornecidas pela sua empresa.
