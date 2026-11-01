@@ -55,27 +55,17 @@
   --color-ok-700: #0f6b42;
 }
 
-/* Cores do caminhão dos desenhos e da estrada do login: no fundo claro, o teto, o vidro e a faixa da cabine; em cima
-   do topo colorido, a cabine, o teto, o vidro, a faixa e o asfalto. No verde são as cores de sempre; nos outros temas
-   saem das cores do tema (o amarelo troca algumas lá embaixo) */
+/* Cores do caminhão dos desenhos: o teto, o vidro e a faixa da cabine. No verde são as cores de sempre; nos outros
+   temas saem das cores do tema (o amarelo troca algumas lá embaixo) */
 :root {
   --caminhao-teto: #0a4a2e;
   --caminhao-vidro: #c0e1cf;
   --caminhao-faixa: #f2c230;
-  --caminhao-cabine-no-topo: #ffffff;
-  --caminhao-teto-no-topo: #cfe0d6;
-  --caminhao-vidro-no-topo: #7fb59a;
-  --caminhao-faixa-no-topo: #f2c230;
-  --asfalto-no-topo: #0b2e1e;
 }
 
 :root[data-tema] {
   --caminhao-teto: color-mix(in srgb, var(--color-logo) 70%, black);
   --caminhao-vidro: color-mix(in srgb, var(--color-logo) 30%, white);
-  --caminhao-cabine-no-topo: var(--color-sobre-topo);
-  --caminhao-teto-no-topo: var(--color-sobre-topo-2);
-  --caminhao-vidro-no-topo: var(--color-sobre-topo-3);
-  --asfalto-no-topo: color-mix(in srgb, var(--color-topo) 45%, black);
 }
 
 /* Azul da placa Mercosul */
@@ -128,10 +118,6 @@
   --caminhao-teto: #d9a300;
   --caminhao-vidro: #2f343b;
   --caminhao-faixa: #1e2126;
-  --caminhao-cabine-no-topo: #ffc72c;
-  --caminhao-teto-no-topo: #d9a300;
-  --caminhao-vidro-no-topo: #2f343b;
-  --caminhao-faixa-no-topo: #1e2126;
 }
 
 /* Preto: o topo, os botões e a logo em preto; o fundo das telas continua claro */
@@ -176,4 +162,26 @@ h1, h2, h3 {
 * {
   scrollbar-width: thin;
   scrollbar-color: #b9c9bd transparent;
+}
+
+/* Movimento lento das fotos do login (TelaPublica), um por foto, como no efeito Ken Burns: aproximar, afastar e
+   andar para os lados. A foto fica um pouco ampliada para o andar não mostrar a borda */
+@keyframes foto-aproximar {
+  from { transform: scale(1); }
+  to { transform: scale(1.07); }
+}
+
+@keyframes foto-afastar {
+  from { transform: scale(1.07); }
+  to { transform: scale(1); }
+}
+
+@keyframes foto-esquerda {
+  from { transform: scale(1.07) translateX(2%); }
+  to { transform: scale(1.07) translateX(-2%); }
+}
+
+@keyframes foto-direita {
+  from { transform: scale(1.07) translateX(-2%); }
+  to { transform: scale(1.07) translateX(2%); }
 }

@@ -24,11 +24,6 @@ type Paleta = {
   /** A placa da logo e a borda dela */
   logo: string
   logoMoldura: string
-  /** O caminhão do login, em cima do topo: o teto e os detalhes da cabine, e o vidro */
-  tetoDoCaminhao: string
-  vidroDoCaminhao: string
-  /** O asfalto da estrada do login, mais escuro que o topo */
-  asfalto: string
 }
 
 const TEMAS: Record<TemaDeCor, Paleta> = {
@@ -37,7 +32,6 @@ const TEMAS: Record<TemaDeCor, Paleta> = {
     marca300: '#94cdb0', marca200: '#c0e1cf', marca100: '#e0f1e7', marca50: '#f0f9f3', fundo: '#edf2ee',
     topo: '#073823', topoForte: '#0a4a2e', sobreTopo: '#ffffff', sobreTopo2: '#c0e1cf', faixa: '#f2c230',
     logo: '#0f6b42', logoMoldura: '#ffffff',
-    tetoDoCaminhao: '#cfe0d6', vidroDoCaminhao: '#7fb59a', asfalto: '#0b2e1e',
   },
   // Azul da placa Mercosul
   Azul: {
@@ -45,7 +39,6 @@ const TEMAS: Record<TemaDeCor, Paleta> = {
     marca300: '#a3b8ea', marca200: '#c9d5f3', marca100: '#e4eaf9', marca50: '#f2f5fc', fundo: '#edf0f6',
     topo: '#0f1d4d', topoForte: '#162a6b', sobreTopo: '#ffffff', sobreTopo2: '#c9d5f3', faixa: '#f2c230',
     logo: '#1f3a93', logoMoldura: '#ffffff',
-    tetoDoCaminhao: '#c9d5f3', vidroDoCaminhao: '#a3b8ea', asfalto: '#070d23',
   },
   // Amarelo das placas de advertência: o topo amarelo com a letra escura, e os botões em grafite
   Amarelo: {
@@ -53,7 +46,6 @@ const TEMAS: Record<TemaDeCor, Paleta> = {
     marca300: '#ffd65a', marca200: '#ffe48f', marca100: '#fff3c7', marca50: '#fffbea', fundo: '#f3f2ee',
     topo: '#ffc72c', topoForte: '#f0b400', sobreTopo: '#1e2126', sobreTopo2: '#4a3d10', faixa: '#1e2126',
     logo: '#ffc72c', logoMoldura: '#1e2126',
-    tetoDoCaminhao: '#4a3d10', vidroDoCaminhao: '#ffd65a', asfalto: '#4d3c0d',
   },
   // Preto: o topo, os botões e a logo em preto; o fundo das telas continua claro
   Preto: {
@@ -61,7 +53,6 @@ const TEMAS: Record<TemaDeCor, Paleta> = {
     marca300: '#b2b6bc', marca200: '#d4d6da', marca100: '#e9eaec', marca50: '#f5f5f6', fundo: '#eef0f2',
     topo: '#141518', topoForte: '#24272b', sobreTopo: '#ffffff', sobreTopo2: '#d4d6da', faixa: '#f2c230',
     logo: '#2b2e33', logoMoldura: '#ffffff',
-    tetoDoCaminhao: '#d4d6da', vidroDoCaminhao: '#b2b6bc', asfalto: '#090a0b',
   },
 }
 

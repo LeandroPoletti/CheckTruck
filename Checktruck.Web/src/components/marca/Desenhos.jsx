@@ -1,22 +1,13 @@
 // Desenhos do site (feitos para o CheckTruck): o caminhão na estrada e a estrada vazia
 
-// Cores do caminhão, do tema (index.css). No fundo claro, a cabine tem a cor da logo; no topo colorido (login), é
-// branca (amarela no tema amarelo). Vão no style porque o atributo fill não aceita var()
+// Cores do caminhão, do tema (index.css): a cabine tem a cor da logo. Vão no style porque o atributo fill não
+// aceita var()
 const CORES = {
-  claro: {
-    cabine: 'var(--color-logo)',
-    cabineEscura: 'var(--caminhao-teto)',
-    vidro: 'var(--caminhao-vidro)',
-    faixa: 'var(--caminhao-faixa)',
-    asfalto: '#26302b',
-  },
-  escuro: {
-    cabine: 'var(--caminhao-cabine-no-topo)',
-    cabineEscura: 'var(--caminhao-teto-no-topo)',
-    vidro: 'var(--caminhao-vidro-no-topo)',
-    faixa: 'var(--caminhao-faixa-no-topo)',
-    asfalto: 'var(--asfalto-no-topo)',
-  },
+  cabine: 'var(--color-logo)',
+  cabineEscura: 'var(--caminhao-teto)',
+  vidro: 'var(--caminhao-vidro)',
+  faixa: 'var(--caminhao-faixa)',
+  asfalto: '#26302b',
 }
 const CHASSI = '#24302b'
 const METAL = '#9fb2a8'
@@ -40,25 +31,22 @@ function Roda({ x }) {
   )
 }
 
-// Cavalo mecânico "cara chata" de lado, numa estrada com a faixa amarela. fundo: 'claro' ou 'escuro'.
-// estrada: false quando quem usa desenha a estrada mais comprida (ex.: o login, de ponta a ponta)
-export function Caminhao({ largura = 320, fundo = 'claro', estrada = true, className = '' }) {
-  const c = CORES[fundo]
-  const altura = estrada ? 170 : 152 // sem a estrada, o desenho acaba embaixo das rodas
+// Cavalo mecânico "cara chata" de lado, numa estrada com a faixa amarela
+export function Caminhao({ largura = 320, className = '' }) {
   return (
-    <svg viewBox={`0 0 340 ${altura}`} width={largura} height={(largura * altura) / 340} aria-hidden="true" className={className}>
-      {estrada && <Estrada asfalto={c.asfalto} />}
+    <svg viewBox="0 0 340 170" width={largura} height={(largura * 170) / 340} aria-hidden="true" className={className}>
+      <Estrada asfalto={CORES.asfalto} />
       <rect x="30" y="112" width="290" height="12" rx="3" fill={CHASSI} />
       <rect x="222" y="102" width="56" height="10" rx="3" fill={CHASSI} />
       <rect x="140" y="24" width="8" height="90" rx="4" fill={METAL} />
       <rect x="138" y="20" width="12" height="8" rx="2" fill={CHASSI} />
-      <path d="M24 118 V52 Q24 34 42 34 H130 Q134 34 134 38 V118 Z" style={{ fill: c.cabine }} />
-      <path d="M46 34 L62 15 Q64 12 68 12 H128 Q132 12 132 16 V34 Z" style={{ fill: c.cabineEscura }} />
-      <rect x="32" y="44" width="52" height="30" rx="6" style={{ fill: c.vidro }} />
+      <path d="M24 118 V52 Q24 34 42 34 H130 Q134 34 134 38 V118 Z" style={{ fill: CORES.cabine }} />
+      <path d="M46 34 L62 15 Q64 12 68 12 H128 Q132 12 132 16 V34 Z" style={{ fill: CORES.cabineEscura }} />
+      <rect x="32" y="44" width="52" height="30" rx="6" style={{ fill: CORES.vidro }} />
       <path d="M40 70 L58 48" stroke="#fff" strokeOpacity=".45" strokeWidth="4" strokeLinecap="round" />
-      <path d="M98 44 V110" strokeWidth="2.5" strokeOpacity=".55" style={{ stroke: c.cabineEscura }} />
-      <rect x="84" y="82" width="9" height="3.5" rx="1.75" style={{ fill: c.cabineEscura }} />
-      <rect x="24" y="92" width="110" height="7" style={{ fill: c.faixa }} />
+      <path d="M98 44 V110" strokeWidth="2.5" strokeOpacity=".55" style={{ stroke: CORES.cabineEscura }} />
+      <rect x="84" y="82" width="9" height="3.5" rx="1.75" style={{ fill: CORES.cabineEscura }} />
+      <rect x="24" y="92" width="110" height="7" style={{ fill: CORES.faixa }} />
       <rect x="14" y="104" width="32" height="14" rx="4" fill={CHASSI} />
       <rect x="16" y="95" width="11" height="6" rx="2" fill="#ffe9a8" />
       <rect x="58" y="112" width="22" height="4" rx="2" fill={METAL} />

@@ -4,17 +4,18 @@ import {
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Redirect } from 'expo-router'
+import { StatusBar } from 'expo-status-bar'
 import { Feather } from '@expo/vector-icons'
 import { useSessao } from '@/servicos/sessao'
 import { API_URL } from '@/servicos/api'
 import Botao from '@/componentes/Botao'
 import Campo from '@/componentes/Campo'
 import Carregando from '@/componentes/Carregando'
-import { Caminhao } from '@/componentes/Desenhos'
 import FaixaDaEstrada from '@/componentes/FaixaDaEstrada'
+import FotosDoLogin from '@/componentes/FotosDoLogin'
 import { Simbolo } from '@/componentes/Logo'
 import MensagemErro from '@/componentes/MensagemErro'
-import { amareloDaEstrada, comTema, cores, fontes } from '@/tema'
+import { comTema, cores, fontes } from '@/tema'
 
 // Entrar com a mesma conta do web (e-mail e senha cadastrados pelo admin ou pelo gestor)
 export default function Login() {
@@ -54,19 +55,15 @@ export default function Login() {
   return (
     <KeyboardAvoidingView style={estilos.tela} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={estilos.rolagem} keyboardShouldPersistTaps="handled" bounces={false}>
+        {/* Em cima, as fotos de caminhão passando, com a marca por cima delas (letra branca em qualquer cor do app) */}
         <View style={[estilos.marca, { paddingTop: margens.top + 28 }]}>
-          <Simbolo tamanho={60} />
+          <StatusBar style="light" />
+          <FotosDoLogin />
+          {/* Numa View para ficar por cima das fotos também no navegador (lá o desenho sozinho ficaria embaixo) */}
+          <View><Simbolo tamanho={60} /></View>
           <Text style={estilos.nome}>CheckTruck</Text>
           <FaixaDaEstrada />
           <Text style={estilos.descricao}>Manutenção preventiva da frota, na palma da mão.</Text>
-
-          {/* O caminhão na estrada, de ponta a ponta da tela, logo acima do formulário */}
-          <View style={estilos.chao} accessible={false}>
-            <View style={estilos.caminhao}><Caminhao largura={250} /></View>
-            <View style={estilos.estrada}>
-              {Array.from({ length: 8 }, (_, i) => <View key={i} style={estilos.tracoDaEstrada} />)}
-            </View>
-          </View>
         </View>
 
         <Animated.View
@@ -136,14 +133,12 @@ export default function Login() {
 const estilos = comTema(() => StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.topo },
   rolagem: { flexGrow: 1 },
-  marca: { flexGrow: 1, paddingHorizontal: 28, gap: 14 },
-  nome: { fontFamily: fontes.titulo, fontSize: 44, lineHeight: 50, color: cores.sobreTopo, letterSpacing: -0.5, marginTop: 4 },
-  descricao: { fontFamily: fontes.texto, fontSize: 16, lineHeight: 23, color: cores.sobreTopo2, maxWidth: 290 },
-  chao: { marginTop: 'auto', marginHorizontal: -28, paddingTop: 12 },
-  caminhao: { alignItems: 'flex-end', paddingRight: 8, marginBottom: -2 },
-  estrada: { height: 18, backgroundColor: cores.asfalto, flexDirection: 'row', alignItems: 'center', gap: 24, paddingLeft: 10, overflow: 'hidden', marginBottom: 16 },
-  tracoDaEstrada: { width: 34, height: 4, borderRadius: 2, backgroundColor: amareloDaEstrada },
+  // A foto vai até embaixo das pontas arredondadas do painel (o painel sobe 28 por cima dela)
+  marca: { flexGrow: 1, minHeight: 300, paddingHorizontal: 28, paddingBottom: 56, gap: 14 },
+  nome: { fontFamily: fontes.titulo, fontSize: 44, lineHeight: 50, color: cores.branco, letterSpacing: -0.5, marginTop: 4 },
+  descricao: { fontFamily: fontes.texto, fontSize: 16, lineHeight: 23, color: 'rgba(255, 255, 255, 0.85)', maxWidth: 290 },
   painel: {
+    marginTop: -28,
     backgroundColor: cores.branco,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,

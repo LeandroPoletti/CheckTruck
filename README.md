@@ -36,6 +36,7 @@ Checktruck.Web/         front (React)
   src/components/       menu, modais e peças das telas (Layout.jsx: título, cartão, abas e tabela)
   src/components/ui/    campos, botões, mensagem de erro, etiquetas e a barra de uso do intervalo
   src/components/marca/ a logo e os desenhos (o caminhão na estrada e a estrada vazia)
+  src/assets/login/     as fotos de caminhão que passam no login
   src/hooks/useCarga.js carregar dados da API numa tela (carregando, erro, tentar de novo e recarregar)
   src/services/         chamadas da API e conversão dos dados
 docs/                   documentação técnica com os diagramas

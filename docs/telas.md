@@ -132,8 +132,11 @@ sistema** (empresas e catálogo do sistema).
 - Logo própria: uma placa de estrada com o "visto" desenhado como uma estrada. Aparece no menu do site, no topo da
   tela inicial do app e nos dois logins, na cor escolhida, e no ícone da aba do navegador e no ícone do app no
   celular, sempre em verde.
-- Desenhos: o caminhão na estrada no login (site e app) e no dashboard do site, e a estrada vazia nas telas sem
-  nada cadastrado.
+- Fotos de caminhão no login (site e app): passam sozinhas a cada 7 segundos, cada uma andando devagar (aproxima,
+  afasta ou desliza para o lado) e a próxima aparecendo por cima, como nos slideshows da Apple. No site ficam à
+  esquerda no computador e numa faixa em cima no celular, com um botão de pausa; no app, no topo da tela. A tela já
+  abre com a primeira foto, e quem pediu menos movimento no sistema vê só ela, parada.
+- Desenhos: o caminhão na estrada no dashboard do site e a estrada vazia nas telas sem nada cadastrado.
 - Letras iguais no site e no app: títulos e números grandes em Overpass (feita a partir da letra das placas de
   estrada), texto em Inter e as letras da placa em Barlow Semi Condensed.
 - Nas listas de caminhões do app, cada cartão tem uma faixa na esquerda com a cor do status.
