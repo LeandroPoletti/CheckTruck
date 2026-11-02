@@ -10,6 +10,7 @@ import { Inter_600SemiBold } from '@expo-google-fonts/inter/600SemiBold'
 import { SessaoProvider, useSessao } from '@/servicos/sessao'
 import { prepararAvisos } from '@/servicos/avisos'
 import Carregando from '@/componentes/Carregando'
+import Cortina from '@/componentes/Cortina'
 import { aplicarTema, cores } from '@/tema'
 
 prepararAvisos()
@@ -36,13 +37,16 @@ export default function Raiz() {
 }
 
 // As telas, na cor do tema de quem está logado. Ao trocar o tema, as telas abrem de novo (a partir da inicial) já
-// com as cores novas
+// com as cores novas. Do login para a tela inicial a troca é direta: quem faz a passagem é a cortina, por cima.
 function Navegacao() {
   const tema = aplicarTema(useSessao().tema)
   return (
     <>
       <StatusBar style={tema === 'Amarelo' ? 'dark' : 'light'} />
-      <Stack key={tema} screenOptions={{ headerShown: false, contentStyle: { backgroundColor: cores.topo } }} />
+      <Stack key={tema} screenOptions={{ headerShown: false, contentStyle: { backgroundColor: cores.topo } }}>
+        <Stack.Screen name="(app)" options={{ animation: 'none' }} />
+      </Stack>
+      <Cortina />
     </>
   )
 }

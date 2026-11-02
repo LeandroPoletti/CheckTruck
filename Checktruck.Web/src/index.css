@@ -40,7 +40,7 @@
   --color-sobre-item-aberto: #ffffff;
   --color-marcador: #f2c230;
 
-  /* A placa da logo e a cabine do caminhão dos desenhos */
+  /* A placa na beira da estrada vazia e a cabine do caminhão dos desenhos */
   --color-logo: #0f6b42;
   --color-logo-moldura: #ffffff;
 
@@ -90,8 +90,8 @@
   --color-logo: #1f3a93;
 }
 
-/* Amarelo das placas de advertência, com grafite: o menu e o lado do login em grafite, com a logo, a tela aberta e o
-   caminhão em amarelo; os botões em grafite */
+/* Amarelo das placas de advertência, com grafite: o menu em grafite, com a tela aberta e o caminhão dos desenhos em
+   amarelo; os botões em grafite */
 :root[data-tema="amarelo"] {
   --color-brand-900: #111214;
   --color-brand-800: #1a1c1f;
@@ -120,7 +120,7 @@
   --caminhao-faixa: #1e2126;
 }
 
-/* Preto: o topo, os botões e a logo em preto; o fundo das telas continua claro */
+/* Preto: o topo, os botões e os desenhos em preto; o fundo das telas continua claro */
 :root[data-tema="preto"] {
   --color-brand-900: #141518;
   --color-brand-800: #1f2125;

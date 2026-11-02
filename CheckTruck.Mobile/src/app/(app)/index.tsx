@@ -1,7 +1,9 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useFocusEffect } from 'expo-router'
 import { useSessao } from '@/servicos/sessao'
 import { atualizarAvisos } from '@/servicos/avisos'
+import { descobrirTela } from '@/componentes/Cortina'
+import { esquecerTelaInicial, telaInicialDe } from '@/telas/inicio'
 import PainelDoMotorista from '@/telas/PainelDoMotorista'
 import PainelDaFrota from '@/telas/PainelDaFrota'
 import SoPeloSite from '@/telas/SoPeloSite'
@@ -15,10 +17,15 @@ export default function Inicio() {
     if (usuario) atualizarAvisos(chamar, usuario).catch(() => {}) // sem aviso não atrapalha o uso do app
   }, [chamar, usuario]))
 
+  // Vindo do login, a tela já abriu pronta embaixo da cortina: a cortina sai, e o que o login buscou não vale mais
+  useEffect(() => {
+    esquecerTelaInicial()
+    descobrirTela()
+  }, [])
+
   if (!usuario) return null // o _layout já manda quem não entrou para o login
 
-  if (usuario.cargo === 'Motorista') return <PainelDoMotorista usuario={usuario} />
-
-  const cuidaDaFrota = usuario.permissoes.includes('VerFrota') || usuario.permissoes.includes('AtenderChamados')
-  return cuidaDaFrota ? <PainelDaFrota usuario={usuario} /> : <SoPeloSite usuario={usuario} />
+  const tela = telaInicialDe(usuario)
+  if (tela === 'motorista') return <PainelDoMotorista usuario={usuario} />
+  return tela === 'frota' ? <PainelDaFrota usuario={usuario} /> : <SoPeloSite usuario={usuario} />
 }

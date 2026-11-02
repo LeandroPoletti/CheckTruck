@@ -51,7 +51,7 @@ export default function Sidebar({ usuario, itens }) {
   return (
     <aside className="flex h-screen w-64 shrink-0 flex-col bg-topo text-sobre-topo">
       <div className="px-4 pt-6 pb-4">
-        <Logo tamanho={36} className="px-1.5 text-[22px]" />
+        <Logo largura={190} className="mx-auto" />
         <div className="mt-5 rounded-xl bg-sobre-topo/[.07] px-3 py-2.5">
           {usuario.empresa && <p className="truncate text-[15px] font-semibold" title={usuario.empresa}>{usuario.empresa}</p>}
           <p className="text-sm text-sobre-topo-2">{nomeCargo(usuario.cargo)}</p>

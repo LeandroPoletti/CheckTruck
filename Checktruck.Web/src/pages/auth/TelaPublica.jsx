@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Pause, Play } from 'lucide-react'
 import Logo from '../../components/marca/Logo'
 import foto01 from '../../assets/login/caminhao-01.webp'
 import foto02 from '../../assets/login/caminhao-02.jpg'
@@ -32,38 +31,20 @@ const TROCA_MS = 7000
 const DISSOLVER_MS = 2000
 // A primeira foto em 40 px, já no código: aparece borrada na hora em que a tela abre, enquanto a de verdade baixa
 const PREVIA_DA_PRIMEIRA = 'data:image/webp;base64,UklGRooBAABXRUJQVlA4IH4BAABwCQCdASooABsAPrVMokwnJCMiKrgKAOAWiWYAnTKEhSerqj8+2pmNSDpAz8QcsRL/NyIbiMuNWUT9ZLejJ+PWEcGWSdwteZLzZrv3JYp6cLURaQAA/rINnrdNnO4Fo1Ze2azGQpeXNxUF6wHbmOgW8wr8/SMgYgEmYO5k3FzGBT6oEnZRJ+baqOqgnzdL7DYQ0eTvDyI+Lq/6sFTaRovtH1Fb+8jrudplgqZ5ue9YK9es28f1eeLRNyfHuD0jKdNiKLjmENxPki1Fwvr6qFN1n5v10p/PKkfVSeGG1mKIYuj0OZYLjmMpfQM/NJqbFjyeY2IelniiNwA9LiIxNcOKm8oraveSMtXI//PoL1hwotIxYKrLfcYV08OUb1utgFbaPB+XOGA+sQKphGapQZg9oC5+3m8/8sXp4lcVz03vSKFtHMHd55La+oUSTBRl97CfH/UL9rnQbkex5Id6O3ZcSDLYXwYxEL/xo3foiOmQFluOSDG3WZ5qlQFYAAAA'
-const PAUSADAS = 'checktruck.fotosPausadas'
-
-function lerPausadas() {
-  try {
-    return localStorage.getItem(PAUSADAS) === '1'
-  } catch {
-    return false
-  }
-}
-
 // As fotos trocando a cada 7 segundos, como nos slideshows da Apple (efeito Ken Burns): cada foto anda devagar e a
 // próxima aparece aos poucos por cima dela (2 segundos), com as duas ainda em movimento. Só baixa a foto da vez e a
-// próxima. A tela já abre com a primeira foto (borrada até ela baixar). O botão de pausa para tudo (e fica lembrado
-// neste navegador); quem pediu menos movimento no sistema vê só a primeira, parada e sem o botão.
+// próxima. A tela já abre com a primeira foto (borrada até ela baixar). Quem pediu menos movimento no sistema vê só a
+// primeira, parada.
 function FotosDeCaminhao({ className }) {
   const [menosMovimento] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-  const [pausadas, setPausadas] = useState(lerPausadas)
   const [passo, setPasso] = useState(0)
   const [primeiraBaixou, setPrimeiraBaixou] = useState(false)
 
   useEffect(() => {
-    if (menosMovimento || pausadas) return undefined
+    if (menosMovimento) return undefined
     const relogio = setInterval(() => setPasso((p) => p + 1), TROCA_MS)
     return () => clearInterval(relogio)
-  }, [menosMovimento, pausadas])
-
-  function pausarOuContinuar() {
-    setPausadas(!pausadas)
-    try {
-      localStorage.setItem(PAUSADAS, pausadas ? '0' : '1')
-    } catch { /* sem localStorage, vale só até fechar a tela */ }
-  }
+  }, [menosMovimento])
 
   const atual = passo % FOTOS.length
   const anterior = passo > 0 ? (passo - 1) % FOTOS.length : -1
@@ -97,7 +78,6 @@ function FotosDeCaminhao({ className }) {
               animationDuration: `${TROCA_MS + 2 * DISSOLVER_MS}ms`,
               animationTimingFunction: 'linear',
               animationFillMode: 'forwards',
-              animationPlayState: pausadas ? 'paused' : 'running',
             }}
             className="absolute inset-0 h-full w-full object-cover"
           />
@@ -105,17 +85,6 @@ function FotosDeCaminhao({ className }) {
       })}
       {/* Escurece a parte de cima da foto, onde fica a logo */}
       <div aria-hidden="true" className="absolute inset-0 z-[3] bg-linear-to-b from-black/70 via-black/15 to-black/35" />
-      {!menosMovimento && (
-        <button
-          type="button"
-          onClick={pausarOuContinuar}
-          aria-label={pausadas ? 'Continuar as fotos' : 'Pausar as fotos'}
-          title={pausadas ? 'Continuar as fotos' : 'Pausar as fotos'}
-          className="absolute right-3 bottom-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-black/35 text-white/90 backdrop-blur-sm transition hover:bg-black/55 hover:text-white lg:right-6 lg:bottom-6"
-        >
-          {pausadas ? <Play size={16} fill="currentColor" /> : <Pause size={16} fill="currentColor" />}
-        </button>
-      )}
     </div>
   )
 }
@@ -129,11 +98,11 @@ export default function TelaPublica({ children, abaixo }) {
       <section className="relative h-64 shrink-0 text-white sm:h-80 lg:h-auto lg:w-[46%] lg:max-w-[680px]">
         <FotosDeCaminhao className="absolute inset-0" />
         <div className="relative z-10 px-6 pt-7 text-center lg:hidden">
-          <h1><Logo tamanho={44} className="text-[32px]" /></h1>
+          <h1><Logo largura={240} className="mx-auto" /></h1>
           <p className="mt-2 text-white/85">Controle de manutenção preventiva</p>
         </div>
         <div className="relative z-10 hidden px-14 pt-16 lg:block">
-          <h1><Logo tamanho={60} className="gap-4 text-[46px]" /></h1>
+          <h1><Logo largura={360} /></h1>
           <p className="mt-4 max-w-sm text-lg text-white/85">Controle de manutenção preventiva</p>
         </div>
       </section>

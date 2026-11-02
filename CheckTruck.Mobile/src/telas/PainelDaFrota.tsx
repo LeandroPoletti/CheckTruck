@@ -4,55 +4,52 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { useCarregarNaTela, useSessao, type Usuario } from '@/servicos/sessao'
 import { quandoTocarNoAvisoDeChamado } from '@/servicos/avisos'
-import { caminhoesDaFrota, type CaminhaoNaLista } from '@/servicos/caminhoes'
-import { listarChamados, type ChamadosDaTela } from '@/servicos/chamados'
+import type { CaminhaoNaLista } from '@/servicos/caminhoes'
+import type { ChamadosDaTela } from '@/servicos/chamados'
 import Abas, { type DadosDaAba } from '@/componentes/Abas'
 import Atalho from '@/componentes/Atalho'
 import Botao from '@/componentes/Botao'
 import MensagemErro from '@/componentes/MensagemErro'
 import Saudacao from '@/componentes/Saudacao'
 import CaminhoesDaFrota from './CaminhoesDaFrota'
-import ChamadosDaFrota, { CONCLUIDOS_NA_TELA } from './ChamadosDaFrota'
+import ChamadosDaFrota from './ChamadosDaFrota'
 import OrdensDaFrota from './OrdensDaFrota'
+import { buscarDadosDaFrota, telaInicialPronta } from './inicio'
 import { comTema, cores } from '@/tema'
 
 type Aba = 'caminhoes' | 'chamados' | 'ordens'
-
-const SEM_CHAMADOS: ChamadosDaTela = { pendentes: [], concluidos: { itens: [], total: 0 } }
 
 // Tela de quem cuida da frota (mecânico, chefe de manutenção, gestor...). Mostra o que o acesso libera, igual ao web:
 // Ver frota mostra os caminhões e as ordens de serviço, e Atender chamados mostra os chamados. Com mais de uma, troca
 // nas abas de cima.
 // No fim da tela, os avisos de troca (Ver frota), os cadastros (permissão Cadastros) e Minha empresa (Admin e Gestor).
-// Recarrega sempre que a tela volta a aparecer (ex.: depois de resolver um chamado) e ao puxar para baixo. As OS
-// carregam na aba delas (com a busca e o período na API).
+// Logo depois do login, abre com o que o login já buscou. Recarrega sempre que a tela volta a aparecer (ex.: depois
+// de resolver um chamado) e ao puxar para baixo. As OS carregam na aba delas (com a busca e o período na API).
 // Tocar no aviso de chamado novo volta para cá, na aba Chamados, já com o chamado novo.
 export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
   const { chamar, sair } = useSessao()
   const verFrota = usuario.permissoes.includes('VerFrota')
   const atender = usuario.permissoes.includes('AtenderChamados')
   const [aba, setAba] = useState<Aba>(verFrota ? 'caminhoes' : 'chamados')
-  const [caminhoes, setCaminhoes] = useState<CaminhaoNaLista[] | null>(null)
-  const [chamados, setChamados] = useState<ChamadosDaTela | null>(null)
+  const [pronta] = useState(() => telaInicialPronta('frota'))
+  const [caminhoes, setCaminhoes] = useState<CaminhaoNaLista[] | null>(pronta?.caminhoes ?? null)
+  const [chamados, setChamados] = useState<ChamadosDaTela | null>(pronta?.chamados ?? null)
   const [erro, setErro] = useState('')
   const [puxando, setPuxando] = useState(false)
   const [puxadas, setPuxadas] = useState(0)
 
   const carregar = useCallback(async () => {
     try {
-      const [frota, lista] = await Promise.all([
-        verFrota ? caminhoesDaFrota(chamar) : Promise.resolve([]),
-        atender ? listarChamados(chamar, CONCLUIDOS_NA_TELA) : Promise.resolve(SEM_CHAMADOS),
-      ])
-      setCaminhoes(frota)
-      setChamados(lista)
+      const dados = await buscarDadosDaFrota(chamar, usuario)
+      setCaminhoes(dados.caminhoes)
+      setChamados(dados.chamados)
       setErro('')
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Não foi possível carregar.')
     }
-  }, [chamar, verFrota, atender])
+  }, [chamar, usuario])
 
-  useCarregarNaTela(carregar)
+  useCarregarNaTela(carregar, pronta !== null)
 
   useEffect(() => {
     if (!atender) return

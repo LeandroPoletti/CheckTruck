@@ -21,7 +21,7 @@ type Paleta = {
   sobreTopo2: string
   /** A faixa tracejada do topo, embaixo do título */
   faixa: string
-  /** A placa da logo e a borda dela */
+  /** A placa na beira da estrada vazia (desenho das telas sem nada) e a borda dela */
   logo: string
   logoMoldura: string
 }
@@ -47,7 +47,7 @@ const TEMAS: Record<TemaDeCor, Paleta> = {
     topo: '#ffc72c', topoForte: '#f0b400', sobreTopo: '#1e2126', sobreTopo2: '#4a3d10', faixa: '#1e2126',
     logo: '#ffc72c', logoMoldura: '#1e2126',
   },
-  // Preto: o topo, os botões e a logo em preto; o fundo das telas continua claro
+  // Preto: o topo, os botões e os desenhos em preto; o fundo das telas continua claro
   Preto: {
     marca900: '#141518', marca800: '#1f2125', marca700: '#2b2e33', marca500: '#5b6069',
     marca300: '#b2b6bc', marca200: '#d4d6da', marca100: '#e9eaec', marca50: '#f5f5f6', fundo: '#eef0f2',

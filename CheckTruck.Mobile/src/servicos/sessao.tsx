@@ -30,7 +30,11 @@ type Sessao = {
   usuario: Usuario | null
   /** A cor do app agora: a de quem está logado ou, no login, a última usada neste celular. */
   tema: TemaDeCor
-  entrar(email: string, senha: string): Promise<void>
+  /**
+   * Com `antesDeAbrir`, o app só abre quando ela termina. Ela roda já com a sessão guardada (no login: a tela de
+   * carregamento e a busca da tela inicial).
+   */
+  entrar(email: string, senha: string, antesDeAbrir?: (eu: Usuario) => Promise<void>): Promise<void>
   sair(): Promise<void>
   /** Grava a cor na conta (o site muda junto) e já troca no app. */
   trocarTema(tema: TemaDeCor): Promise<void>
@@ -104,13 +108,14 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
     restaurar()
   }, [comRenovacao, guardar])
 
-  const entrar = useCallback(async (email: string, senha: string) => {
+  const entrar = useCallback(async (email: string, senha: string, antesDeAbrir?: (eu: Usuario) => Promise<void>) => {
     const { accessToken, refreshToken } = await chamarApi<Tokens>('/api/Auth/login', {
       metodo: 'POST',
       corpo: { email: email.trim(), senha },
     })
     const eu = await chamarApi<Usuario>('/api/Usuario/me', { token: accessToken })
     await guardar({ accessToken, refreshToken })
+    await antesDeAbrir?.(eu)
     setUsuario(eu)
   }, [guardar])
 
@@ -196,10 +201,15 @@ export function useSessao(): Sessao {
 /**
  * Carrega a tela toda vez que ela aparece e de novo quando chega um aviso de mudança com ela aberta (alguém mudou
  * algo no site ou em outro app). Para as telas de lista e de detalhe; os formulários não usam, para nada mudar
- * embaixo de quem está preenchendo.
+ * embaixo de quem está preenchendo. `jaAbriuPronta`: a tela abriu com os dados (a inicial, logo depois do login) e não
+ * carrega de novo na primeira vez.
  */
-export function useCarregarNaTela(carregar: () => unknown) {
+export function useCarregarNaTela(carregar: () => unknown, jaAbriuPronta = false) {
   const { mudancas } = useSessao()
+  const pular = useRef(jaAbriuPronta)
   // mudancas entra só para a função mudar a cada aviso: o useFocusEffect roda de novo quando a função muda
-  useFocusEffect(useCallback(() => { carregar() }, [carregar, mudancas]))
+  useFocusEffect(useCallback(() => {
+    if (pular.current) pular.current = false
+    else carregar()
+  }, [carregar, mudancas]))
 }

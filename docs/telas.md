@@ -125,17 +125,25 @@ sistema** (empresas e catálogo do sistema).
 - O verde das placas de estrada, com o amarelo da faixa do meio da estrada nos detalhes (no menu do site, a faixa
   amarela marca a tela aberta).
 - Quatro cores para escolher: verde (o padrão), azul (da placa Mercosul), amarelo (das placas de advertência: no
-  site, o menu em grafite com a logo e a tela aberta em amarelo; no app, o topo amarelo com a letra escura) e preto.
+  site, o menu em grafite com a tela aberta em amarelo; no app, o topo amarelo com a letra escura) e preto.
   Cada pessoa escolhe a dela (Cor, no menu do site; Cor do app, no fim da tela inicial do app), que fica na conta e
-  vale no site e no app. Muda só o que é colorido (topo, menu, botões, logo e desenhos): o fundo continua claro, e as
+  vale no site e no app. Muda só o que é colorido (topo, menu, botões e desenhos): o fundo continua claro, e as
   cores do status são as mesmas em todas.
-- Logo própria: uma placa de estrada com o "visto" desenhado como uma estrada. Aparece no menu do site, no topo da
-  tela inicial do app e nos dois logins, na cor escolhida, e no ícone da aba do navegador e no ícone do app no
-  celular, sempre em verde.
+- Logo: o caminhão de frente com um arco e o visto, e "CHECK TRUCK" do lado (vetor, nítida em qualquer tamanho). O
+  caminhão e o "CHECK" ficam brancos no menu do site e em cima das fotos dos dois logins, e na cor da letra do topo na
+  tela inicial do app; o arco, o visto e o "TRUCK" são sempre verdes. O ícone da aba do navegador e o do app no
+  celular são o caminhão branco com o visto verde, num quadrado verde-escuro.
 - Fotos de caminhão no login (site e app): passam sozinhas a cada 7 segundos, cada uma andando devagar (aproxima,
   afasta ou desliza para o lado) e a próxima aparecendo por cima, como nos slideshows da Apple. No site ficam à
-  esquerda no computador e numa faixa em cima no celular, com um botão de pausa; no app, no topo da tela. A tela já
+  esquerda no computador e numa faixa em cima no celular; no app, no topo da tela. A tela já
   abre com a primeira foto, e quem pediu menos movimento no sistema vê só ela, parada.
+- Ao entrar no app: a tela de login fica fosca e o caminhão com o relógio girando aparece no meio, com um zoom leve.
+  Enquanto ele roda (uns 2,5 segundos, com a espera pelo servidor dentro deles), o app já busca a tela inicial;
+  depois o caminhão sai, a tela vira a cor do fundo e a tela inicial aparece aos poucos, já pronta, sem carregar de
+  novo. O celular vibra de leve ao entrar e com a senha errada (aí o carregamento some e o erro aparece). Quem ativou
+  "menos movimento" no celular entra direto, sem o caminhão. As animações seguem as curvas e os tempos do Material 3
+  (0,3 s para aparecer e 0,2 s para sair). Só no app, e só depois de digitar o e-mail e a senha (abrir o app já
+  logado não mostra).
 - Desenhos: o caminhão na estrada no dashboard do site e a estrada vazia nas telas sem nada cadastrado.
 - Letras iguais no site e no app: títulos e números grandes em Overpass (feita a partir da letra das placas de
   estrada), texto em Inter e as letras da placa em Barlow Semi Condensed.

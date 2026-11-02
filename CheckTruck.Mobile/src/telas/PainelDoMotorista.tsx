@@ -3,8 +3,8 @@ import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, T
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { useCarregarNaTela, useSessao, type Usuario } from '@/servicos/sessao'
-import { meusCaminhoes, type Caminhao } from '@/servicos/caminhoes'
-import { listarChamados, type Chamado } from '@/servicos/chamados'
+import type { Caminhao } from '@/servicos/caminhoes'
+import type { Chamado } from '@/servicos/chamados'
 import Atalho from '@/componentes/Atalho'
 import Botao from '@/componentes/Botao'
 import CartaoDoChamado from '@/componentes/CartaoDoChamado'
@@ -12,41 +12,35 @@ import CartaoVazio from '@/componentes/CartaoVazio'
 import MensagemErro from '@/componentes/MensagemErro'
 import Saudacao from '@/componentes/Saudacao'
 import SituacaoDoCaminhao from '@/componentes/SituacaoDoCaminhao'
+import { buscarDadosDoMotorista, telaInicialPronta } from './inicio'
 import { comTema, cores, fontes } from '@/tema'
-
-/** Os chamados dele que aparecem na tela (os mais novos). */
-const CHAMADOS_NA_TELA = 5
 
 // Tela do motorista: o caminhão que está com ele (próximas trocas em km e data), atualizar o km, os chamados e, no
 // fim, os avisos de troca do celular.
-// Recarrega sempre que a tela volta a aparecer (ex.: depois de atualizar o km) e ao puxar para baixo.
+// Logo depois do login, abre com o que o login já buscou. Recarrega sempre que a tela volta a aparecer (ex.: depois
+// de atualizar o km) e ao puxar para baixo.
 export default function PainelDoMotorista({ usuario }: { usuario: Usuario }) {
   const { chamar, sair } = useSessao()
   const podeAbrirChamado = usuario.permissoes.includes('AbrirChamados')
-  const [caminhoes, setCaminhoes] = useState<Caminhao[] | null>(null)
-  const [chamados, setChamados] = useState<Chamado[]>([])
+  const [pronta] = useState(() => telaInicialPronta('motorista'))
+  const [caminhoes, setCaminhoes] = useState<Caminhao[] | null>(pronta?.caminhoes ?? null)
+  const [chamados, setChamados] = useState<Chamado[]>(pronta?.chamados ?? [])
   const [escolhidoId, setEscolhidoId] = useState<number | null>(null)
   const [erro, setErro] = useState('')
   const [puxando, setPuxando] = useState(false)
 
   const carregar = useCallback(async () => {
     try {
-      const [lista, abertos] = await Promise.all([
-        meusCaminhoes(chamar),
-        podeAbrirChamado ? listarChamados(chamar, CHAMADOS_NA_TELA) : null,
-      ])
-      setCaminhoes(lista)
-      // Os mais novos primeiro, pendentes ou concluídos
-      setChamados(abertos === null ? [] : [...abertos.pendentes, ...abertos.concluidos.itens]
-        .sort((a, b) => b.abertoEm.localeCompare(a.abertoEm))
-        .slice(0, CHAMADOS_NA_TELA))
+      const dados = await buscarDadosDoMotorista(chamar, usuario)
+      setCaminhoes(dados.caminhoes)
+      setChamados(dados.chamados)
       setErro('')
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Não foi possível carregar.')
     }
-  }, [chamar, podeAbrirChamado])
+  }, [chamar, usuario])
 
-  useCarregarNaTela(carregar)
+  useCarregarNaTela(carregar, pronta !== null)
 
   async function puxarParaAtualizar() {
     setPuxando(true)
