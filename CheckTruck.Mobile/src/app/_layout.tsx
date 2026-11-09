@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useFonts } from 'expo-font'
+import * as SplashScreen from 'expo-splash-screen'
 import { BarlowSemiCondensed_700Bold } from '@expo-google-fonts/barlow-semi-condensed/700Bold'
 import { Overpass_700Bold } from '@expo-google-fonts/overpass/700Bold'
 import { Overpass_800ExtraBold } from '@expo-google-fonts/overpass/800ExtraBold'
@@ -9,13 +10,18 @@ import { Inter_500Medium } from '@expo-google-fonts/inter/500Medium'
 import { Inter_600SemiBold } from '@expo-google-fonts/inter/600SemiBold'
 import { SessaoProvider, useSessao } from '@/servicos/sessao'
 import { prepararAvisos } from '@/servicos/avisos'
+import Abertura from '@/componentes/Abertura'
 import Carregando from '@/componentes/Carregando'
 import Cortina from '@/componentes/Cortina'
+import { prepararTelaInicial } from '@/telas/inicio'
 import { aplicarTema, cores } from '@/tema'
 
 prepararAvisos()
+// A abertura do celular (a logo no app.json) fica na tela até o app estar pronto: quem a tira é a Abertura
+SplashScreen.preventAutoHideAsync()
 
-// Raiz do app: carrega as fontes e a sessão (quem está logado), que valem para todas as telas
+// Raiz do app: carrega as fontes e a sessão (quem está logado), que valem para todas as telas. A abertura fica por
+// cima de tudo até a primeira tela estar pronta
 export default function Raiz() {
   const [fontesProntas, erroNasFontes] = useFonts({
     BarlowSemiCondensed_700Bold,
@@ -27,12 +33,15 @@ export default function Raiz() {
   })
 
   // Se uma fonte falhar, segue com a do sistema em vez de travar o app
-  if (!fontesProntas && !erroNasFontes) return <Carregando />
-
   return (
-    <SessaoProvider>
-      <Navegacao />
-    </SessaoProvider>
+    <>
+      {fontesProntas || erroNasFontes ? (
+        <SessaoProvider aoAbrir={prepararTelaInicial}>
+          <Navegacao />
+        </SessaoProvider>
+      ) : <Carregando />}
+      <Abertura />
+    </>
   )
 }
 

@@ -23,8 +23,9 @@ type Aba = 'caminhoes' | 'chamados' | 'ordens'
 // Ver frota mostra os caminhões e as ordens de serviço, e Atender chamados mostra os chamados. Com mais de uma, troca
 // nas abas de cima.
 // No fim da tela, os avisos de troca (Ver frota), os cadastros (permissão Cadastros) e Minha empresa (Admin e Gestor).
-// Logo depois do login, abre com o que o login já buscou. Recarrega sempre que a tela volta a aparecer (ex.: depois
-// de resolver um chamado) e ao puxar para baixo. As OS carregam na aba delas (com a busca e o período na API).
+// Logo depois do login (ou ao abrir o app), abre com o que já foi buscado. Recarrega sempre que a tela volta a aparecer
+// (ex.: depois de resolver um chamado) e ao puxar para baixo. As OS carregam na aba delas (com a busca e o período na
+// API).
 // Tocar no aviso de chamado novo volta para cá, na aba Chamados, já com o chamado novo.
 export default function PainelDaFrota({ usuario }: { usuario: Usuario }) {
   const { chamar, sair } = useSessao()

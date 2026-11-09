@@ -3,8 +3,9 @@ import { caminhoesDaFrota, meusCaminhoes, type Caminhao, type CaminhaoNaLista } 
 import { listarChamados, type Chamado, type ChamadosDaTela } from '@/servicos/chamados'
 import { CONCLUIDOS_NA_TELA } from './ChamadosDaFrota'
 
-// A tela inicial de cada perfil e o que ela busca. No login, isso é buscado enquanto o caminhão está carregando: a
-// tela inicial já abre pronta, sem carregar de novo na frente da pessoa.
+// A tela inicial de cada perfil e o que ela busca. Isso é buscado antes, no login (enquanto o caminhão está
+// carregando) e ao abrir o app já logado (com a abertura na tela): a tela inicial já abre pronta, sem carregar de
+// novo na frente da pessoa.
 
 type TelaInicial = 'motorista' | 'frota' | 'site'
 type DadosDaFrota = { caminhoes: CaminhaoNaLista[]; chamados: ChamadosDaTela }
@@ -47,7 +48,10 @@ export async function buscarDadosDoMotorista(chamar: Chamar, usuario: Usuario): 
 
 let pronta: { tela: 'frota'; dados: DadosDaFrota } | { tela: 'motorista'; dados: DadosDoMotorista } | null = null
 
-/** No login: busca a tela inicial de quem acabou de entrar. Se falhar, não atrapalha: a tela busca quando abrir. */
+/**
+ * No login e ao abrir o app: busca a tela inicial de quem entrou. Se falhar, não atrapalha: a tela busca quando
+ * abrir.
+ */
 export async function prepararTelaInicial(chamar: Chamar, usuario: Usuario) {
   pronta = null
   try {
@@ -59,14 +63,14 @@ export async function prepararTelaInicial(chamar: Chamar, usuario: Usuario) {
   }
 }
 
-/** O que o login já buscou, para a tela abrir com os dados (null: a tela busca sozinha). */
+/** O que já foi buscado, para a tela abrir com os dados (null: a tela busca sozinha). */
 export function telaInicialPronta(tela: 'frota'): DadosDaFrota | null
 export function telaInicialPronta(tela: 'motorista'): DadosDoMotorista | null
 export function telaInicialPronta(tela: 'frota' | 'motorista') {
   return pronta?.tela === tela ? pronta.dados : null
 }
 
-/** A tela inicial abriu: o que o login buscou não vale mais (daqui para frente a tela busca sozinha). */
+/** A tela inicial abriu: o que foi buscado antes não vale mais (daqui para frente a tela busca sozinha). */
 export function esquecerTelaInicial() {
   pronta = null
 }

@@ -17,8 +17,8 @@ import { comTema, cores, fontes } from '@/tema'
 
 // Tela do motorista: o caminhão que está com ele (próximas trocas em km e data), atualizar o km, os chamados e, no
 // fim, os avisos de troca do celular.
-// Logo depois do login, abre com o que o login já buscou. Recarrega sempre que a tela volta a aparecer (ex.: depois
-// de atualizar o km) e ao puxar para baixo.
+// Logo depois do login (ou ao abrir o app), abre com o que já foi buscado. Recarrega sempre que a tela volta a aparecer
+// (ex.: depois de atualizar o km) e ao puxar para baixo.
 export default function PainelDoMotorista({ usuario }: { usuario: Usuario }) {
   const { chamar, sair } = useSessao()
   const podeAbrirChamado = usuario.permissoes.includes('AbrirChamados')

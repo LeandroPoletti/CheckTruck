@@ -12,6 +12,7 @@ import { useSessao } from '@/servicos/sessao'
 import { API_URL } from '@/servicos/api'
 import Botao from '@/componentes/Botao'
 import Campo from '@/componentes/Campo'
+import { primeiraTelaPronta } from '@/componentes/Abertura'
 import Carregando from '@/componentes/Carregando'
 import { cobrirTela } from '@/componentes/Cortina'
 import Entrando, { type FimDoCarregamento } from '@/componentes/Entrando'
@@ -57,6 +58,11 @@ export default function Login() {
       Animated.timing(subida, { toValue: 1, duration: menos ? 0 : 420, useNativeDriver: true }).start()
     })
   }, [subida])
+
+  // Ao abrir o app sem ninguém logado, a abertura sai quando esta tela está pronta
+  useEffect(() => {
+    if (!carregando && !usuario) primeiraTelaPronta()
+  }, [carregando, usuario])
 
   if (carregando) return <Carregando />
   if (usuario) return <Redirect href="/" />

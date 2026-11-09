@@ -137,6 +137,11 @@ sistema** (empresas e catálogo do sistema).
   afasta ou desliza para o lado) e a próxima aparecendo por cima, como nos slideshows da Apple. No site ficam à
   esquerda no computador e numa faixa em cima no celular; no app, no topo da tela. A tela já
   abre com a primeira foto, e quem pediu menos movimento no sistema vê só ela, parada.
+- Abertura do app (ao tocar no ícone): fundo verde-escuro com a logo no meio, como o Spotify e o Instagram. Fica só
+  enquanto o app carrega (de quem já tinha entrado, a tela inicial é buscada nesse tempo) e some aos poucos, com a
+  logo crescendo de leve, mostrando o login ou a tela inicial já prontos. No Android 12 ou mais novo, a logo tem
+  que caber num círculo no meio da tela, por isso fica desse tamanho. No Expo Go, o começo é a tela do próprio
+  Expo Go (com o ícone): a abertura inteira só aparece no app instalado.
 - Ao entrar no app: a tela de login fica fosca e o caminhão com o relógio girando aparece no meio, com um zoom leve.
   Enquanto ele roda (uns 2,5 segundos, com a espera pelo servidor dentro deles), o app já busca a tela inicial;
   depois o caminhão sai, a tela vira a cor do fundo e a tela inicial aparece aos poucos, já pronta, sem carregar de

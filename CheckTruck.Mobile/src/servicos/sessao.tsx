@@ -48,7 +48,12 @@ const SessaoContext = createContext<Sessao | null>(null)
 // A sessão é a mesma conta do web: o login devolve os tokens e o /me diz quem é, o cargo e a empresa. O token vale
 // 1 hora; quando vence, o app renova sozinho com a chave de renovação, sem pedir a senha. Entra de novo só quem ficou
 // 14 dias sem usar o app, trocou a senha ou o e-mail, ou teve o acesso desativado.
-export function SessaoProvider({ children }: { children: ReactNode }) {
+// `aoAbrir`: o que fazer ao abrir o app já logado, antes de mostrar as telas (a busca da tela inicial, com a
+// abertura ainda na tela).
+export function SessaoProvider({ children, aoAbrir }: {
+  children: ReactNode
+  aoAbrir?: (chamar: Chamar, eu: Usuario) => Promise<void>
+}) {
   const [carregando, setCarregando] = useState(true)
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [ultimoTema, setUltimoTema] = useState<TemaDeCor>('Verde')
@@ -98,7 +103,10 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
       tokens.current = await lerTokens()
       if (tokens.current) {
         try {
-          setUsuario(await comRenovacao((token) => chamarApi<Usuario>('/api/Usuario/me', { token })))
+          const eu = await comRenovacao((token) => chamarApi<Usuario>('/api/Usuario/me', { token }))
+          await aoAbrir?.(<T,>(caminho: string, opcoes: Omit<Opcoes, 'token'> = {}) =>
+            comRenovacao((token) => chamarApi<T>(caminho, { ...opcoes, token })), eu)
+          setUsuario(eu)
         } catch (erro) {
           if (erro instanceof ErroDaApi && erro.status === 401) await guardar(null)
         }
@@ -106,7 +114,7 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
       setCarregando(false)
     }
     restaurar()
-  }, [comRenovacao, guardar])
+  }, [comRenovacao, guardar, aoAbrir])
 
   const entrar = useCallback(async (email: string, senha: string, antesDeAbrir?: (eu: Usuario) => Promise<void>) => {
     const { accessToken, refreshToken } = await chamarApi<Tokens>('/api/Auth/login', {
