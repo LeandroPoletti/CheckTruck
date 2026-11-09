@@ -103,7 +103,27 @@ apaga as imagens velhas do Docker.
 
 Para ver o log da API: `sudo docker compose logs -f api` (na pasta `servidor`).
 
-## App do celular
+## App do celular (APK)
 
-O app instalado (APK) fala com o endereço do CloudFront. Ele entra no app na hora de gerar o APK, pela variável
-`EXPO_PUBLIC_API_URL` (`https://xxxx.cloudfront.net`, sem barra no fim).
+O APK é o app instalado no Android: funciona sem o PC ligado e fala com o endereço do CloudFront. O endereço entra
+no app na hora de gerar o APK, pela variável `EXPO_PUBLIC_API_URL` do perfil `apk` no `CheckTruck.Mobile/eas.json`
+(`https://xxxx.cloudfront.net`, sem barra no fim). Se o endereço mudar, troque lá e gere de novo.
+
+Para gerar, na pasta `CheckTruck.Mobile`, com a conta do Expo dona do projeto (`brenocolonello`):
+
+```bash
+npm install
+npx eas-cli@latest build -p android --profile apk
+```
+
+O APK é montado nos servidores do Expo (no plano grátis ele pode esperar numa fila). Na primeira vez, o comando
+pergunta se pode criar a chave que assina o app: responda que sim. A chave fica guardada na conta do Expo, e os
+próximos APKs saem com a mesma. No fim aparecem o link e o QR code para baixar.
+
+Para instalar, abra o link no celular, baixe o APK e toque nele. O Android pede para permitir a instalação pelo
+navegador e, se o Play Protect avisar, é só tocar em instalar mesmo assim. Um APK novo instala por cima do antigo, e
+quem estava logado continua logado.
+
+Mudou alguma coisa no app? Gere e instale o APK de novo. Mudanças no site e na API não precisam: basta atualizar o
+servidor. O aviso de chamado novo ainda não chega no APK (no Android ele precisa do Firebase); os avisos de troca
+funcionam.

@@ -11,6 +11,12 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.checktruck.app",
+      "blockedPermissions": [
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#013529",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -34,6 +40,13 @@
           "imageWidth": 176,
           "resizeMode": "contain",
           "backgroundColor": "#013529"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notificacao.png",
+          "color": "#12a446"
         }
       ]
     ],

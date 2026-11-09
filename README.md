@@ -137,8 +137,8 @@ puxar a tela para baixo nem apertar F5):
 - **Aviso de chamado novo** (para quem pode atender chamados): quando alguém abre um chamado, pelo site ou
   pelo app, chega no celular "Chamado novo: ABC-1D23" com o tipo e a urgência, mesmo com o app fechado (quem abriu
   não recebe). Tocar no aviso abre os chamados. Vem da API, pelo serviço de push do Expo: o app grava o celular de
-  quem entrou (`api/Celular`) e apaga ao sair. No Expo Go só funciona no iPhone; no Android precisa de uma versão
-  própria do app (development build).
+  quem entrou (`api/Celular`) e apaga ao sair. No Expo Go só funciona no iPhone; no Android, nem no APK, porque lá
+  precisa do Firebase (ainda não configurado).
 - **Com a permissão Cadastros:** Mecânicos, Tipos de manutenção e o Catálogo
   (fabricante → modelo → geração, com o país no cadastro do fabricante), no fim da tela inicial: cadastrar, editar e
   excluir (o mecânico também desativa; dos tipos e do catálogo, só o que é da empresa).
@@ -167,7 +167,7 @@ cadastra a equipe (veja Empresas, abaixo).
 
 Na nuvem, o sistema roda na AWS: o CloudFront dá o endereço com https, uma EC2 roda a API e o site no Docker (pasta
 `servidor`) e o banco é o RDS, com backup todo dia. Como subir, configurar e atualizar está em
-[docs/servidor.md](docs/servidor.md).
+[docs/servidor.md](docs/servidor.md), junto com como gerar e instalar o app no Android (APK).
 
 ## Empresas
 
